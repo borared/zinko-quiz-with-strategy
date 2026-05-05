@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  --zk-yellow: #FFCD29;
+  --zk-blue: #3B68FF;
+  --zk-black: #000000;
+  --zk-white: #FFFFFF;
+}
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  
+  --color-zk-yellow: var(--zk-yellow);
+  --color-zk-blue: var(--zk-blue);
+  --color-zk-black: var(--zk-black);
+  --color-zk-white: var(--zk-white);
+}
+
+@layer base {
+  body {
+    @apply bg-zk-yellow text-zk-black antialiased font-sans;
+  }
+}
+
+.permanent-marker-regular {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.gasoek-one-regular {
+  font-family: "Gasoek One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
