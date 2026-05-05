@@ -1,6 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <main className="flex-1 relative flex flex-col items-center justify-center py-20 px-4 overflow-hidden">
       
@@ -70,8 +74,11 @@ const HeroSection = () => {
           </motion.div>
 
           {/* Button */}
-          <button className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:translate-x-[8px] active:shadow-none">
-            <span className="font-bold text-3xl tracking-wide">PLAY GAMES</span>
+          <button 
+            onClick={() => navigate('/join')}
+            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:translate-x-[8px] active:shadow-none"
+          >
+            <span className="font-bold text-3xl tracking-wide">JOIN</span>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polygon points="10 8 16 12 10 16 10 8"></polygon>

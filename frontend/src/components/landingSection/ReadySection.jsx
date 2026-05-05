@@ -46,7 +46,7 @@ const ReadySection = () => {
         
         {/* CTA Button */}
         <button className="font-black text-xl bg-[#FFD12B] text-[#6E5CF2] border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] px-12 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none mb-4 rounded-full">
-          Play games
+          Start for free
         </button>
         
         {/* Microcopy */}
