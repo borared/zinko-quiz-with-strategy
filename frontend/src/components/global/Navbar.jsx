@@ -2,7 +2,7 @@ import React from 'react';
 
 const Navbar = () => {
   return (
-    <nav className="w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
+    <nav className="sticky top-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
       
       {/* Left: Logo */}
       <div className="flex items-center gap-8">
@@ -19,7 +19,7 @@ const Navbar = () => {
             href="#games" 
             className="bg-zk-blue text-zk-black border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
           >
-            GAMES
+            HOME
           </a>
           <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
             BLOG
