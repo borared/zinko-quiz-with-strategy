@@ -19,15 +19,17 @@ const Navbar = () => {
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6 font-bold text-sm">
           <a 
-            href="#games" 
-            className="bg-zk-blue text-zk-black border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            href="#home" 
+            className="bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
           >
             HOME
           </a>
           <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
             BLOG
           </a>
-          <a href="#pricing" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
+          <a
+          onClick={() => navigate('/pricing')}
+          className="hover:cursor-pointer text-zk-black hover:underline decoration-[2px] underline-offset-4">
             PRICING
           </a>
           <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
@@ -37,11 +39,13 @@ const Navbar = () => {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-4 font-bold text-sm">
+      <div 
+      className="flex items-center gap-4 font-bold text-sm">
         <button 
+          onClick={() => navigate('/join')}
           className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
         >
-          MY LIBRARY
+          JOIN
         </button>
         <button 
           onClick={() => navigate('/signup')}
