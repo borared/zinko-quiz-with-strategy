@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/global/Navbar";
 import Hero from "./page/landing/Hero";
 import Engagement from "./page/landing/Engagement";
@@ -9,6 +9,7 @@ import Footer from "./components/global/Footer";
 import EnterPin from "./page/PinJoiningGate/EnterPin";
 import Signup from "./components/Authentication/Signup";
 import Signin from "./components/Authentication/Signin";
+import PricingPanel from "./page/PricingPanel/PricingPanel";
 
 const LandingPage = () => (
   <>
@@ -20,6 +21,9 @@ const LandingPage = () => (
 );
 
 export default function App() {
+  const location = useLocation();
+  const showFooter = location.pathname !== '/join';
+
   return (
     <div className="min-h-screen bg-zk-yellow flex flex-col font-sans">
       <Navbar />
@@ -29,9 +33,10 @@ export default function App() {
           <Route path="/join" element={<EnterPin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
+          <Route path="/pricing" element={<PricingPanel />} />
         </Routes>
       </main>
-      <Footer />
+      {showFooter && <Footer />}
     </div>
   )
 }
