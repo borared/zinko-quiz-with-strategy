@@ -1,9 +1,73 @@
-import React from 'react';
-import { User, Mail, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSignUp, useAuth, useSignIn } from '@clerk/clerk-react';
 
 const Signup = () => {
+  const { signUp, isLoaded, setActive } = useSignUp();
+  const { signIn } = useSignIn();
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({ firstName: '', email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Redirect if already signed in
+  if (isSignedIn) navigate('/');
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isLoaded) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await signUp.create({
+        firstName:    form.firstName,
+        emailAddress: form.email,
+        password:     form.password,
+      });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        navigate('/');
+      } else {
+        // Email verification may be required — handle via Clerk flow
+        console.log('Additional steps needed:', result.status);
+        setError('Please check your email to verify your account.');
+      }
+    } catch (err) {
+      const msg = err.errors?.[0]?.longMessage || err.message || 'Sign up failed.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    if (!isLoaded) return;
+    setGoogleLoading(true);
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy:        'oauth_google',
+        redirectUrl:     '/sso-callback',
+        redirectUrlComplete: '/',
+      });
+    } catch (err) {
+      setGoogleLoading(false);
+      const msg = err.errors?.[0]?.longMessage || err.message || 'Failed to start Google sign up.';
+      setError(msg);
+    }
+  };
+
   return (
     <div className="flex-1 w-full bg-[#FF6B4A] flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
       
@@ -18,8 +82,6 @@ const Signup = () => {
         transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
         className="absolute bottom-12 right-12 md:bottom-24 md:right-48 w-28 h-28 rounded-2xl border-[4px] border-zk-black bg-[#6E5CF2] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] pointer-events-none"
       />
-      
-      {/* Additional small floating shapes */}
       <motion.div 
         animate={{ y: [-5, 5, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
@@ -40,8 +102,15 @@ const Signup = () => {
           <p className="text-zk-black/70 font-bold text-sm">Ready to battle and learn? Create your Zinko account now!</p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 border-[2px] border-red-400 bg-red-50 text-red-600 text-sm font-bold px-4 py-3">
+            {error}
+          </div>
+        )}
+
         {/* Form */}
-        <form className="flex flex-col gap-5">
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           
           {/* Name Field */}
           <div className="flex flex-col gap-1">
@@ -49,9 +118,13 @@ const Signup = () => {
             <div className="relative flex items-center">
               <User className="absolute left-3 text-zk-black/50" size={20} />
               <input 
+                name="firstName"
                 type="text" 
+                value={form.firstName}
+                onChange={handleChange}
                 placeholder="Enter your full name" 
                 className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                required
               />
             </div>
           </div>
@@ -62,9 +135,13 @@ const Signup = () => {
             <div className="relative flex items-center">
               <Mail className="absolute left-3 text-zk-black/50" size={20} />
               <input 
+                name="email"
                 type="email" 
+                value={form.email}
+                onChange={handleChange}
                 placeholder="you@awesome.com" 
                 className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                required
               />
             </div>
           </div>
@@ -75,19 +152,24 @@ const Signup = () => {
             <div className="relative flex items-center">
               <Lock className="absolute left-3 text-zk-black/50" size={20} />
               <input 
+                name="password"
                 type="password" 
+                value={form.password}
+                onChange={handleChange}
                 placeholder="Shhh... make it strong!" 
                 className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                required
               />
             </div>
           </div>
 
           {/* Create Button */}
           <button 
-            type="button"
-            className="w-full bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none"
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            CREATE ACCOUNT
+            {loading ? <><Loader2 className="animate-spin" size={20} /> Creating...</> : 'CREATE ACCOUNT'}
           </button>
 
         </form>
@@ -102,10 +184,16 @@ const Signup = () => {
         {/* Google Button */}
         <button 
           type="button"
-          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none"
+          onClick={handleGoogleSignUp}
+          disabled={googleLoading}
+          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-          GOOGLE
+          {googleLoading ? (
+            <Loader2 className="animate-spin" size={20} />
+          ) : (
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+          )}
+          {googleLoading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
         </button>
 
         {/* Footer Link */}
@@ -119,3 +207,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
