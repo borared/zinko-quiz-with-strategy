@@ -27,6 +27,7 @@ const ChooseTeamSection = () => {
   const countB = 14;
 
   const handleJoin = (team) => {
+    new Audio('/audio/clicksound.mp3').play();
     setSelectedTeam(team);
     blinkTo('/team-warmup');
   };
