@@ -15,6 +15,8 @@ import Signin from "./components/Authentication/Signin";
 import PricingPanel from "./page/PricingPanel/PricingPanel";
 import { TransitionProvider } from "./context/TransitionContext";
 import EyeBlinkOverlay from "./components/transition/EyeBlinkOverlay";
+import SoundToggle from "./components/global/SoundToggle";
+import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 
 const LandingPage = () => (
   <>
@@ -28,13 +30,15 @@ const LandingPage = () => (
 function AppInner() {
   const location = useLocation();
   const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup'];
-  const showNavbar = !gameFlowPaths.includes(location.pathname);
+  const sectionWithoutNavbar = ['/join-nickname', '/choose-team', '/team-warmup'];
+  const showNavbar = !sectionWithoutNavbar.includes(location.pathname);
   const showFooter = !gameFlowPaths.includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-zk-yellow flex flex-col font-sans overflow-hidden">
       {/* Full-screen eye blink overlay — sits above everything */}
       <EyeBlinkOverlay />
+      <SoundToggle />
 
       {showNavbar && <Navbar />}
       <main className="flex-1 flex flex-col">
@@ -47,6 +51,7 @@ function AppInner() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/pricing" element={<PricingPanel />} />
+          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
         </Routes>
       </main>
       {showFooter && <Footer />}
