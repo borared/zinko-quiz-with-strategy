@@ -26,7 +26,17 @@ const EnterPinSection = () => {
       setError('Invalid PIN. Try: 123456');
       return;
     }
-    navigate('/join-nickname');
+
+    // 🎵 Play the success sound
+    window.gameAudio = new Audio('/audio/n2kstudio-music-for-game-fun-kid-game-163649.mp3');
+    window.gameAudio.loop = true;
+    window.gameAudio.play();
+    window.dispatchEvent(new Event('audioStarted'));
+
+    // Add a small delay so the sound plays before changing page
+    setTimeout(() => {
+      navigate('/join-nickname');
+    }, 1000); 
   };
 
   return (
