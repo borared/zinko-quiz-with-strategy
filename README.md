@@ -1,4 +1,4 @@
-# ⚔️ Brain Battle Arena
+# ⚔️ Zinko
 
 > A real-time multiplayer educational battle game where speed, strategy, and teamwork determine victory.
 
