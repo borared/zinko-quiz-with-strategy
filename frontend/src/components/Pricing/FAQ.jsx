@@ -20,7 +20,7 @@ const FAQ = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {faqs.map((faq, idx) => (
-          <div key={idx} className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8">
+          <div key={idx} className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 rounded-xl">
             <h3 className="text-xl font-bold text-zk-black mb-4">{faq.question}</h3>
             <p className="text-sm font-bold text-zk-black/70 leading-relaxed">
               {faq.answer}
