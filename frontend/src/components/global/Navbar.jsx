@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="flex items-center gap-8">
         <a 
           href="/" 
-          className="bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-1 flex items-center justify-center transform transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+          className="bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-1 flex items-center justify-center transform transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
         >
           <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
         </a>
@@ -35,7 +35,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6 font-bold text-sm">
           <a 
             href="#home" 
-            className="bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            className="bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
           >
             HOME
           </a>
@@ -59,7 +59,7 @@ const Navbar = () => {
           <div className="flex items-center gap-6">
             <button 
               onClick={() => navigate('/create-game')}
-              className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg"
+              className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg rounded-lg"
             >
               Create New Game
             </button>
@@ -72,20 +72,20 @@ const Navbar = () => {
             <div className="relative">
               <div 
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer"
+                className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
               >
                 <img src={user?.imageUrl} alt={user?.firstName} className="w-full h-full object-cover" />
               </div>
 
               {/* Dropdown Menu */}
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl">
                   <button 
                     onClick={() => {
                       setMenuOpen(false);
                       navigate('/dashboard');
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black"
+                    className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black rounded-lg"
                   >
                     Dashboard
                   </button>
@@ -106,13 +106,13 @@ const Navbar = () => {
           <>
             <button 
               onClick={() => navigate('/join')}
-              className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
+              className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
             >
               JOIN
             </button>
             <button 
               onClick={() => navigate('/signup')}
-              className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
+              className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
             >
               SIGN UP
             </button>
@@ -126,14 +126,14 @@ const Navbar = () => {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-sm w-full mx-4 flex flex-col items-center"
+            className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-sm w-full mx-4 flex flex-col items-center rounded-xl"
           >
             <h3 className="text-2xl font-bold mb-2 text-zk-black permanent-marker-regular">SIGN OUT?</h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold">Are you sure you want to sign out of your account?</p>
             <div className="flex gap-4 w-full">
               <button 
                 onClick={() => setShowModal(false)}
-                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
+                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
               >
                 CANCEL
               </button>
@@ -142,7 +142,7 @@ const Navbar = () => {
                   setShowModal(false);
                   signOut();
                 }}
-                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
+                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
               >
                 SURE!
               </button>

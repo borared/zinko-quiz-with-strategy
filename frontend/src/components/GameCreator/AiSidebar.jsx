@@ -45,7 +45,7 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
           <Sparkles size={20} className="text-zk-black" />
           <h2 className="font-black text-lg text-zk-black uppercase">Zinko Assistant</h2>
         </div>
-        <button type="button" onClick={onClose} className="p-1 hover:bg-white border-[2px] border-transparent hover:border-zk-black transition-colors">
+        <button type="button" onClick={onClose} className="p-1 hover:bg-white border-[2px] border-transparent hover:border-zk-black transition-colors rounded-xl">
           <X size={20} className="text-zk-black" />
         </button>
       </div>
@@ -59,14 +59,14 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="e.g., Create 5 questions about photosynthesis with tricky answers."
-            className="border-[3px] border-zk-black p-2 font-bold text-sm h-32 focus:outline-none focus:ring-2 focus:ring-zk-yellow placeholder-gray-400"
+            className="border-[3px] border-zk-black p-2 font-bold text-sm h-32 focus:outline-none focus:ring-2 focus:ring-zk-yellow placeholder-gray-400 rounded-lg"
           />
         </div>
 
         {/* File Upload (Optional) */}
         <div className="flex flex-col gap-1">
           <label className="font-bold text-zk-black text-sm">Reference File (Optional)</label>
-          <div className="border-[2px] border-dashed border-zk-black p-4 flex flex-col items-center justify-center gap-1 bg-gray-50 hover:bg-zk-yellow/10 transition-colors cursor-pointer relative">
+          <div className="border-[2px] border-dashed border-zk-black p-4 flex flex-col items-center justify-center gap-1 bg-gray-50 hover:bg-zk-yellow/10 transition-colors cursor-pointer relative rounded-xl">
             <input 
               type="file" 
               accept=".pdf,.docx,.pptx" 
@@ -94,7 +94,7 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
             max="20" 
             value={numQuestions}
             onChange={(e) => setNumQuestions(e.target.value)}
-            className="border-[3px] border-zk-black p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow"
+            className="border-[3px] border-zk-black p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-lg"
           />
         </div>
 
@@ -104,7 +104,7 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
         <button 
           type="submit" 
           disabled={loading}
-          className="mt-auto bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-auto bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
         >
           {loading ? (
             <>

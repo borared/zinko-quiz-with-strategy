@@ -25,14 +25,14 @@ const EnterNicknameSection = () => {
       <motion.div 
         animate={{ y: [15, -15, 15], rotate: [45, 60, 45] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 bg-[#FFB020]/60 border-[3px] border-zk-black/10 pointer-events-none" 
+        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 bg-[#FFB020]/60 border-[3px] border-zk-black/10 pointer-events-none rounded-xl" 
       />
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center">
         
         {/* Card */}
-        <div className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 flex flex-col items-center">
+        <div className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 flex flex-col items-center rounded-xl">
           
           {/* Header */}
           <div className="text-center mb-8">
@@ -54,14 +54,14 @@ const EnterNicknameSection = () => {
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="TYPE SOMETHING COOL..."
-              className="w-full border-[3px] border-zk-black p-4 text-center text-sm md:text-base font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all uppercase"
+              className="w-full border-[3px] border-zk-black p-4 text-center text-sm md:text-base font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all uppercase rounded-lg"
             />
           </div>
 
           {/* Enter Button */}
           <button 
             onClick={handleEnter}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none mb-8"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none mb-8 rounded-lg"
           >
             Enter <Rocket size={18} />
           </button>
@@ -75,12 +75,12 @@ const EnterNicknameSection = () => {
 
           {/* Bottom Actions */}
           <div className="w-full grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 bg-[#E5E7EB] hover:bg-gray-300 text-zk-black border-[3px] border-zk-black py-3 px-2 font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none">
+            <button className="flex items-center justify-center gap-2 bg-[#E5E7EB] hover:bg-gray-300 text-zk-black border-[3px] border-zk-black py-3 px-2 font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg">
               <QrCode size={16} /> Scan QR
             </button>
             <button 
               onClick={() => navigate('/join')}
-              className="flex items-center justify-center gap-2 bg-[#E5E7EB] hover:bg-gray-300 text-zk-black border-[3px] border-zk-black py-3 px-2 font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none">
+              className="flex items-center justify-center gap-2 bg-[#E5E7EB] hover:bg-gray-300 text-zk-black border-[3px] border-zk-black py-3 px-2 font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg">
               <ArrowLeftCircle size={16} /> New PIN
             </button>
           </div>

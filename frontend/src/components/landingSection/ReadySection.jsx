@@ -24,7 +24,7 @@ const ReadySection = () => {
       <motion.div 
         animate={{ y: [-20, 20, -20], rotate: -360 }}
         transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 12, repeat: Infinity, ease: "linear" } }}
-        className="absolute top-[40%] right-[20%] w-8 h-8 border-[3px] border-zk-black bg-[#6E5CF2] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block transform rotate-45"
+        className="absolute top-[40%] right-[20%] w-8 h-8 border-[3px] border-zk-black bg-[#6E5CF2] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block transform rotate-45 rounded-xl"
       />
       <motion.div 
         animate={{ y: [10, -10, 10], scale: [1, 1.1, 1] }}
