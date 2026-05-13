@@ -44,7 +44,7 @@ const ChooseTeamSection = () => {
       <motion.div
         animate={{ y: [10, -10, 10], rotate: [45, 60, 45] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-24 right-12 w-16 h-16 md:w-24 md:h-24 rotate-45 bg-[#FFB020]/70 border-[3px] border-zk-black/10 pointer-events-none"
+        className="absolute bottom-24 right-12 w-16 h-16 md:w-24 md:h-24 rotate-45 bg-[#FFB020]/70 border-[3px] border-zk-black/10 pointer-events-none rounded-xl"
       />
       <motion.div
         animate={{ y: [-8, 8, -8] }}
