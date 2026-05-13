@@ -3,8 +3,8 @@ import { Plus } from 'lucide-react';
 
 const Sidebar = ({ questions, activeQuestionId, onAddQuestion, onSelectQuestion }) => {
   return (
-    <div className="w-80 bg-[#F5F5F5] border-r-[3px] border-zk-black flex flex-col h-full">
-      <div className="p-4 border-b-[3px] border-zk-black bg-white">
+    <div className="w-80 bg-[#F5F5F5] border-r-[3px] border-zk-black flex flex-col h-full rounded-xl">
+      <div className="p-4 border-b-[3px] border-zk-black bg-white rounded-xl">
         <h2 className="font-bold text-zk-black uppercase tracking-wider text-sm">Question List</h2>
       </div>
 
