@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/ai', require('./routes/ai'));
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
