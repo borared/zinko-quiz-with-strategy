@@ -32,7 +32,7 @@ const SoundToggle = () => {
   return (
     <button
       onClick={toggleSound}
-      className="fixed top-4 right-4 z-[100] bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none"
+      className="fixed top-4 right-4 z-[100] bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl"
       title={isPlaying ? "Mute Sound" : "Unmute Sound"}
     >
       {isPlaying ? <Volume2 size={24} className="text-zk-black" /> : <VolumeX size={24} className="text-zk-black" />}
