@@ -10,9 +10,9 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-[#5D3FD3] border-r-[3px] border-zk-black flex flex-col h-[calc(100vh-76px)] fixed top-[76px] left-0 text-white z-40">
+    <div className="w-64 bg-[#5D3FD3] border-r-[3px] border-zk-black flex flex-col h-[calc(100vh-76px)] fixed top-[76px] left-0 text-white z-40 rounded-r-xl">
       {/* Logo Area */}
-      <div className="p-6 border-b-[3px] border-zk-black bg-[#5D3FD3]">
+      <div className="p-6 border-b-[3px] border-zk-black bg-[#5D3FD3] rounded-xl">
         <h1 className="font-black text-3xl text-white uppercase tracking-tighter">ZINKO</h1>
         <p className="text-xs font-bold uppercase tracking-wider text-white/70 mt-1">Manage & Create</p>
       </div>
@@ -26,7 +26,7 @@ const Sidebar = () => {
               item.active 
                 ? 'bg-[#7C4DFF] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white' 
                 : 'border-transparent hover:bg-white/10 text-white/90'
-            }`}
+            } rounded-lg`}
           >
             {item.icon}
             <span>{item.name}</span>
