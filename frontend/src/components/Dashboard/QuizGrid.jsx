@@ -27,7 +27,7 @@ const QuizGrid = () => {
         {/* Create New Quiz Card */}
         <div 
           onClick={() => navigate('/create-game')}
-          className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/50 cursor-pointer hover:bg-white transition-colors h-[320px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+          className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/50 cursor-pointer hover:bg-white transition-colors h-[320px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
         >
           <div className="w-12 h-12 rounded-full border-[3px] border-zk-black flex items-center justify-center bg-white">
             <Plus size={24} className="text-zk-black" strokeWidth={3} />
