@@ -90,11 +90,11 @@ const Signup = () => {
       <motion.div 
         animate={{ y: [8, -8, 8] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="absolute bottom-1/4 left-[15%] w-6 h-6 border-[3px] border-zk-black bg-white pointer-events-none hidden md:block rotate-45"
+        className="absolute bottom-1/4 left-[15%] w-6 h-6 border-[3px] border-zk-black bg-white pointer-events-none hidden md:block rotate-45 rounded-xl"
       />
 
       {/* Main Card Container */}
-      <div className="relative z-10 w-full max-w-md bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-10">
+      <div className="relative z-10 w-full max-w-md bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-10 rounded-xl">
         
         {/* Header */}
         <div className="text-center mb-8">
@@ -123,7 +123,7 @@ const Signup = () => {
                 value={form.firstName}
                 onChange={handleChange}
                 placeholder="Enter your full name" 
-                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                 required
               />
             </div>
@@ -140,7 +140,7 @@ const Signup = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="you@awesome.com" 
-                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                 required
               />
             </div>
@@ -157,7 +157,7 @@ const Signup = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Shhh... make it strong!" 
-                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                 required
               />
             </div>
@@ -167,7 +167,7 @@ const Signup = () => {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
           >
             {loading ? <><Loader2 className="animate-spin" size={20} /> Creating...</> : 'CREATE ACCOUNT'}
           </button>
@@ -186,7 +186,7 @@ const Signup = () => {
           type="button"
           onClick={handleGoogleSignUp}
           disabled={googleLoading}
-          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed rounded-lg"
         >
           {googleLoading ? (
             <Loader2 className="animate-spin" size={20} />
