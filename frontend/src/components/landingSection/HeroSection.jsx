@@ -15,7 +15,7 @@ const HeroSection = () => {
           y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 10, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
       <motion.div 
         animate={{ y: [15, -15, 15], rotate: -360 }}
@@ -23,7 +23,7 @@ const HeroSection = () => {
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 12, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
       <motion.div 
         animate={{ y: [-10, 10, -10] }}
@@ -76,7 +76,7 @@ const HeroSection = () => {
           {/* Button */}
           <button 
             onClick={() => navigate('/join')}
-            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:translate-x-[8px] active:shadow-none"
+            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:translate-x-[8px] active:shadow-none rounded-xl"
           >
             <span className="font-bold text-3xl tracking-wide">JOIN</span>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
