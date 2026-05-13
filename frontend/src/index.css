@@ -34,3 +34,17 @@
   font-weight: 400;
   font-style: normal;
 }
+
+@keyframes boing {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+  60% { transform: scale(0.98); }
+  80% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@layer utilities {
+  .animate-boing {
+    animation: boing 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
