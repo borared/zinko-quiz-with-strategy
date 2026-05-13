@@ -13,6 +13,8 @@ import TeamWarmUp from "./page/PinJoiningGate/TeamWarmUp";
 import Signup from "./components/Authentication/Signup";
 import Signin from "./components/Authentication/Signin";
 import PricingPanel from "./page/PricingPanel/PricingPanel";
+import GameCreator from "./page/GameCreator/GameCreator";
+import Dashboard from "./page/Dashboard/Dashboard";
 import { TransitionProvider } from "./context/TransitionContext";
 import EyeBlinkOverlay from "./components/transition/EyeBlinkOverlay";
 import SoundToggle from "./components/global/SoundToggle";
@@ -29,7 +31,7 @@ const LandingPage = () => (
 
 function AppInner() {
   const location = useLocation();
-  const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup'];
+  const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup', '/create-game', '/dashboard'];
   const sectionWithoutNavbar = ['/join-nickname', '/choose-team', '/team-warmup'];
   const showNavbar = !sectionWithoutNavbar.includes(location.pathname);
   const showFooter = !gameFlowPaths.includes(location.pathname);
@@ -41,7 +43,7 @@ function AppInner() {
       <SoundToggle />
 
       {showNavbar && <Navbar />}
-      <main className="flex-1 flex flex-col">
+      <main className={`flex-1 flex flex-col ${showNavbar ? 'pt-[76px]' : ''}`}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/join" element={<EnterPin />} />
@@ -52,6 +54,8 @@ function AppInner() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/pricing" element={<PricingPanel />} />
           <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
+          <Route path="/create-game" element={<GameCreator />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
       {showFooter && <Footer />}

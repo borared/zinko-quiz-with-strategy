@@ -20,7 +20,7 @@ const Navbar = () => {
   if (!isLoaded) return null; // Don't render until loaded to avoid flickering
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
       
       {/* Left: Logo */}
       <div className="flex items-center gap-8">
@@ -57,7 +57,10 @@ const Navbar = () => {
       <div className="flex items-center gap-4 font-bold text-sm">
         {isSignedIn ? (
           <div className="flex items-center gap-6">
-            <button className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg">
+            <button 
+              onClick={() => navigate('/create-game')}
+              className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg"
+            >
               Create New Game
             </button>
             <button className="text-zk-black hover:scale-105 transition-transform">
@@ -80,11 +83,11 @@ const Navbar = () => {
                   <button 
                     onClick={() => {
                       setMenuOpen(false);
-                      navigate('/profile');
+                      navigate('/dashboard');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black"
                   >
-                    Profile
+                    Dashboard
                   </button>
                   <button 
                     onClick={() => {
