@@ -40,11 +40,11 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full p-6 relative">
+      <div className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full p-6 relative rounded-xl">
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 hover:bg-zk-yellow border-[2px] border-transparent hover:border-zk-black transition-colors"
+          className="absolute top-4 right-4 p-1 hover:bg-zk-yellow border-[2px] border-transparent hover:border-zk-black transition-colors rounded-xl"
         >
           <X size={24} className="text-zk-black" />
         </button>
@@ -53,7 +53,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* File Upload Area */}
-          <div className="border-[3px] border-dashed border-zk-black p-6 flex flex-col items-center justify-center gap-2 bg-zk-yellow/10 hover:bg-zk-yellow/20 transition-colors cursor-pointer relative">
+          <div className="border-[3px] border-dashed border-zk-black p-6 flex flex-col items-center justify-center gap-2 bg-zk-yellow/10 hover:bg-zk-yellow/20 transition-colors cursor-pointer relative rounded-xl">
             <input 
               type="file" 
               accept=".pdf,.docx,.pptx" 
@@ -80,7 +80,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
               max="20" 
               value={numQuestions}
               onChange={(e) => setNumQuestions(e.target.value)}
-              className="border-[3px] border-zk-black p-2 font-bold focus:outline-none focus:ring-2 focus:ring-zk-yellow"
+              className="border-[3px] border-zk-black p-2 font-bold focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-xl"
             />
           </div>
 
@@ -90,7 +90,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
           <button 
             type="submit" 
             disabled={loading}
-            className="bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
           >
             {loading ? (
               <>
