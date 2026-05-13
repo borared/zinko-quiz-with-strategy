@@ -78,11 +78,11 @@ const Signin = () => {
       <motion.div 
         animate={{ y: [10, -10, 10], rotate: 360 }}
         transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }, rotate: { duration: 15, repeat: Infinity, ease: "linear" } }}
-        className="absolute top-[20%] right-[15%] w-8 h-8 border-[3px] border-zk-black bg-[#6E5CF2] pointer-events-none hidden md:block rotate-12"
+        className="absolute top-[20%] right-[15%] w-8 h-8 border-[3px] border-zk-black bg-[#6E5CF2] pointer-events-none hidden md:block rotate-12 rounded-xl"
       />
 
       {/* Main Card Container */}
-      <div className="relative z-10 w-full max-w-md bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-10">
+      <div className="relative z-10 w-full max-w-md bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-10 rounded-xl">
         
         {/* Header */}
         <div className="text-center mb-8">
@@ -111,7 +111,7 @@ const Signin = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Enter your email..." 
-                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                 required
               />
             </div>
@@ -128,7 +128,7 @@ const Signin = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="••••••••" 
-                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all"
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                 required
               />
             </div>
@@ -145,7 +145,7 @@ const Signin = () => {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
           >
             {loading ? <><Loader2 className="animate-spin" size={20} /> Signing in...</> : 'LOG IN'}
           </button>
@@ -163,7 +163,7 @@ const Signin = () => {
         <button 
           type="button"
           onClick={handleGoogleSignIn}
-          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none"
+          className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none rounded-lg"
         >
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
           CONTINUE WITH GOOGLE

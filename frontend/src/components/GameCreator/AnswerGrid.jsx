@@ -35,7 +35,7 @@ const AnswerGrid = ({ answers, onToggleAnswer }) => {
               onMouseDown={(e) => e.preventDefault()} // Prevent losing focus on input
             >
               <button onClick={() => alert('Image upload for answer is not implemented yet!')} className="p-1 hover:bg-white transition-colors rounded"><ImageIcon size={18} /></button>
-              <div className="border-l border-zk-black h-5"></div>
+              <div className="border-l border-zk-black h-5 rounded-xl"></div>
               
               {/* Native Rich Text Commands */}
               <button 
@@ -63,7 +63,7 @@ const AnswerGrid = ({ answers, onToggleAnswer }) => {
                 X²
               </button>
               
-              <div className="border-l border-zk-black h-5"></div>
+              <div className="border-l border-zk-black h-5 rounded-xl"></div>
               <button onClick={() => insertText('Ω')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">Ω</button>
               <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">f(x)</button>
             </div>

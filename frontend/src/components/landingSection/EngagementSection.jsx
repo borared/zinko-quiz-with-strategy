@@ -18,8 +18,8 @@ const EngagementSection = () => {
           <div className="flex flex-col md:flex-row gap-6 w-full h-auto md:h-64">
             
             {/* Quick Start Card */}
-            <div className="relative flex-1 md:flex-[0.4] bg-[#FF6B4A] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col justify-between overflow-hidden group hover:-translate-y-1 transition-transform">
-              <div className="absolute top-6 right-6 bg-white border-[2px] border-zk-black px-3 py-1 font-bold text-sm z-10">
+            <div className="relative flex-1 md:flex-[0.4] bg-[#FF6B4A] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col justify-between overflow-hidden group hover:-translate-y-1 transition-transform rounded-xl">
+              <div className="absolute top-6 right-6 bg-white border-[2px] border-zk-black px-3 py-1 font-bold text-sm z-10 rounded-lg">
                 QUICK START
               </div>
               <Zap className="text-white w-10 h-10 mb-6" />
@@ -32,8 +32,8 @@ const EngagementSection = () => {
             </div>
 
             {/* Collaborative Play Card */}
-            <div className="relative flex-1 md:flex-[0.6] bg-[#6E5CF2] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col justify-between overflow-hidden group hover:-translate-y-1 transition-transform">
-              <div className="absolute top-6 right-6 bg-white border-[2px] border-zk-black px-3 py-1 font-bold text-sm z-20">
+            <div className="relative flex-1 md:flex-[0.6] bg-[#6E5CF2] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col justify-between overflow-hidden group hover:-translate-y-1 transition-transform rounded-xl">
+              <div className="absolute top-6 right-6 bg-white border-[2px] border-zk-black px-3 py-1 font-bold text-sm z-20 rounded-lg">
                 MULTIPLAYER
               </div>
               
@@ -61,7 +61,7 @@ const EngagementSection = () => {
           <div className="flex flex-col md:flex-row gap-6 w-full h-auto md:h-64">
             
             {/* Live Analytics Card */}
-            <div className="relative flex-1 bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform">
+            <div className="relative flex-1 bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform rounded-xl">
               <TrendingUp className="text-[#6E5CF2] w-10 h-10 mb-auto" />
               <div className="mt-8">
                 <h3 className="text-zk-black font-bold text-lg mb-2 uppercase">Live Analytics</h3>
@@ -72,7 +72,7 @@ const EngagementSection = () => {
             </div>
 
             {/* Custom Themes Card */}
-            <div className="relative flex-1 bg-[#FFD12B] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform">
+            <div className="relative flex-1 bg-[#FFD12B] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform rounded-xl">
               {/* Paintbrush Image */}
               <div className="absolute -right-8 -bottom-4 w-48 h-48 md:w-56 md:h-56 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110 z-0">
                 <img 
@@ -92,7 +92,7 @@ const EngagementSection = () => {
             </div>
 
             {/* Export Options Card */}
-            <div className="relative flex-1 bg-[#887AD2] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform">
+            <div className="relative flex-1 bg-[#887AD2] border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col overflow-hidden group hover:-translate-y-1 transition-transform rounded-xl">
               <CloudDownload className="text-white w-10 h-10 mb-auto" />
               <div className="mt-8">
                 <h3 className="text-white font-bold text-lg mb-2 uppercase">Export Options</h3>

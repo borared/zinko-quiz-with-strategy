@@ -1,6 +1,6 @@
 const PlayerCount = ({ countA, countB }) => {
   return (
-    <div className="flex items-center gap-0 border-[3px] border-zk-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-3 mt-6">
+    <div className="flex items-center gap-0 border-[3px] border-zk-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-3 mt-6 rounded-xl">
       
       {/* Team A */}
       <div className="flex items-center gap-2">
