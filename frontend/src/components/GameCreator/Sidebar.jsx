@@ -9,7 +9,7 @@ const Sidebar = ({ questions, activeQuestionId, onAddQuestion, onSelectQuestion 
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-        {questions.map((q) => (
+        {questions.map((q, index) => (
           <div 
             key={q.id}
             onClick={() => onSelectQuestion(q.id)}
@@ -18,7 +18,7 @@ const Sidebar = ({ questions, activeQuestionId, onAddQuestion, onSelectQuestion 
             }`}
           >
             <div className="absolute -top-3 -left-2 bg-zk-black text-white text-xs font-bold px-1 py-0.5 rounded">
-              Q{q.id}
+              Q{index + 1}
             </div>
             <p className="font-bold text-sm truncate">{q.text}</p>
           </div>

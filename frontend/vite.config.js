@@ -8,4 +8,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
+  optimizeDeps: {
+    include: ['@clerk/clerk-react', 'lucide-react', 'framer-motion', 'react-router-dom'],
+  },
 })
