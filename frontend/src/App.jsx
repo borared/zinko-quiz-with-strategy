@@ -10,6 +10,7 @@ import EnterPin from "./page/PinJoiningGate/EnterPin";
 import EnterNickname from "./page/PinJoiningGate/EnterNickname";
 import ChooseTeam from "./page/PinJoiningGate/ChooseTeam";
 import TeamWarmUp from "./page/PinJoiningGate/TeamWarmUp";
+import ChoosingSkill from "./page/PinJoiningGate/ChoosingSkill";
 import Signup from "./components/Authentication/Signup";
 import Signin from "./components/Authentication/Signin";
 import PricingPanel from "./page/PricingPanel/PricingPanel";
@@ -31,8 +32,8 @@ const LandingPage = () => (
 
 function AppInner() {
   const location = useLocation();
-  const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup', '/create-game', '/dashboard'];
-  const sectionWithoutNavbar = ['/join-nickname', '/choose-team', '/team-warmup'];
+  const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup', '/choose-skill', '/create-game', '/dashboard'];
+  const sectionWithoutNavbar = ['/join-nickname', '/choose-team', '/team-warmup', '/choose-skill', '/sso-callback'];
   const showNavbar = !sectionWithoutNavbar.includes(location.pathname);
   const showFooter = !gameFlowPaths.includes(location.pathname);
 
@@ -50,6 +51,7 @@ function AppInner() {
           <Route path="/join-nickname" element={<EnterNickname />} />
           <Route path="/choose-team" element={<ChooseTeam />} />
           <Route path="/team-warmup" element={<TeamWarmUp />} />
+          <Route path="/choose-skill" element={<ChoosingSkill />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/pricing" element={<PricingPanel />} />

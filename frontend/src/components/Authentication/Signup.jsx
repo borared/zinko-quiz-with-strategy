@@ -58,8 +58,8 @@ const Signup = () => {
     try {
       await signIn.authenticateWithRedirect({
         strategy:        'oauth_google',
-        redirectUrl:     '/sso-callback',
-        redirectUrlComplete: '/',
+        redirectUrl:     window.location.origin + '/sso-callback',
+        redirectUrlComplete: window.location.origin,
       });
     } catch (err) {
       setGoogleLoading(false);
@@ -108,6 +108,9 @@ const Signup = () => {
             {error}
           </div>
         )}
+
+        {/* Hidden Clerk Captcha Container - REQUIRED for custom flows to prevent 10s delays and failures */}
+        <div id="clerk-captcha"></div>
 
         {/* Form */}
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
@@ -207,4 +210,3 @@ const Signup = () => {
 };
 
 export default Signup;
-
