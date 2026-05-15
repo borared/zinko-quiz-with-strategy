@@ -34,7 +34,7 @@ const GameCreator = () => {
       const data = await response.json();
       
       const formattedQuestions = data.questions.map((q, index) => ({
-        id: `q-${Date.now()}-${index}`,
+        id: index + 1,
         label: `QUESTION ${index + 1}`,
         text: q.question,
         answers: q.choices.map((choice, i) => ({
@@ -88,6 +88,15 @@ const GameCreator = () => {
             checked: ans.id === answerId
           }))
         };
+      }
+      return q;
+    }));
+  };
+
+  const handleQuestionTextChange = (questionId, text) => {
+    setQuestions(questions.map(q => {
+      if (q.id === questionId) {
+        return { ...q, text };
       }
       return q;
     }));
@@ -159,7 +168,9 @@ const GameCreator = () => {
 
             {/* Top Question Editor */}
             <QuestionEditor 
-              activeQuestionId={activeQuestionId} 
+              questionNumber={questions.findIndex(q => q.id === activeQuestionId) + 1} 
+              questionText={questions.find(q => q.id === activeQuestionId)?.text}
+              onQuestionTextChange={(text) => handleQuestionTextChange(activeQuestionId, text)}
               image={questions.find(q => q.id === activeQuestionId)?.image}
               onImageChange={(imageUrl) => handleImageChange(activeQuestionId, imageUrl)}
             />

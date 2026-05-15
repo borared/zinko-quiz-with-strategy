@@ -1,18 +1,48 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import WarmUpHeader from './WarmUpHeader';
 import TeamPanel from './TeamPanel';
 import VsCard from './VsCard';
 import BlinkingEye from './BlinkingEye';
 import WaitingBar from '../TeamSelect/WaitingBar';
+
 const bounceIn = (delay = 0) => ({
   initial: { scale: 0, opacity: 0, y: 50 },
   animate: { scale: 1, opacity: 1, y: 0 },
   transition: { delay, type: 'spring', stiffness: 380, damping: 18, mass: 0.9 },
 });
 
+const backgrounds = [
+  '/background_battle/forest.jpg',
+  '/background_battle/city.jpg',
+  '/background_battle/farm.jpg'
+];
+
 const TeamWarmUpSection = () => {
+  const navigate = useNavigate();
+  const [bgImage, setBgImage] = useState(backgrounds[0]);
+
+  useEffect(() => {
+    const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    setBgImage(randomBg);
+  }, []);
+
   return (
-    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-yellow flex flex-col items-center justify-center font-sans px-6 py-8">
+    <div 
+      className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-yellow flex flex-col items-center justify-center font-sans px-6 py-8 bg-cover bg-center"
+      style={{ backgroundImage: `url('${bgImage}')` }}
+    >
+      {/* Dark overlay for better readability over random backgrounds */}
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+
+      {/* Test Button for ChoosingSkill Navigation */}
+      <button 
+        onClick={() => navigate('/choose-skill')}
+        className="absolute top-4 right-4 z-50 bg-[#5D3FD3] text-white px-4 py-2 rounded-xl font-bold border-2 border-zk-black shadow-[4px_4px_0px_#1a1a1a] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#1a1a1a] transition-all uppercase tracking-widest text-sm"
+      >
+        Test Choose Skill
+      </button>
 
       {/* Blinking Eye Decorations */}
       <BlinkingEye size={72} x="5%" y="10%" delay={0}   pupilColor="#1a1a1a" />

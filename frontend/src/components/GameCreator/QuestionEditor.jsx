@@ -1,13 +1,15 @@
 import React from 'react';
 import { Image, Clock, Star, Settings } from 'lucide-react';
 
-const QuestionEditor = ({ activeQuestionId, image, onImageChange }) => {
+const QuestionEditor = ({ questionNumber, questionText, onQuestionTextChange, image, onImageChange }) => {
   return (
     <div className="flex flex-col gap-6 p-6 bg-white border-[3px] border-zk-black rounded-xl">
       {/* Question Title */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {activeQuestionId}</label>
+        <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {questionNumber}</label>
         <textarea 
+          value={questionText || ''}
+          onChange={(e) => onQuestionTextChange(e.target.value)}
           placeholder="Start typing your question here..."
           className="w-full border-[3px] border-zk-black p-4 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all text-xl h-24 resize-none rounded-lg"
         />
