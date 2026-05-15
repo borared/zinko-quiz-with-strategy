@@ -11,13 +11,82 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  console.log('Navbar - isLoaded:', isLoaded, 'isSignedIn:', isSignedIn, 'user:', user);
-
   const handleSignOut = () => {
     setShowModal(true);
   };
 
-  if (!isLoaded) return null; // Don't render until loaded to avoid flickering
+  // Don't block the whole navbar, just the auth buttons
+  const renderAuthButtons = () => {
+    if (!isLoaded) return <div className="w-20 h-8 bg-gray-100 animate-pulse rounded-lg" />;
+    
+    if (isSignedIn) {
+      return (
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={() => navigate('/create-game')}
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg rounded-lg"
+          >
+            Create New Game
+          </button>
+          <button className="text-zk-black hover:scale-105 transition-transform">
+            <Bell size={28} />
+          </button>
+          <button className="text-zk-black hover:scale-105 transition-transform">
+            <Settings size={28} />
+          </button>
+          <div className="relative">
+            <div 
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
+            >
+              <img src={user?.imageUrl} alt={user?.firstName} className="w-full h-full object-cover" />
+            </div>
+
+            {/* Dropdown Menu */}
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl">
+                <button 
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate('/dashboard');
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black rounded-lg"
+                >
+                  Dashboard
+                </button>
+                <button 
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-zk-yellow font-bold text-red-600"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <button 
+          onClick={() => navigate('/join')}
+          className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+        >
+          JOIN
+        </button>
+        <button 
+          onClick={() => navigate('/signup')}
+          className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+        >
+          SIGN UP
+        </button>
+      </>
+    );
+  };
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
@@ -55,69 +124,7 @@ const Navbar = () => {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-4 font-bold text-sm">
-        {isSignedIn ? (
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => navigate('/create-game')}
-              className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg rounded-lg"
-            >
-              Create New Game
-            </button>
-            <button className="text-zk-black hover:scale-105 transition-transform">
-              <Bell size={28} />
-            </button>
-            <button className="text-zk-black hover:scale-105 transition-transform">
-              <Settings size={28} />
-            </button>
-            <div className="relative">
-              <div 
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
-              >
-                <img src={user?.imageUrl} alt={user?.firstName} className="w-full h-full object-cover" />
-              </div>
-
-              {/* Dropdown Menu */}
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl">
-                  <button 
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate('/dashboard');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black rounded-lg"
-                  >
-                    Dashboard
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleSignOut();
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-zk-yellow font-bold text-red-600"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <>
-            <button 
-              onClick={() => navigate('/join')}
-              className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
-            >
-              JOIN
-            </button>
-            <button 
-              onClick={() => navigate('/signup')}
-              className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
-            >
-              SIGN UP
-            </button>
-          </>
-        )}
+        {renderAuthButtons()}
       </div>
       {/* Sign Out Confirmation Modal */}
       {showModal && (

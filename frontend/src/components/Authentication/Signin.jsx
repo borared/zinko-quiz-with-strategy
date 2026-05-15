@@ -51,8 +51,8 @@ const Signin = () => {
     if (!isLoaded) return;
     signIn.authenticateWithRedirect({
       strategy:            'oauth_google',
-      redirectUrl:         '/sso-callback',
-      redirectUrlComplete: '/',
+      redirectUrl:         window.location.origin + '/sso-callback',
+      redirectUrlComplete: window.location.origin,
     });
   };
 
@@ -96,6 +96,9 @@ const Signin = () => {
             {error}
           </div>
         )}
+
+        {/* Hidden Clerk Captcha Container - REQUIRED for custom flows */}
+        <div id="clerk-captcha"></div>
 
         {/* Form */}
         <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
@@ -180,4 +183,3 @@ const Signin = () => {
 };
 
 export default Signin;
-
