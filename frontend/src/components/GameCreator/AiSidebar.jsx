@@ -4,7 +4,7 @@ import { Upload, Loader, Sparkles, X } from 'lucide-react';
 const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState('');
-  const [numQuestions, setNumQuestions] = useState(5);
+  const [numQuestions, setNumQuestions] = useState(8);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,7 +58,7 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
           <textarea 
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g., Create 5 questions about photosynthesis with tricky answers."
+            placeholder="e.g., Create questions about photosynthesis for a Medium difficulty round."
             className="border-[3px] border-zk-black p-2 font-bold text-sm h-32 focus:outline-none focus:ring-2 focus:ring-zk-yellow placeholder-gray-400 rounded-lg"
           />
         </div>
@@ -112,8 +112,9 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
               Generating...
             </>
           ) : (
-            'Generate Questions'
+            'Generate'
           )}
+          <Sparkles size={20} className="text-white" />
         </button>
       </form>
     </div>
