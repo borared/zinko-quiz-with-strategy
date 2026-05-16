@@ -19,8 +19,9 @@ router.get('/test', (req, res) => {
 
 router.post('/generate-quiz', upload.single('file'), async (req, res) => {
   try {
-    const { numQuestions, prompt: userPrompt } = req.body;
+    const { numQuestions, prompt: userPrompt, context } = req.body;
     const file = req.file;
+    const existingQuestions = context ? JSON.parse(context) : [];
 
     if (!process.env.GROQ_API_KEY) {
       console.error('GROQ_API_KEY is missing in .env');
@@ -78,24 +79,36 @@ router.post('/generate-quiz', upload.single('file'), async (req, res) => {
     // 2. Call Groq API
     console.log('Calling Groq API...');
     const prompt = `
-You are an expert quiz generator. 
-Generate exactly ${numQuestions} multiple-choice questions based on the instructions or text provided.
-Each question must have exactly 4 choices (A, B, C, D) and only ONE correct answer.
+You are the "Zinko Game Editor". Your job is to manage questions for a specific round.
+PLATFORM CONTEXT:
+- Round Structure: R1 (Easy), R2 (Medium), R3 (Hard).
+- Goal: Exactly 8 questions per round for an 8-player battle.
 
-${userPrompt ? `Custom Instructions from User: ${userPrompt}` : ''}
+CURRENT STATE OF THIS ROUND:
+${existingQuestions.length > 0 ? existingQuestions.join('\n') : '(Empty Round)'}
 
-${extractedText ? `Lesson Text to use as reference:\n${extractedText}` : ''}
+USER REQUEST: "${userPrompt}"
+${extractedText ? `REFERENCE CONTENT:\n${extractedText}` : ''}
 
-Format the output as a JSON array matching this exact structure:
+INSTRUCTIONS:
+1. ACT AS AN EDITOR. You are modifying the "CURRENT STATE" based on the "USER REQUEST".
+2. If the user asks to REMOVE a question (e.g., "Remove Q8"), do not include that question in your output.
+3. If the user asks to ADD questions, create new ones that are unique from the current list.
+4. If the user asks to MODIFY, update the existing question's text or choices.
+5. If the user provides a topic or file without specific edit instructions, generate ${numQuestions} questions that fit the context.
+
+Return the FINAL, COMPLETE list of questions for this round after applying the changes.
+Match the difficulty requested (Easy, Medium, or Hard).
+
+Format the output as a JSON array:
 [
   {
-    "question": "Question text here",
+    "question": "Question text",
     "choices": ["Choice A", "Choice B", "Choice C", "Choice D"],
-    "correctAnswerIndex": 0 // 0 for A, 1 for B, 2 for C, 3 for D
+    "correctAnswerIndex": 0
   }
 ]
-
-Return ONLY the raw JSON array. Do not include any markdown formatting or extra text.
+Return ONLY the raw JSON array.
 `;
 
     const chatCompletion = await groq.chat.completions.create({
