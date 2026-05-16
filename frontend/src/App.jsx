@@ -19,6 +19,7 @@ import Dashboard from "./page/Dashboard/Dashboard";
 import { TransitionProvider } from "./context/TransitionContext";
 import EyeBlinkOverlay from "./components/transition/EyeBlinkOverlay";
 import SoundToggle from "./components/global/SoundToggle";
+import SSOCallbackView from "./page/Authentication/SSOCallbackView";
 import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 
 const LandingPage = () => (
@@ -33,9 +34,10 @@ const LandingPage = () => (
 function AppInner() {
   const location = useLocation();
   const gameFlowPaths = ['/join', '/join-nickname', '/choose-team', '/team-warmup', '/choose-skill', '/create-game', '/dashboard'];
+  const isGameFlow = gameFlowPaths.some(path => location.pathname.startsWith(path));
   const sectionWithoutNavbar = ['/join-nickname', '/choose-team', '/team-warmup', '/choose-skill', '/sso-callback'];
   const showNavbar = !sectionWithoutNavbar.includes(location.pathname);
-  const showFooter = !gameFlowPaths.includes(location.pathname);
+  const showFooter = !isGameFlow;
 
   return (
     <div className="min-h-screen bg-zk-yellow flex flex-col font-sans overflow-hidden">
@@ -55,8 +57,9 @@ function AppInner() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/pricing" element={<PricingPanel />} />
-          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
+          <Route path="/sso-callback" element={<SSOCallbackView />} />
           <Route path="/create-game" element={<GameCreator />} />
+          <Route path="/create-game/:quizId" element={<GameCreator />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
