@@ -4,14 +4,11 @@ const { upsertUser, deleteUser } = require('../lib/userService');
 
 const router = express.Router();
 
-console.log('webhooks.js loaded. CLERK_WEBHOOK_SECRET:', process.env.CLERK_WEBHOOK_SECRET);
-
 /**
  * POST /api/webhooks/clerk
  */
 router.post('/clerk', express.raw({ type: 'application/json' }), async (req, res) => {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
-  console.log('Webhook route hit. WEBHOOK_SECRET:', WEBHOOK_SECRET);
 
   if (!WEBHOOK_SECRET) {
     console.error('❌ CLERK_WEBHOOK_SECRET is not set in .env');
