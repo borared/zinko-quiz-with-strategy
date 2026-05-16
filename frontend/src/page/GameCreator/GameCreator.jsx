@@ -18,10 +18,11 @@ const GameCreator = () => {
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [activeQuestionId, setActiveQuestionId] = useState(null);
+  const [activeRound, setActiveRound] = useState(1); // 1: Easy, 2: Medium, 3: Hard
   const [quizTitle, setQuizTitle] = useState('');
   const [coverImage, setCoverImage] = useState(null); 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({ title: false, cover: false });
+  const [validationErrors, setValidationErrors] = useState({ title: false, cover: false, round: null });
 
   useEffect(() => {
     if (quizId) {
@@ -36,7 +37,8 @@ const GameCreator = () => {
             id: q.id,
             text: q.question_text,
             answers: q.answers,
-            image: q.image_url
+            image: q.image_url,
+            round: q.round || 1
           }));
           
           setQuestions(formattedQuestions);
@@ -54,10 +56,19 @@ const GameCreator = () => {
   const handleGenerateQuiz = async (file, prompt, numQuestions) => {
     console.log('Generating quiz with prompt:', prompt, 'file:', file?.name);
     
+    const difficulty = activeRound === 1 ? 'Easy' : activeRound === 2 ? 'Medium' : 'Hard';
+    const enhancedPrompt = `[Round ${activeRound} - ${difficulty} Difficulty] ${prompt}`;
+    
+    // Get existing questions for THIS round to give the AI context
+    const existingQuestionsInRound = questions
+      .filter(q => q.round === activeRound)
+      .map((q, idx) => `Q${idx + 1}: ${q.text}`);
+
     const formData = new FormData();
     if (file) formData.append('file', file);
-    formData.append('prompt', prompt);
-    formData.append('numQuestions', numQuestions);
+    formData.append('prompt', enhancedPrompt);
+    formData.append('numQuestions', numQuestions || 8);
+    formData.append('context', JSON.stringify(existingQuestionsInRound));
     
     try {
       const response = await fetch('http://localhost:5000/api/ai/generate-quiz', {
@@ -72,9 +83,8 @@ const GameCreator = () => {
       
       const data = await response.json();
       
-      const formattedQuestions = data.questions.map((q, index) => ({
-        id: index + 1,
-        label: `QUESTION ${index + 1}`,
+      const newFormattedQuestions = data.questions.map((q, index) => ({
+        id: Date.now() + index, // Unique ID
         text: q.question,
         answers: q.choices.map((choice, i) => ({
           id: String.fromCharCode(65 + i), // A, B, C, D
@@ -82,11 +92,20 @@ const GameCreator = () => {
           color: i === 0 ? 'bg-[#5D3FD3]' : i === 1 ? 'bg-[#FF6B4A]' : i === 2 ? 'bg-[#FF4B4B]' : 'bg-[#2D3436]',
           checked: i === q.correctAnswerIndex
         })),
-        image: null
+        image: null,
+        round: activeRound
       }));
       
-      setQuestions(formattedQuestions);
-      setActiveQuestionId(formattedQuestions[0].id);
+      setQuestions(prev => {
+        // Keep questions from other rounds
+        const otherRounds = prev.filter(q => q.round !== activeRound);
+        // Replace current round with AI results
+        return [...otherRounds, ...newFormattedQuestions];
+      });
+
+      if (newFormattedQuestions.length > 0) {
+        setActiveQuestionId(newFormattedQuestions[0].id);
+      }
       
     } catch (error) {
       console.error('Error generating quiz:', error);
@@ -118,19 +137,24 @@ const GameCreator = () => {
   };
 
   const handleSaveQuiz = async () => {
-    // Custom Validation
     const errors = {
       title: !quizTitle.trim(),
       cover: !coverImage
     };
     
-    setValidationErrors(errors);
-    
+    // Round counts validation
+    const round1Count = questions.filter(q => q.round === 1).length;
+    const round2Count = questions.filter(q => q.round === 2).length;
+    const round3Count = questions.filter(q => q.round === 3).length;
+
     if (errors.title || errors.cover) {
-      // Auto-hide errors after 3 seconds
-      setTimeout(() => setValidationErrors({ title: false, cover: false }), 3000);
+      setValidationErrors(errors);
+      setTimeout(() => setValidationErrors({ title: false, cover: false, round: null }), 3000);
       return;
     }
+
+    // Note: We no longer block saving here. 
+    // The "minimum 6 per round" is enforced in the Dashboard for Hosting.
 
     const url = quizId ? `http://localhost:5000/api/quizzes/${quizId}` : 'http://localhost:5000/api/quizzes';
     const method = quizId ? 'PUT' : 'POST';
@@ -161,8 +185,14 @@ const GameCreator = () => {
 
 
   const handleAddQuestion = () => {
-    const newId = questions.length + 1;
-    setQuestions([...questions, { id: newId, text: "New Question", answers: defaultAnswers, image: null }]);
+    const newId = Date.now(); // Use timestamp for more reliable IDs
+    setQuestions([...questions, { 
+      id: newId, 
+      text: "New Question", 
+      answers: defaultAnswers, 
+      image: null,
+      round: activeRound 
+    }]);
     setActiveQuestionId(newId);
   };
 
@@ -205,7 +235,7 @@ const GameCreator = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
         <Sidebar 
-          questions={questions} 
+          questions={questions.filter(q => q.round === activeRound)} 
           activeQuestionId={activeQuestionId} 
           onAddQuestion={handleAddQuestion}
           onSelectQuestion={setActiveQuestionId}
@@ -219,6 +249,72 @@ const GameCreator = () => {
           {/* Dark Overlay that grows with content */}
           <div className="bg-black/40 min-h-full w-full">
             <div className="max-w-6xl mx-auto flex flex-col gap-4 p-6 relative z-10">
+            
+            {/* Round Switcher Bar */}
+            <div className="grid grid-cols-3 gap-4 mb-2">
+              {[
+                { id: 1, label: 'Round 1', difficulty: 'Easy', color: 'bg-zk-blue' },
+                { id: 2, label: 'Round 2', difficulty: 'Medium', color: 'bg-zk-yellow' },
+                { id: 3, label: 'Round 3', difficulty: 'Hard', color: 'bg-[#FF4B4B]' }
+              ].map((round) => {
+                const count = questions.filter(q => q.round === round.id).length;
+                const isActive = activeRound === round.id;
+                const isError = validationErrors.round === round.id;
+                
+                return (
+                  <div key={round.id} className="relative">
+                    <AnimatePresence>
+                      {isError && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 15, scale: 0.8 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="absolute -top-16 left-0 right-0 bg-[#FF4B4B] text-white px-4 py-2 text-xs font-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[100] flex items-center justify-center gap-2 whitespace-nowrap"
+                        >
+                          <AlertCircle size={14} fill="white" className="text-[#FF4B4B]" />
+                          MIN. 6 QUESTIONS NEEDED!
+                          <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-black rotate-45" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <button
+                      onClick={() => {
+                        setActiveRound(round.id);
+                        const roundQuestions = questions.filter(q => q.round === round.id);
+                        if (roundQuestions.length > 0) setActiveQuestionId(roundQuestions[0].id);
+                        else setActiveQuestionId(null);
+                      }}
+                      className={`w-full relative border-[3px] border-zk-black p-4 transition-all rounded-xl ${
+                        isActive 
+                          ? `${round.color} text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-y-1` 
+                          : isError ? 'bg-red-50 border-red-500 animate-shake' : 'bg-white/90 text-zk-black hover:bg-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="text-left">
+                          <p className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-white/70' : isError ? 'text-red-500' : 'text-zk-black/50'}`}>
+                            {round.difficulty}
+                          </p>
+                          <h3 className="text-xl font-black uppercase leading-tight">{round.label}</h3>
+                        </div>
+                        <div className={`w-10 h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-lg rounded-lg ${
+                          count >= 8 ? 'bg-[#00C853] text-white' : count >= 6 ? 'bg-zk-blue text-white' : count > 0 ? 'bg-white text-zk-black' : 'bg-gray-100 text-gray-400'
+                        }`}>
+                          {count}/8
+                        </div>
+                      </div>
+                      {isActive && (
+                        <motion.div 
+                          layoutId="roundUnderline"
+                          className="absolute -bottom-[3px] left-0 right-0 h-1 bg-white mx-4 rounded-full"
+                        />
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
             {/* Header Buttons */}
             <div className="flex justify-between items-center bg-white/90 backdrop-blur-sm p-4 border-[3px] border-zk-black rounded-xl relative z-[60]">
               <div className="flex gap-4 items-center">
@@ -336,15 +432,17 @@ const GameCreator = () => {
                 <div className="bg-zk-yellow p-6 border-[3px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-2xl mb-6">
                   <Wand2 size={64} className="text-zk-black" />
                 </div>
-                <h2 className="text-3xl font-black text-zk-black mb-2 uppercase">Your Quiz is Empty!</h2>
+                <h2 className="text-3xl font-black text-zk-black mb-2 uppercase">
+                  Round {activeRound} is Empty!
+                </h2>
                 <p className="text-zk-black/70 font-bold mb-8 text-center max-w-md">
-                  Start by clicking the button below to add your first question, or use the AI Assistant to generate one instantly!
+                  Add 8 questions to satisfy the battle logic for this round.
                 </p>
                 <button 
                   onClick={handleAddQuestion}
                   className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-4 font-black text-xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none rounded-xl"
                 >
-                  + ADD FIRST QUESTION
+                  + ADD TO ROUND {activeRound}
                 </button>
               </div>
             )}
