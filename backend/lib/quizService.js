@@ -27,6 +27,7 @@ const saveQuiz = async (quizData) => {
     image_url: q.image || null,
     answers: q.answers, // JSONB column
     order_index: index,
+    round: q.round || 1, // Store the round index (1, 2, or 3)
   }));
 
   // 3. Insert all Questions
