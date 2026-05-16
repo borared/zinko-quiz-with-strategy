@@ -95,6 +95,7 @@ router.put('/:id', async (req, res) => {
       image_url: q.image || null,
       answers: q.answers,
       order_index: index,
+      round: q.round || 1,
     }));
 
     const { error: questionsError } = await supabase
