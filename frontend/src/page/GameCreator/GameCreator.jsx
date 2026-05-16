@@ -1,16 +1,55 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from '../../components/GameCreator/Sidebar';
 import QuestionEditor from '../../components/GameCreator/QuestionEditor';
 import AnswerGrid from '../../components/GameCreator/AnswerGrid';
 import BottomPanel from '../../components/GameCreator/BottomPanel';
 import AiSidebar from '../../components/GameCreator/AiSidebar';
-import { Wand2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Wand2, Image, Upload, Link as LinkIcon, X, AlertCircle } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 
 const GameCreator = () => {
   const navigate = useNavigate();
+  const { quizId } = useParams();
+  const { user } = useUser();
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [activeQuestionId, setActiveQuestionId] = useState(null);
+  const [quizTitle, setQuizTitle] = useState('');
+  const [coverImage, setCoverImage] = useState(null); 
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({ title: false, cover: false });
+
+  useEffect(() => {
+    if (quizId) {
+      const fetchQuiz = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/quizzes/${quizId}`);
+          const data = await response.json();
+          setQuizTitle(data.title);
+          setCoverImage(data.cover_image);
+          
+          const formattedQuestions = data.questions.map(q => ({
+            id: q.id,
+            text: q.question_text,
+            answers: q.answers,
+            image: q.image_url
+          }));
+          
+          setQuestions(formattedQuestions);
+          if (formattedQuestions.length > 0) {
+            setActiveQuestionId(formattedQuestions[0].id);
+          }
+        } catch (error) {
+          console.error('Error fetching quiz for edit:', error);
+        }
+      };
+      fetchQuiz();
+    }
+  }, [quizId]);
 
   const handleGenerateQuiz = async (file, prompt, numQuestions) => {
     console.log('Generating quiz with prompt:', prompt, 'file:', file?.name);
@@ -65,12 +104,61 @@ const GameCreator = () => {
     { id: 'D', text: "", color: 'bg-[#2D3436]', checked: false },
   ];
 
-  const [questions, setQuestions] = useState([
-    { id: 1, text: "What is the primary function of the mitochondr...", answers: defaultAnswers, image: null },
-    { id: 2, text: "Identify the chemical element with the symbol...", answers: defaultAnswers, image: null },
-    { id: 3, text: "How many planets are in our solar system?", answers: defaultAnswers, image: null },
-  ]);
-  const [activeQuestionId, setActiveQuestionId] = useState(1);
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result);
+        setIsImageModalOpen(false);
+        setValidationErrors(prev => ({ ...prev, cover: false }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveQuiz = async () => {
+    // Custom Validation
+    const errors = {
+      title: !quizTitle.trim(),
+      cover: !coverImage
+    };
+    
+    setValidationErrors(errors);
+    
+    if (errors.title || errors.cover) {
+      // Auto-hide errors after 3 seconds
+      setTimeout(() => setValidationErrors({ title: false, cover: false }), 3000);
+      return;
+    }
+
+    const url = quizId ? `http://localhost:5000/api/quizzes/${quizId}` : 'http://localhost:5000/api/quizzes';
+    const method = quizId ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: quizTitle,
+          creator_id: user.id,
+          questions: questions,
+          cover_image: coverImage
+        }),
+      });
+
+      if (response.ok) {
+        alert(quizId ? 'Quiz updated successfully!' : 'Quiz saved successfully!');
+        navigate('/dashboard');
+      } else {
+        throw new Error('Failed to save quiz');
+      }
+    } catch (error) {
+      console.error('Error saving quiz:', error);
+      alert('Error saving quiz. Make sure backend is running.');
+    }
+  };
+
 
   const handleAddQuestion = () => {
     const newId = questions.length + 1;
@@ -132,7 +220,7 @@ const GameCreator = () => {
           <div className="bg-black/40 min-h-full w-full">
             <div className="max-w-6xl mx-auto flex flex-col gap-4 p-6 relative z-10">
             {/* Header Buttons */}
-            <div className="flex justify-between items-center bg-white/90 backdrop-blur-sm p-4 border-[3px] border-zk-black rounded-xl">
+            <div className="flex justify-between items-center bg-white/90 backdrop-blur-sm p-4 border-[3px] border-zk-black rounded-xl relative z-[60]">
               <div className="flex gap-4 items-center">
                 <button 
                   onClick={() => navigate('/')}
@@ -145,11 +233,65 @@ const GameCreator = () => {
                 </button>
                 
                 {/* Quiz Title Input */}
-                <input 
-                  type="text" 
-                  placeholder="Enter Quiz Title..." 
-                  className="border-[2px] border-zk-black px-4 py-2 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zk-blue/30 transition-all w-64 rounded-lg"
-                />
+                <div className="flex items-center gap-2 relative">
+                  <AnimatePresence>
+                    {validationErrors.title && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -15, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="absolute top-16 left-0 bg-[#FF4B4B] text-white px-5 py-3 text-sm font-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[9999] flex items-center gap-3 whitespace-nowrap"
+                      >
+                        <AlertCircle size={20} fill="white" className="text-[#FF4B4B]" />
+                        PLEASE ENTER A QUIZ TITLE!
+                        <div className="absolute -top-[11px] left-8 w-4 h-4 bg-[#FF4B4B] border-l-[3px] border-t-[3px] border-zk-black rotate-45" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
+                  <input 
+                    type="text" 
+                    value={quizTitle}
+                    onChange={(e) => {
+                      setQuizTitle(e.target.value);
+                      if (e.target.value.trim()) setValidationErrors(prev => ({ ...prev, title: false }));
+                    }}
+                    placeholder="Enter Quiz Title..." 
+                    className={`border-[3px] ${validationErrors.title ? 'border-[#FF4B4B] animate-shake bg-red-50' : 'border-zk-black'} px-4 py-3 font-black text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/20 transition-all w-80 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
+                  />
+
+                  <div className="relative">
+                    <AnimatePresence>
+                      {validationErrors.cover && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -15, scale: 0.8 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="absolute top-16 right-0 bg-[#5D3FD3] text-white px-5 py-3 text-sm font-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[9999] flex items-center gap-3 whitespace-nowrap"
+                        >
+                          <Image size={20} fill="white" className="text-[#5D3FD3]" />
+                          SET A COVER IMAGE!
+                          <div className="absolute -top-[11px] right-8 w-4 h-4 bg-[#5D3FD3] border-l-[3px] border-t-[3px] border-zk-black rotate-45" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    <button 
+                      onClick={() => setIsImageModalOpen(true)}
+                      title="Set Quiz Cover Image"
+                      className={`w-14 h-14 bg-white border-[3px] ${validationErrors.cover ? 'border-[#FF4B4B] animate-shake' : 'border-zk-black'} flex items-center justify-center hover:bg-zk-yellow transition-all relative overflow-hidden rounded-xl group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}
+                    >
+                      {coverImage ? (
+                        <img src={coverImage} className="w-full h-full object-cover" alt="Cover" />
+                      ) : (
+                        <Image size={28} className="text-zk-black" strokeWidth={2.5} />
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Upload size={20} className="text-white" strokeWidth={3} />
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
               
               <div className="flex gap-4">
@@ -160,29 +302,52 @@ const GameCreator = () => {
                   <Wand2 size={16} />
                   GENERATE QUIZ
                 </button>
-                <button className="bg-[#00C853] text-white border-[2px] border-zk-black px-6 py-2 font-bold text-sm rounded-lg hover:opacity-90 transition-opacity">
+                <button 
+                  onClick={handleSaveQuiz}
+                  className="bg-[#00C853] text-white border-[2px] border-zk-black px-6 py-2 font-bold text-sm rounded-lg hover:opacity-90 transition-opacity"
+                >
                   SAVE QUIZ
                 </button>
               </div>
             </div>
 
-            {/* Top Question Editor */}
-            <QuestionEditor 
-              questionNumber={questions.findIndex(q => q.id === activeQuestionId) + 1} 
-              questionText={questions.find(q => q.id === activeQuestionId)?.text}
-              onQuestionTextChange={(text) => handleQuestionTextChange(activeQuestionId, text)}
-              image={questions.find(q => q.id === activeQuestionId)?.image}
-              onImageChange={(imageUrl) => handleImageChange(activeQuestionId, imageUrl)}
-            />
+            {questions.length > 0 ? (
+              <>
+                {/* Top Question Editor */}
+                <QuestionEditor 
+                  questionNumber={questions.findIndex(q => q.id === activeQuestionId) + 1} 
+                  questionText={questions.find(q => q.id === activeQuestionId)?.text}
+                  onQuestionTextChange={(text) => handleQuestionTextChange(activeQuestionId, text)}
+                  image={questions.find(q => q.id === activeQuestionId)?.image}
+                  onImageChange={(imageUrl) => handleImageChange(activeQuestionId, imageUrl)}
+                />
 
-            {/* Answer Grid */}
-            <AnswerGrid 
-              answers={questions.find(q => q.id === activeQuestionId)?.answers || []} 
-              onToggleAnswer={(answerId) => handleToggleAnswer(activeQuestionId, answerId)}
-            />
+                {/* Answer Grid */}
+                <AnswerGrid 
+                  answers={questions.find(q => q.id === activeQuestionId)?.answers || []} 
+                  onToggleAnswer={(answerId) => handleToggleAnswer(activeQuestionId, answerId)}
+                />
 
-            {/* Bottom Panels */}
-            <BottomPanel />
+                {/* Bottom Panels */}
+                <BottomPanel />
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur-sm border-[3px] border-zk-black rounded-2xl border-dashed">
+                <div className="bg-zk-yellow p-6 border-[3px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-2xl mb-6">
+                  <Wand2 size={64} className="text-zk-black" />
+                </div>
+                <h2 className="text-3xl font-black text-zk-black mb-2 uppercase">Your Quiz is Empty!</h2>
+                <p className="text-zk-black/70 font-bold mb-8 text-center max-w-md">
+                  Start by clicking the button below to add your first question, or use the AI Assistant to generate one instantly!
+                </p>
+                <button 
+                  onClick={handleAddQuestion}
+                  className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-4 font-black text-xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none rounded-xl"
+                >
+                  + ADD FIRST QUESTION
+                </button>
+              </div>
+            )}
           </div>
         </div>
         </div>
@@ -194,6 +359,85 @@ const GameCreator = () => {
         onClose={() => setIsAiSidebarOpen(false)} 
         onGenerate={handleGenerateQuiz} 
       />
+      {/* Cover Image Hub Modal */}
+      {isImageModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full p-8 relative rounded-2xl"
+          >
+            <button 
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-zk-yellow border-[2px] border-transparent hover:border-zk-black transition-colors rounded-xl"
+            >
+              <X size={24} className="text-zk-black" />
+            </button>
+
+            <h2 className="text-3xl font-black text-zk-black uppercase mb-2">Quiz Cover Hub</h2>
+            <p className="text-zk-black/60 font-bold mb-8 italic">Choose how you want to represent your masterpiece!</p>
+
+            <div className="flex flex-col gap-6">
+              {/* Option 1: URL */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-black text-zk-black uppercase tracking-widest flex items-center gap-2">
+                  <LinkIcon size={14} /> Paste Image Link
+                </label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="https://example.com/image.png"
+                    value={typeof coverImage === 'string' && !coverImage.startsWith('data:') ? coverImage : ''}
+                    onChange={(e) => {
+                      setCoverImage(e.target.value);
+                      setValidationErrors(prev => ({ ...prev, cover: false }));
+                    }}
+                    className="flex-1 border-[3px] border-zk-black p-3 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-zk-yellow/30 rounded-xl"
+                  />
+                  <button 
+                    onClick={() => setIsImageModalOpen(false)}
+                    className="bg-zk-black text-white px-4 font-black text-xs uppercase rounded-xl hover:bg-zk-blue transition-colors"
+                  >
+                    Set
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-[2px] bg-gray-100"></div>
+                <span className="text-[10px] font-black text-gray-400 uppercase">Or</span>
+                <div className="flex-1 h-[2px] bg-gray-100"></div>
+              </div>
+
+              {/* Option 2: Upload */}
+              <div 
+                className="group border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-zk-yellow/10 transition-all cursor-pointer relative rounded-2xl"
+              >
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="w-12 h-12 bg-white border-[3px] border-zk-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:translate-y-[2px] group-hover:translate-x-[2px] group-hover:shadow-none transition-all rounded-xl pointer-events-none">
+                  <Upload size={24} className="text-zk-black" />
+                </div>
+                <div className="text-center pointer-events-none">
+                  <p className="font-black text-zk-black uppercase text-sm">Upload from Device</p>
+                  <p className="text-[10px] text-zk-black/50 font-bold italic">PNG, JPG or GIF up to 5MB</p>
+                </div>
+              </div>
+            </div>
+
+            {coverImage && (
+              <div className="mt-8 p-4 border-[3px] border-zk-black bg-zk-yellow/10 rounded-xl">
+                <p className="text-[10px] font-black text-zk-black uppercase mb-2">Current Selection Preview:</p>
+                <img src={coverImage} alt="Preview" className="w-full h-32 object-cover border-[2px] border-zk-black rounded-lg" />
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
