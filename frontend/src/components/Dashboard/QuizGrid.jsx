@@ -3,19 +3,25 @@ import QuizCard from './QuizCard';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const QuizGrid = () => {
+const QuizGrid = ({ quizzes, loading }) => {
   const navigate = useNavigate();
   
-  const quizzes = [
-    { id: 1, title: 'Quantum Physics 101', subject: 'SCIENCE', subjectColor: 'bg-[#FF4B4B]', plays: 45, created: '2 days ago', image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=400&q=80' },
-    { id: 2, title: 'Ancient Civilizations', subject: 'HISTORY', subjectColor: 'bg-[#5D3FD3]', plays: '1.2k', trending: true, image: 'https://images.unsplash.com/photo-1543165365-07232ed12fad?auto=format&fit=crop&w=400&q=80' },
-    { id: 3, title: 'French Verbs Master', subject: 'LANGUAGES', subjectColor: 'bg-[#FF6B4A]', plays: 89, created: 'last week', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=400&q=80' },
-  ];
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white/50 animate-pulse border-[3px] border-zk-black rounded-xl h-[320px]" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h2 className="font-black text-2xl text-zk-black uppercase tracking-tight">Recent Quizzes</h2>
+        <h2 className="font-black text-2xl text-zk-black uppercase tracking-tight">
+          {quizzes.length > 0 ? 'Your Quizzes' : 'No Quizzes Found'}
+        </h2>
         <button className="text-sm font-bold text-zk-black hover:underline">View All</button>
       </div>
 
