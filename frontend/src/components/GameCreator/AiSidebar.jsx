@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Upload, Loader, Sparkles, X } from 'lucide-react';
 
-const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
+import { useQuiz } from '../../context/QuizContext';
+
+const AiSidebar = ({ isOpen, onClose }) => {
+  const { handleGenerateQuiz } = useQuiz();
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState('');
   const [numQuestions, setNumQuestions] = useState(8);
@@ -26,9 +29,10 @@ const AiSidebar = ({ isOpen, onClose, onGenerate }) => {
     setError('');
     
     try {
-      await onGenerate(file, prompt, numQuestions);
+      await handleGenerateQuiz(file, prompt, numQuestions);
       setPrompt('');
       setFile(null);
+      onClose(); // Auto-close on success
     } catch (err) {
       setError(err.message || 'Failed to generate quiz. Please try again.');
       console.error(err);
