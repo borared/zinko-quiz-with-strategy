@@ -1,0 +1,8 @@
+{
+  "name": "@zinko/shared",
+  "version": "1.0.0",
+  "description": "Shared constants, utilities and validation for Zinko — used by both frontend and backend.",
+  "main": "./src/index.js",
+  "keywords": [],
+  "license": "ISC"
+}
