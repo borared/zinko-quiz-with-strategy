@@ -2,6 +2,22 @@ const express = require('express');
 const { saveQuiz } = require('../lib/quizService');
 const router = express.Router();
 
+// Inline shared constants (backend uses CommonJS; @zinko/shared is ESM-only via Vite alias)
+const MIN_QUESTIONS_PER_ROUND = 6;
+const TOTAL_ROUNDS = 3;
+
+function validateQuiz(questions) {
+  const errors = [];
+  for (let r = 1; r <= TOTAL_ROUNDS; r++) {
+    const count = questions.filter(q => q.round === r).length;
+    if (count < MIN_QUESTIONS_PER_ROUND) {
+      errors.push(`Round ${r} needs at least ${MIN_QUESTIONS_PER_ROUND} questions (has ${count})`);
+    }
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+
 /**
  * POST /api/quizzes
  * Save a new quiz
@@ -12,6 +28,12 @@ router.post('/', async (req, res) => {
 
     if (!title || !creator_id || !questions) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Validate quiz using shared rules (same logic as frontend)
+    const { valid, errors } = validateQuiz(questions);
+    if (!valid) {
+      return res.status(400).json({ error: 'Quiz validation failed', details: errors });
     }
 
     const quiz = await saveQuiz({ title, creator_id, questions, cover_image: req.body.cover_image });
