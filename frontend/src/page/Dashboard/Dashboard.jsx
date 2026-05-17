@@ -3,6 +3,7 @@ import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
 import { useUser } from '@clerk/clerk-react';
+import api from '../../services/api';
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -13,8 +14,7 @@ const Dashboard = () => {
     const fetchQuizzes = async () => {
       if (!user) return;
       try {
-        const response = await fetch(`http://localhost:5000/api/quizzes/user/${user.id}`);
-        const data = await response.json();
+        const data = await api.get(`/api/quizzes/user/${user.id}`);
         setQuizzes(data);
       } catch (error) {
         console.error('Error fetching quizzes:', error);
