@@ -15,28 +15,28 @@ const skills = [
     id: "rabbit",
     name: "Rabbit",
     imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1778752131/Gemini_Generated_Image_9u48gx9u48gx9u48_o1sfzh.png",
+      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779041092/Screenshot_2026-05-18_010349_zrjzse.png",
     skillDescription: "Blocks & Counters All Attacks",
   },
   {
     id: "frog",
     name: "Frog",
     imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1778752125/Gemini_Generated_Image_f6m0juf6m0juf6m0_ckftjf.png",
+      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779041092/Screenshot_2026-05-18_010359_c3ksvg.png",
     skillDescription: "Destroys 50% of Enemy Points",
   },
   {
     id: "fox",
     name: "Fox",
     imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1778752126/Gemini_Generated_Image_r62tolr62tolr62t_aktq15.png",
+      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779030311/photo_2026-05-17_22-04-28_owtfct.jpg",
     skillDescription: "Steals 30% of Enemy Points",
   },
   {
     id: "butterfly",
     name: "Butterfly",
     imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1778752122/Gemini_Generated_Image_nwn3pnwn3pnwn3pn_vwj9de.png",
+      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779030433/Screenshot_2026-05-17_220659_i6y3ok.png",
     skillDescription: "Boosts Team Points by +20%",
   },
 ];
