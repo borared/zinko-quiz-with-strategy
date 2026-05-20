@@ -1,0 +1,16 @@
+# This file is only used during development
+# It allows you to override settings in docker-compose.yml
+# Automatically loaded by docker-compose when present
+
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - DEBUG=true
+    stdin_open: true
+    tty: true
+
+  frontend:
+    stdin_open: true
+    tty: true
