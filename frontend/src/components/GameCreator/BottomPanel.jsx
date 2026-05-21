@@ -1,5 +1,4 @@
-import React from 'react';
-import { Lightbulb, Copy } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 
 const BottomPanel = () => {
   return (
