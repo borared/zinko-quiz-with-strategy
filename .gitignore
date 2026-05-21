@@ -3,6 +3,9 @@
 backend/.env
 frontend/.env
 
+# Dependencies
+node_modules/
+
 # Keep example files (safe templates)
 !.env.example
 !backend/.env.example
