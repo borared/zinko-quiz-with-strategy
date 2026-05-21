@@ -5,9 +5,22 @@ const supabase = require('../lib/supabaseClient');
  * Called when Clerk fires user.created or user.updated.
  */
 const upsertUser = async (clerkUser) => {
-  const primaryEmail = clerkUser.email_addresses?.find(
-    (e) => e.id === clerkUser.primary_email_address_id
-  )?.email_address ?? null;
+  // Handle both webhook format (snake_case) and API format (camelCase)
+  let primaryEmail = null;
+  
+  if (clerkUser.emailAddresses && clerkUser.emailAddresses.length > 0) {
+    // API format: emailAddresses[].emailAddress
+    const primaryEmailObj = clerkUser.emailAddresses.find(
+      (e) => e.id === clerkUser.primaryEmailAddressId
+    );
+    primaryEmail = primaryEmailObj?.emailAddress || clerkUser.emailAddresses[0]?.emailAddress;
+  } else if (clerkUser.email_addresses && clerkUser.email_addresses.length > 0) {
+    // Webhook format: email_addresses[].email_address
+    const primaryEmailObj = clerkUser.email_addresses.find(
+      (e) => e.id === clerkUser.primary_email_address_id
+    );
+    primaryEmail = primaryEmailObj?.email_address || clerkUser.email_addresses[0]?.email_address;
+  }
 
   const { data, error } = await supabase
     .from('users')
@@ -15,10 +28,10 @@ const upsertUser = async (clerkUser) => {
       {
         clerk_id:   clerkUser.id,
         email:      primaryEmail,
-        first_name: clerkUser.first_name ?? null,
-        last_name:  clerkUser.last_name ?? null,
-        username:   clerkUser.username ?? null,
-        avatar_url: clerkUser.image_url ?? null,
+        first_name: clerkUser.first_name || clerkUser.firstName || null,
+        last_name:  clerkUser.last_name || clerkUser.lastName || null,
+        username:   clerkUser.username || null,
+        avatar_url: clerkUser.image_url || clerkUser.imageUrl || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'clerk_id' }
