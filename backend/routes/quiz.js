@@ -47,12 +47,39 @@ router.post('/', async (req, res) => {
 });
 
 /**
+ * GET /api/quizzes/debug/all
+ * Debug endpoint - fetch all quizzes with creator info
+ */
+router.get('/debug/all', async (req, res) => {
+  try {
+    const { data, error } = await require('../lib/supabaseClient')
+      .from('quizzes')
+      .select('id, title, creator_id, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json({ 
+      total: data.length,
+      quizzes: data.map(q => ({
+        ...q,
+        creator_id_length: q.creator_id.length
+      }))
+    });
+  } catch (err) {
+    console.error('❌ Error fetching all quizzes:', err.message);
+    res.status(500).json({ error: 'Failed to fetch quizzes' });
+  }
+});
+
+/**
  * GET /api/quizzes/user/:userId
  * Fetch all quizzes for a specific creator
  */
 router.get('/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    console.log(`🔍 Fetching quizzes for user: "${userId}" (length: ${userId.length})`);
+    
     const { data, error } = await require('../lib/supabaseClient')
       .from('quizzes')
       .select('*, questions(*)')
@@ -60,6 +87,8 @@ router.get('/user/:userId', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+    
+    console.log(`✅ Found ${data.length} quizzes for user: ${userId}`);
     res.json(data);
   } catch (err) {
     console.error('❌ Error fetching quizzes:', err.message);
