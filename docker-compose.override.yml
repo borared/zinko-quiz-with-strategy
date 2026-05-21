@@ -2,7 +2,7 @@
 # It allows you to override settings in docker-compose.yml
 # Automatically loaded by docker-compose when present
 
-version: '3.8'
+version: "3.8"
 
 services:
   backend:

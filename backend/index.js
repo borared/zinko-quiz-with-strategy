@@ -23,12 +23,28 @@ app.use('/api/webhooks', webhookRoutes);
 // ─── Body Parser ─────────────────────────────────────────────────────────────
 app.use(express.json());
 
+// ─── Request Logger ──────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path}`);
+  next();
+});
+
 // ─── Clerk Middleware ─────────────────────────────────────────────────────────
 app.use(clerkMiddleware());
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({ message: 'Zinko API is running.' });
+});
+
+// Debug endpoint to check Clerk user ID
+app.get('/api/debug/me', (req, res) => {
+  const { getAuth } = require('@clerk/express');
+  const { userId } = getAuth(req);
+  res.json({ 
+    clerkUserId: userId || 'Not authenticated',
+    message: 'This is your current Clerk user ID. Compare it with the creator_id in your database.'
+  });
 });
 
 app.use('/api/auth', authRoutes);
@@ -44,5 +60,10 @@ app.use((req, res) => {
 // ─── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`📊 Available routes:`);
+  console.log(`   GET  /api/quizzes/user/:userId`);
+  console.log(`   GET  /api/quizzes/:id`);
+  console.log(`   POST /api/quizzes`);
+  console.log(`   PUT  /api/quizzes/:id`);
 });
 
