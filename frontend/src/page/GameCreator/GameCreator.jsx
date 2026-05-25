@@ -9,9 +9,9 @@ import { Wand2, Image, Upload, Link as LinkIcon, X, AlertCircle } from 'lucide-r
 import { QuizProvider, useQuiz } from '../../context/QuizContext';
 
 const GameCreatorContent = () => {
-  const { 
-    quizTitle, setQuizTitle, 
-    coverImage, setCoverImage, 
+  const {
+    quizTitle, setQuizTitle,
+    coverImage, setCoverImage,
     activeRound, setActiveRound,
     questions, handleSaveQuiz,
     isSaving, loading
@@ -31,9 +31,9 @@ const GameCreatorContent = () => {
   return (
     <div className="min-h-screen font-sans selection:bg-[#5D3FD3] selection:text-white relative">
       {/* Cinematic Background Layer */}
-      <div 
+      <div
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat scale-105"
-        style={{ 
+        style={{
           backgroundImage: 'url("https://res.cloudinary.com/dicrvjstp/image/upload/v1778512239/Gemini_Generated_Image_o8qfs4o8qfs4o8qf_kqpgha.png")',
           filter: 'brightness(0.8) contrast(1.1)'
         }}
@@ -43,7 +43,7 @@ const GameCreatorContent = () => {
 
       <div className="relative z-10">
         {/* Header / Navbar */}
-        <nav className="ml-80 bg-white/80 backdrop-blur-md border-b-[3px] border-zk-black px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <nav className="ml-80 bg-white/80 backdrop-blur-md border-b-[3px] border-zk-black px-6 h-[80px] flex items-center justify-between sticky top-0 z-40 shadow-sm">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <div className="bg-[#5D3FD3] text-white p-1.5 border-[2px] border-zk-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-lg transition-transform hover:scale-110">
@@ -51,23 +51,22 @@ const GameCreatorContent = () => {
               </div>
               <h1 className="text-2xl font-black italic tracking-tighter uppercase text-zk-black">ZINKO CREATOR</h1>
             </div>
-            
+
             <div className="h-8 w-[3px] bg-zk-black/10 rounded-full"></div>
-            
+
             <div className="flex items-center gap-4">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={quizTitle}
                 onChange={(e) => setQuizTitle(e.target.value)}
                 placeholder="Enter Quiz Title..."
                 className="bg-transparent border-none text-xl font-black uppercase tracking-tight text-zk-black placeholder-zk-black/30 focus:outline-none w-64 rounded px-2"
               />
-              
-              <button 
+
+              <button
                 onClick={() => setIsImageModalOpen(true)}
-                className={`flex items-center gap-2 border-[3px] border-zk-black px-3 py-1.5 font-bold text-sm rounded-xl transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                  coverImage ? 'bg-zk-blue text-white' : 'bg-white text-zk-black'
-                }`}
+                className={`flex items-center gap-2 border-[3px] border-zk-black px-3 py-1.5 font-bold text-sm rounded-xl transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${coverImage ? 'bg-zk-blue text-white' : 'bg-white text-zk-black'
+                  }`}
               >
                 <Image size={18} />
                 {coverImage ? 'CHANGE COVER' : 'ADD COVER'}
@@ -76,10 +75,10 @@ const GameCreatorContent = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={handleSaveQuiz}
               disabled={isSaving}
-              className="bg-[#00C853] text-white border-[3px] border-zk-black px-8 py-3 font-black text-lg uppercase tracking-wider rounded-xl transition-all hover:translate-y-[2px] hover:translate-x-[2px] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
+              className="bg-[#00C853] text-white border-[3px] border-zk-black px-6 py-2 font-black text-sm uppercase tracking-wider rounded-xl transition-all hover:translate-y-[2px] hover:translate-x-[2px] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
             >
               {isSaving ? 'SAVING...' : 'SAVE QUIZ'}
             </button>
@@ -106,16 +105,15 @@ const GameCreatorContent = () => {
                 ].map((round) => {
                   const count = questions.filter(q => q.round === round.id).length;
                   const isActive = activeRound === round.id;
-                  
+
                   return (
                     <button
                       key={round.id}
                       onClick={() => setActiveRound(round.id)}
-                      className={`relative border-[3px] border-zk-black p-4 transition-all rounded-xl ${
-                        isActive 
-                          ? `${round.color} text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-y-1` 
-                          : 'bg-white/90 text-zk-black hover:bg-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                      }`}
+                      className={`relative border-[3px] border-zk-black p-4 transition-all rounded-xl ${isActive
+                        ? `${round.color} text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-y-1`
+                        : 'bg-white/90 text-zk-black hover:bg-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">
@@ -124,9 +122,8 @@ const GameCreatorContent = () => {
                           </p>
                           <h3 className="text-xl font-black uppercase leading-tight">{round.label}</h3>
                         </div>
-                        <div className={`w-10 h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-lg rounded-lg ${
-                          count >= 6 ? 'bg-zk-blue text-white' : count > 0 ? 'bg-white text-zk-black' : 'bg-gray-100 text-gray-400'
-                        }`}>
+                        <div className={`w-10 h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-lg rounded-lg ${count >= 6 ? 'bg-zk-blue text-white' : count > 0 ? 'bg-white text-zk-black' : 'bg-gray-100 text-gray-400'
+                          }`}>
                           {count}/8
                         </div>
                       </div>
@@ -141,7 +138,7 @@ const GameCreatorContent = () => {
 
             {/* Sticky AI Assistant Toggle */}
             <aside className="sticky top-28 shrink-0">
-              <button 
+              <button
                 onClick={() => setIsAiSidebarOpen(true)}
                 className="bg-[#5D3FD3] text-white border-[3px] border-zk-black p-4 rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col items-center gap-2 group"
               >
@@ -159,24 +156,24 @@ const GameCreatorContent = () => {
       <AnimatePresence>
         {isImageModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsImageModalOpen(false)}
               className="absolute inset-0 bg-zk-black/60 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
               className="bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-md relative z-10 p-8 rounded-2xl"
             >
               <button onClick={() => setIsImageModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <X size={20} />
               </button>
-              
+
               <h2 className="text-3xl font-black uppercase tracking-tight italic mb-2">Quiz Cover</h2>
               <p className="text-zk-black/60 font-bold text-sm mb-8 uppercase tracking-wide">Select a visual for your battle</p>
 
               <div className="flex flex-col gap-6">
-                <div 
+                <div
                   className="aspect-video bg-gray-100 border-[3px] border-dashed border-zk-black rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zk-blue/5 transition-all group"
                   onClick={() => document.getElementById('cover-upload').click()}
                 >
@@ -202,8 +199,8 @@ const GameCreatorContent = () => {
                   <div className="absolute inset-y-0 left-4 flex items-center">
                     <LinkIcon size={18} className="text-zk-black/40" />
                   </div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="PASTE IMAGE URL..."
                     value={typeof coverImage === 'string' && coverImage.startsWith('http') ? coverImage : ''}
                     onChange={(e) => setCoverImage(e.target.value)}
@@ -211,7 +208,7 @@ const GameCreatorContent = () => {
                   />
                 </div>
 
-                <button 
+                <button
                   onClick={() => setIsImageModalOpen(false)}
                   className="w-full bg-zk-black text-white py-4 font-black uppercase tracking-widest text-lg rounded-xl hover:bg-zk-black/90 transition-all"
                 >
