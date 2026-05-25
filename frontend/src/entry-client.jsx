@@ -8,19 +8,27 @@ import { ToastProvider } from './context/ToastContext.jsx';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in your .env file');
-}
+// Determine if the key is a real value (not the placeholder)
+const isValidClerkKey = PUBLISHABLE_KEY && !PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here');
 
 const AppTree = (
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    {isValidClerkKey ? (
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <BrowserRouter>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </BrowserRouter>
+      </ClerkProvider>
+    ) : (
+      // Clerk key missing or placeholder – render app without Clerk
       <BrowserRouter>
         <ToastProvider>
           <App />
         </ToastProvider>
       </BrowserRouter>
-    </ClerkProvider>
+    )}
   </StrictMode>
 );
 
