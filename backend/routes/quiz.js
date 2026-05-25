@@ -30,11 +30,8 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Validate quiz using shared rules (same logic as frontend)
-    const { valid, errors } = validateQuiz(questions);
-    if (!valid) {
-      return res.status(400).json({ error: 'Quiz validation failed', details: errors });
-    }
+    // We allow saving incomplete quizzes as drafts.
+    // Strict validation should only occur when hosting/publishing.
 
     const quiz = await saveQuiz({ title, creator_id, questions, cover_image: req.body.cover_image });
     
