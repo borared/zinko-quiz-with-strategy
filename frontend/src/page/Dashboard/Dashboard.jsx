@@ -6,18 +6,24 @@ import { useUser } from '@clerk/clerk-react';
 import api from '../../services/api';
 
 const Dashboard = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
-      if (!user) return;
+      if (!isLoaded) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await api.get(`/api/quizzes/user/${user.id}`);
         setQuizzes(data);
       } catch (error) {
         console.error('Error fetching quizzes:', error);
+        setFetchError(error.message || 'Error fetching quizzes');
       } finally {
         setLoading(false);
       }
@@ -35,10 +41,13 @@ const Dashboard = () => {
       <div className="flex-1 p-8 ml-64">
         <div className="max-w-7xl mx-auto flex flex-col gap-8">
           {/* Welcome Banner & Stats */}
-          <WelcomeBanner />
+          <WelcomeBanner totalQuizzes={quizzes.length} />
 
           {/* Recent Quizzes */}
           <QuizGrid quizzes={quizzes} loading={loading} />
+          {fetchError && (
+            <div className="text-red-600 font-bold mt-4">Unable to load your quizzes: {fetchError}</div>
+          )}
         </div>
       </div>
     </div>
