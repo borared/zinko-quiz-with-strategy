@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Valid game PIN — change this when integrating with the backend
-const VALID_PIN = '123456';
+import api from '../../services/api';
 
 const EnterPinSection = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -17,26 +16,46 @@ const EnterPinSection = () => {
     }
   };
 
-  const handleEnter = () => {
+  const handleEnter = async () => {
     if (pin.length < 6) {
       setError('Please enter a full 6-digit PIN.');
       return;
     }
-    if (pin !== VALID_PIN) {
-      setError('Invalid PIN. Try: 123456');
-      return;
+
+    try {
+      setLoading(true);
+      setError('');
+      // Validate PIN with backend
+      const data = await api.get(`/api/game/${pin}`);
+
+      if (!data.valid) {
+        setError(data.message || 'Invalid PIN. Please try again.');
+        return;
+      }
+
+      if (data.phase !== 'LOBBY') {
+        setError('This game has already started. Ask the host for a new PIN.');
+        return;
+      }
+
+      // Store PIN for use in the next steps
+      sessionStorage.setItem('game_pin', pin);
+
+      // 🎵 Play the success sound
+      window.gameAudio = new Audio('/audio/n2kstudio-music-for-game-fun-kid-game-163649.mp3');
+      window.gameAudio.loop = true;
+      window.gameAudio.play().catch(() => {}); // handle autoplay block silently
+      window.dispatchEvent(new Event('audioStarted'));
+
+      setTimeout(() => {
+        navigate('/join-nickname');
+      }, 500);
+
+    } catch (err) {
+      setError('Game not found. Check your PIN and try again.');
+    } finally {
+      setLoading(false);
     }
-
-    // 🎵 Play the success sound
-    window.gameAudio = new Audio('/audio/n2kstudio-music-for-game-fun-kid-game-163649.mp3');
-    window.gameAudio.loop = true;
-    window.gameAudio.play();
-    window.dispatchEvent(new Event('audioStarted'));
-
-    // Add a small delay so the sound plays before changing page
-    setTimeout(() => {
-      navigate('/join-nickname');
-    }, 1000); 
   };
 
   return (
@@ -65,36 +84,40 @@ const EnterPinSection = () => {
           {/* Input Box */}
           <div className="w-full">
             <input 
+              id="pin-input"
               type="text" 
               value={pin}
               onChange={handleInputChange}
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
               placeholder="0 0 0 0 0 0"
-              className="w-full border-[3px] border-zk-black p-4 text-center text-3xl md:text-4xl tracking-[0.3em] md:tracking-[0.5em] font-bold text-zk-black placeholder-gray-200 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
+              disabled={loading}
+              className="w-full border-[3px] border-zk-black p-4 text-center text-3xl md:text-4xl tracking-[0.3em] md:tracking-[0.5em] font-bold text-zk-black placeholder-gray-200 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl disabled:opacity-60"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <p className="text-center text-sm font-bold text-red-500 border-[2px] border-red-300 bg-red-50 py-2 px-4">
+            <p className="text-center text-sm font-bold text-red-500 border-[2px] border-red-300 bg-red-50 py-2 px-4 rounded-lg">
               {error}
             </p>
           )}
 
           {/* Enter Button */}
           <button 
+            id="enter-pin-btn"
             onClick={handleEnter}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl"
+            disabled={loading || pin.length < 6}
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl disabled:opacity-50 disabled:cursor-wait disabled:transform-none flex items-center justify-center gap-2"
           >
-            Enter
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-[3px] border-white border-t-transparent rounded-full animate-spin" />
+                Checking...
+              </>
+            ) : 'Enter'}
           </button>
 
         </div>
-
-        {/* Hint */}
-        <p className="mt-4 text-xs font-bold text-zk-black/40 uppercase tracking-wider">
-          Hint: use PIN <span className="text-zk-black/60">123456</span>
-        </p>
 
       </div>
     </div>
