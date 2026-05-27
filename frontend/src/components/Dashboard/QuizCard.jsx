@@ -1,7 +1,8 @@
-import React from 'react';
-import { Pencil } from 'lucide-react';
+import React, { useState } from 'react';
+import { Pencil, Play, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../services/api';
 
 const QuizCard = ({ quiz }) => {
   const navigate = useNavigate();
@@ -23,13 +24,25 @@ const QuizCard = ({ quiz }) => {
   const r3Count = questions.filter(q => q.round === 3).length;
   const isReady = r1Count >= 6 && r2Count >= 6 && r3Count >= 6;
 
-  const handleHostClick = () => {
+  const [isHosting, setIsHosting] = useState(false);
+
+  const handleHostClick = async () => {
     if (!isReady) {
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
-    } else {
-      // Logic for hosting goes here
-      console.log('Hosting quiz:', quiz.id);
+      return;
+    }
+    try {
+      setIsHosting(true);
+      const { pin } = await api.post('/api/game/host', { quizId: quiz.id });
+      // Store quizId so HostLobby can emit host:initialize
+      sessionStorage.setItem(`game_${pin}_quizId`, quiz.id);
+      navigate(`/host/lobby/${pin}`);
+    } catch (err) {
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+    } finally {
+      setIsHosting(false);
     }
   };
 
@@ -84,11 +97,17 @@ const QuizCard = ({ quiz }) => {
             )}
           </AnimatePresence>
 
-          <button 
+          <button
+            id={`host-btn-${quiz.id}`}
             onClick={handleHostClick}
-            className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all"
+            disabled={isHosting}
+            className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
           >
-            Host
+            {isHosting ? (
+              <><Loader2 size={14} className="animate-spin" /> Creating...</>
+            ) : (
+              <><Play size={14} fill="currentColor" /> Host</>
+            )}
           </button>
           <button 
             onClick={() => navigate('/create-game/' + quiz.id)}

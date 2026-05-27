@@ -9,6 +9,8 @@ const EnterNicknameSection = () => {
 
   const handleEnter = () => {
     if (nickname.trim().length === 0) return;
+    // Store nickname for the socket join event
+    sessionStorage.setItem('player_nickname', nickname.trim());
     navigate('/choose-team');
   };
 

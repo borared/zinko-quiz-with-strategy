@@ -5,6 +5,7 @@ import App from './App.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { SocketProvider } from './context/SocketContext.jsx';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -16,17 +17,21 @@ const AppTree = (
     {isValidClerkKey ? (
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
         <BrowserRouter>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
+          <SocketProvider>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </SocketProvider>
         </BrowserRouter>
       </ClerkProvider>
     ) : (
       // Clerk key missing or placeholder – render app without Clerk
       <BrowserRouter>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
+        <SocketProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </SocketProvider>
       </BrowserRouter>
     )}
   </StrictMode>
@@ -34,10 +39,10 @@ const AppTree = (
 
 const root = document.getElementById('root');
 
-// If #root already has children it means the server pre-rendered this page (SSG).
+// If #root has element children it means the server pre-rendered this page (SSG).
 // Use hydrateRoot to attach React to the existing HTML — no blank flash, instant paint.
-// If #root is empty (auth-gated pages), use createRoot for normal CSR behaviour.
-if (root.hasChildNodes()) {
+// If #root is empty (or only has the ssr-outlet comment), use createRoot for normal CSR behaviour.
+if (root.children.length > 0) {
   hydrateRoot(root, AppTree);
 } else {
   createRoot(root).render(AppTree);
