@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { usePageTransition } from '../../context/TransitionContext';
+import { useSocket } from '../../context/SocketContext';
+import { useNavigate } from 'react-router-dom';
 import TeamHeader from './TeamHeader';
 import TeamCard from './TeamCard';
 import PlayerCount from './PlayerCount';
@@ -19,17 +21,75 @@ const bounceIn = (delay = 0) => ({
   },
 });
 
+// Generate anonymous player ID if not already set
+function getOrCreatePlayerId() {
+  let id = sessionStorage.getItem('player_id');
+  if (!id) {
+    id = `guest_${Math.random().toString(36).slice(2, 10)}_${Date.now()}`;
+    sessionStorage.setItem('player_id', id);
+  }
+  return id;
+}
+
 const ChooseTeamSection = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [joining, setJoining] = useState(false);
   const { blinkTo } = usePageTransition();
+  const { getSocket } = useSocket();
+  const navigate = useNavigate();
 
   const countA = 12;
   const countB = 14;
 
   const handleJoin = (team) => {
-    new Audio('/audio/clicksound.mp3').play();
+    if (joining) return;
+    setJoining(true);
+
+    new Audio('/audio/clicksound.mp3').play().catch(() => {});
     setSelectedTeam(team);
-    blinkTo('/team-warmup');
+
+    // Pull stored session data
+    const pin      = sessionStorage.getItem('game_pin');
+    const nickname = sessionStorage.getItem('player_nickname') || 'Player';
+    const playerId = getOrCreatePlayerId();
+
+    // Store team for PlayerLobby / PlayerController to read
+    sessionStorage.setItem('player_team', team);
+
+    if (pin) {
+      const socket = getSocket();
+
+      // Emit join event so the backend adds us to the room
+      socket.emit('player:join', { pin, playerId, nickname, team });
+
+      // Listen for confirmation once (or proceed optimistically)
+      const onJoined = () => {
+        socket.off('player:joined', onJoined);
+        socket.off('error', onError);
+        blinkTo(`/play/lobby/${pin}`);
+      };
+
+      const onError = ({ message }) => {
+        console.error('Join error:', message);
+        socket.off('player:joined', onJoined);
+        socket.off('error', onError);
+        setJoining(false);
+      };
+
+      socket.once('player:joined', onJoined);
+      socket.once('error', onError);
+
+      // Safety fallback — navigate anyway after 2s even if no ack
+      setTimeout(() => {
+        socket.off('player:joined', onJoined);
+        socket.off('error', onError);
+        navigate(`/play/lobby/${pin}`);
+      }, 2000);
+
+    } else {
+      // No PIN in session — fallback to old warmup flow
+      blinkTo('/team-warmup');
+    }
   };
 
   return (
@@ -87,6 +147,19 @@ const ChooseTeamSection = () => {
           <PlayerCount countA={countA} countB={countB} />
         </motion.div>
 
+        {/* Joining overlay */}
+        {joining && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-zk-yellow/80 flex items-center justify-center rounded-xl"
+          >
+            <div className="text-center">
+              <div className="w-10 h-10 border-4 border-zk-black border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="font-black uppercase tracking-widest text-zk-black text-sm">Joining game...</p>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Waiting bar slides up from the bottom */}
@@ -104,4 +177,3 @@ const ChooseTeamSection = () => {
 };
 
 export default ChooseTeamSection;
-
