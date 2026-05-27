@@ -34,7 +34,7 @@ export default defineConfig({
 
   // ── Pre-bundle these for faster dev startup ─────────────────────────────────
   optimizeDeps: {
-    include: ['@clerk/clerk-react', 'lucide-react', 'framer-motion', 'react-router-dom'],
+    include: ['@clerk/clerk-react', 'lucide-react', 'framer-motion', 'react-router-dom', 'react-qr-code'],
   },
 
   build: {
