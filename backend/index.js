@@ -1,23 +1,41 @@
+const http    = require('http');
 const express = require('express');
-const cors = require('cors');
+const cors    = require('cors');
+const { Server } = require('socket.io');
 const { clerkMiddleware } = require('@clerk/express');
 require('dotenv').config();
 
 const authRoutes    = require('./routes/auth');
 const userRoutes    = require('./routes/user');
 const webhookRoutes = require('./routes/webhooks');
+const gameRoutes    = require('./routes/game');
 
-const app = express();
+const { initSocketHandler } = require('./lib/socketHandler');
+
+const app  = express();
+const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 
+// ─── Socket.io ───────────────────────────────────────────────────────────────
+const io = new Server(httpServer, {
+  cors: {
+    origin: FRONTEND_URL,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+initSocketHandler(io);
+
 // ─── Webhooks (raw body — MUST come before express.json()) ───────────────────
-// svix needs the raw request body to verify the signature
 app.use('/api/webhooks', webhookRoutes);
 
 // ─── Body Parser ─────────────────────────────────────────────────────────────
@@ -47,10 +65,11 @@ app.get('/api/debug/me', (req, res) => {
   });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/ai', require('./routes/ai'));
+app.use('/api/auth',    authRoutes);
+app.use('/api/user',    userRoutes);
+app.use('/api/ai',      require('./routes/ai'));
 app.use('/api/quizzes', require('./routes/quiz'));
+app.use('/api/game',    gameRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
@@ -58,12 +77,14 @@ app.use((req, res) => {
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`🔌 Socket.io attached and listening`);
   console.log(`📊 Available routes:`);
   console.log(`   GET  /api/quizzes/user/:userId`);
   console.log(`   GET  /api/quizzes/:id`);
   console.log(`   POST /api/quizzes`);
   console.log(`   PUT  /api/quizzes/:id`);
+  console.log(`   POST /api/game/host`);
+  console.log(`   GET  /api/game/:pin`);
 });
-
