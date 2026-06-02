@@ -60,9 +60,13 @@ function initSocketHandler(io) {
         return;
       }
 
-      socket.join(pin);
+        if (game.players.some(p => p.nickname.toLowerCase() === nickname.toLowerCase())) {
+          socket.emit('error', { message: 'Nickname already taken' });
+          return;
+        }
+        socket.join(pin);
 
-      // Upsert player (handle reconnects)
+        // Upsert player (handle reconnects)
       const existing = game.players.find(p => p.id === playerId);
       if (existing) {
         existing.socketId = socket.id;
@@ -87,7 +91,37 @@ function initSocketHandler(io) {
         count: game.players.length,
       });
 
-      socket.emit('player:joined', { success: true, nickname, avatar, team });
+socket.emit('player:joined', { success: true, nickname, avatar, team });
+
+    }); // end of player:join handler
+
+    // ── lobby helpers ────────────────────────────────────────────────────────
+    // Provide current player list on request (e.g., after player navigates to lobby)
+    socket.on('lobby:request-players', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+      socket.emit('lobby:players-update', {
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        count: game.players.length,
+      });
+    });
+
+    // Check nickname availability before joining (used during nickname entry)
+    socket.on('lobby:check-nickname', ({ pin, nickname }, callback) => {
+      const game = games.get(pin);
+      if (!game) {
+        callback({ available: false, message: 'Game not found' });
+        return;
+      }
+      const exists = game.players.some(p => p.nickname.toLowerCase() === nickname.trim().toLowerCase());
+      if (exists) {
+        callback({ available: false, message: 'Nickname already taken' });
+      } else {
+        callback({ available: true });
+      }
     });
 
     // ── game:start ────────────────────────────────────────────────────────────

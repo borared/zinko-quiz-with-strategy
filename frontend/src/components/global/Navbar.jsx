@@ -1,15 +1,49 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import { Bell, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LayoutDashboard, Bell, Settings, LogOut } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside or scrolling
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleScroll = () => setMenuOpen(false);
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [menuOpen]);
+
+  const getLinkClass = (path) => {
+    // Basic active check based on pathname
+    const isActive = location.pathname.startsWith(path) && path !== '/';
+    
+    // For exact matching (like pricing)
+    const isExact = location.pathname === path;
+
+    if (isActive || isExact) {
+      return "bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-bold cursor-pointer transition-colors";
+    }
+    return "text-zk-black hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold px-4 py-1 transition-colors";
+  };
 
   const handleSignOut = () => {
     setShowModal(true);
@@ -22,20 +56,16 @@ const Navbar = () => {
     if (isSignedIn) {
       return (
         <div className="flex items-center gap-6">
-          <button 
+          <button
             onClick={() => navigate('/create-game')}
             className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg rounded-lg"
           >
             Create New Game
           </button>
-          <button className="text-zk-black hover:scale-105 transition-transform">
-            <Bell size={28} />
-          </button>
-          <button className="text-zk-black hover:scale-105 transition-transform">
-            <Settings size={28} />
-          </button>
-          <div className="relative">
-            <div 
+
+          {/* Profile Avatar + Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <div
               onClick={() => setMenuOpen(!menuOpen)}
               className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
             >
@@ -43,28 +73,51 @@ const Navbar = () => {
             </div>
 
             {/* Dropdown Menu */}
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl">
-                <button 
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate('/dashboard');
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-zk-yellow border-b-[2px] border-zk-black font-bold text-zk-black rounded-lg"
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="absolute right-0 mt-2 w-52 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
                 >
-                  Dashboard
-                </button>
-                <button 
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleSignOut();
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-zk-yellow font-bold text-red-600"
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
+                  {/* User info header */}
+                  <div className="px-4 py-3 border-b-[2px] border-zk-black bg-zk-yellow/40">
+                    <p className="font-bold text-zk-black text-sm truncate">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-zk-black/60 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+                  </div>
+
+                  <button
+                    onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                  >
+                    <LayoutDashboard size={16} /> Dashboard
+                  </button>
+
+                  <button
+                    onClick={() => { setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                  >
+                    <Bell size={16} /> Notification
+                  </button>
+
+                  <button
+                    onClick={() => { setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[2px] border-zk-black font-bold text-zk-black text-sm transition-colors"
+                  >
+                    <Settings size={16} /> Setting
+                  </button>
+
+                  <button
+                    onClick={() => { setMenuOpen(false); handleSignOut(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 font-bold text-red-500 text-sm transition-colors"
+                  >
+                    <LogOut size={16} /> Sign out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       );
@@ -102,22 +155,23 @@ const Navbar = () => {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6 font-bold text-sm">
-          <a 
-            href="#home" 
-            className="bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
-          >
-            HOME
-          </a>
-          <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
+          <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 px-4 py-1 transition-colors">
             BLOG
           </a>
           <a
-          onClick={() => navigate('/pricing')}
-          className="hover:cursor-pointer text-zk-black hover:underline decoration-[2px] underline-offset-4">
+            onClick={() => navigate('/pricing')}
+            className={getLinkClass('/pricing')}
+          >
             PRICING
           </a>
-          <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4">
+          <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 px-4 py-1 transition-colors">
             CLASSPIN
+          </a>
+          <a
+            onClick={() => navigate('/dashboard')}
+            className={getLinkClass('/dashboard')}
+          >
+            DASHBOARD
           </a>
         </div>
       </div>
