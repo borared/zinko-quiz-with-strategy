@@ -2,10 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { BrowserRouter } from 'react-router-dom'
 import { ClerkProvider } from '@clerk/clerk-react'
-import { ToastProvider } from './context/ToastContext.jsx'
-import { SocketProvider } from './context/SocketContext.jsx'
+import AppProviders from './AppProviders.jsx'
 
 // Load Clerk publishable key from env
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -16,24 +14,11 @@ const isValidClerkKey = PUBLISHABLE_KEY && !PUBLISHABLE_KEY.includes('your_clerk
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {isValidClerkKey ? (
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-        <BrowserRouter>
-          <SocketProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </SocketProvider>
-        </BrowserRouter>
-      </ClerkProvider>
-    ) : (
-      // Clerk key missing or placeholder – render app without Clerk
-      <BrowserRouter>
-        <SocketProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </SocketProvider>
-      </BrowserRouter>
-    )}
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+          <AppProviders />
+        </ClerkProvider>
+      ) : (
+        <AppProviders />
+      )}
   </StrictMode>,
 )
