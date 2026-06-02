@@ -24,10 +24,6 @@ const backgrounds = [
   '/background_battle/farm.jpg',
 ];
 
-/* ── Avatars ─────────────────────────────────────────────────────────────── */
-const AVATARS = ['🦊', '🐸', '🐼', '🦋', '🐯', '🦁', '🐧', '🦄', '🐺', '🦉', '🐻', '🦝'];
-const getAvatar = (nickname) => AVATARS[nickname.charCodeAt(0) % AVATARS.length];
-
 /* ─── BlinkingEye ────────────────────────────────────────────────────────── */
 function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
   return (
@@ -92,9 +88,15 @@ function PlayerSlot({ player, isFirst, color }) {
       style={{ backgroundColor: darkColor }}
     >
       <div className="absolute inset-0 bg-white/10" />
-      <span className="text-3xl mb-1 relative z-10" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}>
-        {getAvatar(player.nickname)}
-      </span>
+      
+      <div className="w-[65%] h-[65%] mb-1 relative z-10 flex items-center justify-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
+        <img 
+          src={`/avatars/${player.avatar || 'pizza'}.png?v=2`} 
+          alt="avatar" 
+          className="w-full h-full object-contain"
+        />
+      </div>
+
       <span className="text-white font-black text-xs uppercase tracking-wider relative z-10 px-1 text-center truncate w-full">
         {player.nickname}
       </span>
