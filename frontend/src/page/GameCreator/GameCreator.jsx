@@ -43,7 +43,7 @@ const GameCreatorContent = () => {
 
       <div className="relative z-10">
         {/* Header / Navbar */}
-        <nav className="ml-80 bg-white/80 backdrop-blur-md border-b-[3px] border-zk-black px-6 h-[80px] flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <nav className="fixed top-[80px] left-0 right-0 ml-80 bg-white/80 backdrop-blur-md border-b-[3px] border-zk-black px-6 h-[80px] flex items-center justify-between z-50 shadow-sm">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <div className="bg-[#5D3FD3] text-white p-1.5 border-[2px] border-zk-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-lg transition-transform hover:scale-110">
@@ -85,17 +85,17 @@ const GameCreatorContent = () => {
           </div>
         </nav>
 
-        <main className="p-8 max-w-[1600px] mx-auto">
+        <main className="pt-[80px] p-8 max-w-[1600px] mx-auto">
           <div className="flex gap-8 items-start">
             {/* Fixed Sidebar — stays locked on scroll */}
-            <aside className="fixed top-[76px] left-0 w-80 h-[calc(100vh-76px)] z-30">
+            <aside className="fixed top-[80px] left-0 w-80 h-[calc(100vh-80px)] z-30">
               <Sidebar />
             </aside>
             {/* Spacer to push content right past the fixed sidebar */}
             <div className="w-80 shrink-0"></div>
 
             {/* Scrollable Editor Workspace */}
-            <div className="flex-1 flex flex-col gap-8 pb-32">
+            <div className="flex-1 flex flex-col gap-8 pb-32 mt-4">
               {/* Round Switcher */}
               <div className="grid grid-cols-3 gap-6 bg-white/30 backdrop-blur-md p-4 border-[3px] border-zk-black rounded-2xl shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
                 {[
@@ -137,7 +137,7 @@ const GameCreatorContent = () => {
             </div>
 
             {/* Sticky AI Assistant Toggle */}
-            <aside className="sticky top-28 shrink-0">
+            <aside className="sticky top-44 shrink-0">
               <button
                 onClick={() => setIsAiSidebarOpen(true)}
                 className="bg-[#5D3FD3] text-white border-[3px] border-zk-black p-4 rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col items-center gap-2 group"

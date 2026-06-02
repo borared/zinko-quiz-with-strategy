@@ -11,102 +11,7 @@ const supabase = require('./supabaseClient');
 // ─── In-memory game store ─────────────────────────────────────────────────────
 const games = new Map(); // pin → gameState
 
-const QUESTION_TIME_SECONDS = 20;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function generatePin() {
-  let pin;
-  do {
-    pin = String(Math.floor(100000 + Math.random() * 900000));
-  } while (games.has(pin));
-  return pin;
-}
-
-function getLeaderboard(players) {
-  return [...players]
-    .sort((a, b) => b.score - a.score)
-    .map((p, i) => ({ ...p, rank: i + 1 }));
-}
-
-function buildAnswerStats(game) {
-  const question = game.questions[game.currentQuestionIndex];
-  if (!question) return [];
-  const answerCounts = {};
-  question.answers.forEach(a => { answerCounts[a.id] = 0; });
-  Object.values(game.answers).forEach(ans => {
-    if (answerCounts[ans] !== undefined) answerCounts[ans]++;
-  });
-  return question.answers.map(a => ({
-    id: a.id,
-    text: a.text,
-    color: a.color,
-    count: answerCounts[a.id] || 0,
-    isCorrect: a.checked,
-  }));
-}
-
-// ─── Timer ───────────────────────────────────────────────────────────────────
-
-function startTimer(io, pin) {
-  const game = games.get(pin);
-  if (!game) return;
-
-  let timeLeft = QUESTION_TIME_SECONDS;
-  game.timeLeft = timeLeft;
-
-  clearInterval(game.timer);
-  game.timer = setInterval(() => {
-    const g = games.get(pin);
-    if (!g) { clearInterval(game.timer); return; }
-
-    g.timeLeft = --timeLeft;
-    io.to(pin).emit('game:timer-tick', { timeLeft: g.timeLeft });
-
-    if (timeLeft <= 0) {
-      clearInterval(g.timer);
-      revealResults(io, pin);
-    }
-  }, 1000);
-}
-
-function revealResults(io, pin) {
-  const game = games.get(pin);
-  if (!game || game.phase === 'RESULT') return;
-
-  game.phase = 'RESULT';
-  const question = game.questions[game.currentQuestionIndex];
-  const correctId = question.answers.find(a => a.checked)?.id;
-  const stats = buildAnswerStats(game);
-
-  // Award points based on correctness + speed bonus
-  game.players.forEach(player => {
-    const selectedId = game.answers[player.id];
-    const isCorrect = selectedId === correctId;
-    const timeTaken = game.answerTimes[player.id] || QUESTION_TIME_SECONDS * 1000;
-    const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / (QUESTION_TIME_SECONDS * 1000)) * 500)) : 0;
-    const points = isCorrect ? 1000 + speedBonus : 0;
-    player.score += points;
-    player.lastPoints = points;
-    player.lastCorrect = isCorrect;
-
-    // Notify individual player
-    io.to(player.socketId).emit('game:player-result', {
-      isCorrect,
-      correctAnswerId: correctId,
-      pointsEarned: points,
-      totalScore: player.score,
-    });
-  });
-
-  // Broadcast full reveal to all (host shows bar chart with correct answer highlighted)
-  io.to(pin).emit('game:reveal-results', {
-    correctAnswerId: correctId,
-    stats,
-    leaderboard: getLeaderboard(game.players).slice(0, 5),
-  });
-}
-
+const { QUESTION_TIME_SECONDS, generatePin, getLeaderboard, buildAnswerStats, startTimer, revealResults } = require('./socketUtils');
 // ─── Socket event handlers ────────────────────────────────────────────────────
 
 function initSocketHandler(io) {
@@ -144,7 +49,7 @@ function initSocketHandler(io) {
     });
 
     // ── player:join ───────────────────────────────────────────────────────────
-    socket.on('player:join', ({ pin, playerId, nickname, team }) => {
+    socket.on('player:join', ({ pin, playerId, nickname, avatar, team }) => {
       const game = games.get(pin);
       if (!game) {
         socket.emit('error', { message: 'Game not found. Check your PIN.' });
@@ -155,9 +60,13 @@ function initSocketHandler(io) {
         return;
       }
 
-      socket.join(pin);
+        if (game.players.some(p => p.nickname.toLowerCase() === nickname.toLowerCase())) {
+          socket.emit('error', { message: 'Nickname already taken' });
+          return;
+        }
+        socket.join(pin);
 
-      // Upsert player (handle reconnects)
+        // Upsert player (handle reconnects)
       const existing = game.players.find(p => p.id === playerId);
       if (existing) {
         existing.socketId = socket.id;
@@ -166,6 +75,7 @@ function initSocketHandler(io) {
           id: playerId,
           socketId: socket.id,
           nickname,
+          avatar: avatar || 'pizza',
           team: team || 'A',
           score: 0,
           lastPoints: 0,
@@ -177,11 +87,41 @@ function initSocketHandler(io) {
 
       // Broadcast updated player list to everyone in room (host + players)
       io.to(pin).emit('lobby:players-update', {
-        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, team: p.team })),
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
         count: game.players.length,
       });
 
-      socket.emit('player:joined', { success: true, nickname, team });
+socket.emit('player:joined', { success: true, nickname, avatar, team });
+
+    }); // end of player:join handler
+
+    // ── lobby helpers ────────────────────────────────────────────────────────
+    // Provide current player list on request (e.g., after player navigates to lobby)
+    socket.on('lobby:request-players', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+      socket.emit('lobby:players-update', {
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        count: game.players.length,
+      });
+    });
+
+    // Check nickname availability before joining (used during nickname entry)
+    socket.on('lobby:check-nickname', ({ pin, nickname }, callback) => {
+      const game = games.get(pin);
+      if (!game) {
+        callback({ available: false, message: 'Game not found' });
+        return;
+      }
+      const exists = game.players.some(p => p.nickname.toLowerCase() === nickname.trim().toLowerCase());
+      if (exists) {
+        callback({ available: false, message: 'Nickname already taken' });
+      } else {
+        callback({ available: true });
+      }
     });
 
     // ── game:start ────────────────────────────────────────────────────────────
@@ -210,7 +150,7 @@ function initSocketHandler(io) {
         timeSeconds: QUESTION_TIME_SECONDS,
       });
 
-      startTimer(io, pin);
+      startTimer(io, pin, games);
     });
 
     // ── game:next-question ────────────────────────────────────────────────────
@@ -245,7 +185,7 @@ function initSocketHandler(io) {
         timeSeconds: QUESTION_TIME_SECONDS,
       });
 
-      startTimer(io, pin);
+      startTimer(io, pin, games);
     });
 
     // ── player:submit-answer ──────────────────────────────────────────────────
@@ -271,7 +211,7 @@ function initSocketHandler(io) {
       // Auto-reveal when everyone answered
       if (answeredCount >= totalPlayers) {
         clearInterval(game.timer);
-        revealResults(io, pin);
+        revealResults(io, pin, games);
       }
     });
 
@@ -307,7 +247,7 @@ function initSocketHandler(io) {
 // ─── Public API (used by REST routes) ────────────────────────────────────────
 
 function createGame({ pin, quizId, hostUserId }) {
-  const gamePin = pin || generatePin();
+  const gamePin = pin || generatePin(games);
   games.set(gamePin, {
     pin: gamePin,
     quizId,
