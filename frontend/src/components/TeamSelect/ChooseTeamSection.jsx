@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { usePageTransition } from '../../context/TransitionContext';
 import { useSocket } from '../../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../context/ToastContext';
 import TeamHeader from './TeamHeader';
 import TeamCard from './TeamCard';
 import PlayerCount from './PlayerCount';
@@ -37,6 +38,7 @@ const ChooseTeamSection = () => {
   const { blinkTo } = usePageTransition();
   const { getSocket } = useSocket();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const countA = 12;
   const countB = 14;
@@ -51,6 +53,7 @@ const ChooseTeamSection = () => {
     // Pull stored session data
     const pin      = sessionStorage.getItem('game_pin');
     const nickname = sessionStorage.getItem('player_nickname') || 'Player';
+    const avatar   = sessionStorage.getItem('player_avatar') || 'pizza';
     const playerId = getOrCreatePlayerId();
 
     // Store team for PlayerLobby / PlayerController to read
@@ -60,31 +63,31 @@ const ChooseTeamSection = () => {
       const socket = getSocket();
 
       // Emit join event so the backend adds us to the room
-      socket.emit('player:join', { pin, playerId, nickname, team });
+      socket.emit('player:join', { pin, playerId, nickname, avatar, team });
 
       // Listen for confirmation once (or proceed optimistically)
-      const onJoined = () => {
-        socket.off('player:joined', onJoined);
-        socket.off('error', onError);
-        blinkTo(`/play/lobby/${pin}`);
-      };
+        let joinSucceeded = false;
+        const onJoined = () => {
+          joinSucceeded = true;
+          socket.off('player:joined', onJoined);
+          socket.off('error', onError);
+          setJoining(false);
+          blinkTo(`/play/lobby/${pin}`);
+        };
 
       const onError = ({ message }) => {
         console.error('Join error:', message);
+        // Show error toast using Zinko style (red)
+        showToast(message, 'error');
         socket.off('player:joined', onJoined);
         socket.off('error', onError);
         setJoining(false);
       };
 
-      socket.once('player:joined', onJoined);
-      socket.once('error', onError);
+        socket.once('player:joined', onJoined);
+        socket.once('error', onError);
 
-      // Safety fallback — navigate anyway after 2s even if no ack
-      setTimeout(() => {
-        socket.off('player:joined', onJoined);
-        socket.off('error', onError);
-        navigate(`/play/lobby/${pin}`);
-      }, 2000);
+
 
     } else {
       // No PIN in session — fallback to old warmup flow
