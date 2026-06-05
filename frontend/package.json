@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@rolldown/binding-darwin-arm64": "^1.0.0-rc.17",
+    "@tailwindcss/oxide-darwin-arm64": "^4.2.4",
     "@tailwindcss/vite": "^4.2.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -32,6 +34,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "lightningcss-darwin-arm64": "^1.32.0",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.2.4",
     "vite": "^8.0.10"

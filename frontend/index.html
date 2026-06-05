@@ -18,6 +18,8 @@
   </head>
   <body>
     <div id="root"><!--ssr-outlet--></div>
+    <!-- Hidden Clerk Captcha Container - placed outside React root to prevent unmounting during re-renders -->
+    <div id="clerk-captcha"></div>
     <script type="module" src="/src/entry-client.jsx"></script>
   </body>
 </html>
