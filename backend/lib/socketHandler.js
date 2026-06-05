@@ -41,7 +41,7 @@ function initSocketHandler(io) {
         if (error) throw error;
         game.questions = data;
         console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${data.length} questions`);
-        socket.emit('host:initialized', { pin, questionCount: data.length });
+        socket.emit('host:initialized', { pin, questionCount: data.length, background: game.background });
       } catch (err) {
         console.error('❌ Failed to load questions:', err.message);
         socket.emit('error', { message: 'Failed to load quiz questions.' });
@@ -89,6 +89,7 @@ function initSocketHandler(io) {
       io.to(pin).emit('lobby:players-update', {
         players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
         count: game.players.length,
+        background: game.background,
       });
 
 socket.emit('player:joined', { success: true, nickname, avatar, team });
@@ -106,6 +107,7 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       socket.emit('lobby:players-update', {
         players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
         count: game.players.length,
+        background: game.background,
       });
     });
 
@@ -122,6 +124,51 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       } else {
         callback({ available: true });
       }
+    });
+
+    // ── lobby:start-countdown ──────────────────────────────────────────────────
+    socket.on('lobby:start-countdown', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game || game.hostSocketId !== socket.id) return;
+      io.to(pin).emit('lobby:countdown-started');
+    });
+
+    // ── player:select-skill ──────────────────────────────────────────────────
+    socket.on('player:select-skill', ({ pin, playerId, skillId, team, nickname, avatar }) => {
+      const game = games.get(pin);
+      if (!game) return;
+      if (!game.teamSkills[team]) game.teamSkills[team] = {};
+      
+      if (game.teamSkills[team][skillId] && game.teamSkills[team][skillId].playerId !== playerId) {
+        socket.emit('error', { message: 'Skill already taken by a teammate' });
+        return;
+      }
+
+      Object.keys(game.teamSkills[team]).forEach(sId => {
+        if (game.teamSkills[team][sId].playerId === playerId) {
+          delete game.teamSkills[team][sId];
+        }
+      });
+      
+      game.teamSkills[team][skillId] = { playerId, nickname, avatar };
+      io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
+    });
+
+    // ── player:cancel-skill ──────────────────────────────────────────────────
+    socket.on('player:cancel-skill', ({ pin, skillId, team, playerId }) => {
+      const game = games.get(pin);
+      if (!game) return;
+      if (game.teamSkills[team] && game.teamSkills[team][skillId] && game.teamSkills[team][skillId].playerId === playerId) {
+        delete game.teamSkills[team][skillId];
+        io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
+      }
+    });
+
+    // ── lobby:request-skills ─────────────────────────────────────────────────
+    socket.on('lobby:request-skills', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game) return;
+      socket.emit('lobby:skills-update', { teamSkills: game.teamSkills });
     });
 
     // ── game:start ────────────────────────────────────────────────────────────
@@ -259,9 +306,11 @@ function createGame({ pin, quizId, hostUserId }) {
     currentQuestionIndex: 0,
     answers: {},
     answerTimes: {},
+    teamSkills: { A: {}, B: {} },
     timeLeft: QUESTION_TIME_SECONDS,
     timer: null,
     createdAt: Date.now(),
+    background: ['/background_battle/city.jpg', '/background_battle/board.png'][Math.floor(Math.random() * 2)],
   });
   return gamePin;
 }

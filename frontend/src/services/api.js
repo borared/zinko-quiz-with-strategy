@@ -1,8 +1,14 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('zinko_jwt');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 const api = {
   get: async (endpoint) => {
     const response = await fetch(`${API_URL}${endpoint}`, {
+      headers: { ...getAuthHeaders() },
       credentials: 'include',
     });
     if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
@@ -12,7 +18,7 @@ const api = {
   post: async (endpoint, data) => {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       credentials: 'include',
       body: JSON.stringify(data),
     });
@@ -26,6 +32,7 @@ const api = {
   postForm: async (endpoint, formData) => {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
+      headers: { ...getAuthHeaders() },
       credentials: 'include',
       body: formData,
     });
@@ -39,7 +46,7 @@ const api = {
   put: async (endpoint, data) => {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       credentials: 'include',
       body: JSON.stringify(data),
     });

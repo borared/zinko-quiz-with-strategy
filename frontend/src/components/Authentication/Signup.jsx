@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Lock, Loader2, KeyRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignUp, useAuth, useSignIn } from '@clerk/clerk-react';
@@ -10,13 +10,16 @@ const Signup = () => {
   const { isSignedIn } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ firstName: '', email: '', password: '' });
+  const [form, setForm] = useState({ firstName: '', email: '', password: '', code: '' });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
 
   // Redirect if already signed in
-  if (isSignedIn) navigate('/');
+  useEffect(() => {
+    if (isSignedIn) navigate('/');
+  }, [isSignedIn, navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,8 +33,14 @@ const Signup = () => {
     setError('');
 
     try {
+      // Split Hero Name into First and Last Name in case Clerk requires Last Name
+      const nameParts = form.firstName.trim().split(' ');
+      const fName = nameParts[0] || 'Player';
+      const lName = nameParts.slice(1).join(' ') || 'Zinko';
+
       const result = await signUp.create({
-        firstName:    form.firstName,
+        firstName:    fName,
+        lastName:     lName,
         emailAddress: form.email,
         password:     form.password,
       });
@@ -39,13 +48,41 @@ const Signup = () => {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         navigate('/');
+      } else if (result.status === 'missing_requirements' && result.unverifiedFields?.includes('email_address')) {
+        // Prepare email verification
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+        setPendingVerification(true);
       } else {
-        // Email verification may be required — handle via Clerk flow
-        console.log('Additional steps needed:', result.status);
-        setError('Please check your email to verify your account.');
+        console.log('Additional steps needed. Result:', JSON.stringify(result, null, 2));
+        setError(`Missing requirements: ${result.missingFields?.join(', ') || 'Check console'}`);
       }
     } catch (err) {
       const msg = err.errors?.[0]?.longMessage || err.message || 'Sign up failed.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault();
+    if (!isLoaded) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code: form.code,
+      });
+
+      if (completeSignUp.status === 'complete') {
+        await setActive({ session: completeSignUp.createdSessionId });
+        navigate('/');
+      } else {
+        setError('Verification failed. Please try again.');
+      }
+    } catch (err) {
+      const msg = err.errors?.[0]?.longMessage || err.message || 'Verification failed.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -98,8 +135,14 @@ const Signup = () => {
         
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-black text-zk-black mb-2 tracking-tight">Join the Fun!</h2>
-          <p className="text-zk-black/70 font-bold text-sm">Ready to battle and learn? Create your Zinko account now!</p>
+          <h2 className="text-4xl font-black text-zk-black mb-2 tracking-tight">
+            {pendingVerification ? 'Verify Email' : 'Join the Fun!'}
+          </h2>
+          <p className="text-zk-black/70 font-bold text-sm">
+            {pendingVerification 
+              ? 'We sent a secret code to your email.' 
+              : 'Ready to battle and learn? Create your Zinko account now!'}
+          </p>
         </div>
 
         {/* Error Message */}
@@ -109,11 +152,12 @@ const Signup = () => {
           </div>
         )}
 
-        {/* Hidden Clerk Captcha Container - REQUIRED for custom flows to prevent 10s delays and failures */}
-        <div id="clerk-captcha"></div>
+        {/* Hidden Clerk Captcha Container is now in index.html to prevent React unmounts! */}
 
-        {/* Form */}
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        {!pendingVerification ? (
+          <>
+            {/* Form */}
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           
           {/* Name Field */}
           <div className="flex flex-col gap-1">
@@ -198,6 +242,35 @@ const Signup = () => {
           )}
           {googleLoading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
         </button>
+      </>
+      ) : (
+        /* Verification Form */
+        <form className="flex flex-col gap-5" onSubmit={handleVerifySubmit}>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Verification Code</label>
+            <div className="relative flex items-center">
+              <KeyRound className="absolute left-3 text-zk-black/50" size={20} />
+              <input 
+                name="code"
+                type="text" 
+                value={form.code}
+                onChange={handleChange}
+                placeholder="123456" 
+                className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl tracking-widest text-center text-xl"
+                required
+              />
+            </div>
+          </div>
+          
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-[#FFD12B] text-zk-black border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
+          >
+            {loading ? <><Loader2 className="animate-spin" size={20} /> Verifying...</> : 'VERIFY EMAIL'}
+          </button>
+        </form>
+      )}
 
         {/* Footer Link */}
         <div className="text-center mt-8 text-sm font-bold text-zk-black/80">

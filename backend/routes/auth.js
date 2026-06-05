@@ -1,8 +1,14 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireClerkAuth, requireCustomAuth } = require('../middleware/auth');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
+
+/**
+ * POST /api/auth/token
+ * Protected by Clerk — generates a custom JWT
+ */
+router.post('/token', requireClerkAuth, authController.generateToken);
 
 /**
  * GET /api/auth/me
@@ -12,9 +18,9 @@ router.get('/me', authController.getMe);
 
 /**
  * GET /api/auth/profile
- * Protected — returns the authenticated user's info.
+ * Protected by Custom JWT — returns the authenticated user's info.
  * Returns 401 if not signed in.
  */
-router.get('/profile', requireAuth, authController.getProfile);
+router.get('/profile', requireCustomAuth, authController.getProfile);
 
 module.exports = router;

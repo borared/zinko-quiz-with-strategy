@@ -3,6 +3,7 @@ import { User, Lock, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignIn, useAuth } from '@clerk/clerk-react';
+import api from '../../services/api';
 
 const Signin = () => {
   const { signIn, isLoaded, setActive } = useSignIn();
@@ -35,6 +36,15 @@ const Signin = () => {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
+        
+        // Fetch custom JWT from backend
+        try {
+          const { token } = await api.post('/api/auth/token', {});
+          localStorage.setItem('zinko_jwt', token);
+        } catch (backendErr) {
+          console.error("Failed to fetch custom JWT:", backendErr);
+        }
+
         navigate('/');
       } else {
         setError('Sign in could not be completed. Please try again.');
