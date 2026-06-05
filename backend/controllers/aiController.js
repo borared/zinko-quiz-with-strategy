@@ -2,7 +2,6 @@ const officeParser = require('officeparser');
 const Groq = require('groq-sdk');
 const fs = require('fs');
 const path = require('path');
-const { PDFParse } = require('pdf-parse');
 const { QUIZ_RULES } = require('../../packages/shared/src/constants/quiz.js');
 
 /**
@@ -40,6 +39,7 @@ const generateQuiz = async (req, res) => {
       if (file.originalname.toLowerCase().endsWith('.pdf')) {
         console.log('Using pdf-parse for PDF...');
         try {
+          const { PDFParse } = require('pdf-parse');
           const parser = new PDFParse({ data: file.buffer });
           const result = await parser.getText();
           extractedText = result.text;
