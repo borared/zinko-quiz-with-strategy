@@ -1,5 +1,7 @@
-import React, { lazy, Suspense, memo, useMemo } from "react";
+import React, { lazy, Suspense, memo, useMemo, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import api from "./services/api";
 import { TransitionProvider } from "./context/TransitionContext";
 import EyeBlinkOverlay from "./components/Transition/EyeBlinkOverlay";
 import SoundToggle from "./components/Global/SoundToggle";
@@ -82,6 +84,20 @@ const isGameScreen = (path) =>
 
 function AppInner() {
   const location = useLocation();
+  const { isLoaded, isSignedIn } = useAuth();
+
+  // Sync custom backend JWT when Clerk session changes
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn && !localStorage.getItem('zinko_jwt')) {
+        api.post('/api/auth/token', {})
+          .then(({ token }) => localStorage.setItem('zinko_jwt', token))
+          .catch(err => console.error("Failed to fetch custom JWT:", err));
+      } else if (!isSignedIn) {
+        localStorage.removeItem('zinko_jwt');
+      }
+    }
+  }, [isLoaded, isSignedIn]);
 
   const isGameFlow = useMemo(
     () => GAME_FLOW_PATHS.some((p) => location.pathname.startsWith(p)),
