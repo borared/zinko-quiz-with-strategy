@@ -1,78 +1,98 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SkillCard = ({
   name,
-  imageUrl,
+  icon: Icon,
+  color,
   skillDescription,
   isSelected,
   isLocked,
+  locker,
   onClick,
   onCancel,
+  index,
   initial,
   animate,
   transition
 }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  // Auto flip after a short delay so they start face down and then flip
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFlipped(true);
+    }, 500 + index * 200);
+    return () => clearTimeout(timer);
+  }, [index]);
+
   return (
     <motion.div
       initial={initial}
       animate={animate}
       transition={transition}
-      className={`group relative flex-1 h-full overflow-hidden transition-all duration-300 ease-in-out border-r-2 border-black/50 last:border-r-0 bg-zk-black 
-        ${isSelected ? "z-10 shadow-[0_0_30px_rgba(0,0,0,0.8)] flex-[1.1] cursor-default" 
-        : isLocked ? "opacity-50 grayscale-[50%] cursor-not-allowed" 
-        : "cursor-pointer hover:flex-[1.05] hover:z-10"}`}
-      onClick={isLocked ? undefined : onClick}
+      className="w-full h-32 lg:h-full lg:flex-1 perspective-1000 flex-shrink-0"
     >
-      {/* Background Image */}
-      <motion.img
-        src={imageUrl}
-        alt={name}
-        className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500"
-        whileHover={isLocked || isSelected ? {} : { scale: 1.05 }}
-      />
-
-      {/* Overlay gradient for text readability (appears on hover or when selected) */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${isSelected ? "opacity-100" : isLocked ? "opacity-0" : "opacity-0 group-hover:opacity-100"}`}
-      />
-
-      {/* Skill Info */}
-      <div
-        className={`absolute bottom-0 left-0 w-full p-6 text-center transition-transform duration-300 flex flex-col items-center justify-end h-full ${isSelected ? "translate-y-0 opacity-100" : isLocked ? "translate-y-8 opacity-0" : "translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"}`}
+      <motion.div
+        className={`w-full h-full relative preserve-3d transition-all duration-300 ${isSelected ? 'scale-[1.02] z-10' : 'hover:scale-[1.01]'}`}
+        animate={{ rotateY: isFlipped ? 0 : 180 }}
+        transition={{ duration: 0.6, type: "spring", stiffness: 200, damping: 20 }}
+        onClick={isLocked ? undefined : onClick}
       >
-        <h3
-          className="text-3xl font-black text-white uppercase tracking-widest mb-3 permanent-marker-regular"
-          style={{
-            WebkitTextStroke: "1px #1a1a1a",
-            textShadow: "2px 2px 0 #1a1a1a",
-          }}
+        {/* FRONT */}
+        <div 
+          className={`absolute inset-0 backface-hidden flex lg:flex-col items-center justify-center p-4 lg:p-6 border-[4px] border-black rounded-xl shadow-[6px_6px_0_rgba(0,0,0,1)] cursor-pointer bg-[#1a1a1a]
+            ${isLocked && !locker ? 'opacity-50 grayscale' : ''} ${isSelected ? 'border-[#FFCD29] shadow-[0_0_20px_#FFCD29]' : ''} ${locker ? 'border-zk-blue shadow-[0_0_20px_var(--zk-blue)]' : ''}`}
         >
-          {name}
-        </h3>
-        <p className="text-white font-black bg-zk-blue p-3 md:p-4 rounded-xl border-[3px] border-[#1a1a1a] text-sm md:text-base leading-snug max-w-[90%] shadow-[4px_4px_0px_#1a1a1a] md:shadow-[6px_6px_0px_#1a1a1a] tracking-wide">
-          {skillDescription}
-        </p>
-      </div>
+           <div className="w-20 h-20 lg:w-32 lg:h-32 flex-shrink-0 border-[3px] border-black rounded-xl flex items-center justify-center mr-4 lg:mr-0 lg:mb-6" style={{ backgroundColor: color }}>
+              {Icon && <Icon className="w-10 h-10 lg:w-16 lg:h-16 text-white" strokeWidth={3} />}
+           </div>
+           
+           <div className="flex-1 lg:flex-none flex flex-col justify-center text-left lg:text-center w-full">
+              <h3 className="text-2xl lg:text-3xl font-black text-white uppercase tracking-widest zinko-font" style={{ WebkitTextStroke: '1px #000' }}>{name}</h3>
+              <p className="text-white font-bold text-sm lg:text-base bg-black/40 px-3 py-1 rounded inline-block mt-1 lg:mt-3 border-[2px] border-black mx-auto">
+                 {skillDescription}
+              </p>
+           </div>
 
-      {/* Selection Border */}
-      {isSelected && (
-        <div className="absolute inset-0 border-4 border-[#D4A322] pointer-events-none" />
-      )}
+           {isSelected && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onCancel(e); }}
+                className="bg-[#FF4B4B] text-white font-black px-3 py-2 lg:px-6 lg:py-3 lg:mt-6 border-[3px] border-black rounded-lg shadow-[4px_4px_0_#000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_#000] transition-all uppercase tracking-widest text-xs lg:text-sm ml-2 lg:ml-0 flex-shrink-0"
+              >
+                Cancel
+              </button>
+           )}
 
-      {/* Static Cancel Button inside the Card */}
-      {isSelected && (
-        <button
-          onClick={onCancel}
-          className="absolute top-4 right-4 z-50 bg-[#FF4B4B] text-white font-black px-3 py-2 border-[3px] border-zk-black rounded-lg shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[2px_2px_0px_#1a1a1a] hover:translate-y-[2px] hover:translate-x-[2px] transition-all uppercase tracking-widest text-xs flex items-center gap-1"
+           <AnimatePresence>
+             {locker && (
+               <motion.div
+                 initial={{ scale: 0 }}
+                 animate={{ scale: 1 }}
+                 exit={{ scale: 0 }}
+                 className="absolute -top-3 -right-3 lg:-top-5 lg:-right-5 bg-zk-blue border-[3px] border-black rounded-xl p-2 lg:p-3 shadow-[4px_4px_0_#000] flex flex-col items-center z-20"
+               >
+                 <img src={locker.avatar} alt={locker.nickname} className="w-8 h-8 lg:w-12 lg:h-12 object-cover rounded-lg" />
+                 <span className="text-white font-black text-[10px] lg:text-xs uppercase bg-black/50 px-1 rounded mt-1 max-w-[60px] lg:max-w-[80px] truncate text-center">
+                   {locker.nickname}
+                 </span>
+               </motion.div>
+             )}
+           </AnimatePresence>
+        </div>
+
+        {/* BACK */}
+        <div 
+          className="absolute inset-0 backface-hidden flex items-center justify-center border-[4px] border-black rounded-xl shadow-[6px_6px_0_rgba(0,0,0,1)] bg-[#FFCD29] overflow-hidden"
+          style={{ transform: "rotateY(180deg)" }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-          Cancel
-        </button>
-      )}
+          <div className="absolute inset-0 opacity-20"
+               style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #FFCD29 25%, #FFCD29 75%, #000 75%, #000)", backgroundPosition: "0 0, 10px 10px", backgroundSize: "20px 20px" }} />
+          <div className="bg-white border-[4px] border-black px-6 py-2 rounded-xl transform -rotate-6 z-10 shadow-[4px_4px_0_#000]">
+             <span className="font-black text-black text-3xl lg:text-5xl uppercase tracking-widest zinko-font">Zinko</span>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

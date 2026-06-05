@@ -53,7 +53,7 @@ const ChooseTeamSection = () => {
     // Pull stored session data
     const pin      = sessionStorage.getItem('game_pin');
     const nickname = sessionStorage.getItem('player_nickname') || 'Player';
-    const avatar   = sessionStorage.getItem('player_avatar') || 'pizza';
+    const avatar   = sessionStorage.getItem('player_avatar') || 'avatar1.png';
     const playerId = getOrCreatePlayerId();
 
     // Store team for PlayerLobby / PlayerController to read

@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Sword, Shield, HelpCircle, VenetianMask } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../context/SocketContext";
 import SkillHeader from "./SkillHeader";
 import SkillCard from "./SkillCard";
 import SkillTimer from "./SkillTimer";
@@ -12,37 +15,102 @@ const bounceIn = () => ({
 
 const skills = [
   {
-    id: "rabbit",
-    name: "Rabbit",
-    imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779041092/Screenshot_2026-05-18_010349_zrjzse.png",
-    skillDescription: "Blocks & Counters All Attacks",
+    id: "sapper",
+    name: "Sapper",
+    icon: Sword,
+    skillDescription: "50% ATK on 1 Enemy",
+    color: "#FF4B4B"
   },
   {
-    id: "frog",
-    name: "Frog",
-    imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779041092/Screenshot_2026-05-18_010359_c3ksvg.png",
-    skillDescription: "Destroys 50% of Enemy Points",
+    id: "guardian",
+    name: "Guardian",
+    icon: Shield,
+    skillDescription: "Block All Enemy Skills",
+    color: "#3B68FF"
   },
   {
-    id: "fox",
-    name: "Fox",
-    imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779030311/photo_2026-05-17_22-04-28_owtfct.jpg",
-    skillDescription: "Steals 30% of Enemy Points",
+    id: "trickster",
+    name: "Trickster",
+    icon: HelpCircle,
+    skillDescription: "Swap Skill with Enemy",
+    color: "#9b59b6"
   },
   {
-    id: "butterfly",
-    name: "Butterfly",
-    imageUrl:
-      "https://res.cloudinary.com/dicrvjstp/image/upload/v1779030433/Screenshot_2026-05-17_220659_i6y3ok.png",
-    skillDescription: "Boosts Team Points by +20%",
+    id: "illusionist",
+    name: "Illusionist",
+    icon: VenetianMask,
+    skillDescription: "Swap Avatar (Trick Enemy)",
+    color: "#27AE60"
   },
 ];
 
 const ChoosingSkillSection = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
+  const [teamSkills, setTeamSkills] = useState({});
+  
+  const navigate = useNavigate();
+  const { getSocket } = useSocket();
+  const pin = sessionStorage.getItem('game_pin') || '';
+  const playerId = sessionStorage.getItem('player_id') || '';
+  const team = sessionStorage.getItem('player_team') || 'A';
+  const nickname = sessionStorage.getItem('player_nickname') || '';
+  const avatar = sessionStorage.getItem('player_avatar') || 'pizza';
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.emit('lobby:request-skills', { pin });
+
+    const onSkillsUpdate = (data) => {
+      setTeamSkills(data.teamSkills || {});
+    };
+
+    const onQuestion = (data) => {
+      if (selectedSkill) {
+        sessionStorage.setItem('player_skill', selectedSkill);
+      }
+      navigate(`/play/game/${pin}`, { state: { question: data } });
+    };
+
+    socket.on('lobby:skills-update', onSkillsUpdate);
+    socket.on('game:question', onQuestion);
+
+    return () => {
+      socket.off('lobby:skills-update', onSkillsUpdate);
+      socket.off('game:question', onQuestion);
+    };
+  }, [getSocket, navigate, pin, selectedSkill]);
+
+  const handleSelectSkill = (skillId) => {
+    // Check if teammate took it
+    const myTeamSkills = teamSkills[team] || {};
+    if (myTeamSkills[skillId] && myTeamSkills[skillId].playerId !== playerId) {
+      return; // Locked by teammate
+    }
+
+    setSelectedSkill(skillId);
+    getSocket()?.emit('player:select-skill', {
+      pin,
+      playerId,
+      skillId,
+      team,
+      nickname,
+      avatar
+    });
+  };
+
+  const handleCancelSkill = (skillId) => {
+    setSelectedSkill(null);
+    getSocket()?.emit('player:cancel-skill', {
+      pin,
+      skillId,
+      team,
+      playerId
+    });
+  };
+
+  const myTeamSkills = teamSkills[team] || {};
 
   return (
     <div
@@ -57,23 +125,32 @@ const ChoosingSkillSection = () => {
 
 
       {/* Cards Container - Occupies the middle section filling full width */}
-      <div className="relative z-10 flex w-full h-[65vh] md:h-[70vh] shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-zk-black">
-        {skills.map((skill) => (
-          <SkillCard
-            key={skill.id}
-            {...skill}
-            isSelected={selectedSkill === skill.id}
-            isLocked={selectedSkill !== null && selectedSkill !== skill.id}
-            onClick={() => {
-              if (!selectedSkill) setSelectedSkill(skill.id);
-            }}
-            onCancel={(e) => {
-              e.stopPropagation();
-              setSelectedSkill(null);
-            }}
-            {...bounceIn()}
-          />
-        ))}
+      <div className="relative z-10 flex flex-col w-full h-[65vh] md:h-[70vh] overflow-y-auto px-6 py-4 custom-scrollbar items-center justify-center">
+        <div className="w-full max-w-[1200px] flex flex-col lg:flex-row gap-4 h-full lg:items-stretch lg:justify-center">
+          {skills.map((skill, index) => {
+            const locker = myTeamSkills[skill.id];
+            const isLockedByTeammate = locker && locker.playerId !== playerId;
+
+            return (
+              <SkillCard
+                key={skill.id}
+                {...skill}
+                index={index}
+                isSelected={selectedSkill === skill.id}
+                isLocked={isLockedByTeammate || (selectedSkill !== null && selectedSkill !== skill.id)}
+                locker={isLockedByTeammate ? locker : null}
+                onClick={() => {
+                  if (!selectedSkill && !isLockedByTeammate) handleSelectSkill(skill.id);
+                }}
+                onCancel={(e) => {
+                  e.stopPropagation();
+                  handleCancelSkill(skill.id);
+                }}
+                {...bounceIn()}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <SkillTimer />

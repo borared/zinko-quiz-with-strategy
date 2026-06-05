@@ -137,8 +137,9 @@ export default function HostGame() {
 
   const TOTAL_TIME = 20;
 
-  const [phase, setPhase] = useState("QUESTION"); // QUESTION | RESULT | LEADERBOARD
+  const [phase, setPhase] = useState("SKILL_PICK"); // SKILL_PICK | QUESTION | RESULT | LEADERBOARD
   const [question, setQuestion] = useState(location.state?.question || null);
+  const [skillTimeLeft, setSkillTimeLeft] = useState(60);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [answered, setAnswered] = useState(0);
   const [total, setTotal] = useState(0);
@@ -146,6 +147,22 @@ export default function HostGame() {
   const [correctId, setCorrectId] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [isFinalLeaderboard, setIsFinalLeaderboard] = useState(false);
+
+  useEffect(() => {
+    if (phase === "SKILL_PICK") {
+      const interval = setInterval(() => {
+        setSkillTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            getSocket().emit("game:start", { pin });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [phase, pin, getSocket]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -219,7 +236,7 @@ export default function HostGame() {
     navigate("/dashboard");
   }, [navigate]);
 
-  if (!question) {
+  if (!question && phase !== "SKILL_PICK") {
     return (
       <div className="min-h-screen bg-[#0D0D1A] flex items-center justify-center">
         <div className="text-white text-center">
@@ -244,8 +261,35 @@ export default function HostGame() {
         }}
       />
 
-      {/* ── QUESTION PHASE ── */}
+      {/* ── SKILL_PICK PHASE ── */}
       <AnimatePresence mode="wait">
+        {phase === "SKILL_PICK" && (
+          <motion.div
+            key="skill_pick"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="relative z-10 flex flex-col flex-1 items-center justify-center p-8"
+          >
+            <h1
+              className="text-[6rem] md:text-[8rem] font-black uppercase text-white tracking-widest zinko-font leading-none text-center"
+              style={{
+                WebkitTextStroke: "6px #000000",
+                textShadow: "8px 8px 0 #000000",
+              }}
+            >
+              Skill Time
+            </h1>
+            <div className="absolute bottom-16 flex flex-col items-center">
+              <span className="text-white/50 font-bold uppercase tracking-widest mb-2">Time to Pick</span>
+              <span className="text-6xl font-black text-[#FFCD29]" style={{ WebkitTextStroke: "2px #000000" }}>
+                {skillTimeLeft}s
+              </span>
+            </div>
+          </motion.div>
+        )}
+
+      {/* ── QUESTION PHASE ── */}
         {phase === "QUESTION" && (
           <motion.div
             key="question"
