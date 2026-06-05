@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 
 const EnterPinSection = () => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const navigate = useNavigate();
+
+  const triggerShake = () => {
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
+  };
 
   const handleInputChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // only allow numbers
@@ -19,6 +26,7 @@ const EnterPinSection = () => {
   const handleEnter = async () => {
     if (pin.length < 6) {
       setError('Please enter a full 6-digit PIN.');
+      triggerShake();
       return;
     }
 
@@ -30,11 +38,13 @@ const EnterPinSection = () => {
 
       if (!data.valid) {
         setError(data.message || 'Invalid PIN. Please try again.');
+        triggerShake();
         return;
       }
 
       if (data.phase !== 'LOBBY') {
         setError('This game has already started. Ask the host for a new PIN.');
+        triggerShake();
         return;
       }
 
@@ -53,6 +63,7 @@ const EnterPinSection = () => {
 
     } catch (err) {
       setError('Game not found. Check your PIN and try again.');
+      triggerShake();
     } finally {
       setLoading(false);
     }
@@ -79,7 +90,11 @@ const EnterPinSection = () => {
         </div>
 
         {/* Card */}
-        <div className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl">
+        <motion.div 
+          animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
+          transition={{ duration: 0.4 }}
+          className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
+        >
           
           {/* Input Box */}
           <div className="w-full">
@@ -117,7 +132,7 @@ const EnterPinSection = () => {
             ) : 'Enter'}
           </button>
 
-        </div>
+        </motion.div>
 
       </div>
     </div>
