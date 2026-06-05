@@ -1,18 +1,38 @@
 const { getAuth } = require('@clerk/express');
+const jwt = require('jsonwebtoken');
 
 /**
- * requireAuth middleware
- * Checks for a valid Clerk session on the request.
- * Returns 401 JSON (API-safe, no redirects) if not authenticated.
+ * requireClerkAuth
+ * Checks for a valid Clerk session. Used for generating custom JWTs.
  */
-const requireAuth = (req, res, next) => {
+const requireClerkAuth = (req, res, next) => {
   const { userId } = getAuth(req);
 
   if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
+    return res.status(401).json({ error: 'Unauthorized. Clerk session invalid.' });
   }
 
   next();
 };
 
-module.exports = { requireAuth };
+/**
+ * requireCustomAuth
+ * Checks for the custom backend JWT in Authorization header.
+ */
+const requireCustomAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized. Missing token.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user payload to request
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+  }
+};
+
+module.exports = { requireClerkAuth, requireCustomAuth };
