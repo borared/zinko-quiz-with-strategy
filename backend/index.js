@@ -69,6 +69,7 @@ app.use('/api/auth',    authRoutes);
 app.use('/api/user',    userRoutes);
 app.use('/api/ai',      require('./routes/ai'));
 app.use('/api/quizzes', require('./routes/quiz'));
+app.use('/api/avatars', require('./routes/avatar'));
 app.use('/api/game',    gameRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
