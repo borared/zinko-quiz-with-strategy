@@ -11,12 +11,7 @@ const bounceIn = (delay = 0) => ({
   transition: { delay, type: 'spring', stiffness: 380, damping: 18, mass: 0.9 },
 });
 
-/* ── Random battle backgrounds (same pool as TeamWarmUp) ─────────────────── */
-const backgrounds = [
-  '/background_battle/forest.jpg',
-  '/background_battle/city.jpg',
-  '/background_battle/farm.jpg',
-];
+
 
 /* ─── BlinkingEye ────────────────────────────────────────────────────────── */
 function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
@@ -91,19 +86,19 @@ function PlayerSlot({ player, isFirst, color, isMe }) {
       )}
       <div className="absolute inset-0 bg-white/10" />
       
-      <div className="w-[65%] h-[65%] mb-1 relative z-10 flex items-center justify-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
         <img 
-          src={`/avatars/${player.avatar || 'pizza'}.png?v=2`} 
+          src={player.avatar || ''} 
           alt="avatar" 
-          className="w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover z-10"
         />
-      </div>
 
-      <span className="text-white font-black text-xs uppercase tracking-wider relative z-10 px-1 text-center truncate w-full">
-        {player.nickname}
-      </span>
+      <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+        <span className="text-[#000000] font-black text-[10px] md:text-xs uppercase tracking-wider relative block">
+          {player.nickname}
+        </span>
+      </div>
       {isMe && (
-        <span className="absolute top-1 right-1 text-[8px] bg-[#FFCD29] text-black px-1 rounded font-bold z-20">
+        <span className="absolute top-1 right-1 text-[8px] bg-[#FFCD29] text-black px-1.5 py-0.5 rounded font-black z-20 border-[2px] border-[#000000]">
           YOU
         </span>
       )}
@@ -173,13 +168,9 @@ export default function PlayerLobby() {
   const team     = sessionStorage.getItem('player_team') || 'A';
   const playerId = sessionStorage.getItem('player_id');
 
-  const [bgImage, setBgImage] = useState(backgrounds[0]);
+  const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
   const [players, setPlayers] = useState([]);
-
-  // Pick a random background on mount
-  useEffect(() => {
-    setBgImage(backgrounds[Math.floor(Math.random() * backgrounds.length)]);
-  }, []);
+  const [startCountdown, setStartCountdown] = useState(null);
 
   // Socket logic
   useEffect(() => {
@@ -193,18 +184,35 @@ export default function PlayerLobby() {
 
     const onPlayersUpdate = (data) => {
       setPlayers(data.players || []);
+      if (data.background) setBgImage(data.background);
     };
 
     const onQuestion = (data) => {
       navigate(`/play/game/${pin}`, { state: { question: data } });
     };
 
+    const onCountdownStarted = () => {
+      setStartCountdown(3);
+      const interval = setInterval(() => {
+        setStartCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            navigate('/choose-skill');
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    };
+
     socket.on('lobby:players-update', onPlayersUpdate);
     socket.on('game:question', onQuestion);
+    socket.on('lobby:countdown-started', onCountdownStarted);
 
     return () => {
       socket.off('lobby:players-update', onPlayersUpdate);
       socket.off('game:question', onQuestion);
+      socket.off('lobby:countdown-started', onCountdownStarted);
     };
   }, [getSocket, isConnected, pin, navigate, nickname, team, playerId]);
 
@@ -229,6 +237,22 @@ export default function PlayerLobby() {
       <BlinkingEye size={50} x="85%" y="15%" delay={1.2} pupilColor="#5D3FD3" />
       <BlinkingEye size={40} x="88%" y="70%" delay={0.6} pupilColor="#c0392b" />
       <BlinkingEye size={45} x="3%" y="75%" delay={2} pupilColor="#2ea84a" />
+
+      {/* Start Game Countdown Overlay */}
+      {startCountdown !== null && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
+          <motion.div
+            key={startCountdown}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [1.5, 1], opacity: 1 }}
+            transition={{ duration: 0.5, type: 'spring' }}
+            className="text-[15rem] md:text-[20rem] font-black text-[#FFCD29] drop-shadow-[0_10px_0_rgba(0,0,0,1)] zinko-font"
+            style={{ WebkitTextStroke: '8px #000000' }}
+          >
+            {startCountdown}
+          </motion.div>
+        </div>
+      )}
 
       {/* ── Content Container ──────────────────────────────────────────── */}
       <div className="relative z-10 flex flex-col h-full w-full max-w-6xl mx-auto pt-4">
