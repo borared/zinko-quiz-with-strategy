@@ -17,12 +17,7 @@ const bounceIn = (delay = 0) => ({
   transition: { delay, type: 'spring', stiffness: 380, damping: 18, mass: 0.9 },
 });
 
-/* ── Random battle backgrounds (same pool as TeamWarmUp) ─────────────────── */
-const backgrounds = [
-  '/background_battle/forest.jpg',
-  '/background_battle/city.jpg',
-  '/background_battle/farm.jpg',
-];
+
 
 /* ─── BlinkingEye ────────────────────────────────────────────────────────── */
 function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
@@ -89,17 +84,17 @@ function PlayerSlot({ player, isFirst, color }) {
     >
       <div className="absolute inset-0 bg-white/10" />
       
-      <div className="w-[65%] h-[65%] mb-1 relative z-10 flex items-center justify-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
         <img 
-          src={`/avatars/${player.avatar || 'pizza'}.png?v=2`} 
+          src={player.avatar || ''} 
           alt="avatar" 
-          className="w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-cover z-10"
         />
-      </div>
 
-      <span className="text-white font-black text-xs uppercase tracking-wider relative z-10 px-1 text-center truncate w-full">
-        {player.nickname}
-      </span>
+      <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+        <span className="text-[#000000] font-black text-[10px] md:text-xs uppercase tracking-wider relative block">
+          {player.nickname}
+        </span>
+      </div>
     </div>
   );
 }
@@ -160,14 +155,9 @@ export default function HostLobby() {
   const navigate = useNavigate();
   const { getSocket, isConnected } = useSocket();
 
-  const [bgImage, setBgImage] = useState(backgrounds[0]);
+  const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
   const [players, setPlayers] = useState([]);
   const [startCountdown, setStartCountdown] = useState(null);
-
-  // Pick a random background on mount
-  useEffect(() => {
-    setBgImage(backgrounds[Math.floor(Math.random() * backgrounds.length)]);
-  }, []);
 
   // Connect to socket and get real players
   useEffect(() => {
@@ -176,19 +166,31 @@ export default function HostLobby() {
 
     socket.emit('host:initialize', { pin, quizId: location.state?.quizId });
 
-    const onPlayersUpdate = (data) => {
-      setPlayers(data.players || []);
+    const onInitialized = (data) => {
+      if (data.background) setBgImage(data.background);
     };
 
+    const onPlayersUpdate = (data) => {
+      setPlayers(data.players || []);
+      if (data.background) setBgImage(data.background);
+    };
+
+    socket.on('host:initialized', onInitialized);
     socket.on('lobby:players-update', onPlayersUpdate);
 
     return () => {
+      socket.off('host:initialized', onInitialized);
       socket.off('lobby:players-update', onPlayersUpdate);
     };
   }, [getSocket, isConnected, pin, location.state]);
 
   const handleStartGame = useCallback(() => {
     if (players.length === 0) return;
+    const socket = getSocket();
+    if (socket && isConnected) {
+      socket.emit('lobby:start-countdown', { pin });
+    }
+    
     setStartCountdown(3);
     const interval = setInterval(() => {
       setStartCountdown((prev) => {
@@ -200,7 +202,7 @@ export default function HostLobby() {
         return prev - 1;
       });
     }, 1000);
-  }, [players.length, navigate, pin, location.state]);
+  }, [players.length, navigate, pin, location.state, getSocket, isConnected]);
 
   const gameUrl = `${window.location.origin}/join?pin=${pin}`;
   const teamAPlayers = players.filter((p) => p.team === 'A');
@@ -224,6 +226,23 @@ export default function HostLobby() {
       <BlinkingEye size={50} x="85%" y="15%" delay={1.2} pupilColor="#5D3FD3" />
       <BlinkingEye size={40} x="88%" y="70%" delay={0.6} pupilColor="#c0392b" />
       <BlinkingEye size={45} x="3%" y="75%" delay={2} pupilColor="#2ea84a" />
+
+      {/* Start Game Countdown Overlay */}
+      {startCountdown !== null && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
+          <motion.div
+            key={startCountdown}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [1.5, 1], opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ duration: 0.5, type: 'spring' }}
+            className="text-[15rem] md:text-[20rem] font-black text-[#FFCD29] drop-shadow-[0_10px_0_rgba(0,0,0,1)] zinko-font"
+            style={{ WebkitTextStroke: '8px #000000' }}
+          >
+            {startCountdown}
+          </motion.div>
+        </div>
+      )}
 
       {/* ── Top Right Edge: QR & PIN ───────────────────────────────────── */}
       <motion.div
@@ -315,7 +334,7 @@ export default function HostLobby() {
         <button
           id="start-game-btn"
           onClick={handleStartGame}
-          disabled={players.length === 0 || startCountdown !== null}
+          disabled={teamAPlayers.length === 0 || teamAPlayers.length !== teamBPlayers.length || startCountdown !== null}
           className="px-16 py-3 border-[4px] border-[#000000] rounded-xl font-black text-xl uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ backgroundColor: '#FFCD29', color: '#000000', boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)' }}
         >
