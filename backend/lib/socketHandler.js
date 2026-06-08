@@ -133,6 +133,13 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       io.to(pin).emit('lobby:countdown-started');
     });
 
+    // ── host:skill-timer-sync ────────────────────────────────────────────────
+    socket.on('host:skill-timer-sync', ({ pin, timeLeft }) => {
+      const game = games.get(pin);
+      if (!game || game.hostSocketId !== socket.id) return;
+      io.to(pin).emit('game:skill-timer-tick', { timeLeft });
+    });
+
     // ── player:select-skill ──────────────────────────────────────────────────
     socket.on('player:select-skill', ({ pin, playerId, skillId, team, nickname, avatar }) => {
       const game = games.get(pin);
