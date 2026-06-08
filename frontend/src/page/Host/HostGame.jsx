@@ -152,12 +152,15 @@ export default function HostGame() {
     if (phase === "SKILL_PICK") {
       const interval = setInterval(() => {
         setSkillTimeLeft((prev) => {
-          if (prev <= 1) {
+          const newTime = prev - 1;
+          getSocket().emit("host:skill-timer-sync", { pin, timeLeft: newTime });
+          
+          if (newTime <= 0) {
             clearInterval(interval);
             getSocket().emit("game:start", { pin });
             return 0;
           }
-          return prev - 1;
+          return newTime;
         });
       }, 1000);
       return () => clearInterval(interval);
