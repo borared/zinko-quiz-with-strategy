@@ -1,4 +1,3 @@
-const { getAuth } = require('@clerk/express');
 const { createGame, getGame } = require('../lib/socketHandler');
 const gameModel = require('../models/gameModel');
 
@@ -8,7 +7,7 @@ const gameModel = require('../models/gameModel');
  */
 const hostGame = async (req, res) => {
   try {
-    const { userId } = getAuth(req);
+    const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: 'Authentication required to host a game.' });
 
     const { quizId } = req.body;
