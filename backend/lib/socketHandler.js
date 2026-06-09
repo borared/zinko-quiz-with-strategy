@@ -191,6 +191,9 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('game:start', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'LOBBY' && game.phase !== 'SKILL_PICK') {
+        return; // Prevent duplicate start calls
+      }
       if (game.players.length === 0) {
         socket.emit('error', { message: 'Need at least 1 player to start.' });
         return;
@@ -234,6 +237,7 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('game:next-question', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'LEADERBOARD' && game.phase !== 'RESULT') return; // Must be on leaderboard or result to go to next question
 
       const nextIndex = game.currentQuestionIndex + 1;
 
@@ -359,6 +363,7 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('host:show-leaderboard', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'RESULT') return; // Must be on result screen to show leaderboard
 
       game.phase = 'LEADERBOARD';
       const leaderboard = getLeaderboard(game.players);
@@ -369,7 +374,13 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       });
     });
 
-    // ── disconnect ────────────────────────────────────────────────────────────
+    // ── host:end-game ─────────────────────────────────────────────────────────
+    socket.on('host:end-game', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game || game.hostSocketId !== socket.id) return;
+      cleanupGame(pin);
+      console.log(`🗑️  Host explicitly ended game: ${pin}`);
+    });
     socket.on('disconnect', () => {
       console.log(`🔌 Socket disconnected: ${socket.id}`);
       // Mark player offline (don't remove — allow reconnect)
