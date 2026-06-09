@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { Pencil, Play, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-;
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 
 const QuizCard = ({ quiz }) => {
   const router = useRouter();
   const [showError, setShowError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const timeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -21,15 +21,16 @@ const QuizCard = ({ quiz }) => {
   };
 
   const questions = quiz.questions || [];
-  const r1Count = questions.filter(q => q.round === 1).length;
-  const r2Count = questions.filter(q => q.round === 2).length;
-  const r3Count = questions.filter(q => q.round === 3).length;
+  const r1Count = questions.filter(q => q.round === 1 || q.round === "1").length;
+  const r2Count = questions.filter(q => q.round === 2 || q.round === "2").length;
+  const r3Count = questions.filter(q => q.round === 3 || q.round === "3").length;
   const isReady = r1Count >= 6 && r2Count >= 6 && r3Count >= 6;
 
   const [isHosting, setIsHosting] = useState(false);
 
   const handleHostClick = async () => {
     if (!isReady) {
+      setErrorMessage("Please add at least 6 questions per round!");
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
@@ -41,6 +42,8 @@ const QuizCard = ({ quiz }) => {
       sessionStorage.setItem(`game_${pin}_quizId`, quiz.id);
       router.push(`/host/lobby/${pin}`);
     } catch (err) {
+      console.error("Hosting failed:", err);
+      setErrorMessage(err.message || "Failed to host game!");
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
     } finally {
@@ -93,7 +96,7 @@ const QuizCard = ({ quiz }) => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="absolute left-0 right-0 bg-[#FF4B4B] text-white px-4 py-3 text-[10px] font-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[50] flex items-center justify-center text-center uppercase"
               >
-                Please add at least 6 questions per round!
+                {errorMessage}
                 <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-black rotate-45" />
               </motion.div>
             )}
