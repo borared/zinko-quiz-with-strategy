@@ -7,6 +7,7 @@ import api from '../../services/api';
 const QuizCard = ({ quiz }) => {
   const navigate = useNavigate();
   const [showError, setShowError] = React.useState(false);
+  const [apiError, setApiError] = React.useState(null);
 
   const timeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -39,8 +40,9 @@ const QuizCard = ({ quiz }) => {
       sessionStorage.setItem(`game_${pin}_quizId`, quiz.id);
       navigate(`/host/lobby/${pin}`);
     } catch (err) {
-      setShowError(true);
-      setTimeout(() => setShowError(false), 3000);
+      console.error("Host Error:", err);
+      setApiError(err?.response?.data?.error || err.message || 'Failed to host game');
+      setTimeout(() => setApiError(null), 3000);
     } finally {
       setIsHosting(false);
     }
@@ -92,6 +94,17 @@ const QuizCard = ({ quiz }) => {
                 className="absolute left-0 right-0 bg-[#FF4B4B] text-white px-4 py-3 text-[10px] font-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[50] flex items-center justify-center text-center uppercase"
               >
                 Please add at least 6 questions per round!
+                <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-black rotate-45" />
+              </motion.div>
+            )}
+            {apiError && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                animate={{ opacity: 1, y: -55, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="absolute left-0 right-0 bg-[#FF4B4B] text-white px-4 py-3 text-[10px] font-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black z-[50] flex items-center justify-center text-center uppercase"
+              >
+                {apiError}
                 <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-black rotate-45" />
               </motion.div>
             )}
