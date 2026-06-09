@@ -40,6 +40,7 @@ export default function PlayerController() {
 
   useEffect(() => {
     const socket = getSocket();
+    if (!socket) return;
 
     const onQuestion = (data) => {
       setQuestion(data);
@@ -109,7 +110,7 @@ export default function PlayerController() {
     const onFoxAttack = ({ targetTeam }) => {
       if (targetTeam === team) {
         setFoxSmokescreen(true);
-        setTimeout(() => setFoxSmokescreen(false), 3000);
+        setTimeout(() => setFoxSmokescreen(false), 5000);
       }
     };
 
@@ -248,9 +249,22 @@ export default function PlayerController() {
   }
 
   return (
-    <div className={`min-h-screen bg-[#0D0D1A] flex flex-col overflow-hidden relative transition-colors duration-300 ${rabbitRush ? 'ring-[16px] ring-[#F39C12] ring-inset' : ''}`}>
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+    <div 
+      className={`min-h-screen flex flex-col overflow-hidden relative transition-colors duration-300 ${rabbitRush ? 'ring-[16px] ring-[#F39C12] ring-inset z-50' : ''}`}
+      style={{
+        backgroundImage: `url('/background_battle/city.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundColor: "#C4962C",
+      }}
+    >
+      {/* Warm overlay matching host screen */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70 pointer-events-none z-0" />
+      
+      {/* ── Content wrapper to sit above overlay ── */}
+      <div className="relative z-10 flex flex-col flex-1 h-full">
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div>
           <p className="text-white/40 text-xs uppercase tracking-widest font-bold">Player</p>
           <p className="text-white font-black text-base">{nickname}</p>
@@ -286,7 +300,18 @@ export default function PlayerController() {
       </div>
 
       {/* ── Center prompt ── */}
-      <div className="flex-1 flex items-center justify-center px-5">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 gap-4 mt-2">
+        {phase === 'PLAYING' && !selectedId && question && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full bg-white rounded-2xl p-5 border-[4px] border-zk-black shadow-[6px_6px_0_#000] text-center"
+          >
+            <p className="text-zk-black font-black text-xl lg:text-2xl leading-tight uppercase">
+              {question.questionText}
+            </p>
+          </motion.div>
+        )}
         <AnimatePresence mode="wait">
           {phase === 'PLAYING' && !selectedId && (
             <motion.div
@@ -341,12 +366,18 @@ export default function PlayerController() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 backdrop-blur-3xl bg-black/80 rounded-t-3xl flex items-center justify-center pointer-events-auto"
+              className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center pointer-events-auto"
             >
-              <div className="text-center">
-                <span className="text-6xl mb-4 block">🦊💨</span>
-                <p className="text-white font-black text-2xl uppercase tracking-widest">Smokescreen!</p>
-              </div>
+              <motion.div 
+                animate={{ rotate: [0, -10, 10, -10, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+                className="text-8xl mb-6"
+              >
+                🦊💨
+              </motion.div>
+              <h1 className="text-zk-black font-black text-4xl uppercase tracking-widest text-center px-4 permanent-marker-regular">
+                Blinded by<br/>The Fox!
+              </h1>
             </motion.div>
           )}
         </AnimatePresence>
@@ -394,6 +425,7 @@ export default function PlayerController() {
         {!question?.answers && [0, 1, 2, 3].map(i => (
           <div key={i} className={`rounded-3xl min-h-[140px] ${ANSWER_BUTTONS[i].bg} opacity-20 animate-pulse`} />
         ))}
+      </div>
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ const skills = [
     id: "fox",
     name: "The Fox",
     icon: Cloud,
-    skillDescription: "Smokescreen: Blind Enemies (3s)",
+    skillDescription: "Smokescreen: Blind Enemies (5s)",
     color: "#E74C3C" // Red
   },
   {
