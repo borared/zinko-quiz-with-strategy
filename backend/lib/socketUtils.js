@@ -72,22 +72,71 @@ function revealResults(io, pin, games) {
   const correctId = question.answers.find(a => a.checked)?.id;
   const stats = buildAnswerStats(game);
 
-  // Award points based on correctness and speed
+  // 1. Award base points based on correctness and speed, considering Rabbit
   game.players.forEach(player => {
     const selectedId = game.answers[player.id];
     const isCorrect = selectedId === correctId;
     const timeTaken = game.answerTimes[player.id] || QUESTION_TIME_SECONDS * 1000;
     const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / (QUESTION_TIME_SECONDS * 1000)) * 500)) : 0;
-    const points = isCorrect ? 1000 + speedBonus : 0;
+    
+    let points = isCorrect ? 1000 + speedBonus : 0;
+    
+    // Rabbit modifier
+    const rabbit = game.rabbitActive?.[player.team];
+    let rabbitBonusApplied = false;
+    if (rabbit && rabbit.startTime && isCorrect) {
+      const absTime = game.absoluteAnswerTimes?.[player.id] || Date.now();
+      if (absTime - rabbit.startTime <= 5000) {
+        points *= 2;
+        rabbitBonusApplied = true;
+      }
+    }
+
     player.score += points;
     player.lastPoints = points;
     player.lastCorrect = isCorrect;
+    player.rabbitBonusApplied = rabbitBonusApplied;
+    player.stolenPoints = 0; // reset
+  });
 
+  // 2. Frog stealing logic
+  const teams = ['A', 'B'];
+  teams.forEach(team => {
+    const frogActive = game.frogActive?.[team];
+    if (frogActive) {
+      const frogPlayer = game.players.find(p => p.id === frogActive.playerId);
+      if (frogPlayer && frogPlayer.lastCorrect) {
+        // Find fastest correct enemy
+        const enemyTeam = team === 'A' ? 'B' : 'A';
+        const correctEnemies = game.players.filter(p => p.team === enemyTeam && p.lastCorrect);
+        
+        if (correctEnemies.length > 0) {
+          correctEnemies.sort((a, b) => (game.answerTimes[a.id] || 99999) - (game.answerTimes[b.id] || 99999));
+          const fastestEnemy = correctEnemies[0];
+          
+          const stealAmount = Math.floor(fastestEnemy.lastPoints * 0.5);
+          
+          fastestEnemy.score -= stealAmount;
+          fastestEnemy.lastPoints -= stealAmount;
+          fastestEnemy.stolenPoints = -stealAmount; // negative means they lost it
+          
+          frogPlayer.score += stealAmount;
+          frogPlayer.lastPoints += stealAmount;
+          frogPlayer.stolenPoints = stealAmount; // positive means they gained it
+        }
+      }
+    }
+  });
+
+  // 3. Emit results
+  game.players.forEach(player => {
     io.to(player.socketId).emit('game:player-result', {
-      isCorrect,
+      isCorrect: player.lastCorrect,
       correctAnswerId: correctId,
-      pointsEarned: points,
+      pointsEarned: player.lastPoints,
       totalScore: player.score,
+      rabbitBonusApplied: player.rabbitBonusApplied,
+      stolenPoints: player.stolenPoints,
     });
   });
 

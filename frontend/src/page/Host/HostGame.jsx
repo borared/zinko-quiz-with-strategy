@@ -133,13 +133,21 @@ export default function HostGame() {
   const { pin } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { getSocket } = useSocket();
+  const { getSocket, isConnected } = useSocket();
 
   const TOTAL_TIME = 20;
 
   const [phase, setPhase] = useState("SKILL_PICK"); // SKILL_PICK | QUESTION | RESULT | LEADERBOARD
   const [question, setQuestion] = useState(location.state?.question || null);
-  const [skillTimeLeft, setSkillTimeLeft] = useState(60);
+  const [skillTimeLeft, setSkillTimeLeft] = useState(20);
+
+  // Re-register as host if socket reconnects
+  useEffect(() => {
+    if (isConnected) {
+      const socket = getSocket();
+      socket?.emit("host:reconnect", { pin });
+    }
+  }, [isConnected, pin, getSocket]);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [answered, setAnswered] = useState(0);
   const [total, setTotal] = useState(0);
@@ -151,21 +159,37 @@ export default function HostGame() {
   useEffect(() => {
     if (phase === "SKILL_PICK") {
       const interval = setInterval(() => {
-        setSkillTimeLeft((prev) => {
-          const newTime = prev - 1;
-          getSocket().emit("host:skill-timer-sync", { pin, timeLeft: newTime });
-          
-          if (newTime <= 0) {
-            clearInterval(interval);
-            getSocket().emit("game:start", { pin });
-            return 0;
-          }
-          return newTime;
-        });
+        setSkillTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [phase, pin, getSocket]);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "SKILL_PICK") {
+      const socket = getSocket();
+      if (!socket) return;
+      socket.emit("host:skill-timer-sync", { pin, timeLeft: skillTimeLeft });
+      
+      if (skillTimeLeft <= 0) {
+        socket.emit("game:start", { pin });
+      }
+    }
+  }, [skillTimeLeft, phase, pin, getSocket]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    
+    const onError = (err) => {
+      alert(`Server Error: ${err.message}`);
+    };
+    socket.on("error", onError);
+    
+    return () => {
+      socket.off("error", onError);
+    };
+  }, [getSocket]);
 
   useEffect(() => {
     const socket = getSocket();
