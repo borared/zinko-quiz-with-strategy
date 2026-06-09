@@ -7,6 +7,7 @@ import EyeBlinkOverlay from '@/components/transition/EyeBlinkOverlay';
 import SoundToggle from '@/components/global/SoundToggle';
 import Navbar from '@/components/global/Navbar';
 import Footer from '@/components/global/Footer';
+import AuthSync from '@/components/Authentication/AuthSync';
 import { usePathname } from 'next/navigation';
 
 const NO_NAVBAR_PATHS = [
@@ -42,6 +43,7 @@ export default function ClientLayoutWrapper({ children }) {
       <ToastProvider>
         <SocketProvider>
           <QuizProvider>
+            <AuthSync />
             <EyeBlinkOverlay />
             <SoundToggle />
             {showNavbar && <Navbar />}
