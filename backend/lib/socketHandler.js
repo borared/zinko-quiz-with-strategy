@@ -39,9 +39,13 @@ function initSocketHandler(io) {
           .order('order_index', { ascending: true });
 
         if (error) throw error;
-        game.questions = data;
-        console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${data.length} questions`);
-        socket.emit('host:initialized', { pin, questionCount: data.length, background: game.background });
+
+        // Randomize questions and cap at 15 for 3 rounds of 5 matches
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        game.questions = shuffled.slice(0, 15);
+
+        console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
+        socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
       } catch (err) {
         console.error('❌ Failed to load questions:', err.message);
         socket.emit('error', { message: 'Failed to load quiz questions.' });
@@ -222,6 +226,8 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
 
       io.to(pin).emit('game:question', {
         index: 0,
+        round: 1,
+        match: 1,
         total: game.questions.length,
         questionText: question.question_text || '',
         imageUrl: question.image_url || null,
@@ -268,15 +274,17 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
         return;
       }
 
-      io.to(pin).emit('game:question', {
-        index: nextIndex,
-        total: game.questions.length,
-        questionText: question.question_text || '',
-        imageUrl: question.image_url || null,
-        answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
-        timeSeconds: QUESTION_TIME_SECONDS,
-        skillCharges: game.skillCharges,
-      });
+        io.to(pin).emit('game:question', {
+          index: nextIndex,
+          round: Math.floor(nextIndex / 5) + 1,
+          match: (nextIndex % 5) + 1,
+          total: game.questions.length,
+          questionText: question.question_text || '',
+          imageUrl: question.image_url || null,
+          answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
+          timeSeconds: QUESTION_TIME_SECONDS,
+          skillCharges: game.skillCharges,
+        });
 
       startTimer(io, pin, games);
     });
@@ -412,8 +420,8 @@ function createGame({ pin, quizId, hostUserId }) {
     answerTimes: {},
     teamSkills: { A: {}, B: {} },
     skillCharges: {
-      A: { rabbit: 2, fox: 3, butterfly: 2, frog: 3 },
-      B: { rabbit: 2, fox: 3, butterfly: 2, frog: 3 },
+      A: { rabbit: 2, fox: 2, butterfly: 2, frog: 2 },
+      B: { rabbit: 2, fox: 2, butterfly: 2, frog: 2 },
     },
     activeSkillThisRound: { A: null, B: null },
     rabbitActive: { A: null, B: null },
