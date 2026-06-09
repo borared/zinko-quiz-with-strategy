@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sword, Shield, HelpCircle, VenetianMask } from "lucide-react";
+import { Zap, Cloud, Eye, Target } from "lucide-react";
 import { useRouter } from 'next/navigation';
 ;
 import { useSocket } from "../../context/SocketContext";
@@ -15,36 +15,7 @@ const bounceIn = () => ({
   transition: { type: "spring", stiffness: 1200, damping: 12, mass: 0.2 },
 });
 
-const skills = [
-  {
-    id: "sapper",
-    name: "Sapper",
-    icon: Sword,
-    skillDescription: "50% ATK on 1 Enemy",
-    color: "#FF4B4B"
-  },
-  {
-    id: "guardian",
-    name: "Guardian",
-    icon: Shield,
-    skillDescription: "Block All Enemy Skills",
-    color: "#3B68FF"
-  },
-  {
-    id: "trickster",
-    name: "Trickster",
-    icon: HelpCircle,
-    skillDescription: "Swap Skill with Enemy",
-    color: "#9b59b6"
-  },
-  {
-    id: "illusionist",
-    name: "Illusionist",
-    icon: VenetianMask,
-    skillDescription: "Swap Avatar (Trick Enemy)",
-    color: "#27AE60"
-  },
-];
+import { SKILLS } from "../../config/skills";
 
 const ChoosingSkillSection = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
@@ -72,7 +43,8 @@ const ChoosingSkillSection = () => {
       if (selectedSkill) {
         sessionStorage.setItem('player_skill', selectedSkill);
       }
-      router.push(`/play/game/${pin}`, { state: { question: data } });
+      sessionStorage.setItem('current_question', JSON.stringify(data));
+      router.push(`/play/game/${pin}`);
     };
 
     socket.on('lobby:skills-update', onSkillsUpdate);
@@ -129,7 +101,7 @@ const ChoosingSkillSection = () => {
       {/* Cards Container - Occupies the middle section filling full width */}
       <div className="relative z-10 flex flex-col w-full h-[65vh] md:h-[70vh] overflow-y-auto px-6 py-4 custom-scrollbar items-center justify-center">
         <div className="w-full max-w-[1200px] flex flex-col lg:flex-row gap-4 h-full lg:items-stretch lg:justify-center">
-          {skills.map((skill, index) => {
+          {SKILLS.map((skill, index) => {
             const locker = myTeamSkills[skill.id];
             const isLockedByTeammate = locker && locker.playerId !== playerId;
 
