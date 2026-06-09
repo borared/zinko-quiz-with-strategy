@@ -161,6 +161,15 @@ export default function HostLobby() {
   const [players, setPlayers] = useState([]);
   const [startCountdown, setStartCountdown] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyPin = useCallback(() => {
+    if (pin) {
+      navigator.clipboard.writeText(pin);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, [pin]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -171,7 +180,8 @@ export default function HostLobby() {
     const socket = getSocket();
     if (!socket || !isConnected) return;
 
-    socket.emit('host:initialize', { pin, quizId: location.state?.quizId });
+    const storedQuizId = sessionStorage.getItem(`game_${pin}_quizId`);
+    socket.emit('host:initialize', { pin, quizId: storedQuizId });
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
@@ -264,14 +274,16 @@ export default function HostLobby() {
       >
         {/* Game PIN */}
         <div
-          className="border-[4px] border-[#000000] rounded-xl py-2.5 flex flex-col items-center justify-center text-center w-full"
+          onClick={copyPin}
+          className="border-[4px] border-[#000000] rounded-xl py-2.5 flex flex-col items-center justify-center text-center w-full cursor-pointer hover:scale-105 transition-transform"
           style={{ backgroundColor: '#FFCD29', boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
+          title="Click to copy"
         >
           <p
             className="text-[10px] font-black uppercase tracking-[0.2em] mb-0.5"
             style={{ color: '#000000' }}
           >
-            Game PIN
+            {copied ? 'Copied!' : 'Game PIN'}
           </p>
           <p
             className="text-3xl md:text-4xl font-black tracking-wider leading-none"
