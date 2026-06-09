@@ -12,6 +12,7 @@ services:
       - PORT=5000
       - NODE_ENV=development
       - FRONTEND_URL=http://localhost:3000
+      - JWT_SECRET=fa294cb955fa4f185ad9af14507b41fc12bba611dcd59956c2209396c25adae4
       - SUPABASE_URL=https://hyfqsjidyxufsatveaih.supabase.co
       - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5ZnFzamlkeXh1ZnNhdHZlYWloIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODg1MTI2OCwiZXhwIjoyMDk0NDI3MjY4fQ.GddsczShASoZtHM4ofEtAeXR4FzRKGYJum0RvQXHb2A
       - CLERK_PUBLISHABLE_KEY=pk_test_Y29udGVudC1wYW5kYS02My5jbGVyay5hY2NvdW50cy5kZXYk

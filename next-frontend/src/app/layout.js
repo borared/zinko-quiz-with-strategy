@@ -11,8 +11,10 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // DEBUG: confirm env var is loaded server-side
+  console.log('[Layout] CLERK KEY:', process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? 'FOUND ✓' : 'MISSING ✗');
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <html lang="en">
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
