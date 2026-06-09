@@ -199,7 +199,9 @@ export default function PlayerLobby() {
         setStartCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(interval);
-            router.push('/choose-skill');
+            setTimeout(() => {
+              router.push('/choose-skill');
+            }, 0);
             return null;
           }
           return prev - 1;
