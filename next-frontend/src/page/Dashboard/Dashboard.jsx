@@ -5,14 +5,18 @@ import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
+import { useSocket } from '../../context/SocketContext';
 
 const Dashboard = () => {
   const { user, isLoaded } = useUser();
+  const { disconnectSocket } = useSocket();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
+    disconnectSocket();
+    
     const fetchQuizzes = async () => {
       if (!isLoaded) return;
       if (!user) {
@@ -31,7 +35,7 @@ const Dashboard = () => {
     };
 
     fetchQuizzes();
-  }, [user]);
+  }, [user, isLoaded, disconnectSocket]);
 
   return (
     <div className="flex bg-[#FFD54F] font-sans min-h-screen">

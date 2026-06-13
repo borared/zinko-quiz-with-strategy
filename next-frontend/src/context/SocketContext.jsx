@@ -44,6 +44,15 @@ export const SocketProvider = ({ children }) => {
     return socketRef.current;
   }, []);
 
+  const disconnectSocket = useCallback(() => {
+    if (socketRef.current) {
+      console.log('🔌 Manually disconnecting socket');
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setIsConnected(false);
+    }
+  }, []);
+
   // Ensure socket is created on mount and cleaned up on unmount
   useEffect(() => {
     getSocket();
@@ -58,8 +67,9 @@ export const SocketProvider = ({ children }) => {
   const value = useMemo(() => ({
     socket: socketRef.current,
     getSocket,
+    disconnectSocket,
     isConnected,
-  }), [getSocket, isConnected]);
+  }), [getSocket, disconnectSocket, isConnected]);
 
   return (
     <SocketContext.Provider value={value}>

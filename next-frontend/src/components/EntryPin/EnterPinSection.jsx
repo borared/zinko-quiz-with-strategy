@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-;
+import { useSocket } from '../../context/SocketContext';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
 
@@ -11,6 +11,11 @@ const EnterPinSection = () => {
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const router = useRouter();
+  const { disconnectSocket } = useSocket();
+
+  React.useEffect(() => {
+    disconnectSocket();
+  }, [disconnectSocket]);
 
   const triggerShake = () => {
     setIsShaking(true);
