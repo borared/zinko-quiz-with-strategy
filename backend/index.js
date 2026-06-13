@@ -1,18 +1,18 @@
-const http    = require('http');
+const http = require('http');
 const express = require('express');
-const cors    = require('cors');
+const cors = require('cors');
 const { Server } = require('socket.io');
 const { clerkMiddleware } = require('@clerk/express');
 require('dotenv').config();
 
-const authRoutes    = require('./routes/auth');
-const userRoutes    = require('./routes/user');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 const webhookRoutes = require('./routes/webhooks');
-const gameRoutes    = require('./routes/game');
+const gameRoutes = require('./routes/game');
 
 const { initSocketHandler } = require('./lib/socketHandler');
 
-const app  = express();
+const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
@@ -63,22 +63,31 @@ app.get('/', (req, res) => {
 app.get('/api/debug/me', (req, res) => {
   const { getAuth } = require('@clerk/express');
   const { userId } = getAuth(req);
-  res.json({ 
+  res.json({
     clerkUserId: userId || 'Not authenticated',
     message: 'This is your current Clerk user ID. Compare it with the creator_id in your database.'
   });
 });
 
-app.use('/api/auth',    authRoutes);
-app.use('/api/user',    userRoutes);
-app.use('/api/ai',      require('./routes/ai'));
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/ai', require('./routes/ai'));
 app.use('/api/quizzes', require('./routes/quiz'));
 app.use('/api/avatars', require('./routes/avatar'));
-app.use('/api/game',    gameRoutes);
+app.use('/api/game', gameRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found.' });
+});
+
+// ─── Global Error Handler ────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err.stack || err.message || err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong.'
+  });
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────

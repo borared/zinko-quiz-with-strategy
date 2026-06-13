@@ -1,8 +1,8 @@
-const AvatarModel = require('../models/avatarModel');
+const avatarService = require('../services/avatarService');
 
 const getAvatars = async (req, res) => {
   try {
-    const avatars = await AvatarModel.getAllAvatars();
+    const avatars = await avatarService.getAllAvatars();
     res.status(200).json({ success: true, data: avatars });
   } catch (error) {
     console.error('Error fetching avatars:', error.message);

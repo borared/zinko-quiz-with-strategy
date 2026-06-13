@@ -1,5 +1,31 @@
-const quizModel = require('../models/quizModel');
+const { z } = require('zod');
+const quizService = require('../services/quizService');
 const handleError = require('../lib/errorHandler');
+
+// ─── Zod Validation Schemas ──────────────────────────────────────────────────
+const answerSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  isCorrect: z.boolean(),
+  color: z.string().optional(),
+});
+
+const questionSchema = z.object({
+  id: z.string().optional(),
+  question_text: z.string().min(1, 'Question text is required'),
+  image_url: z.string().nullable().optional(),
+  answers: z.array(answerSchema).min(2, 'At least 2 answers required per question'),
+  time_limit: z.number().int().positive().optional().default(20),
+});
+
+const quizSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
+  creator_id: z.string().min(1, 'Creator ID is required'),
+  cover_image: z.string().nullable().optional(),
+  questions: z.array(questionSchema).min(1, 'At least 1 question is required'),
+});
+
+const updateQuizSchema = quizSchema.omit({ creator_id: true });
 
 /**
  * Handle POST /api/quizzes
@@ -7,13 +33,18 @@ const handleError = require('../lib/errorHandler');
  */
 const createQuiz = async (req, res) => {
   try {
-    const { title, creator_id, questions } = req.body;
-
-    if (!title || !creator_id || !questions) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    // Validate request body
+    const parsed = quizSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: parsed.error.issues 
+      });
     }
 
-    const quiz = await quizModel.createQuiz({ title, creator_id, questions, cover_image: req.body.cover_image });
+    const { title, creator_id, questions, cover_image } = parsed.data;
+
+    const quiz = await quizService.createQuiz({ title, creator_id, questions, cover_image });
     
     console.log(`✅ Quiz saved: ${quiz.title} by ${creator_id}`);
     res.status(201).json({ message: 'Quiz saved successfully', quiz });
@@ -28,7 +59,7 @@ const createQuiz = async (req, res) => {
  */
 const getAllQuizzesDebug = async (req, res) => {
   try {
-    const data = await quizModel.getAllQuizzesDebug();
+    const data = await quizService.getAllQuizzesDebug();
     
     res.json({ 
       total: data.length,
@@ -51,7 +82,7 @@ const getQuizzesByUser = async (req, res) => {
     const { userId } = req.params;
     console.log(`🔍 Fetching quizzes for user: "${userId}" (length: ${userId.length})`);
     
-    const data = await quizModel.getQuizzesByUserId(userId);
+    const data = await quizService.getQuizzesByUserId(userId);
     
     console.log(`✅ Found ${data.length} quizzes for user: ${userId}`);
     res.json(data);
@@ -67,7 +98,7 @@ const getQuizzesByUser = async (req, res) => {
 const getQuizById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await quizModel.getQuizById(id);
+    const data = await quizService.getQuizById(id);
     res.json(data);
   } catch (err) {
     handleError(res, 'Failed to fetch quiz', err);
@@ -81,9 +112,19 @@ const getQuizById = async (req, res) => {
 const updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, questions, cover_image } = req.body;
+    
+    // Validate request body
+    const parsed = updateQuizSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: parsed.error.issues 
+      });
+    }
 
-    await quizModel.updateQuiz(id, { title, questions, cover_image });
+    const { title, questions, cover_image } = parsed.data;
+
+    await quizService.updateQuiz(id, { title, questions, cover_image });
 
     res.json({ message: 'Quiz updated successfully' });
   } catch (err) {

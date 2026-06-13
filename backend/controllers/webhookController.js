@@ -1,5 +1,5 @@
 const { Webhook } = require('svix');
-const userModel = require('../models/userModel');
+const userService = require('../services/userService');
 
 /**
  * Handle POST /api/webhooks/clerk
@@ -42,12 +42,12 @@ const handleClerkWebhook = async (req, res) => {
     switch (type) {
       case 'user.created':
       case 'user.updated': {
-        const user = await userModel.upsertUser(data);
+        const user = await userService.upsertUser(data);
         console.log(`✅ User synced to Supabase: ${user.clerk_id}`);
         break;
       }
       case 'user.deleted': {
-        await userModel.deleteUser(data.id);
+        await userService.deleteUser(data.id);
         console.log(`🗑️  User deleted from Supabase: ${data.id}`);
         break;
       }

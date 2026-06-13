@@ -15,6 +15,7 @@
   "dependencies": {
     "@clerk/backend": "^3.4.11",
     "@clerk/express": "^2.1.15",
+    "@prisma/client": "5.22.0",
     "@supabase/supabase-js": "^2.105.4",
     "@zinko/shared": "*",
     "cors": "^2.8.6",
@@ -26,9 +27,11 @@
     "officeparser": "^6.1.1",
     "pdf-parse": "^2.4.5",
     "socket.io": "^4.8.3",
-    "svix": "^1.93.0"
+    "svix": "^1.93.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prisma": "5.22.0"
   }
 }

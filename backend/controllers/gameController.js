@@ -1,5 +1,5 @@
 const { createGame, getGame } = require('../lib/socketHandler');
-const gameModel = require('../models/gameModel');
+const gameService = require('../services/gameService');
 
 /**
  * Handle POST /api/game/host
@@ -14,7 +14,7 @@ const hostGame = async (req, res) => {
     if (!quizId) return res.status(400).json({ error: 'quizId is required.' });
 
     // Verify quiz belongs to the requesting user
-    const quiz = await gameModel.getQuizForGameHost(quizId);
+    const quiz = await gameService.getQuizForGameHost(quizId);
 
     if (!quiz) return res.status(404).json({ error: 'Quiz not found.' });
     if (quiz.creator_id !== userId) return res.status(403).json({ error: 'You do not own this quiz.' });
