@@ -8,6 +8,8 @@ import AnswerGrid from './AnswerGrid';
 import ResultOverlay from './ResultOverlay';
 import RabbitRush from './Skills/RabbitRush';
 import ButterflyEffect from './Skills/ButterflyEffect';
+import VaultBreakerPlayer from './VaultBreakerPlayer';
+import RewardWheel from '../HostGame/RewardWheel';
 
 export default function PlayerControllerUI() {
   const { pin } = useParams();
@@ -32,6 +34,12 @@ export default function PlayerControllerUI() {
   const [timeLeft, setTimeLeft]         = useState(20);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionTotal, setQuestionTotal] = useState(1);
+
+  const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
+  const [minigameData, setMinigameData] = useState({
+    vaultsToWin: 3, teamVaults: {}, playerButtons: {}, heldColors: { A: [], B: [] }, winner: null, players: []
+  });
+  const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
   // Skill states
   const [skillChargesLeft, setSkillChargesLeft] = useState(0);
@@ -125,6 +133,57 @@ export default function PlayerControllerUI() {
       router.push(`/play/result/${pin}`);
     };
 
+    const onMinigameStarted = ({ vaultsToWin, teamVaults, playerButtons, players }) => {
+      setPhase('MINIGAME_RACING');
+      setQuestion(null);
+      setMinigameData({ vaultsToWin, teamVaults, playerButtons, heldColors: { A: [], B: [] }, winner: null, players: players || [] });
+    };
+
+    const onMinigameProgress = ({ teamVaults, heldColors }) => {
+      setMinigameData(prev => ({ 
+        ...prev, 
+        teamVaults: teamVaults || prev.teamVaults, 
+        heldColors: heldColors || prev.heldColors 
+      }));
+    };
+
+    const onMinigameVaultCracked = ({ team, teamVaults }) => {
+      setMinigameData(prev => ({ ...prev, teamVaults: teamVaults || prev.teamVaults }));
+    };
+
+    const onMinigameFinished = ({ spinnerId, spinnerName, preSelectedRewardId }) => {
+      setMinigameSpinner({ id: spinnerId, name: spinnerName, preSelectedRewardId });
+      setPhase('MINIGAME_REWARD');
+    };
+
+    const onWheelSpinning = () => {
+      setIsWheelSpinning(true);
+    };
+
+    const onSyncState = (data) => {
+      setPhase(data.phase);
+      
+      if (data.currentQuestion) {
+        setQuestion(data.currentQuestion);
+        setTimeLeft(data.timeLeft || 20);
+        setQuestionIndex(data.currentQuestion.index);
+        setQuestionTotal(data.currentQuestion.total);
+        
+        if (data.currentQuestion.skillCharges && data.currentQuestion.skillCharges[team] && playerSkill) {
+          setSkillChargesLeft(data.currentQuestion.skillCharges[team][playerSkill]);
+        }
+      }
+      
+      if (data.hasAnswered) {
+        setSelectedId('synced-answer'); // Block answering again
+        if (data.phase === 'QUESTION') setPhase('ANSWERED');
+      }
+      
+      if (data.minigameData) {
+        setMinigameData(prev => ({ ...prev, ...data.minigameData }));
+      }
+    };
+
     socket.on('game:question', onQuestion);
     socket.on('game:timer-tick', onTimerTick);
     socket.on('player:answer-received', onAnswerReceived);
@@ -137,8 +196,14 @@ export default function PlayerControllerUI() {
     socket.on('game:butterfly-result', onButterflyResult);
     socket.on('game:rabbit-rush', onRabbitRush);
 
-    // Initial fetch to get the current question state just in case we joined slightly late
-    socket.emit('player:get-current-question', { pin });
+    socket.on('game:minigame-started', onMinigameStarted);
+    socket.on('game:minigame-progress', onMinigameProgress);
+    socket.on('game:minigame-finished', onMinigameFinished);
+    socket.on('game:wheel-spinning', onWheelSpinning);
+    socket.on('player:sync-state-response', onSyncState);
+
+    // Initial fetch to get the current game state in case of late join or browser refresh
+    socket.emit('player:sync-state', { pin, playerId: playerId.current });
 
     return () => {
       socket.off('game:question', onQuestion);
@@ -152,6 +217,12 @@ export default function PlayerControllerUI() {
       socket.off('game:fox-attack', onFoxAttack);
       socket.off('game:butterfly-result', onButterflyResult);
       socket.off('game:rabbit-rush', onRabbitRush);
+      
+      socket.off('game:minigame-started', onMinigameStarted);
+      socket.off('game:minigame-vault-cracked', onMinigameVaultCracked);
+      socket.off('game:minigame-finished', onMinigameFinished);
+      socket.off('game:wheel-spinning', onWheelSpinning);
+      socket.off('player:sync-state-response', onSyncState);
     };
   }, [pin, getSocket, router, team, playerSkill]);
 
@@ -178,6 +249,41 @@ export default function PlayerControllerUI() {
   // ── RESULT overlay ──
   if (phase === 'RESULT' && resultData) {
     return <ResultOverlay resultData={resultData} />;
+  }
+
+  // ── MINIGAME ──
+  if (phase === 'MINIGAME_RACING') {
+    const assignedColors = minigameData.playerButtons[playerId.current] || [];
+    return (
+      <VaultBreakerPlayer 
+        assignedColors={assignedColors}
+        onHold={(color) => {
+          const socket = getSocket();
+          if (socket) socket.emit('player:hold-button', { pin, playerId: playerId.current, color });
+        }}
+        onRelease={(color) => {
+          const socket = getSocket();
+          if (socket) socket.emit('player:release-button', { pin, playerId: playerId.current, color });
+        }}
+      />
+    );
+  }
+
+  if (phase === 'MINIGAME_REWARD') {
+    const isMe = minigameSpinner.id === playerId.current;
+    
+    return (
+      <RewardWheel 
+        pin={pin}
+        winnerTeam={minigameData.winner}
+        spinnerName={minigameSpinner.name}
+        isSpinner={isMe}
+        preSelectedRewardId={minigameSpinner.preSelectedRewardId}
+        externalSpinTrigger={isWheelSpinning}
+        onRewardClaimed={() => {}} // Host handles server transition
+        playerId={playerId.current}
+      />
+    );
   }
 
   return (

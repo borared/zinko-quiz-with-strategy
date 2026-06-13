@@ -8,6 +8,8 @@ import SkillPickPhase from "./SkillPickPhase";
 import QuestionPhase from "./QuestionPhase";
 import ResultPhase from "./ResultPhase";
 import LeaderboardPhase from "./LeaderboardPhase";
+import VaultBreakerHost from "./VaultBreakerHost";
+import RewardWheel from "./RewardWheel";
 
 export default function HostGameUI() {
   const { pin } = useParams();
@@ -28,6 +30,13 @@ export default function HostGameUI() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [isFinalLeaderboard, setIsFinalLeaderboard] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Minigame states
+  const [minigameData, setMinigameData] = useState({
+    tapsA: 0, tapsB: 0, targetA: 100, targetB: 100, winner: null, spinnerName: "",
+    playerTaps: {}, players: []
+  });
+  const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
   // Re-register as host if socket reconnects
   useEffect(() => {
@@ -110,12 +119,55 @@ export default function HostGameUI() {
       setPhase("LEADERBOARD");
     };
 
+    const onMinigameStarted = ({ vaultsToWin, teamVaults, playerButtons, players }) => {
+      setMinigameData({ 
+        vaultsToWin, 
+        teamVaults, 
+        playerButtons, 
+        heldColors: { A: [], B: [] },
+        winner: null, 
+        spinnerName: "", 
+        players: players || [] 
+      });
+      setIsWheelSpinning(false);
+      setPhase("MINIGAME_RACING");
+    };
+
+    const onMinigameProgress = ({ teamVaults, heldColors }) => {
+      setMinigameData(prev => ({ ...prev, teamVaults: teamVaults || prev.teamVaults, heldColors: heldColors || prev.heldColors }));
+    };
+
+    const onMinigameVaultCracked = ({ team, teamVaults }) => {
+      setMinigameData(prev => ({ ...prev, teamVaults: teamVaults || prev.teamVaults }));
+      // Optional: Play sound effect here
+    };
+
+    const onMinigameFinished = ({ spinnerId, spinnerName, preSelectedRewardId }) => {
+      setMinigameData(prev => ({ ...prev, spinnerName, spinnerId, preSelectedRewardId }));
+      setPhase("MINIGAME_REWARD");
+    };
+
+    const onWheelSpinning = () => {
+      setIsWheelSpinning(true);
+    };
+
+    const onRewardClaimed = () => {
+      // Resume the game by going to the next question
+      getSocket().emit("game:next-question", { pin });
+    };
+
     socket.on("game:question", onQuestion);
     socket.on("game:timer-tick", onTimerTick);
     socket.on("host:answer-progress", onAnswerProgress);
     socket.on("game:reveal-results", onRevealResults);
     socket.on("game:leaderboard", onLeaderboard);
     socket.on("game:finished", onFinished);
+    
+    socket.on("game:minigame-started", onMinigameStarted);
+    socket.on("game:minigame-progress", onMinigameProgress);
+    socket.on("game:minigame-vault-cracked", onMinigameVaultCracked);
+    socket.on("game:minigame-finished", onMinigameFinished);
+    socket.on("game:wheel-spinning", onWheelSpinning);
 
     return () => {
       socket.off("game:question", onQuestion);
@@ -124,8 +176,13 @@ export default function HostGameUI() {
       socket.off("game:reveal-results", onRevealResults);
       socket.off("game:leaderboard", onLeaderboard);
       socket.off("game:finished", onFinished);
+      socket.off("game:minigame-started", onMinigameStarted);
+      socket.off("game:minigame-progress", onMinigameProgress);
+      socket.off("game:minigame-vault-cracked", onMinigameVaultCracked);
+      socket.off("game:minigame-finished", onMinigameFinished);
+      socket.off("game:wheel-spinning", onWheelSpinning);
     };
-  }, [getSocket, TOTAL_TIME]);
+  }, [getSocket, TOTAL_TIME, pin]);
 
   const handleShowLeaderboard = useCallback(() => {
     if (isTransitioning) return;
@@ -136,8 +193,15 @@ export default function HostGameUI() {
   const handleNextQuestion = useCallback(() => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    getSocket().emit("game:next-question", { pin });
-  }, [pin, getSocket, isTransitioning]);
+
+    // If it's the end of Round 1 (assuming 5 questions per round, next index is 5)
+    // question object has 'index'. If question.index == 4, the next is 5.
+    if (question?.index === 4) {
+      getSocket().emit("host:start-minigame", { pin });
+    } else {
+      getSocket().emit("game:next-question", { pin });
+    }
+  }, [pin, getSocket, isTransitioning, question]);
 
   const handleEndGame = useCallback(() => {
     if (isTransitioning) return;
@@ -203,6 +267,29 @@ export default function HostGameUI() {
             isFinalLeaderboard={isFinalLeaderboard} 
             handleNextQuestion={handleNextQuestion} 
             handleEndGame={handleEndGame} 
+          />
+        )}
+
+        {phase === "MINIGAME_RACING" && minigameData.teamVaults && (
+          <VaultBreakerHost 
+            teamVaults={minigameData.teamVaults}
+            heldColors={minigameData.heldColors}
+            vaultsToWin={minigameData.vaultsToWin}
+            winner={minigameData.winner}
+          />
+        )}
+
+        {phase === "MINIGAME_REWARD" && (
+          <RewardWheel 
+            pin={pin}
+            winnerTeam={minigameData.winner}
+            spinnerName={minigameData.spinnerName}
+            isSpinner={false} // Host is never the spinner
+            preSelectedRewardId={minigameData.preSelectedRewardId}
+            externalSpinTrigger={isWheelSpinning}
+            onRewardClaimed={() => {
+              getSocket().emit("game:next-question", { pin });
+            }}
           />
         )}
       </AnimatePresence>
