@@ -1,6 +1,6 @@
 const supabase = require('../lib/supabaseClient');
 
-const AvatarModel = {
+const AvatarRepository = {
   // Fetch all avatars
   getAllAvatars: async () => {
     const { data, error } = await supabase
@@ -15,4 +15,4 @@ const AvatarModel = {
   }
 };
 
-module.exports = AvatarModel;
+module.exports = AvatarRepository;
