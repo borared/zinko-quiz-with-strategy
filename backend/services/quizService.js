@@ -25,10 +25,47 @@ const getAllQuizzesDebug = async () => {
   return await quizRepository.getAllQuizzesDebug();
 };
 
+const cloneQuiz = async (quizId, newCreatorId) => {
+  const originalQuiz = await quizRepository.getQuizById(quizId);
+  if (!originalQuiz) throw new Error("Quiz not found");
+
+  const clonedData = {
+    title: `${originalQuiz.title} (Clone)`,
+    creator_id: newCreatorId,
+    cover_image: originalQuiz.cover_image,
+    is_public: false,
+    is_cloned: true,
+    questions: originalQuiz.questions.map(q => ({
+      text: q.question_text,
+      image: q.image_url,
+      answers: q.answers,
+      round: q.round
+    }))
+  };
+
+  return await quizRepository.createQuiz(clonedData);
+};
+
+const getPublicQuizzes = async () => {
+  return await quizRepository.getPublicQuizzes();
+};
+
+const updateQuizVisibility = async (id, is_public) => {
+  return await quizRepository.updateQuizVisibility(id, is_public);
+};
+
+const deleteQuiz = async (id) => {
+  return await quizRepository.deleteQuiz(id);
+};
+
 module.exports = {
   createQuiz,
   updateQuiz,
   getQuizById,
   getQuizzesByUserId,
   getAllQuizzesDebug,
+  cloneQuiz,
+  getPublicQuizzes,
+  updateQuizVisibility,
+  deleteQuiz,
 };
