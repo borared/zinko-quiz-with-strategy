@@ -16,7 +16,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     disconnectSocket();
-    
+
     const fetchQuizzes = async () => {
       if (!isLoaded) return;
       if (!user) {
