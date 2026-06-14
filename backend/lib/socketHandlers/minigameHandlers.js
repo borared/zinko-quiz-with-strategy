@@ -106,7 +106,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         }
         
         game.minigameSpinnerId = spinnerId;
-        const rewardsList = ['SKILL_CHARGE', 'DOUBLE_POINTS', 'NOTHING'];
+        const rewardsList = ['SKILL_CHARGE', 'BONUS_POINTS_20', 'NOTHING'];
         game.preSelectedRewardId = rewardsList[Math.floor(Math.random() * rewardsList.length)];
 
         io.to(pin).emit('game:minigame-finished', { 
@@ -170,14 +170,23 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
      if (!game || game.hostSocketId !== socket.id) return;
      
      if (rewardType === 'SKILL_CHARGE') {
-       // Give a random skill charge
-       const skills = ['rabbit', 'fox', 'butterfly', 'frog'];
-       const randomSkill = skills[Math.floor(Math.random() * skills.length)];
+       // Give a random skill charge ONLY to a skill the team actually possesses
+       const teamSkillsObj = game.teamSkills[team] || {};
+       const activeSkillIds = Object.keys(teamSkillsObj);
+       
+       let randomSkill;
+       if (activeSkillIds.length > 0) {
+         randomSkill = activeSkillIds[Math.floor(Math.random() * activeSkillIds.length)];
+       } else {
+         const skills = ['rabbit', 'fox', 'butterfly', 'frog'];
+         randomSkill = skills[Math.floor(Math.random() * skills.length)];
+       }
+       
        game.skillCharges[team][randomSkill] += 1;
        io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'SKILL_CHARGE', detail: randomSkill });
-     } else if (rewardType === 'DOUBLE_POINTS') {
-       game.activeMultiplier = { team, multiplier: 2, durationRounds: 1 };
-       io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'DOUBLE_POINTS' });
+     } else if (rewardType === 'BONUS_POINTS_20') {
+       game.activeMultiplier = { team, multiplier: 1.2, durationRounds: 1 };
+       io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'BONUS_POINTS_20' });
      } else {
        io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'NOTHING' });
      }
