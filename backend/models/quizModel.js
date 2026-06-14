@@ -17,6 +17,7 @@
  * @property {string|null} cover_image
  * @property {string} creator_id
  * @property {boolean} is_public
+ * @property {boolean} is_cloned
  * @property {Question[]} questions
  * @property {Date} created_at
  * @property {Date} updated_at
