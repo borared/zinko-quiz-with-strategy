@@ -36,16 +36,16 @@ const createQuiz = async (req, res) => {
     // Validate request body
     const parsed = quizSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: parsed.error.issues 
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: parsed.error.issues
       });
     }
 
     const { title, creator_id, questions, cover_image } = parsed.data;
 
     const quiz = await quizService.createQuiz({ title, creator_id, questions, cover_image });
-    
+
     console.log(`✅ Quiz saved: ${quiz.title} by ${creator_id}`);
     res.status(201).json({ message: 'Quiz saved successfully', quiz });
   } catch (err) {
@@ -60,8 +60,8 @@ const createQuiz = async (req, res) => {
 const getAllQuizzesDebug = async (req, res) => {
   try {
     const data = await quizService.getAllQuizzesDebug();
-    
-    res.json({ 
+
+    res.json({
       total: data.length,
       quizzes: data.map(q => ({
         ...q,
@@ -81,9 +81,9 @@ const getQuizzesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
     console.log(`🔍 Fetching quizzes for user: "${userId}" (length: ${userId.length})`);
-    
+
     const data = await quizService.getQuizzesByUserId(userId);
-    
+
     console.log(`✅ Found ${data.length} quizzes for user: ${userId}`);
     res.json(data);
   } catch (err) {
@@ -112,13 +112,13 @@ const getQuizById = async (req, res) => {
 const updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Validate request body
     const parsed = updateQuizSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: parsed.error.issues 
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: parsed.error.issues
       });
     }
 
@@ -132,10 +132,77 @@ const updateQuiz = async (req, res) => {
   }
 };
 
+/**
+ * Handle GET /api/quizzes/public
+ * Fetch public quizzes
+ */
+const getPublicQuizzes = async (req, res) => {
+  try {
+    const data = await quizService.getPublicQuizzes();
+    res.json(data);
+  } catch (err) {
+    handleError(res, 'Failed to fetch public quizzes', err);
+  }
+};
+
+/**
+ * Handle POST /api/quizzes/:id/clone
+ * Clone a public quiz
+ */
+const cloneQuiz = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newCreatorId } = req.body;
+    if (!newCreatorId) {
+      return res.status(400).json({ error: 'newCreatorId is required in body' });
+    }
+    const clonedQuiz = await quizService.cloneQuiz(id, newCreatorId);
+    res.status(201).json({ message: 'Quiz cloned successfully', quiz: clonedQuiz });
+  } catch (err) {
+    handleError(res, 'Failed to clone quiz', err);
+  }
+};
+
+/**
+ * Handle PATCH /api/quizzes/:id/visibility
+ * Toggle is_public status
+ */
+const updateVisibility = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_public } = req.body;
+    if (typeof is_public !== 'boolean') {
+      return res.status(400).json({ error: 'is_public boolean is required' });
+    }
+    await quizService.updateQuizVisibility(id, is_public);
+    res.json({ message: 'Quiz visibility updated successfully' });
+  } catch (err) {
+    handleError(res, 'Failed to update visibility', err);
+  }
+};
+
+/**
+ * Handle DELETE /api/quizzes/:id
+ * Delete a quiz
+ */
+const deleteQuiz = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await quizService.deleteQuiz(id);
+    res.json({ message: 'Quiz deleted successfully' });
+  } catch (err) {
+    handleError(res, 'Failed to delete quiz', err);
+  }
+};
+
 module.exports = {
   createQuiz,
   getAllQuizzesDebug,
   getQuizzesByUser,
   getQuizById,
   updateQuiz,
+  getPublicQuizzes,
+  cloneQuiz,
+  updateVisibility,
+  deleteQuiz,
 };
