@@ -74,17 +74,17 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-8 p-4 bg-slate-900 relative">
       <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-      
+
       <div className="relative z-10 text-center mb-4">
-         <h2 className="gasoek-one-regular text-4xl text-zk-yellow drop-shadow-md">
-           HOLD YOUR COLORS!
-         </h2>
-         <p className="font-zk-bold text-white/80 mt-2 text-lg">
-           Communicate with your team to crack the vault.
-         </p>
-         <p className="font-zk-bold text-white/50 mt-1 text-sm">
-           On desktop, press and hold the matching keys!
-         </p>
+        <h2 className="gasoek-one-regular text-4xl text-zk-yellow drop-shadow-md">
+          HOLD YOUR COLORS!
+        </h2>
+        <p 
+          className="font-bold text-white/90 mt-2 text-3xl"
+          style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+        >
+          Communicate with your team to crack the vault.
+        </p>
       </div>
 
       <div className="relative z-10 flex flex-wrap justify-center gap-6 w-full max-w-sm">
@@ -93,32 +93,48 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
           return (
             <motion.button
               key={color}
-              whileTap={{ scale: 0.9, y: 8 }}
-              animate={isPressedViaKey ? { scale: 0.9, y: 8 } : { scale: 1, y: 0 }}
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[6px] border-black shadow-[0_12px_0_0_#000] focus:outline-none flex flex-col items-center justify-center"
+              initial={{ scale: 1, x: 0, y: 0, boxShadow: "10px 10px 0px 0px rgba(0,0,0,1)" }}
+              whileHover={{ scale: 1.05, x: -2, y: -2, boxShadow: "14px 14px 0px 0px rgba(0,0,0,1)" }}
+              whileTap={{ scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
+              animate={isPressedViaKey 
+                ? { scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" } 
+                : { scale: 1 }}
+              className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-[6px] border-zk-black focus:outline-none flex flex-col items-center justify-center transition-colors"
               style={{ backgroundColor: COLOR_MAP[color] }}
               onPointerDown={(e) => {
-                 if (isPressedViaKey) return;
-                 e.currentTarget.setPointerCapture(e.pointerId);
-                 onHold(color);
+                if (isPressedViaKey) return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                onHold(color);
               }}
               onPointerUp={(e) => {
-                 if (isPressedViaKey) return;
-                 e.currentTarget.releasePointerCapture(e.pointerId);
-                 onRelease(color);
+                if (isPressedViaKey) return;
+                e.currentTarget.releasePointerCapture(e.pointerId);
+                onRelease(color);
               }}
               onPointerCancel={() => {
-                 if (!isPressedViaKey) onRelease(color);
+                if (!isPressedViaKey) onRelease(color);
               }}
               onContextMenu={preventDefault}
             >
-               <span className="font-zk-bold text-black/40 text-2xl drop-shadow-sm uppercase flex flex-col items-center">
-                 {color}
-                 <span className="text-sm mt-1 bg-black/20 text-black/80 px-2 py-1 rounded">Key: {color[0]}</span>
-               </span>
+              {/* Empty button, just color and border */}
             </motion.button>
           );
         })}
+      </div>
+
+      {/* Bottom Right Instruction */}
+      <div 
+        className="absolute bottom-6 right-6 z-20 text-right text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+        style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+      >
+        <p className="text-3xl font-bold mb-2">Desktop Keys:</p>
+        <div className="flex flex-col items-end gap-2">
+          {assignedColors.map(c => (
+            <span key={c} className="text-2xl bg-zk-black text-white border-2 border-white px-3 py-1 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]">
+              Hold <strong className="text-zk-yellow">{c[0]}</strong> for {c}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
