@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { Upload, Loader, Sparkles, X } from 'lucide-react';
 
-import { useQuiz } from '../../context/QuizContext';
+import { useQuizStore } from '@/store/useQuizStore';
+import { useToastStore } from '@/store/useToastStore';
 
 const AiSidebar = ({ isOpen, onClose }) => {
-  const { handleGenerateQuiz } = useQuiz();
+  const { handleGenerateQuiz } = useQuizStore();
+  const { showToast } = useToastStore();
   const [file, setFile] = useState(null);
   const [prompt, setPrompt] = useState('');
   const [numQuestions, setNumQuestions] = useState(8);
@@ -30,7 +32,7 @@ const AiSidebar = ({ isOpen, onClose }) => {
     setError('');
     
     try {
-      await handleGenerateQuiz(file, prompt, numQuestions);
+      await handleGenerateQuiz(file, prompt, numQuestions, showToast);
       setPrompt('');
       setFile(null);
       onClose(); // Auto-close on success

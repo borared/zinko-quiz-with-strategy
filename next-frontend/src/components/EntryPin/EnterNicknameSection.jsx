@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 ;
 import AvatarSelector from './AvatarSelector';
-import { useSocket } from '../../context/SocketContext';
-import { useToast } from '../../context/ToastContext';
+import { useSocketStore } from '@/store/useSocketStore';
+import { useToastStore } from '@/store/useToastStore';
 import api from '../../services/api';
 
 
@@ -19,8 +19,8 @@ const EnterNicknameSection = () => {
   const [loadingAvatars, setLoadingAvatars] = useState(true);
   const router = useRouter();
 
-  const { getSocket } = useSocket();
-  const { showToast } = useToast();
+  const { getSocket } = useSocketStore();
+  const { showToast } = useToastStore();
 
   useEffect(() => {
     const loadAvatars = async () => {

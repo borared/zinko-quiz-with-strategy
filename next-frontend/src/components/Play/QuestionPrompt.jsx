@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSkillConfig } from '../../config/skills';
+import { Lock } from 'lucide-react';
 
 export default function QuestionPrompt({ 
   phase, 
@@ -46,15 +47,15 @@ export default function QuestionPrompt({
                   <button 
                     onClick={handleUseSkill}
                     disabled={isInactive}
-                    className={`flex items-center justify-center gap-2 px-8 py-3 rounded-full font-black uppercase border-b-4 text-xl tracking-widest transition-transform mx-auto ${
+                    className={`flex items-center justify-center gap-3 px-8 py-3 rounded-full font-black uppercase border-[4px] border-zk-black transition-all mx-auto ${
                       isInactive
-                        ? 'bg-gray-700 border-gray-900 text-white/50 cursor-not-allowed'
-                        : `${config.buttonColor} ${config.buttonBorder} text-white active:translate-y-1 active:border-b-0 hover:scale-105`
+                        ? 'bg-gray-700 text-white/50 cursor-not-allowed'
+                        : `${config.buttonColor} text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:brightness-110`
                     }`}
-                    style={(!isInactive) ? { boxShadow: `0 0 20px ${config.buttonShadow}` } : {}}
+                    style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.2rem', letterSpacing: '2px' }}
                   >
-                    <Icon className="w-6 h-6" />
-                    <span>{isSkillLockedOut ? skillLockoutMsg : `USE ${config.name.toUpperCase()} (${skillChargesLeft})`}</span>
+                    <Icon className="w-8 h-8" />
+                    <span style={{ paddingTop: '4px' }}>{isSkillLockedOut ? skillLockoutMsg : `USE ${config.name.toUpperCase()} (${skillChargesLeft})`}</span>
                   </button>
                 );
               })()
@@ -72,11 +73,19 @@ export default function QuestionPrompt({
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-center"
+            className="flex flex-col items-center justify-center mt-4"
           >
-            <div className="text-5xl mb-3">⏳</div>
-            <p className="text-white font-black text-xl">Answer locked in!</p>
-            <p className="text-white/40 text-sm mt-1 uppercase tracking-widest">Waiting for results...</p>
+            <div className="bg-zk-black border-[4px] border-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] rounded-3xl px-12 py-8 flex flex-col items-center text-center">
+              <motion.div
+                initial={{ rotate: -10 }}
+                animate={{ rotate: 10 }}
+                transition={{ repeat: Infinity, duration: 0.5, repeatType: "reverse", ease: "easeInOut" }}
+              >
+                <Lock className="w-16 h-16 text-zk-yellow" />
+              </motion.div>
+              <p className="text-white font-black mt-4 uppercase leading-none" style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '3rem', letterSpacing: '2px' }}>Answer locked in!</p>
+              <p className="text-white/60 font-bold text-sm mt-3 uppercase tracking-[0.3em]">Waiting for results...</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

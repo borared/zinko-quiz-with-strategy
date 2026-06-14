@@ -29,9 +29,9 @@ const WhyThis = () => {
   return (
     <section className="bg-white py-24 px-4 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
-        
+
         {/* Title */}
-        <h2 className="gasoek-one-regular text-3xl md:text-4xl font-bold text-zk-black mb-16 text-center">
+        <h2 className="gasoek-one-regular text-3xl md:text-5xl font-bold text-zk-black mb-16 text-center">
           Why choose Zinko for engagement
         </h2>
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 ;
-import { useSocket } from '../../context/SocketContext';
+import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
 
@@ -164,11 +164,11 @@ function VsCard() {
 export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
-  const { getSocket, isConnected } = useSocket();
+  const { getSocket, isConnected } = useSocketStore();
 
-  const nickname = sessionStorage.getItem('player_nickname') || 'Player';
-  const team     = sessionStorage.getItem('player_team') || 'A';
-  const playerId = sessionStorage.getItem('player_id');
+  const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
+  const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
+  const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
 
   const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
   const [players, setPlayers] = useState([]);

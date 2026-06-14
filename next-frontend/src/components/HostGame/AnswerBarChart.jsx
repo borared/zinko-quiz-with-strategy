@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check } from 'lucide-react';
 
 const ANSWER_COLORS = [
   { bg: "#5D3FD3", label: "A", text: "white" },   // Purple
@@ -14,7 +15,7 @@ export default function AnswerBarChart({ stats, revealed }) {
   const maxCount = Math.max(1, ...stats.map((s) => s.count));
 
   return (
-    <div className="flex items-end justify-center gap-6 h-40">
+    <div className="flex items-end justify-center gap-6 min-h-[220px]">
       {stats.map((s, i) => {
         const color = ANSWER_COLORS[i] || ANSWER_COLORS[0];
         const pct = (s.count / maxCount) * 100;
@@ -45,7 +46,9 @@ export default function AnswerBarChart({ stats, revealed }) {
                 }}
               >
                 {s.isCorrect && revealed && (
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-2xl">✅</div>
+                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#27AE60] text-white w-8 h-8 rounded-lg flex items-center justify-center border-[2px] border-zk-black shadow-[2px_2px_0_#000]">
+                    <Check size={20} strokeWidth={4} />
+                  </div>
                 )}
               </motion.div>
             </div>

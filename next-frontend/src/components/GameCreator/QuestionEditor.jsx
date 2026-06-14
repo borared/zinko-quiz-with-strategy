@@ -1,10 +1,11 @@
 "use client";
 import React from 'react';
-import { Image, Clock, Star, Settings } from 'lucide-react';
-import { useQuiz } from '../../context/QuizContext';
+import { Image, Clock, Star, Settings, Trash2 } from 'lucide-react';
+import { useQuizStore } from '@/store/useQuizStore';
 
 const QuestionEditor = () => {
-  const { questions, activeQuestion, activeRound, updateActiveQuestion } = useQuiz();
+  const { questions, activeQuestionId, activeRound, updateActiveQuestion, deleteQuestion } = useQuizStore();
+  const activeQuestion = questions.find(q => q.id === activeQuestionId);
 
   if (!activeQuestion) {
     return (
@@ -21,7 +22,16 @@ const QuestionEditor = () => {
     <div className="flex flex-col gap-6 p-6 bg-white/90 backdrop-blur-lg border-[3px] border-zk-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       {/* Question Title */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {questionNumber}</label>
+        <div className="flex justify-between items-center">
+          <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {questionNumber}</label>
+          <button 
+            onClick={() => deleteQuestion(activeQuestion.id)}
+            className="flex items-center gap-1.5 text-[#E74C3C] border-[2px] border-[#E74C3C] hover:bg-[#E74C3C] hover:text-white px-3 py-1.5 rounded-lg transition-all font-black text-sm uppercase tracking-widest"
+          >
+            <Trash2 size={18} strokeWidth={3} />
+            Delete
+          </button>
+        </div>
         <textarea 
           value={activeQuestion.text || ''}
           onChange={(e) => updateActiveQuestion({ text: e.target.value })}

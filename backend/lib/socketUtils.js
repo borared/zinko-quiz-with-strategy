@@ -92,10 +92,20 @@ function revealResults(io, pin, games) {
       }
     }
 
+    // Minigame Bonus Points modifier
+    const activeMultiplier = game.activeMultiplier;
+    let bonusPointsApplied = false;
+    if (activeMultiplier && activeMultiplier.team === player.team && activeMultiplier.durationRounds > 0 && isCorrect) {
+      points *= activeMultiplier.multiplier;
+      points = Math.round(points);
+      bonusPointsApplied = true;
+    }
+
     player.score += points;
     player.lastPoints = points;
     player.lastCorrect = isCorrect;
     player.rabbitBonusApplied = rabbitBonusApplied;
+    player.bonusPointsApplied = bonusPointsApplied;
     player.stolenPoints = 0; // reset
   });
 
@@ -136,6 +146,7 @@ function revealResults(io, pin, games) {
       pointsEarned: player.lastPoints,
       totalScore: player.score,
       rabbitBonusApplied: player.rabbitBonusApplied,
+      bonusPointsApplied: player.bonusPointsApplied,
       stolenPoints: player.stolenPoints,
     });
   });
@@ -145,6 +156,14 @@ function revealResults(io, pin, games) {
     stats,
     leaderboard: getLeaderboard(game.players).slice(0, 5),
   });
+
+  // 4. Decrement active multiplier
+  if (game.activeMultiplier && game.activeMultiplier.durationRounds > 0) {
+    game.activeMultiplier.durationRounds -= 1;
+    if (game.activeMultiplier.durationRounds <= 0) {
+      game.activeMultiplier = null;
+    }
+  }
 }
 
 module.exports = {

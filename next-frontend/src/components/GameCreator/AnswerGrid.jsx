@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useCallback, memo } from 'react';
 import { Check, Image as ImageIcon } from 'lucide-react';
-import { useQuiz } from '../../context/QuizContext';
+import { useQuizStore } from '@/store/useQuizStore';
 
 const AnswerGrid = memo(() => {
-  const { activeQuestion, updateActiveQuestion } = useQuiz();
+  const { questions, activeQuestionId, updateActiveQuestion } = useQuizStore();
+  const activeQuestion = questions.find(q => q.id === activeQuestionId);
   const [focusedAnswerId, setFocusedAnswerId] = useState(null);
 
   // ── All hooks MUST be above any early return (Rules of Hooks) ─────────────

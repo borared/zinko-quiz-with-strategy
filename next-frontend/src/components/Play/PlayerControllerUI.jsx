@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useSocket } from '@/context/SocketContext';
+import { useSocketStore } from '@/store/useSocketStore';
 import PlayHeader from './PlayHeader';
 import QuestionPrompt from './QuestionPrompt';
 import AnswerGrid from './AnswerGrid';
@@ -14,12 +14,12 @@ import RewardWheel from '../HostGame/RewardWheel';
 export default function PlayerControllerUI() {
   const { pin } = useParams();
   const router = useRouter();
-  const { getSocket } = useSocket();
+  const { getSocket } = useSocketStore();
 
-  const playerId  = useRef(sessionStorage.getItem('player_id') || 'unknown');
-  const nickname  = sessionStorage.getItem('player_nickname') || 'Player';
-  const playerSkill = sessionStorage.getItem('player_skill') || null;
-  const team        = sessionStorage.getItem('player_team') || 'A';
+  const playerId  = useRef(typeof window !== 'undefined' ? sessionStorage.getItem('player_id') || 'unknown' : 'unknown');
+  const nickname  = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
+  const playerSkill = typeof window !== 'undefined' ? sessionStorage.getItem('player_skill') || null : null;
+  const team        = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
 
   const [question, setQuestion]         = useState(() => {
     if (typeof window !== 'undefined') {
@@ -161,7 +161,8 @@ export default function PlayerControllerUI() {
     };
 
     const onSyncState = (data) => {
-      setPhase(data.phase);
+      const clientPhase = data.phase === 'QUESTION' ? 'PLAYING' : data.phase;
+      setPhase(clientPhase);
       
       if (data.currentQuestion) {
         setQuestion(data.currentQuestion);
@@ -176,7 +177,7 @@ export default function PlayerControllerUI() {
       
       if (data.hasAnswered) {
         setSelectedId('synced-answer'); // Block answering again
-        if (data.phase === 'QUESTION') setPhase('ANSWERED');
+        if (clientPhase === 'PLAYING') setPhase('ANSWERED');
       }
       
       if (data.minigameData) {
@@ -282,6 +283,7 @@ export default function PlayerControllerUI() {
         externalSpinTrigger={isWheelSpinning}
         onRewardClaimed={() => {}} // Host handles server transition
         playerId={playerId.current}
+        isHost={false}
       />
     );
   }

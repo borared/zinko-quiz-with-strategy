@@ -43,7 +43,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
       <div className="flex flex-col items-center justify-center relative w-full h-full px-8">
         
         {/* Team Header */}
-        <h2 className="gasoek-one-regular text-5xl mb-6 text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+        <h2 className="gasoek-one-regular text-5xl mb-6 text-white tracking-widest">
           TEAM {teamName}
         </h2>
 
@@ -71,7 +71,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
 
         {/* The Vault Graphic */}
         <motion.div 
-          className="relative w-64 h-64 md:w-80 md:h-80 bg-[#cbd5e1] rounded-3xl border-[8px] border-black shadow-[0_12px_0_0_#000] flex items-center justify-center overflow-hidden"
+          className="relative w-64 h-64 md:w-80 md:h-80 bg-[#cbd5e1] rounded-3xl border-[8px] border-black flex items-center justify-center overflow-hidden"
           animate={{
             x: shakeIntensity ? [0, -shakeIntensity, shakeIntensity, -shakeIntensity, 0] : 0,
             y: shakeIntensity ? [0, shakeIntensity, -shakeIntensity, shakeIntensity, 0] : 0,
@@ -109,7 +109,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
         {/* Progress Bar below vault */}
         <div className="mt-12 w-full max-w-sm h-10 border-[4px] border-black bg-slate-800 rounded-full overflow-hidden relative">
            <motion.div 
-             className="h-full bg-zk-green"
+             className="h-full bg-[#3b82f6]"
              initial={{ width: 0 }}
              animate={{ width: `${progressPerc}%` }}
              transition={{ type: "spring", stiffness: 50 }}
@@ -146,11 +146,11 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
         }}
       />
 
-      <div className="relative z-10 text-center py-8">
-         <h1 className="gasoek-one-regular text-zk-yellow text-5xl md:text-6xl drop-shadow-[0_4px_0_#000]">
-           SYNCHRONIZATION OVERLOAD
+      <div className="relative z-10 text-center py-8 mt-4">
+         <h1 className="gasoek-one-regular text-zk-yellow text-5xl md:text-6xl tracking-wider">
+           Vaults Cracker
          </h1>
-         <p className="font-zk-bold text-white text-2xl mt-4">
+         <p className="text-white text-4xl mt-4 opacity-90" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
            Hold the right combination to crack the vaults!
          </p>
       </div>

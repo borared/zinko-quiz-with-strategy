@@ -1,25 +1,60 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter, useParams } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import Sidebar from '../../components/GameCreator/Sidebar';
 import QuestionEditor from '../../components/GameCreator/QuestionEditor';
 import AnswerGrid from '../../components/GameCreator/AnswerGrid';
 import AiSidebar from '../../components/GameCreator/AiSidebar';
 import { Wand2, Image, Upload, Link as LinkIcon, X, AlertCircle } from 'lucide-react';
-import { QuizProvider, useQuiz } from '../../context/QuizContext';
+import { useQuizStore } from '@/store/useQuizStore';
+import { useToastStore } from '@/store/useToastStore';
 
 const GameCreatorContent = () => {
+  const router = useRouter();
+  const { quizId } = useParams();
+  const { user } = useUser();
+  const { showToast } = useToastStore();
+
   const {
     quizTitle, setQuizTitle,
     coverImage, setCoverImage,
     activeRound, setActiveRound,
-    questions, handleSaveQuiz,
-    isSaving, loading
-  } = useQuiz();
+    questions, handleSaveQuiz, fetchQuiz,
+    isSaving, loading, undoDelete, activeQuestionId
+  } = useQuizStore();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        const activeEl = document.activeElement;
+        const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+        
+        if (!isInput) {
+          e.preventDefault();
+          undoDelete();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undoDelete]);
+
+  useEffect(() => {
+    if (quizId) {
+      fetchQuiz(quizId, showToast);
+    }
+  }, [quizId, fetchQuiz, showToast]);
 
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const onSave = () => {
+    handleSaveQuiz(quizId, user?.id, router, showToast);
+  };
 
   if (loading) {
     return (
@@ -77,7 +112,7 @@ const GameCreatorContent = () => {
 
           <div className="flex items-center gap-4">
             <button
-              onClick={handleSaveQuiz}
+              onClick={onSave}
               disabled={isSaving}
               className="bg-[#00C853] text-white border-[3px] border-zk-black px-6 py-2 font-black text-sm uppercase tracking-wider rounded-xl transition-all hover:translate-y-[2px] hover:translate-x-[2px] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
             >
@@ -133,8 +168,31 @@ const GameCreatorContent = () => {
                 })}
               </div>
 
-              <QuestionEditor />
-              <AnswerGrid />
+              <AnimatePresence mode="wait">
+                {activeQuestionId ? (
+                  <motion.div
+                    key={activeQuestionId}
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ type: "spring", stiffness: 700, damping: 20, mass: 0.8 }}
+                    className="flex flex-col gap-8"
+                  >
+                    <QuestionEditor />
+                    <AnswerGrid />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex-1 flex items-center justify-center p-12 bg-white/40 backdrop-blur-md border-[3px] border-dashed border-zk-black rounded-xl"
+                  >
+                    <p className="font-black text-2xl text-zk-black/30 uppercase tracking-tighter">Select or Add a question to get started</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Sticky AI Assistant Toggle */}
@@ -225,9 +283,9 @@ const GameCreatorContent = () => {
 };
 
 const GameCreator = () => (
-  <QuizProvider>
+  <>
     <GameCreatorContent />
-  </QuizProvider>
+  </>
 );
 
 export default GameCreator;

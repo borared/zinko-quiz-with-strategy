@@ -32,24 +32,24 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
 
         {/* Top bar: Question counter | Timer | Answered */}
         <div className="flex items-center justify-between mb-4">
-          <div className="bg-white border-[3px] border-zk-black shadow-[4px_4px_0_#000] rounded-xl px-5 py-2 text-center">
-            <span className="text-zk-black/50 text-xs font-black uppercase tracking-widest">
+          <div className="bg-zk-black border-[3px] border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-xl px-6 py-3 text-left">
+            <span className="text-white/50 text-xs font-black uppercase tracking-widest leading-none mb-1 block">
               Round {question.round || 1}
             </span>
-            <p className="text-zk-black font-black text-xl whitespace-nowrap">
+            <p className="text-white font-black leading-none" style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.2rem', letterSpacing: '1px', paddingTop: '4px' }}>
               Match {question.match || 1}
             </p>
           </div>
 
           <CountdownRing timeLeft={timeLeft} total={totalTime} />
 
-          <div className="bg-white border-[3px] border-zk-black shadow-[4px_4px_0_#000] rounded-xl px-5 py-2 text-right">
-            <span className="text-zk-black/50 text-xs font-black uppercase tracking-widest">
+          <div className="bg-zk-black border-[3px] border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-xl px-6 py-3 text-right">
+            <span className="text-white/50 text-xs font-black uppercase tracking-widest leading-none mb-1 block">
               Answered
             </span>
-            <p className="text-zk-black font-black text-xl">
+            <p className="text-white font-black leading-none" style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.2rem', letterSpacing: '1px', paddingTop: '4px' }}>
               <motion.span key={answered}>{answered}</motion.span>
-              <span className="text-zk-black/30"> / {total || "—"}</span>
+              <span className="text-white/40"> / {total || "—"}</span>
             </p>
           </div>
         </div>

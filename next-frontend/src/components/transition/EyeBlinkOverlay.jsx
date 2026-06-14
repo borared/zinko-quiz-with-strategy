@@ -1,11 +1,13 @@
 "use client";
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePageTransition } from '../../context/TransitionContext';
+import { useTransitionStore } from '@/store/useTransitionStore';
+import { useRouter } from 'next/navigation';
 
 const lidEase = [0.76, 0, 0.24, 1];
 
 const EyeBlinkOverlay = () => {
-  const { phase, onCloseDone, onOpenDone } = usePageTransition();
+  const router = useRouter();
+  const { phase, onCloseDone, onOpenDone } = useTransitionStore();
 
   const isVisible = phase === 'closing' || phase === 'opening';
   const isClosing = phase === 'closing';
@@ -33,7 +35,7 @@ const EyeBlinkOverlay = () => {
             onAnimationComplete={(definition) => {
               // When the top lid finishes CLOSING (reached 'visible' = center)
               if (definition === 'visible') {
-                onCloseDone();
+                onCloseDone(router);
               }
             }}
           >

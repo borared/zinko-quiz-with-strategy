@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useSocket } from "../../context/SocketContext";
+import { useSocketStore } from '@/store/useSocketStore';
 
 const SkillTimer = () => {
   const [timeLeft, setTimeLeft] = useState(120);
-  const { getSocket, isConnected } = useSocket();
+  const { getSocket, isConnected } = useSocketStore();
 
   useEffect(() => {
     const socket = getSocket();

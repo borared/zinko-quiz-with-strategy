@@ -1,11 +1,11 @@
 "use client";
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { usePageTransition } from '../../context/TransitionContext';
-import { useSocket } from '../../context/SocketContext';
+import { useTransitionStore } from '@/store/useTransitionStore';
+import { useSocketStore } from '@/store/useSocketStore';
 import { useRouter } from 'next/navigation';
 ;
-import { useToast } from '../../context/ToastContext';
+import { useToastStore } from '@/store/useToastStore';
 import TeamHeader from './TeamHeader';
 import TeamCard from './TeamCard';
 import PlayerCount from './PlayerCount';
@@ -37,10 +37,10 @@ function getOrCreatePlayerId() {
 const ChooseTeamSection = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [joining, setJoining] = useState(false);
-  const { blinkTo } = usePageTransition();
-  const { getSocket } = useSocket();
+  const { blinkTo } = useTransitionStore();
+  const { getSocket } = useSocketStore();
   const router = useRouter();
-  const { showToast } = useToast();
+  const { showToast } = useToastStore();
 
   const countA = 12;
   const countB = 14;
