@@ -1,10 +1,11 @@
 "use client";
 import React, { useMemo, memo } from 'react';
 import { Plus } from 'lucide-react';
-import { useQuiz } from '../../context/QuizContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useQuizStore } from '@/store/useQuizStore';
 
 const Sidebar = memo(() => {
-  const { questions, activeQuestionId, activeRound, handleAddQuestion, setActiveQuestionId } = useQuiz();
+  const { questions, activeQuestionId, activeRound, handleAddQuestion, setActiveQuestionId } = useQuizStore();
 
   // Only re-compute when questions or activeRound changes
   const roundQuestions = useMemo(
@@ -19,19 +20,26 @@ const Sidebar = memo(() => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-4 flex flex-col gap-4">
-        {roundQuestions.map((q, index) => (
-          <div
-            key={q.id}
-            onClick={() => setActiveQuestionId(q.id)}
-            className={`relative p-4 border-[3px] border-zk-black rounded-lg cursor-pointer transition-transform hover:translate-y-[2px] hover:translate-x-[2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${q.id === activeQuestionId ? 'bg-[#5D3FD3] text-white' : 'bg-white text-zk-black'
-              }`}
-          >
-            <div className="absolute -top-3 -left-2 bg-zk-black text-white text-xs font-bold px-1 py-0.5 rounded">
-              Q{index + 1}
-            </div>
-            <p className="font-bold text-sm truncate">{q.text || 'Untitled Question'}</p>
-          </div>
-        ))}
+        <AnimatePresence>
+          {roundQuestions.map((q, index) => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.9, height: 0 }}
+              animate={{ opacity: 1, scale: 1, height: 'auto' }}
+              exit={{ opacity: 0, scale: 0.8, x: -50, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.2 }}
+              key={q.id}
+              onClick={() => setActiveQuestionId(q.id)}
+              className={`relative p-4 border-[3px] border-zk-black rounded-lg cursor-pointer transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${q.id === activeQuestionId ? 'bg-[#5D3FD3] text-white' : 'bg-white text-zk-black'
+                }`}
+            >
+              <div className="absolute -top-3 -left-2 bg-zk-black text-white text-xs font-bold px-1 py-0.5 rounded">
+                Q{index + 1}
+              </div>
+              <p className="font-bold text-sm truncate">{q.text || 'Untitled Question'}</p>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {/* Add Question Button inside the list */}
         <button
