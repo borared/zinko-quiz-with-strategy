@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSocket } from "@/context/SocketContext";
+import { useSocketStore } from '@/store/useSocketStore';
 import { AnimatePresence } from "framer-motion";
 
 import SkillPickPhase from "./SkillPickPhase";
@@ -14,7 +14,7 @@ import RewardWheel from "./RewardWheel";
 export default function HostGameUI() {
   const { pin } = useParams();
   const router = useRouter();
-  const { getSocket, isConnected } = useSocket();
+  const { getSocket, isConnected } = useSocketStore();
 
   const TOTAL_TIME = 20;
 
@@ -290,6 +290,7 @@ export default function HostGameUI() {
             onRewardClaimed={() => {
               getSocket().emit("game:next-question", { pin });
             }}
+            isHost={true}
           />
         )}
       </AnimatePresence>

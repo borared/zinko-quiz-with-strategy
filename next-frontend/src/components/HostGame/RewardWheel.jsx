@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
-import { useSocket } from "@/context/SocketContext";
+import { useSocketStore } from '@/store/useSocketStore';
+import confetti from "canvas-confetti";
 
 const REWARDS = [
-  { id: "DOUBLE_POINTS", label: "x2 Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
+  { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
   { id: "SKILL_CHARGE",  label: "Skill Charge!", sublabel: "+1 Charge", color: "#22c55e", textColor: "#ffffff" },
   { id: "NOTHING",       label: "Nothing!", sublabel: "Better luck next time", color: "#EF4444", textColor: "#ffffff" },
 ];
@@ -28,13 +29,7 @@ function WheelSVG({ rotation }) {
 
   return (
     <svg viewBox="0 0 400 400" width="100%" height="100%">
-      <defs>
-        <filter id="wheel-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="rgba(0,0,0,0.6)" />
-        </filter>
-      </defs>
-
-      <g transform={`rotate(${rotation}, ${cx}, ${cy})`} filter="url(#wheel-shadow)">
+      <g transform={`rotate(${rotation}, ${cx}, ${cy})`}>
         {REWARDS.map((reward, i) => {
           const startAngle = i * SEGMENT_ANGLE - 90;
           const endAngle = startAngle + SEGMENT_ANGLE;
@@ -67,7 +62,7 @@ function WheelSVG({ rotation }) {
                 style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
               >
                 <tspan x={tx} dy="-10">{reward.label}</tspan>
-                <tspan x={tx} dy="24" fontSize="14" fontWeight="700" opacity="0.85">{reward.sublabel}</tspan>
+                <tspan x={tx} dy="24" fontSize="20" fontWeight="bold" opacity="0.9" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '1px' }}>{reward.sublabel}</tspan>
               </text>
             </g>
           );
@@ -99,12 +94,12 @@ function WheelSVG({ rotation }) {
   );
 }
 
-export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, preSelectedRewardId, externalSpinTrigger, onRewardClaimed, playerId }) {
+export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, preSelectedRewardId, externalSpinTrigger, onRewardClaimed, playerId, isHost }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const rotationRef = React.useRef(0); // avoid stale closure
   const [wonReward, setWonReward] = useState(null);
-  const { getSocket } = useSocket();
+  const { getSocket } = useSocketStore();
 
   // When another client spins (externalSpinTrigger), trigger the spin visually
   useEffect(() => {
@@ -152,7 +147,17 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
       const reward = REWARDS[winIndex];
       setWonReward(reward);
 
-      if (isSpinner) {
+      if (reward.id !== "NOTHING") {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          zIndex: 100,
+          colors: ['#FFCD29', '#ffffff', '#22c55e', '#ef4444']
+        });
+      }
+
+      if (isHost) {
         const socket = getSocket();
         if (socket) {
           socket.emit("host:claim-minigame-reward", {
@@ -176,29 +181,21 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
   };
 
   return (
-    <div className="absolute inset-0 z-50 overflow-hidden flex flex-col items-center justify-center" style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)" }}>
-
-      {/* Spinning sunburst */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vmax] h-[200vmax] opacity-15 pointer-events-none"
-        style={{ backgroundImage: "repeating-conic-gradient(from 0deg, transparent 0deg 10deg, white 10deg 20deg)", animation: "spin 60s linear infinite" }}
-      />
+    <div className="absolute inset-0 z-50 overflow-hidden flex flex-col items-center justify-center bg-zk-blue">
 
       {/* Header */}
-      <div className="z-10 mb-6 text-center px-8 py-4 rounded-3xl border-[5px] border-black shadow-[0_8px_0_0_#000]" style={{ background: "#FFCD29" }}>
-        <h2 className="gasoek-one-regular text-black uppercase tracking-wide flex items-center gap-3 justify-center" style={{ fontSize: "2.5rem", lineHeight: 1 }}>
-          <Trophy size={40} strokeWidth={3} className="text-black" />
+      <div className="z-10 mb-6 text-center px-8 flex flex-col items-center">
+        <h2 className="gasoek-one-regular text-white drop-shadow-md uppercase tracking-wide flex items-center gap-3 justify-center" style={{ fontSize: "3rem", lineHeight: 1 }}>
+          <Trophy size={40} strokeWidth={3} className="text-zk-yellow drop-shadow-sm" />
           Team {winnerTeam} Wins!
         </h2>
-        <p className="font-zk-bold text-black/80 text-lg mt-1">
-          {wonReward
-            ? `Reward: ${wonReward.label}`
-            : isSpinning
-            ? "Spinning..."
-            : isSpinner
-            ? "Tap the wheel to spin!"
-            : `Waiting for ${spinnerName} to spin...`}
-        </p>
+        <div className="h-12 mt-2 flex items-center justify-center">
+          {wonReward && (
+            <p className="text-white font-bold text-4xl drop-shadow-sm" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+              Reward: {wonReward.label}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Wheel area */}
@@ -219,7 +216,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
 
         {/* The wheel */}
         <motion.div
-          className="w-[340px] h-[340px] md:w-[420px] md:h-[420px] rounded-full border-[10px] border-black shadow-[0_16px_48px_rgba(0,0,0,0.6)] cursor-pointer relative"
+          className="w-[340px] h-[340px] md:w-[420px] md:h-[420px] rounded-full border-[10px] border-black cursor-pointer relative"
           animate={{ rotate: rotation }}
           transition={{ duration: 5.5, ease: [0.05, 0.95, 0.2, 1.0] }}
           onClick={handleSpinClick}
@@ -235,38 +232,54 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 px-8 py-3 rounded-2xl border-[4px] border-black shadow-[0_6px_0_0_#000] font-zk-bold text-xl text-black uppercase tracking-widest"
-            style={{ background: "#FFCD29" }}
+            className="mt-8 font-bold text-4xl text-white uppercase tracking-widest drop-shadow-md"
+            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
-            👆 TAP THE WHEEL TO SPIN!
+            TAP THE WHEEL TO SPIN!
           </motion.div>
         )}
       </div>
 
-      {/* Result banner */}
+      {/* Results and Controls */}
       {wonReward && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 15 }}
-          className="z-20 mt-6 px-10 py-5 rounded-3xl border-[5px] border-black shadow-[0_10px_0_0_#000] text-center"
-          style={{ background: wonReward.color }}
-        >
-          <p className="gasoek-one-regular uppercase tracking-wider text-4xl" style={{ color: wonReward.textColor }}>
-            {wonReward.label}
-          </p>
-          <p className="font-zk-bold mt-1 text-lg opacity-90" style={{ color: wonReward.textColor }}>
-            {wonReward.sublabel}
-          </p>
-          {!isSpinner && !externalSpinTrigger /* host logic trick */ && (
-            <button
-              onClick={onRewardClaimed}
-              className="mt-4 px-8 py-3 bg-[#1e3a8a] text-white font-zk-bold text-xl rounded-xl border-[4px] border-black shadow-[0_5px_0_0_#000] hover:-translate-y-1 active:translate-y-1 active:shadow-none transition-all"
+        <>
+          {/* Floating Reward Tag at Bottom Right */}
+          <motion.div
+            initial={{ x: 50, opacity: 0, rotate: 2 }} 
+            animate={{ x: 0, opacity: 1, rotate: 2, y: [0, -8, 0] }} 
+            transition={{ 
+              x: { type: 'spring', stiffness: 200 },
+              opacity: { duration: 0.5 },
+              y: { repeat: Infinity, duration: 2.2, ease: "easeInOut" }
+            }}
+            className="absolute bottom-6 right-6 z-20 px-8 py-4 rounded-3xl border-[5px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center"
+            style={{ background: wonReward.color }}
+          >
+            <p className="gasoek-one-regular uppercase tracking-wider text-4xl" style={{ color: wonReward.textColor }}>
+              {wonReward.label}
+            </p>
+            <p className="font-bold mt-1 text-3xl opacity-90" style={{ color: wonReward.textColor, fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+              {wonReward.sublabel}
+            </p>
+          </motion.div>
+
+          {/* Centered Continue Button for Host */}
+          {isHost && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 z-20"
             >
-              Continue Game →
-            </button>
+              <button
+                onClick={onRewardClaimed}
+                className="px-10 py-3 bg-[#1e3a8a] text-white text-4xl font-bold rounded-2xl border-[4px] border-black shadow-[0_6px_0_0_#000] hover:-translate-y-1 active:translate-y-[6px] active:shadow-none transition-all tracking-widest drop-shadow-sm"
+                style={{ fontFamily: 'var(--font-amatic-sc)' }}
+              >
+                Continue Game →
+              </button>
+            </motion.div>
           )}
-        </motion.div>
+        </>
       )}
     </div>
   );
