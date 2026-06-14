@@ -34,6 +34,8 @@ model quizzes {
   id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String      @default("Untitled Quiz")
   creator_id  String
+  is_public   Boolean?    @default(false)
+  is_cloned   Boolean?    @default(false)
   created_at  DateTime?   @default(now()) @db.Timestamptz(6)
   updated_at  DateTime?   @default(now()) @db.Timestamptz(6)
   cover_image String?

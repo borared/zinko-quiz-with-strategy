@@ -4,7 +4,7 @@ const supabase = require('../lib/supabaseClient');
  * Save a full quiz and its questions to Supabase.
  */
 const createQuiz = async (quizData) => {
-  const { title, creator_id, questions, cover_image } = quizData;
+  const { title, creator_id, questions, cover_image, is_public = false, is_cloned = false } = quizData;
 
   // 1. Insert the Quiz Metadata
   const { data: quiz, error: quizError } = await supabase
@@ -13,6 +13,8 @@ const createQuiz = async (quizData) => {
       title,
       creator_id,
       cover_image: cover_image || null,
+      is_public,
+      is_cloned,
       updated_at: new Date().toISOString()
     })
     .select()
@@ -115,10 +117,78 @@ const getAllQuizzesDebug = async () => {
   return data;
 };
 
+/**
+ * Fetch all public quizzes with creator details.
+ */
+const getPublicQuizzes = async () => {
+  const { data: quizzes, error: quizError } = await supabase
+    .from('quizzes')
+    .select('*, questions(*)')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false });
+
+  if (quizError) throw quizError;
+  if (!quizzes || quizzes.length === 0) return [];
+
+  const creatorIds = [...new Set(quizzes.map(q => q.creator_id))];
+  const { data: users, error: usersError } = await supabase
+    .from('users')
+    .select('clerk_id, first_name, last_name, username')
+    .in('clerk_id', creatorIds);
+
+  if (usersError) throw usersError;
+
+  const usersMap = {};
+  if (users) {
+    users.forEach(u => {
+      usersMap[u.clerk_id] = u;
+    });
+  }
+
+  return quizzes.map(q => ({
+    ...q,
+    creator: usersMap[q.creator_id] || null,
+  }));
+};
+
+/**
+ * Update the visibility of a quiz.
+ */
+const updateQuizVisibility = async (id, is_public) => {
+  const { data, error } = await supabase
+    .from('quizzes')
+    .update({ is_public, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Delete a quiz.
+ */
+const deleteQuiz = async (id) => {
+  // Delete questions first
+  await supabase.from('questions').delete().eq('quiz_id', id);
+
+  const { error } = await supabase
+    .from('quizzes')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+};
+
 module.exports = {
   createQuiz,
   updateQuiz,
   getQuizById,
   getQuizzesByUserId,
   getAllQuizzesDebug,
+  getPublicQuizzes,
+  updateQuizVisibility,
+  deleteQuiz,
 };

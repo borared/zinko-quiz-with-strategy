@@ -170,6 +170,12 @@ const Navbar = () => {
             CLASSPIN
           </a>
           <a
+            onClick={() => router.push('/discovery')}
+            className={getLinkClass('/discovery')}
+          >
+            DISCOVERY
+          </a>
+          <a
             onClick={() => router.push('/dashboard')}
             className={getLinkClass('/dashboard')}
           >
