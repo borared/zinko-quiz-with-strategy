@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 ;
-import { useSocket } from '../../context/SocketContext';
+import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
 import QRCodePackage from 'react-qr-code';
@@ -155,7 +155,7 @@ export default function HostLobby() {
   const { pin } = useParams();
   const location = usePathname();
   const router = useRouter();
-  const { getSocket, isConnected } = useSocket();
+  const { getSocket, isConnected } = useSocketStore();
 
   const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
   const [players, setPlayers] = useState([]);
