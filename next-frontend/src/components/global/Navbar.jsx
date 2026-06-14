@@ -37,7 +37,7 @@ const Navbar = () => {
   const getLinkClass = (path) => {
     // Basic active check based on pathname
     const isActive = pathname?.startsWith(path) && path !== '/';
-    
+
     // For exact matching (like pricing)
     const isExact = pathname === path;
 
@@ -54,7 +54,7 @@ const Navbar = () => {
   // Don't block the whole navbar, just the auth buttons
   const renderAuthButtons = () => {
     if (!isLoaded) return <div className="w-20 h-8 bg-gray-100 animate-pulse rounded-lg" />;
-    
+
     if (isSignedIn) {
       return (
         <div className="flex items-center gap-6">
@@ -127,13 +127,13 @@ const Navbar = () => {
 
     return (
       <>
-        <button 
+        <button
           onClick={() => router.push('/join')}
           className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
         >
           JOIN
         </button>
-        <button 
+        <button
           onClick={() => router.push('/signup')}
           className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
         >
@@ -145,11 +145,11 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
-      
+
       {/* Left: Logo */}
       <div className="flex items-center gap-8">
-        <a 
-          href="/" 
+        <a
+          href="/"
           className="bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-1 flex items-center justify-center transform transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
         >
           <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
@@ -185,7 +185,7 @@ const Navbar = () => {
       {/* Sign Out Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200]">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -194,18 +194,20 @@ const Navbar = () => {
             <h3 className="text-2xl font-bold mb-2 text-zk-black permanent-marker-regular">SIGN OUT?</h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold">Are you sure you want to sign out of your account?</p>
             <div className="flex gap-4 w-full">
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 CANCEL
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setShowModal(false);
                   signOut();
                 }}
-                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 SURE!
               </button>
