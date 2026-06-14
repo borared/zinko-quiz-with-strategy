@@ -11,14 +11,13 @@ services:
     environment:
       - PORT=5000
       - NODE_ENV=development
-      - FRONTEND_URL=http://localhost:3000
-      - JWT_SECRET=fa294cb955fa4f185ad9af14507b41fc12bba611dcd59956c2209396c25adae4
-      - SUPABASE_URL=https://hyfqsjidyxufsatveaih.supabase.co
-      - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5ZnFzamlkeXh1ZnNhdHZlYWloIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODg1MTI2OCwiZXhwIjoyMDk0NDI3MjY4fQ.GddsczShASoZtHM4ofEtAeXR4FzRKGYJum0RvQXHb2A
-      - CLERK_PUBLISHABLE_KEY=pk_test_Y29udGVudC1wYW5kYS02My5jbGVyay5hY2NvdW50cy5kZXYk
-      - CLERK_SECRET_KEY=sk_test_IZCKj9g5sLGcTR5ycXtkSTdxDHMLRfgkEpIR0WwGJZ
-      - CLERK_WEBHOOK_SECRET=whsec_hYmlvBb7oVPFHPN5YrgkgV+n7slXICtm
-      - GROQ_API_KEY=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
+      - FRONTEND_URL=http://localhost:5173
+      # Add your environment variables here or use .env file
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SVIX_WEBHOOK_SECRET=${SVIX_WEBHOOK_SECRET}
     volumes:
       - ./backend:/app/backend
       - ./packages/shared:/app/packages/shared
@@ -30,21 +29,18 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: next-frontend/Dockerfile
-    container_name: zinko-next-frontend
+      dockerfile: frontend/Dockerfile
+    container_name: zinko-frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000
-      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y29udGVudC1wYW5kYS02My5jbGVyay5hY2NvdW50cy5kZXYk
-      - CLERK_SECRET_KEY=sk_test_IZCKj9g5sLGcTR5ycXtkSTdxDHMLRfgkEpIR0WwGJZ
-      - NEXT_PUBLIC_SUPABASE_URL=https://hyfqsjidyxufsatveaih.supabase.co
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5ZnFzamlkeXh1ZnNhdHZlYWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTEyNjgsImV4cCI6MjA5NDQyNzI2OH0.FKmLk0OQmK2lqJXh1P5pX6Y8Z9L0M1N2O3P4Q5R6S7T
+      - VITE_API_URL=http://localhost:5000
+      - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
     volumes:
-      - ./next-frontend:/app/next-frontend
+      - ./frontend:/app/frontend
       - ./packages/shared:/app/packages/shared
       - /app/node_modules
-      - /app/next-frontend/node_modules
+      - /app/frontend/node_modules
     networks:
       - zinko-network
 

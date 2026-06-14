@@ -173,14 +173,6 @@ const Navbar = () => {
           >
             DASHBOARD
           </a>
-          {isSignedIn && (
-            <a
-              onClick={() => navigate('/discovery')}
-              className={getLinkClass('/discovery')}
-            >
-              DISCOVERY
-            </a>
-          )}
         </div>
       </div>
 

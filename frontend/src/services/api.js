@@ -56,33 +56,6 @@ const api = {
     }
     return response.json();
   },
-
-  patch: async (endpoint, data) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
-    }
-    return response.json();
-  },
-
-  delete: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method: 'DELETE',
-      headers: { ...getAuthHeaders() },
-      credentials: 'include',
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
-    }
-    return response.json();
-  },
 };
 
 export default api;

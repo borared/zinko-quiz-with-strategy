@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Zap, Cloud, Eye, Target } from "lucide-react";
+import { Sword, Shield, HelpCircle, VenetianMask } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../context/SocketContext";
 import SkillHeader from "./SkillHeader";
@@ -15,32 +15,32 @@ const bounceIn = () => ({
 
 const skills = [
   {
-    id: "rabbit",
-    name: "The Rabbit",
-    icon: Zap,
-    skillDescription: "Adrenaline Rush: 2x Points (5s)",
-    color: "#F39C12" // Orange/Yellow
+    id: "sapper",
+    name: "Sapper",
+    icon: Sword,
+    skillDescription: "50% ATK on 1 Enemy",
+    color: "#FF4B4B"
   },
   {
-    id: "fox",
-    name: "The Fox",
-    icon: Cloud,
-    skillDescription: "Smokescreen: Blind Enemies (5s)",
-    color: "#E74C3C" // Red
+    id: "guardian",
+    name: "Guardian",
+    icon: Shield,
+    skillDescription: "Block All Enemy Skills",
+    color: "#3B68FF"
   },
   {
-    id: "butterfly",
-    name: "The Butterfly",
-    icon: Eye,
-    skillDescription: "Oracle: Remove 2 Wrong Answers",
-    color: "#9B59B6" // Purple
+    id: "trickster",
+    name: "Trickster",
+    icon: HelpCircle,
+    skillDescription: "Swap Skill with Enemy",
+    color: "#9b59b6"
   },
   {
-    id: "frog",
-    name: "The Frog",
-    icon: Target,
-    skillDescription: "Sticky Tongue: Steal 50% Enemy Points",
-    color: "#27AE60" // Green
+    id: "illusionist",
+    name: "Illusionist",
+    icon: VenetianMask,
+    skillDescription: "Swap Avatar (Trick Enemy)",
+    color: "#27AE60"
   },
 ];
 

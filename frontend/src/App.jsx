@@ -25,7 +25,6 @@ const Signin = lazy(() => import("./components/Authentication/Signin"));
 const PricingPanel = lazy(() => import("./page/PricingPanel/PricingPanel"));
 const GameCreator = lazy(() => import("./page/GameCreator/GameCreator"));
 const Dashboard = lazy(() => import("./page/Dashboard/Dashboard"));
-const Discovery = lazy(() => import("./page/Discovery/Discovery"));
 const SSOCallbackView = lazy(
   () => import("./page/Authentication/SSOCallbackView"),
 );
@@ -136,7 +135,6 @@ function AppInner() {
             <Route path="/create-game" element={<GameCreator />} />
             <Route path="/create-game/:quizId" element={<GameCreator />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/discovery" element={<Discovery />} />
 
             {/* ── Player join flow ── */}
             <Route path="/join" element={<EnterPin />} />

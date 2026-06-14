@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useSocket } from '../../context/SocketContext';
 import { motion } from 'framer-motion';
@@ -164,8 +164,7 @@ export default function HostLobby() {
     const socket = getSocket();
     if (!socket || !isConnected) return;
 
-    const quizId = location.state?.quizId || sessionStorage.getItem(`game_${pin}_quizId`);
-    socket.emit('host:initialize', { pin, quizId });
+    socket.emit('host:initialize', { pin, quizId: location.state?.quizId });
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
@@ -185,8 +184,6 @@ export default function HostLobby() {
     };
   }, [getSocket, isConnected, pin, location.state]);
 
-  const pendingNavigate = useRef(false);
-
   const handleStartGame = useCallback(() => {
     if (players.length === 0) return;
     const socket = getSocket();
@@ -199,20 +196,13 @@ export default function HostLobby() {
       setStartCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          pendingNavigate.current = true;
-          return 0;
+          navigate(`/host/game/${pin}`, { state: location.state });
+          return null;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [players.length, getSocket, isConnected, pin]);
-
-  useEffect(() => {
-    if (startCountdown === 0 && pendingNavigate.current) {
-      pendingNavigate.current = false;
-      navigate(`/host/game/${pin}`, { state: location.state });
-    }
-  }, [startCountdown, navigate, pin, location.state]);
+  }, [players.length, navigate, pin, location.state, getSocket, isConnected]);
 
   const gameUrl = `${window.location.origin}/join?pin=${pin}`;
   const teamAPlayers = players.filter((p) => p.team === 'A');

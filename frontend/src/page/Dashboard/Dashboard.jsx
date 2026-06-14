@@ -32,16 +32,6 @@ const Dashboard = () => {
     fetchQuizzes();
   }, [user]);
 
-  const handleDelete = async (quizId) => {
-    try {
-      await api.delete(`/api/quizzes/${quizId}`);
-      setQuizzes(quizzes.filter(q => q.id !== quizId));
-    } catch (err) {
-      console.error('Failed to delete quiz:', err);
-      alert('Failed to delete quiz: ' + err.message);
-    }
-  };
-
   return (
     <div className="flex bg-[#FFD54F] font-sans min-h-screen">
       {/* Left Sidebar */}
@@ -54,7 +44,7 @@ const Dashboard = () => {
           <WelcomeBanner totalQuizzes={quizzes.length} />
 
           {/* Recent Quizzes */}
-          <QuizGrid quizzes={quizzes} loading={loading} onDelete={handleDelete} />
+          <QuizGrid quizzes={quizzes} loading={loading} />
           {fetchError && (
             <div className="text-red-600 font-bold mt-4">Unable to load your quizzes: {fetchError}</div>
           )}

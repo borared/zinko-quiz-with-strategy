@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useSocket } from "../../context/SocketContext";
 
 const SkillTimer = () => {
-  const [timeLeft, setTimeLeft] = useState(60);
-  const { getSocket, isConnected } = useSocket();
+  const [timeLeft, setTimeLeft] = useState(120);
 
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket || !isConnected) return;
+    if (timeLeft <= 0) return;
 
-    const onTick = (data) => setTimeLeft(data.timeLeft);
-    socket.on("game:skill-timer-tick", onTick);
+    const timerId = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
 
-    return () => socket.off("game:skill-timer-tick", onTick);
-  }, [getSocket, isConnected]);
+    return () => clearInterval(timerId);
+  }, [timeLeft]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
