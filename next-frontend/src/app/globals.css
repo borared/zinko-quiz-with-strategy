@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&display=swap');
+@import "tailwindcss";
+
+
+:root {
+  --zk-yellow: #FFCD29;
+  --zk-blue: #3B68FF;
+  --zk-black: #000000;
+  --zk-white: #FFFFFF;
+}
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  
+  --color-zk-yellow: var(--zk-yellow);
+  --color-zk-blue: var(--zk-blue);
+  --color-zk-black: var(--zk-black);
+  --color-zk-white: var(--zk-white);
+}
+
+@layer base {
+  body {
+    @apply bg-zk-yellow text-zk-black antialiased font-sans;
+  }
+}
+
+.permanent-marker-regular {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.gasoek-one-regular {
+  font-family: "Gasoek One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@keyframes boing {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.04); }
+  60% { transform: scale(0.98); }
+  80% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@layer utilities {
+  .animate-boing {
+    animation: boing 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+}

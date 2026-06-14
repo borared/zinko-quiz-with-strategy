@@ -39,13 +39,26 @@ function initSocketHandler(io) {
           .order('order_index', { ascending: true });
 
         if (error) throw error;
-        game.questions = data;
-        console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${data.length} questions`);
-        socket.emit('host:initialized', { pin, questionCount: data.length, background: game.background });
+
+        // Randomize questions and cap at 15 for 3 rounds of 5 matches
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        game.questions = shuffled.slice(0, 15);
+
+        console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
+        socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
       } catch (err) {
         console.error('❌ Failed to load questions:', err.message);
         socket.emit('error', { message: 'Failed to load quiz questions.' });
       }
+    });
+
+    // ── host:reconnect ────────────────────────────────────────────────────────
+    socket.on('host:reconnect', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game) return;
+      game.hostSocketId = socket.id;
+      socket.join(pin);
+      console.log(`🔌 Host reconnected to game ${pin}`);
     });
 
     // ── player:join ───────────────────────────────────────────────────────────
@@ -133,6 +146,13 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       io.to(pin).emit('lobby:countdown-started');
     });
 
+    // ── host:skill-timer-sync ────────────────────────────────────────────────
+    socket.on('host:skill-timer-sync', ({ pin, timeLeft }) => {
+      const game = games.get(pin);
+      if (!game || game.hostSocketId !== socket.id) return;
+      io.to(pin).emit('game:skill-timer-tick', { timeLeft });
+    });
+
     // ── player:select-skill ──────────────────────────────────────────────────
     socket.on('player:select-skill', ({ pin, playerId, skillId, team, nickname, avatar }) => {
       const game = games.get(pin);
@@ -175,6 +195,9 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('game:start', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'LOBBY' && game.phase !== 'SKILL_PICK') {
+        return; // Prevent duplicate start calls
+      }
       if (game.players.length === 0) {
         socket.emit('error', { message: 'Need at least 1 player to start.' });
         return;
@@ -184,17 +207,33 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       game.currentQuestionIndex = 0;
       game.answers = {};
       game.answerTimes = {};
+      game.absoluteAnswerTimes = {};
+      
+      // Reset skill states for the new round
+      game.activeSkillThisRound = { A: null, B: null };
+      game.rabbitActive = { A: null, B: null };
+      game.foxActive = { A: null, B: null };
+      game.frogActive = { A: null, B: null };
+
+      if (!game.questions || game.questions.length === 0) {
+        console.error(`Game ${pin}: No questions available to start.`);
+        socket.emit('error', { message: 'No questions loaded for this game.' });
+        return;
+      }
 
       const question = game.questions[0];
       console.log(`▶️  Game ${pin} started — Q1`);
 
       io.to(pin).emit('game:question', {
         index: 0,
+        round: 1,
+        match: 1,
         total: game.questions.length,
-        questionText: question.question_text,
-        imageUrl: question.image_url,
-        answers: question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })),
+        questionText: question.question_text || '',
+        imageUrl: question.image_url || null,
+        answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
         timeSeconds: QUESTION_TIME_SECONDS,
+        skillCharges: game.skillCharges,
       });
 
       startTimer(io, pin, games);
@@ -204,6 +243,7 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('game:next-question', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'LEADERBOARD' && game.phase !== 'RESULT') return; // Must be on leaderboard or result to go to next question
 
       const nextIndex = game.currentQuestionIndex + 1;
 
@@ -220,19 +260,82 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       game.phase = 'QUESTION';
       game.answers = {};
       game.answerTimes = {};
+      game.absoluteAnswerTimes = {};
+      
+      // Reset skill states for the new round
+      game.activeSkillThisRound = { A: null, B: null };
+      game.rabbitActive = { A: null, B: null };
+      game.foxActive = { A: null, B: null };
+      game.frogActive = { A: null, B: null };
 
       const question = game.questions[nextIndex];
+      if (!question) {
+        console.error(`Game ${pin}: Next question not found.`);
+        return;
+      }
 
-      io.to(pin).emit('game:question', {
-        index: nextIndex,
-        total: game.questions.length,
-        questionText: question.question_text,
-        imageUrl: question.image_url,
-        answers: question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })),
-        timeSeconds: QUESTION_TIME_SECONDS,
-      });
+        io.to(pin).emit('game:question', {
+          index: nextIndex,
+          round: Math.floor(nextIndex / 5) + 1,
+          match: (nextIndex % 5) + 1,
+          total: game.questions.length,
+          questionText: question.question_text || '',
+          imageUrl: question.image_url || null,
+          answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
+          timeSeconds: QUESTION_TIME_SECONDS,
+          skillCharges: game.skillCharges,
+        });
 
       startTimer(io, pin, games);
+    });
+
+    // ── player:use-skill ──────────────────────────────────────────────────────
+    socket.on('player:use-skill', ({ pin, playerId, team, skillId, nickname }) => {
+      const game = games.get(pin);
+      if (!game || game.phase !== 'QUESTION') return;
+      
+      // Check if team already used a skill this round
+      if (game.activeSkillThisRound[team]) {
+        socket.emit('error', { message: 'Your team already used a skill this round!' });
+        return;
+      }
+      
+      // Check charges
+      if (game.skillCharges[team][skillId] <= 0) {
+        socket.emit('error', { message: 'Out of charges!' });
+        return;
+      }
+      
+      // Activate skill
+      game.skillCharges[team][skillId] -= 1;
+      game.activeSkillThisRound[team] = { skillId, playerId, nickname };
+      
+      // Broadcast lockout to the team
+      io.to(pin).emit(`game:skill-lockout`, { team, skillId, playerId, nickname });
+      
+      // Execute specific skill logic
+      if (skillId === 'rabbit') {
+        game.rabbitActive[team] = { startTime: Date.now(), timeLeftWhenActivated: game.timeLeft };
+        io.to(pin).emit('game:rabbit-rush', { team });
+      } 
+      else if (skillId === 'fox') {
+        game.foxActive[team] = true;
+        const enemyTeam = team === 'A' ? 'B' : 'A';
+        io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam });
+      } 
+      else if (skillId === 'butterfly') {
+        // Find 2 wrong answers
+        const question = game.questions[game.currentQuestionIndex];
+        const correctId = question.answers.find(a => a.checked)?.id;
+        const wrongAnswers = question.answers.filter(a => a.id !== correctId).map(a => a.id);
+        // Shuffle and pick 2
+        const removedAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2);
+        
+        io.to(pin).emit('game:butterfly-result', { team, removedAnswers });
+      } 
+      else if (skillId === 'frog') {
+        game.frogActive[team] = { playerId };
+      }
     });
 
     // ── player:submit-answer ──────────────────────────────────────────────────
@@ -243,6 +346,8 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
 
       game.answers[playerId] = answerId;
       game.answerTimes[playerId] = (QUESTION_TIME_SECONDS - (game.timeLeft || 0)) * 1000;
+      game.absoluteAnswerTimes = game.absoluteAnswerTimes || {};
+      game.absoluteAnswerTimes[playerId] = Date.now();
 
       const answeredCount = Object.keys(game.answers).length;
       const totalPlayers = game.players.length;
@@ -266,6 +371,7 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
     socket.on('host:show-leaderboard', ({ pin }) => {
       const game = games.get(pin);
       if (!game || game.hostSocketId !== socket.id) return;
+      if (game.phase !== 'RESULT') return; // Must be on result screen to show leaderboard
 
       game.phase = 'LEADERBOARD';
       const leaderboard = getLeaderboard(game.players);
@@ -276,7 +382,13 @@ socket.emit('player:joined', { success: true, nickname, avatar, team });
       });
     });
 
-    // ── disconnect ────────────────────────────────────────────────────────────
+    // ── host:end-game ─────────────────────────────────────────────────────────
+    socket.on('host:end-game', ({ pin }) => {
+      const game = games.get(pin);
+      if (!game || game.hostSocketId !== socket.id) return;
+      cleanupGame(pin);
+      console.log(`🗑️  Host explicitly ended game: ${pin}`);
+    });
     socket.on('disconnect', () => {
       console.log(`🔌 Socket disconnected: ${socket.id}`);
       // Mark player offline (don't remove — allow reconnect)
@@ -307,6 +419,14 @@ function createGame({ pin, quizId, hostUserId }) {
     answers: {},
     answerTimes: {},
     teamSkills: { A: {}, B: {} },
+    skillCharges: {
+      A: { rabbit: 2, fox: 2, butterfly: 2, frog: 2 },
+      B: { rabbit: 2, fox: 2, butterfly: 2, frog: 2 },
+    },
+    activeSkillThisRound: { A: null, B: null },
+    rabbitActive: { A: null, B: null },
+    foxActive: { A: null, B: null },
+    frogActive: { A: null, B: null },
     timeLeft: QUESTION_TIME_SECONDS,
     timer: null,
     createdAt: Date.now(),

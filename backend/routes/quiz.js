@@ -15,6 +15,12 @@ router.post('/', quizController.createQuiz);
 router.get('/debug/all', quizController.getAllQuizzesDebug);
 
 /**
+ * GET /api/quizzes/public
+ * Fetch all public quizzes
+ */
+router.get('/public', quizController.getPublicQuizzes);
+
+/**
  * GET /api/quizzes/user/:userId
  * Fetch all quizzes for a specific creator
  */
@@ -31,5 +37,13 @@ router.get('/:id', quizController.getQuizById);
  * Update an existing quiz
  */
 router.put('/:id', quizController.updateQuiz);
+
+/**
+ * PATCH /api/quizzes/:id/visibility
+ * Update an existing quiz visibility
+ */
+router.patch('/:id/visibility', quizController.updateVisibility);
+router.post('/:id/clone', quizController.cloneQuiz);
+router.delete('/:id', quizController.deleteQuiz);
 
 module.exports = router;
