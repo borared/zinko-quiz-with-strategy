@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Zap, Cloud, Eye, Target } from "lucide-react";
 import { useRouter } from 'next/navigation';
 ;
-import { useSocket } from "../../context/SocketContext";
+import { useSocketStore } from '@/store/useSocketStore';
 import SkillHeader from "./SkillHeader";
 import SkillCard from "./SkillCard";
 import SkillTimer from "./SkillTimer";
@@ -22,7 +22,7 @@ const ChoosingSkillSection = () => {
   const [teamSkills, setTeamSkills] = useState({});
   
   const router = useRouter();
-  const { getSocket } = useSocket();
+  const { getSocket } = useSocketStore();
   const pin = typeof window !== 'undefined' ? sessionStorage.getItem('game_pin') || '' : '';
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') || '' : '';
   const team = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';

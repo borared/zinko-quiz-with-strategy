@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSocket } from '../../context/SocketContext';
+import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
 
@@ -11,7 +11,7 @@ const EnterPinSection = () => {
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const router = useRouter();
-  const { disconnectSocket } = useSocket();
+  const { disconnectSocket } = useSocketStore();
 
   React.useEffect(() => {
     disconnectSocket();
@@ -61,7 +61,7 @@ const EnterPinSection = () => {
       // 🎵 Play the success sound
       window.gameAudio = new Audio('/audio/n2kstudio-music-for-game-fun-kid-game-163649.mp3');
       window.gameAudio.loop = true;
-      window.gameAudio.play().catch(() => {}); // handle autoplay block silently
+      window.gameAudio.play().catch(() => { }); // handle autoplay block silently
       window.dispatchEvent(new Event('audioStarted'));
 
       setTimeout(() => {
@@ -78,14 +78,14 @@ const EnterPinSection = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow w-full py-20 px-4 font-sans">
-      
+
       {/* Decorative Elements */}
       <div className="absolute top-12 left-12 md:top-24 md:left-32 w-16 h-16 md:w-24 md:h-24 rounded-full border-[3px] border-black/10 bg-black/5 pointer-events-none" />
       <div className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 border-[3px] border-black/10 bg-black/5 pointer-events-none" />
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center">
-        
+
         {/* Title */}
         <div className="text-center mb-8 permanent-marker-regular">
           <h2 className="text-4xl md:text-5xl font-bold text-zk-black mb-2 uppercase tracking-wide">
@@ -97,17 +97,17 @@ const EnterPinSection = () => {
         </div>
 
         {/* Card */}
-        <motion.div 
+        <motion.div
           animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
           transition={{ duration: 0.4 }}
           className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
         >
-          
+
           {/* Input Box */}
           <div className="w-full">
-            <input 
+            <input
               id="pin-input"
-              type="text" 
+              type="text"
               value={pin}
               onChange={handleInputChange}
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
@@ -125,11 +125,12 @@ const EnterPinSection = () => {
           )}
 
           {/* Enter Button */}
-          <button 
+          <button
             id="enter-pin-btn"
             onClick={handleEnter}
             disabled={loading || pin.length < 6}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl disabled:opacity-50 disabled:cursor-wait disabled:transform-none flex items-center justify-center gap-2"
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl disabled:opacity-50 disabled:cursor-wait disabled:transform-none flex items-center justify-center gap-2"
+            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {loading ? (
               <>
