@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FoxSmokescreen from './Skills/FoxSmokescreen';
 
 const ANSWER_BUTTONS = [
-  { shape: '▲', bg: 'bg-[#E74C3C]', activeBg: 'bg-[#C0392B]', border: 'border-[#C0392B]', shadow: '#C0392B' },
-  { shape: '◆', bg: 'bg-[#3B68FF]', activeBg: 'bg-[#2850CC]', border: 'border-[#2850CC]', shadow: '#2850CC' },
-  { shape: '●', bg: 'bg-[#F39C12]', activeBg: 'bg-[#D68910]', border: 'border-[#D68910]', shadow: '#D68910' },
-  { shape: '■', bg: 'bg-[#27AE60]', activeBg: 'bg-[#1E8449]', border: 'border-[#1E8449]', shadow: '#1E8449' },
+  { shape: '▲', bg: 'bg-[#E74C3C]', activeBg: 'bg-[#C0392B]' },
+  { shape: '◆', bg: 'bg-[#3B68FF]', activeBg: 'bg-[#2850CC]' },
+  { shape: '●', bg: 'bg-[#F39C12]', activeBg: 'bg-[#D68910]' },
+  { shape: '■', bg: 'bg-[#27AE60]', activeBg: 'bg-[#1E8449]' },
 ];
 
 export default function AnswerGrid({ 
@@ -37,12 +37,12 @@ export default function AnswerGrid({
             disabled={isDisabled}
             className={`
               relative rounded-3xl px-4 py-6 flex flex-col items-center justify-center gap-3
-              border-b-4 transition-all duration-150 min-h-[140px]
+              border-[4px] border-zk-black transition-all duration-150 min-h-[140px]
               ${isSelected
-                ? `${btn.activeBg} ${btn.border} shadow-none translate-y-1 opacity-100`
+                ? `${btn.activeBg} shadow-none translate-y-[6px] translate-x-[6px] opacity-100`
                 : isDisabled
-                  ? `${btn.bg} ${btn.border} opacity-20 cursor-not-allowed filter grayscale`
-                  : `${btn.bg} ${btn.border} shadow-[0_6px_0_0_${btn.shadow}] active:translate-y-[3px] active:shadow-[0_3px_0_0_${btn.shadow}]`
+                  ? `${btn.bg} opacity-20 cursor-not-allowed filter grayscale`
+                  : `${btn.bg} shadow-[6px_6px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:brightness-110`
               }
             `}
           >
