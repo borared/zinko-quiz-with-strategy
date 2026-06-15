@@ -95,6 +95,11 @@ INSTRUCTIONS:
 3. If the user asks to ADD questions, create new ones that are unique from the current list.
 4. If the user asks to MODIFY, update the existing question's text or choices.
 5. If the user provides a topic or file without specific edit instructions, generate ${numQuestions} questions that fit the context.
+6. If the USER REQUEST is written in Khmer or explicitly asks for Khmer language, generate the quiz in Khmer.
+7. If the USER REQUEST is in any other non-English language, respond in that language.
+
+9. CRITICAL: Randomize the 'correctAnswerIndex' across the questions so it is an even mix of 0, 1, 2, and 3. DO NOT always make it 0.
+10. CRITICAL: Make the incorrect choices (distractors) plausible, tricky, and related to the topic so the quiz is challenging.
 
 Return the FINAL, COMPLETE list of questions for this round after applying the changes.
 Match the difficulty requested (Easy, Medium, or Hard).
