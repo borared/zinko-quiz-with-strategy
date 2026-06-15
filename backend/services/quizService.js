@@ -1,4 +1,6 @@
 const quizRepository = require('../repositories/quizRepository');
+const userRepository = require('../repositories/userRepository');
+const notificationService = require('./notificationService');
 
 /**
  * Service: Handles business logic for quizzes
@@ -43,7 +45,24 @@ const cloneQuiz = async (quizId, newCreatorId) => {
     }))
   };
 
-  return await quizRepository.createQuiz(clonedData);
+  const clonedQuiz = await quizRepository.createQuiz(clonedData);
+
+  try {
+    // Notify the original creator
+    const clonerUser = await userRepository.getUserByClerkId(newCreatorId);
+    const clonerName = clonerUser ? (clonerUser.first_name || clonerUser.username || 'Someone') : 'Someone';
+    const message = `cloned your quiz "${originalQuiz.title}"`;
+    const metadata = {
+      cloner_id: newCreatorId,
+      cloner_name: clonerName,
+      cloner_avatar: clonerUser?.avatar_url || null
+    };
+    await notificationService.createNotification(originalQuiz.creator_id, 'QUIZ_CLONED', message, metadata);
+  } catch (error) {
+    console.error("Failed to create notification for cloned quiz:", error);
+  }
+
+  return clonedQuiz;
 };
 
 const getPublicQuizzes = async () => {
