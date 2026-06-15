@@ -55,4 +55,15 @@ const deleteUser = async (clerkId) => {
   if (error) throw error;
 };
 
-module.exports = { upsertUser, deleteUser };
+const getUserByClerkId = async (clerkId) => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('clerk_id', clerkId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error; // ignore not found
+  return data;
+};
+
+module.exports = { upsertUser, deleteUser, getUserByClerkId };
