@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 ;
 import { useUser, useAuth } from '@clerk/nextjs';
-import { LayoutDashboard, Bell, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Bell, Settings, LogOut, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 const Navbar = () => {
   const router = useRouter();
@@ -15,6 +16,14 @@ const Navbar = () => {
   const [showModal, setShowModal] = useState(false);
   const dropdownRef = useRef(null);
 
+  const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead } = useNotificationStore();
+
+  useEffect(() => {
+    if (isSignedIn && user?.id) {
+      fetchNotifications(user.id);
+    }
+  }, [isSignedIn, user?.id, fetchNotifications]);
+
   // Close dropdown when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -22,7 +31,9 @@ const Navbar = () => {
         setMenuOpen(false);
       }
     };
-    const handleScroll = () => setMenuOpen(false);
+    const handleScroll = () => {
+      setMenuOpen(false);
+    };
 
     if (menuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
@@ -69,10 +80,16 @@ const Navbar = () => {
           <div className="relative" ref={dropdownRef}>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
-              className="w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
+              className="relative w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
             >
               <img src={user?.imageUrl} alt={user?.firstName} className="w-full h-full object-cover" />
             </div>
+            {/* Unread Badge on Avatar */}
+            {unreadCount > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-10">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </div>
+            )}
 
             {/* Dropdown Menu */}
             <AnimatePresence>
@@ -82,41 +99,50 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 mt-2 w-52 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
                 >
-                  {/* User info header */}
-                  <div className="px-4 py-3 border-b-[2px] border-zk-black bg-zk-yellow/40">
-                    <p className="font-bold text-zk-black text-sm truncate">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-zk-black/60 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
-                  </div>
+                  {/* Default Profile Menu */}
+                  <>
+                    <div className="px-4 py-3 border-b-[2px] border-zk-black bg-zk-yellow/40">
+                      <p className="font-bold text-zk-black text-sm truncate">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-xs text-zk-black/60 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+                    </div>
 
-                  <button
-                    onClick={() => { setMenuOpen(false); router.push('/dashboard'); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
-                  >
-                    <LayoutDashboard size={16} /> Dashboard
-                  </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); router.push('/dashboard'); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                    >
+                      <LayoutDashboard size={16} /> Dashboard
+                    </button>
 
-                  <button
-                    onClick={() => { setMenuOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
-                  >
-                    <Bell size={16} /> Notification
-                  </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); router.push('/notifications'); }}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Bell size={16} /> Notification
+                      </div>
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-[1px] border-black shadow-[1px_1px_0_0_rgba(0,0,0,1)]">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
 
-                  <button
-                    onClick={() => { setMenuOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[2px] border-zk-black font-bold text-zk-black text-sm transition-colors"
-                  >
-                    <Settings size={16} /> Setting
-                  </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[2px] border-zk-black font-bold text-zk-black text-sm transition-colors"
+                    >
+                      <Settings size={16} /> Setting
+                    </button>
 
-                  <button
-                    onClick={() => { setMenuOpen(false); handleSignOut(); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 font-bold text-red-500 text-sm transition-colors"
-                  >
-                    <LogOut size={16} /> Sign out
-                  </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); handleSignOut(); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 font-bold text-red-500 text-sm transition-colors"
+                    >
+                      <LogOut size={16} /> Sign out
+                    </button>
+                  </>
                 </motion.div>
               )}
             </AnimatePresence>
