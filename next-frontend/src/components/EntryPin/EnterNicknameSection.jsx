@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Rocket, VenetianMask, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 ;
 import AvatarSelector from './AvatarSelector';
 import { useSocketStore } from '@/store/useSocketStore';
@@ -18,13 +18,33 @@ const EnterNicknameSection = () => {
   const [error, setError] = useState('');
   const [loadingAvatars, setLoadingAvatars] = useState(true);
   const router = useRouter();
+  const { pin } = useParams();
 
   const { getSocket } = useSocketStore();
   const { showToast } = useToastStore();
 
   useEffect(() => {
-    const loadAvatars = async () => {
+    if (!pin) {
+      router.push('/join');
+      return;
+    }
+
+    const validatePinAndLoadAvatars = async () => {
       try {
+        // First validate the PIN
+        const gameRes = await api.get(`/api/game/${pin}`);
+        if (!gameRes || !gameRes.valid) {
+          showToast(gameRes?.message || 'Invalid PIN. Please try again.', 'error');
+          router.replace('/join');
+          return;
+        }
+        if (gameRes.phase !== 'LOBBY') {
+          showToast('This game has already started. Ask the host for a new PIN.', 'error');
+          router.replace('/join');
+          return;
+        }
+
+        // PIN is valid, now load avatars
         const { data, success } = await api.get('/api/avatars');
         if (success && Array.isArray(data) && data.length) {
           setAvatars(data);
@@ -34,13 +54,14 @@ const EnterNicknameSection = () => {
           console.error('Failed to load avatars', data);
         }
       } catch (e) {
-        console.error('Error fetching avatars:', e);
+        showToast('Game not found. Check your PIN.', 'error');
+        router.replace('/join');
       } finally {
         setLoadingAvatars(false);
       }
     };
-    loadAvatars();
-  }, []);
+    validatePinAndLoadAvatars();
+  }, [pin, router, showToast]);
 
   const handleEnter = () => {
     if (nickname.trim().length === 0) {
@@ -48,7 +69,9 @@ const EnterNicknameSection = () => {
       return;
     }
     setError('');
-    const pin = sessionStorage.getItem('game_pin');
+
+    // Ensure session storage holds the correct pin in case they jumped straight here
+    sessionStorage.setItem('game_pin', pin);
 
     if (pin) {
       const socket = getSocket();
@@ -57,7 +80,7 @@ const EnterNicknameSection = () => {
           if (response && response.available) {
             sessionStorage.setItem('player_nickname', nickname.trim());
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-            router.push('/choose-team');
+            router.push(`/play/choose-team/${pin}`);
           } else {
             setError(response?.message || 'Nickname already taken');
             showToast(response?.message || 'Nickname already taken', 'error');
@@ -66,12 +89,10 @@ const EnterNicknameSection = () => {
       } else {
         sessionStorage.setItem('player_nickname', nickname.trim());
         sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-        router.push('/choose-team');
+        router.push(`/play/choose-team/${pin}`);
       }
     } else {
-      sessionStorage.setItem('player_nickname', nickname.trim());
-      sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-      router.push('/choose-team');
+      router.push('/join');
     }
   };
 
