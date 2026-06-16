@@ -9,6 +9,7 @@ import QuestionPhase from "./QuestionPhase";
 import ResultPhase from "./ResultPhase";
 import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
+import HigherLowerHost from "./HigherLowerHost";
 import RewardWheel from "./RewardWheel";
 
 export default function HostGameUI() {
@@ -33,9 +34,24 @@ export default function HostGameUI() {
 
   // Minigame states
   const [minigameData, setMinigameData] = useState({
-    tapsA: 0, tapsB: 0, targetA: 100, targetB: 100, winner: null, spinnerName: "",
-    playerTaps: {}, players: []
+    vaultsToWin: 0,
+    teamVaults: { A: { cracked: 0 }, B: { cracked: 0 } },
+    heldColors: { A: [], B: [] },
+    winner: null,
+    spinnerName: "",
+    players: []
   });
+
+  const [higherLowerData, setHigherLowerData] = useState({
+    subPhase: null, // 'PICK', 'COUNTDOWN', or 'GUESS'
+    teamA: { guess: null, status: null, lockedIn: false },
+    teamB: { guess: null, status: null, lockedIn: false },
+    winner: null,
+    spinnerName: "",
+    preSelectedRewardId: null,
+    currentTurn: null
+  });
+
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
   // Re-register as host if socket reconnects
@@ -120,14 +136,14 @@ export default function HostGameUI() {
     };
 
     const onMinigameStarted = ({ vaultsToWin, teamVaults, playerButtons, players }) => {
-      setMinigameData({ 
-        vaultsToWin, 
-        teamVaults, 
-        playerButtons, 
+      setMinigameData({
+        vaultsToWin,
+        teamVaults,
+        playerButtons,
         heldColors: { A: [], B: [] },
-        winner: null, 
-        spinnerName: "", 
-        players: players || [] 
+        winner: null,
+        spinnerName: "",
+        players: players || []
       });
       setIsWheelSpinning(false);
       setPhase("MINIGAME_RACING");
@@ -142,18 +158,70 @@ export default function HostGameUI() {
       // Optional: Play sound effect here
     };
 
-    const onMinigameFinished = ({ spinnerId, spinnerName, preSelectedRewardId }) => {
-      setMinigameData(prev => ({ ...prev, spinnerName, spinnerId, preSelectedRewardId }));
-      setPhase("MINIGAME_REWARD");
+    const onMinigameFinished = ({ winnerTeam, spinnerId, spinnerName, preSelectedRewardId }) => {
+      // If it's Higher/Lower, set winner there too
+      setHigherLowerData(prev => ({ ...prev, winner: winnerTeam, spinnerName, preSelectedRewardId }));
+      setMinigameData(prev => ({ ...prev, winner: winnerTeam, spinnerName, spinnerId, preSelectedRewardId }));
+      
+      // Ensure the wheel doesn't auto-spin from a previous game
+      setIsWheelSpinning(false);
+
+      // Delay transitioning to the Reward Wheel so the popup has time to display
+      setTimeout(() => {
+        setPhase("MINIGAME_REWARD");
+      }, 4000);
+    };
+
+    const onMinigameHigherLowerStarted = () => {
+      setHigherLowerData({
+        subPhase: 'INTRO',
+        teamA: { guess: null, status: null, lockedIn: false },
+        teamB: { guess: null, status: null, lockedIn: false },
+        winner: null,
+        spinnerName: "",
+        preSelectedRewardId: null,
+        currentTurn: null
+      });
+      setIsWheelSpinning(false);
+      setPhase("MINIGAME_HIGHER_LOWER");
+
+      setTimeout(() => {
+        setHigherLowerData(prev => ({ ...prev, subPhase: 'PICK' }));
+      }, 3000);
+    };
+
+    const onHigherLowerLockedIn = ({ team }) => {
+      setHigherLowerData(prev => ({
+        ...prev,
+        [`team${team}`]: { ...prev[`team${team}`], lockedIn: true }
+      }));
+    };
+
+    const onHigherLowerCountdownStarted = () => {
+      setHigherLowerData(prev => ({ ...prev, subPhase: 'COUNTDOWN' }));
+    };
+
+    const onMinigameHigherLowerGuessingStarted = ({ startingTeam }) => {
+      setHigherLowerData(prev => ({ ...prev, subPhase: 'GUESS', currentTurn: startingTeam }));
+    };
+
+    const onHigherLowerFeedback = ({ team, guess, status, nextTurn }) => {
+      setHigherLowerData(prev => ({
+        ...prev,
+        [`team${team}`]: { ...prev[`team${team}`], guess, status },
+        currentTurn: nextTurn || prev.currentTurn
+      }));
     };
 
     const onWheelSpinning = () => {
       setIsWheelSpinning(true);
     };
 
-    const onRewardClaimed = () => {
-      // Resume the game by going to the next question
-      getSocket().emit("game:next-question", { pin });
+    const onMinigameRewardClaimed = () => {
+      // Wait 3 seconds so players can see the reward before moving on automatically
+      setTimeout(() => {
+        getSocket().emit("game:next-question", { pin });
+      }, 3000);
     };
 
     socket.on("game:question", onQuestion);
@@ -162,12 +230,18 @@ export default function HostGameUI() {
     socket.on("game:reveal-results", onRevealResults);
     socket.on("game:leaderboard", onLeaderboard);
     socket.on("game:finished", onFinished);
-    
+
     socket.on("game:minigame-started", onMinigameStarted);
     socket.on("game:minigame-progress", onMinigameProgress);
     socket.on("game:minigame-vault-cracked", onMinigameVaultCracked);
+    socket.on("game:minigame-higher-lower-started", onMinigameHigherLowerStarted);
+    socket.on("game:higher-lower-locked-in", onHigherLowerLockedIn);
+    socket.on("game:minigame-higher-lower-countdown-started", onHigherLowerCountdownStarted);
+    socket.on("game:minigame-higher-lower-guessing-started", onMinigameHigherLowerGuessingStarted);
+    socket.on("game:higher-lower-feedback", onHigherLowerFeedback);
     socket.on("game:minigame-finished", onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
+    socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
       socket.off("game:question", onQuestion);
@@ -179,8 +253,14 @@ export default function HostGameUI() {
       socket.off("game:minigame-started", onMinigameStarted);
       socket.off("game:minigame-progress", onMinigameProgress);
       socket.off("game:minigame-vault-cracked", onMinigameVaultCracked);
+      socket.off("game:minigame-higher-lower-started", onMinigameHigherLowerStarted);
+      socket.off("game:higher-lower-locked-in", onHigherLowerLockedIn);
+      socket.off("game:minigame-higher-lower-countdown-started", onHigherLowerCountdownStarted);
+      socket.off("game:minigame-higher-lower-guessing-started", onMinigameHigherLowerGuessingStarted);
+      socket.off("game:higher-lower-feedback", onHigherLowerFeedback);
       socket.off("game:minigame-finished", onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
+      socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
   }, [getSocket, TOTAL_TIME, pin]);
 
@@ -195,9 +275,12 @@ export default function HostGameUI() {
     setIsTransitioning(true);
 
     // If it's the end of Round 1 (assuming 5 questions per round, next index is 5)
-    // question object has 'index'. If question.index == 4, the next is 5.
     if (question?.index === 4) {
       getSocket().emit("host:start-minigame", { pin });
+    } 
+    // If it's the end of Round 2 (next index is 10)
+    else if (question?.index === 9) {
+      getSocket().emit("host:start-minigame-higher-lower", { pin });
     } else {
       getSocket().emit("game:next-question", { pin });
     }
@@ -240,38 +323,38 @@ export default function HostGameUI() {
         {phase === "SKILL_PICK" && (
           <SkillPickPhase skillTimeLeft={skillTimeLeft} />
         )}
-        
+
         {phase === "QUESTION" && (
-          <QuestionPhase 
-            question={question} 
-            timeLeft={timeLeft} 
-            totalTime={TOTAL_TIME} 
-            answered={answered} 
-            total={total} 
-          />
-        )}
-        
-        {phase === "RESULT" && (
-          <ResultPhase 
+          <QuestionPhase
             question={question}
-            stats={stats} 
-            leaderboard={leaderboard} 
-            handleShowLeaderboard={handleShowLeaderboard} 
-            handleNextQuestion={handleNextQuestion} 
+            timeLeft={timeLeft}
+            totalTime={TOTAL_TIME}
+            answered={answered}
+            total={total}
           />
         )}
-        
+
+        {phase === "RESULT" && (
+          <ResultPhase
+            question={question}
+            stats={stats}
+            leaderboard={leaderboard}
+            handleShowLeaderboard={handleShowLeaderboard}
+            handleNextQuestion={handleNextQuestion}
+          />
+        )}
+
         {phase === "LEADERBOARD" && (
-          <LeaderboardPhase 
-            leaderboard={leaderboard} 
-            isFinalLeaderboard={isFinalLeaderboard} 
-            handleNextQuestion={handleNextQuestion} 
-            handleEndGame={handleEndGame} 
+          <LeaderboardPhase
+            leaderboard={leaderboard}
+            isFinalLeaderboard={isFinalLeaderboard}
+            handleNextQuestion={handleNextQuestion}
+            handleEndGame={handleEndGame}
           />
         )}
 
         {phase === "MINIGAME_RACING" && minigameData.teamVaults && (
-          <VaultBreakerHost 
+          <VaultBreakerHost
             teamVaults={minigameData.teamVaults}
             heldColors={minigameData.heldColors}
             vaultsToWin={minigameData.vaultsToWin}
@@ -279,8 +362,18 @@ export default function HostGameUI() {
           />
         )}
 
+        {phase === "MINIGAME_HIGHER_LOWER" && (
+          <HigherLowerHost 
+            teamA={higherLowerData.teamA}
+            teamB={higherLowerData.teamB}
+            winner={higherLowerData.winner}
+            subPhase={higherLowerData.subPhase}
+            currentTurn={higherLowerData.currentTurn}
+          />
+        )}
+
         {phase === "MINIGAME_REWARD" && (
-          <RewardWheel 
+          <RewardWheel
             pin={pin}
             winnerTeam={minigameData.winner}
             spinnerName={minigameData.spinnerName}
