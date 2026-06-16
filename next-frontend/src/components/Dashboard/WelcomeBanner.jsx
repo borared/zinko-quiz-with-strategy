@@ -15,7 +15,7 @@ const WelcomeBanner = ({ totalQuizzes = 0 }) => {
 
       <div className="relative z-10 flex flex-col gap-2">
         <h1 className="font-black text-4xl text-white tracking-tight drop-shadow-[0_4px_4px_rgba(0,0,0,1)] [text-shadow:2px_2px_0_#000,-2px_-2px_0_#000,2px_-2px_0_#000,-2px_2px_0_#000]">Welcome back, {firstName}!</h1>
-        <p className="text-white font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,1)] [text-shadow:1px_1px_0_#000,-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000]">Ready to spark some curiosity today? Your students are waiting for their next challenge.</p>
+        <p className="font-['Amatic_SC'] text-3xl text-white font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,1)] [text-shadow:1px_1px_0_#000,-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000]">Ready to spark some curiosity today? Your students are waiting for their next challenge.</p>
       </div>
 
       {/* Stats Cards */}
