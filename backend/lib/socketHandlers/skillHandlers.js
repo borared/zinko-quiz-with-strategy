@@ -81,7 +81,7 @@ module.exports = function registerSkillHandlers(io, socket, games) {
     else if (skillId === 'butterfly') {
       // Find 2 wrong answers
       const question = game.questions[game.currentQuestionIndex];
-      const correctId = question.answers.find(a => a.checked)?.id;
+      const correctId = question.answers.find(a => a.isCorrect === true || a.checked === true)?.id;
       const wrongAnswers = question.answers.filter(a => a.id !== correctId).map(a => a.id);
       // Shuffle and pick 2
       const removedAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2);
