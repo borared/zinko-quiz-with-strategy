@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { useSocketStore } from '@/store/useSocketStore';
 import confetti from "canvas-confetti";
+import { SKILLS } from '@/config/skills';
 
 const REWARDS = [
   { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
@@ -99,6 +100,8 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
   const [rotation, setRotation] = useState(0);
   const rotationRef = React.useRef(0); // avoid stale closure
   const [wonReward, setWonReward] = useState(null);
+  const [showSkillSelection, setShowSkillSelection] = useState(false);
+  const [selectedSkillId, setSelectedSkillId] = useState(null);
   const { getSocket } = useSocketStore();
 
   // When another client spins (externalSpinTrigger), trigger the spin visually
@@ -158,16 +161,34 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
       }
 
       if (isHost) {
-        const socket = getSocket();
-        if (socket) {
-          socket.emit("host:claim-minigame-reward", {
-            pin,
-            team: winnerTeam,
-            rewardType: reward.id,
-          });
+        if (reward.id !== "SKILL_CHARGE") {
+          const socket = getSocket();
+          if (socket) {
+            socket.emit("host:claim-minigame-reward", {
+              pin,
+              team: winnerTeam,
+              rewardType: reward.id,
+            });
+          }
         }
+      } else if (isSpinner && reward.id === "SKILL_CHARGE") {
+        setShowSkillSelection(true);
       }
     }, 5500);
+  };
+
+  const handleClaimSkill = () => {
+    if (!selectedSkillId) return;
+    const socket = getSocket();
+    if (socket) {
+      socket.emit("player:claim-minigame-reward", {
+        pin,
+        playerId: playerId || socket.id,
+        rewardType: "SKILL_CHARGE",
+        detail: selectedSkillId,
+      });
+    }
+    setShowSkillSelection(false);
   };
 
   const handleSpinClick = () => {
@@ -280,6 +301,62 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
             </motion.div>
           )}
         </>
+      )}
+
+      {/* Skill Selection Modal for Spinner */}
+      {showSkillSelection && (
+        <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zk-blue border-[4px] border-black shadow-[8px_8px_0_0_#000] rounded-3xl p-6 md:p-8 flex flex-col items-center w-full max-w-2xl"
+          >
+            <h3 className="gasoek-one-regular text-white text-3xl md:text-5xl uppercase mb-6 text-center" style={{ textShadow: "2px 2px 0 #000" }}>
+              Choose a Skill to Charge!
+            </h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-8">
+              {SKILLS.map((skill) => {
+                const Icon = skill.icon;
+                const isSelected = selectedSkillId === skill.id;
+                
+                return (
+                  <motion.div
+                    key={skill.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedSkillId(skill.id)}
+                    className={`cursor-pointer rounded-2xl p-4 flex flex-col items-center text-center border-[4px] transition-all duration-200 ${
+                      isSelected 
+                        ? 'border-white bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
+                        : 'border-black bg-black/40 hover:bg-black/20 shadow-[4px_4px_0_0_#000]'
+                    }`}
+                  >
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center border-[3px] border-black mb-3 shadow-[2px_2px_0_0_#000]" style={{ backgroundColor: skill.color }}>
+                      <Icon size={32} className="text-white" />
+                    </div>
+                    <span className="font-bold text-white text-lg tracking-wider" style={{ fontFamily: 'var(--font-amatic-sc)' }}>
+                      {skill.name}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={handleClaimSkill}
+              disabled={!selectedSkillId}
+              className={`px-10 py-3 text-white text-4xl font-bold rounded-2xl border-[4px] border-black transition-all tracking-widest ${
+                selectedSkillId 
+                  ? 'bg-[#22c55e] shadow-[0_6px_0_0_#000] hover:-translate-y-1 active:translate-y-[6px] active:shadow-none cursor-pointer' 
+                  : 'bg-gray-500 opacity-50 cursor-not-allowed shadow-[0_6px_0_0_#000]'
+              }`}
+              style={{ fontFamily: 'var(--font-amatic-sc)' }}
+            >
+              Confirm & Claim
+            </button>
+          </motion.div>
+        </div>
       )}
     </div>
   );
