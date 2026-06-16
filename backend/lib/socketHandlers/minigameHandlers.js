@@ -14,24 +14,33 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     const assignButtons = (teamPlayers) => {
       const assignments = {};
-      if (teamPlayers.length === 0) return assignments;
-      if (teamPlayers.length === 1) {
-         assignments[teamPlayers[0].id] = [...colors]; 
-         return assignments;
+      const numPlayers = teamPlayers.length;
+      if (numPlayers === 0) return assignments;
+      
+      if (numPlayers === 1) {
+        // 1 player: gets all 4 colors
+        assignments[teamPlayers[0].id] = [...colors];
+      } else if (numPlayers === 2) {
+        // 2 players: 2 colors each (all 4 colors distributed)
+        const shuffled = [...colors].sort(() => 0.5 - Math.random());
+        assignments[teamPlayers[0].id] = [shuffled[0], shuffled[1]];
+        assignments[teamPlayers[1].id] = [shuffled[2], shuffled[3]];
+      } else if (numPlayers === 3) {
+        // 3 players: 2 colors each
+        // First 2 players cover all 4 colors
+        const shuffled = [...colors].sort(() => 0.5 - Math.random());
+        assignments[teamPlayers[0].id] = [shuffled[0], shuffled[1]];
+        assignments[teamPlayers[1].id] = [shuffled[2], shuffled[3]];
+        // 3rd player gets 2 random colors
+        const shuffled2 = [...colors].sort(() => 0.5 - Math.random());
+        assignments[teamPlayers[2].id] = [shuffled2[0], shuffled2[1]];
+      } else {
+        // 4+ players: 1 color each
+        const shuffled = [...colors].sort(() => 0.5 - Math.random());
+        for (let i = 0; i < numPlayers; i++) {
+          assignments[teamPlayers[i].id] = [shuffled[i % 4]];
+        }
       }
-      teamPlayers.forEach(p => {
-         const shuffled = [...colors].sort(() => 0.5 - Math.random());
-         assignments[p.id] = shuffled.slice(0, 2);
-      });
-      const allAssigned = new Set(Object.values(assignments).flat());
-      colors.forEach((c) => {
-         if (!allAssigned.has(c)) {
-           const randomPlayer = teamPlayers[Math.floor(Math.random() * teamPlayers.length)];
-           if (!assignments[randomPlayer.id].includes(c)) {
-              assignments[randomPlayer.id].push(c);
-           }
-         }
-      });
       return assignments;
     };
 
@@ -170,7 +179,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
      if (!game || game.hostSocketId !== socket.id) return;
      
      if (rewardType === 'SKILL_CHARGE') {
-       // Give a random skill charge ONLY to a skill the team actually possesses
+       // Only used as a fallback if needed
        const teamSkillsObj = game.teamSkills[team] || {};
        const activeSkillIds = Object.keys(teamSkillsObj);
        
@@ -190,5 +199,117 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
      } else {
        io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'NOTHING' });
      }
+  });
+
+  // ── player:claim-minigame-reward ──────────────────────────────────────────
+  socket.on('player:claim-minigame-reward', ({ pin, playerId, rewardType, detail }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_REWARD') return;
+    
+    // Only the spinner is allowed to claim the reward
+    if (game.minigameSpinnerId !== playerId) return;
+    
+    const team = game.playerTeamMap[playerId];
+    if (!team) return;
+
+    if (rewardType === 'SKILL_CHARGE' && detail) {
+      if (!game.skillCharges[team]) {
+        game.skillCharges[team] = { rabbit: 0, fox: 0, butterfly: 0, frog: 0 };
+      }
+      game.skillCharges[team][detail] = (game.skillCharges[team][detail] || 0) + 1;
+      
+      io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'SKILL_CHARGE', detail });
+    }
+  });
+
+  // ── host:start-minigame-higher-lower ─────────────────────────────────────────
+  socket.on('host:start-minigame-higher-lower', ({ pin }) => {
+    const game = games.get(pin);
+    if (!game || game.hostSocketId !== socket.id) return;
+    
+    game.phase = 'MINIGAME_HIGHER_LOWER_PICK';
+    game.secretCodes = { A: null, B: null };
+    
+    // To map playerId -> team quickly in guess events
+    game.playerTeamMap = {};
+    game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
+
+    io.to(pin).emit('game:minigame-higher-lower-started', {});
+  });
+
+  // ── player:higher-lower-set-secret ─────────────────────────────────────────
+  socket.on('player:higher-lower-set-secret', ({ pin, playerId, secret }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_HIGHER_LOWER_PICK') return;
+
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    const numericSecret = parseInt(secret, 10);
+    if (isNaN(numericSecret) || numericSecret < 1 || numericSecret > 99) return;
+
+    if (game.secretCodes[team] === null) {
+      game.secretCodes[team] = numericSecret;
+      io.to(pin).emit('game:higher-lower-locked-in', { team });
+
+      if (game.secretCodes.A !== null && game.secretCodes.B !== null) {
+        game.phase = 'MINIGAME_HIGHER_LOWER_COUNTDOWN';
+        io.to(pin).emit('game:minigame-higher-lower-countdown-started', {});
+
+        setTimeout(() => {
+          // If the game is still active
+          if (games.has(pin) && game.phase === 'MINIGAME_HIGHER_LOWER_COUNTDOWN') {
+            game.phase = 'MINIGAME_HIGHER_LOWER_GUESS';
+            game.currentTurn = Math.random() < 0.5 ? 'A' : 'B';
+            io.to(pin).emit('game:minigame-higher-lower-guessing-started', { startingTeam: game.currentTurn });
+          }
+        }, 3000);
+      }
+    }
+  });
+
+  // ── player:higher-lower-guess ──────────────────────────────────────────────
+  socket.on('player:higher-lower-guess', ({ pin, playerId, guess }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_HIGHER_LOWER_GUESS') return;
+    
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    const numericGuess = parseInt(guess, 10);
+    if (isNaN(numericGuess)) return;
+
+    if (game.currentTurn !== team) return;
+
+    const enemyTeam = team === 'A' ? 'B' : 'A';
+    const enemySecret = game.secretCodes[enemyTeam];
+
+    if (numericGuess === enemySecret) {
+      game.phase = 'MINIGAME_REWARD';
+      
+      const winningPlayers = game.players.filter(p => p.team === team);
+      let spinnerId = null;
+      let spinnerName = "Host";
+      if (winningPlayers.length > 0) {
+        const chosen = winningPlayers[Math.floor(Math.random() * winningPlayers.length)];
+        spinnerId = chosen.id;
+        spinnerName = chosen.nickname;
+      }
+      
+      game.minigameSpinnerId = spinnerId;
+      const rewardsList = ['SKILL_CHARGE', 'BONUS_POINTS_20', 'NOTHING'];
+      game.preSelectedRewardId = rewardsList[Math.floor(Math.random() * rewardsList.length)];
+
+      io.to(pin).emit('game:minigame-finished', { 
+        winnerTeam: team, 
+        spinnerId, 
+        spinnerName,
+        preSelectedRewardId: game.preSelectedRewardId
+      });
+    } else {
+      game.currentTurn = enemyTeam;
+      const status = numericGuess > enemySecret ? 'LOWER' : 'HIGHER';
+      io.to(pin).emit('game:higher-lower-feedback', { team, guess: numericGuess, status, playerId, nextTurn: game.currentTurn });
+    }
   });
 };
