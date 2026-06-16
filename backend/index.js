@@ -20,7 +20,7 @@ const FRONTEND_URLS = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
   'http://localhost:3000',
-  'http://172.23.4.140:3000'
+  'http://172.23.1.212:3000'
 ].filter(Boolean);
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ app.use((err, req, res, next) => {
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on http://localhost:${PORT} and http://172.23.4.140:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT} and http://172.23.1.212:${PORT}`);
   console.log(`🔌 Socket.io attached and listening`);
   console.log(`📊 Available routes:`);
   console.log(`   GET  /api/quizzes/user/:userId`);
