@@ -98,13 +98,12 @@ export default function Notifications() {
         {/* Notifications List */}
         <div className="flex flex-col gap-4">
           {isLoading ? (
-            <div className="bg-white border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-12 text-center flex flex-col items-center justify-center">
+            <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
               <Loader2 className="animate-spin w-12 h-12 text-zk-black mb-4" />
               <h2 className="text-2xl font-black text-zk-black">Loading Notifications...</h2>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="bg-white border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-2xl p-12 text-center flex flex-col items-center justify-center">
-              <img src="/assets/zinko.png" alt="Zinko" className="w-24 h-24 mb-4 opacity-50 grayscale" />
+            <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
               <h2 className="text-2xl font-black text-zk-black">You're all caught up!</h2>
               <p className="text-zk-black/60 font-bold mt-2">No new notifications to display.</p>
             </div>

@@ -34,43 +34,46 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
     const { required, cracked } = teamData;
     const progress = Math.min(cracked, vaultsToWin);
     const progressPerc = (progress / vaultsToWin) * 100;
-    
+
     // Check if team is holding right combinations to shake the vault
     const correctHeld = required.filter(c => heldList.includes(c)).length;
-    const shakeIntensity = correctHeld === required.length ? 0 : correctHeld > 0 ? correctHeld * 2 : 0;
+    const shakeIntensity = 0; // Removed shaking so players can't guess from feedback
 
     return (
       <div className="flex flex-col items-center justify-center relative w-full h-full px-8">
-        
+
         {/* Team Header */}
         <h2 className="gasoek-one-regular text-5xl mb-6 text-white tracking-widest">
           TEAM {teamName}
         </h2>
 
-        {/* Indicator Lights (The combination lock) */}
-        <div className="flex gap-4 mb-8">
-          {required.map((color, idx) => {
-            const isHeld = heldList.includes(color);
-            return (
+        {/* Indicator Lights (Currently Held Colors) */}
+        <div className="flex gap-4 mb-8 h-16 min-w-[200px] justify-center items-center">
+          {heldList.length === 0 ? (
+            <span className="text-white/50 font-bold" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px', fontSize: '2rem' }}>
+              Waiting for inputs...
+            </span>
+          ) : (
+            heldList.map((color, idx) => (
               <motion.div
-                key={`${teamName}-${cracked}-${idx}`}
+                key={`held-${teamName}-${color}-${idx}`}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className="w-16 h-16 rounded-full border-[4px] border-black shadow-[0_4px_0_0_#000]"
                 style={{
                   backgroundColor: COLOR_MAP[color],
-                  opacity: isHeld ? 1 : 0.4,
-                  boxShadow: isHeld ? `0 0 25px ${COLOR_MAP[color]}, 0 4px 0 0 #000` : "0 4px 0 0 #000",
-                  transform: isHeld ? "scale(1.1)" : "scale(1)",
+                  opacity: 1,
+                  boxShadow: `0 0 25px ${COLOR_MAP[color]}, 0 4px 0 0 #000`,
+                  transform: "scale(1.1)",
                   transition: "opacity 0.15s, box-shadow 0.15s, transform 0.15s"
                 }}
               />
-            );
-          })}
+            ))
+          )}
         </div>
 
         {/* The Vault Graphic */}
-        <motion.div 
+        <motion.div
           className="relative w-64 h-64 md:w-80 md:h-80 bg-[#cbd5e1] rounded-3xl border-[8px] border-black flex items-center justify-center overflow-hidden"
           animate={{
             x: shakeIntensity ? [0, -shakeIntensity, shakeIntensity, -shakeIntensity, 0] : 0,
@@ -87,7 +90,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
           {/* Inner Vault Door detailing */}
           <div className="absolute inset-4 border-[4px] border-slate-500 rounded-2xl pointer-events-none" />
           <div className="absolute w-24 h-24 rounded-full border-[6px] border-black bg-slate-400 flex items-center justify-center">
-             <div className="w-8 h-8 rounded-full bg-black" />
+            <div className="w-8 h-8 rounded-full bg-black" />
           </div>
           {/* Handle bars */}
           <div className="absolute w-48 h-4 bg-black rotate-45" />
@@ -96,7 +99,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
           {/* Cracked Success Flash */}
           <AnimatePresence>
             {isCracking && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -108,20 +111,20 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
 
         {/* Progress Bar below vault */}
         <div className="mt-12 w-full max-w-sm h-10 border-[4px] border-black bg-slate-800 rounded-full overflow-hidden relative">
-           <motion.div 
-             className="h-full bg-[#3b82f6]"
-             initial={{ width: 0 }}
-             animate={{ width: `${progressPerc}%` }}
-             transition={{ type: "spring", stiffness: 50 }}
-           />
-           <div className="absolute inset-0 flex items-center justify-center font-zk-bold text-white text-xl drop-shadow-md">
-             {progress} / {vaultsToWin}
-           </div>
+          <motion.div
+            className="h-full bg-[#3b82f6]"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPerc}%` }}
+            transition={{ type: "spring", stiffness: 50 }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center font-zk-bold text-white text-xl drop-shadow-md">
+            {progress} / {vaultsToWin}
+          </div>
         </div>
 
         {/* Winner Overlay */}
         {isWinner && (
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -138,7 +141,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
   return (
     <div className="relative w-full h-full min-h-screen bg-slate-900 overflow-hidden flex flex-col">
       {/* Background pattern */}
-      <div 
+      <div
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
           backgroundImage: "radial-gradient(#ffffff 2px, transparent 2px)",
@@ -147,12 +150,12 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
       />
 
       <div className="relative z-10 text-center py-8 mt-4">
-         <h1 className="gasoek-one-regular text-zk-yellow text-5xl md:text-6xl tracking-wider">
-           Vaults Cracker
-         </h1>
-         <p className="text-white text-4xl mt-4 opacity-90" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
-           Hold the right combination to crack the vaults!
-         </p>
+        <h1 className="gasoek-one-regular text-zk-yellow text-5xl md:text-6xl tracking-wider">
+          Vaults Cracker
+        </h1>
+        <p className="text-white text-4xl mt-4 opacity-90" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+          Hold the right combination to crack the vaults!
+        </p>
       </div>
 
       <div className="flex-1 flex flex-row relative z-10 pb-12">

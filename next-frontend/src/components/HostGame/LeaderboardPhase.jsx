@@ -219,9 +219,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="end-game-btn"
               onClick={handleEndGame}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-black shadow-[6px_6px_0_#000] rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[4px_4px_0_#000] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none transition-all flex items-center gap-3"
+              className="bg-[#3B68FF] text-white border-[4px] border-zk-black shadow-[6px_6px_0_#000] rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[4px_4px_0_#000] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none transition-all flex items-center gap-3"
             >
-              <Home size={22} /> Home
+              <Home size={26} /> Home
             </button>
           )}
         </div>

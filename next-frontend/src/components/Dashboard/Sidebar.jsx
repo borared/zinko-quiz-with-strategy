@@ -1,13 +1,17 @@
 "use client";
 import React from 'react';
 import { BookOpen, Users, Compass, BarChart2 } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const Sidebar = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const menuItems = [
-    { id: 'library', name: 'My Library', icon: <BookOpen size={20} />, active: true },
-    { id: 'classes', name: 'Classes', icon: <Users size={20} />, active: false },
-    { id: 'discover', name: 'Discover', icon: <Compass size={20} />, active: false },
-    { id: 'reports', name: 'Reports', icon: <BarChart2 size={20} />, active: false },
+    { id: 'library', name: 'My Library', icon: <BookOpen size={20} />, path: '/dashboard' },
+    { id: 'classes', name: 'Classes', icon: <Users size={20} />, path: '/classes' },
+    { id: 'discover', name: 'Discover', icon: <Compass size={20} />, path: '/discovery' },
+    { id: 'reports', name: 'Reports', icon: <BarChart2 size={20} />, path: '/reports' },
   ];
 
   return (
@@ -20,19 +24,23 @@ const Sidebar = () => {
 
       {/* Menu Items */}
       <div className="flex-1 p-4 flex flex-col gap-3 mt-4">
-        {menuItems.map((item) => (
-          <div 
-            key={item.id}
-            className={`flex items-center gap-4 p-3 font-bold text-sm cursor-pointer transition-all border-[2px] ${
-              item.active 
-                ? 'bg-[#7C4DFF] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white' 
-                : 'border-transparent hover:bg-white/10 text-white/90'
-            } rounded-lg`}
-          >
-            {item.icon}
-            <span>{item.name}</span>
-          </div>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <div 
+              key={item.id}
+              onClick={() => router.push(item.path)}
+              className={`flex items-center gap-4 p-3 font-bold text-sm cursor-pointer transition-all border-[2px] ${
+                isActive 
+                  ? 'bg-[#7C4DFF] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white' 
+                  : 'border-transparent hover:bg-white/10 text-white/90'
+              } rounded-lg`}
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

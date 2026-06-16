@@ -15,7 +15,7 @@ export const SKILLS = [
     id: "fox",
     name: "The Fox",
     icon: Cloud,
-    skillDescription: "Smokescreen: Blind Enemies (10s)",
+    skillDescription: "Smokescreen: Blind Enemies (5s)",
     color: "#E74C3C",
     buttonColor: "bg-[#E74C3C]",
     buttonBorder: "border-[#C0392B]",

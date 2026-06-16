@@ -9,6 +9,7 @@ import ResultOverlay from './ResultOverlay';
 import RabbitRush from './Skills/RabbitRush';
 import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
+import HigherLowerPlayer from './HigherLowerPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 
 export default function PlayerControllerUI() {
@@ -35,10 +36,22 @@ export default function PlayerControllerUI() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionTotal, setQuestionTotal] = useState(1);
 
-  const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
   const [minigameData, setMinigameData] = useState({
-    vaultsToWin: 3, teamVaults: {}, playerButtons: {}, heldColors: { A: [], B: [] }, winner: null, players: []
+    vaultsToWin: 0,
+    teamVaults: { A: { cracked: 0 }, B: { cracked: 0 } },
+    heldColors: { A: [], B: [] },
+    playerButtons: {},
+    winner: null,
+    players: []
   });
+
+  const [higherLowerData, setHigherLowerData] = useState({
+    subPhase: null, // 'PICK', 'COUNTDOWN', or 'GUESS'
+    status: null, // 'HIGHER' or 'LOWER'
+    currentTurn: null
+  });
+
+  const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
   // Skill states
@@ -108,7 +121,7 @@ export default function PlayerControllerUI() {
     const onFoxAttack = ({ targetTeam }) => {
       if (targetTeam === team) {
         setFoxSmokescreen(true);
-        setTimeout(() => setFoxSmokescreen(false), 10000);
+        setTimeout(() => setFoxSmokescreen(false), 5000);
       }
     };
 
@@ -153,7 +166,33 @@ export default function PlayerControllerUI() {
 
     const onMinigameFinished = ({ spinnerId, spinnerName, preSelectedRewardId }) => {
       setMinigameSpinner({ id: spinnerId, name: spinnerName, preSelectedRewardId });
+      setIsWheelSpinning(false);
       setPhase('MINIGAME_REWARD');
+    };
+
+    const onMinigameHigherLowerStarted = () => {
+      setHigherLowerData({ subPhase: 'INTRO', status: null, currentTurn: null });
+      setPhase('MINIGAME_HIGHER_LOWER');
+      setTimeout(() => {
+        setHigherLowerData(prev => ({ ...prev, subPhase: 'PICK' }));
+      }, 3000);
+    };
+
+    const onHigherLowerCountdownStarted = () => {
+      setHigherLowerData(prev => ({ ...prev, subPhase: 'COUNTDOWN' }));
+    };
+
+    const onMinigameHigherLowerGuessingStarted = ({ startingTeam }) => {
+      setHigherLowerData({ subPhase: 'GUESS', status: null, currentTurn: startingTeam });
+      setPhase('MINIGAME_HIGHER_LOWER');
+    };
+
+    const onHigherLowerFeedback = ({ status, playerId: feedbackPlayerId, nextTurn }) => {
+      setHigherLowerData(prev => {
+        // Only show status feedback if THIS player made the guess
+        const newStatus = feedbackPlayerId === playerId.current ? { value: status, ts: Date.now() } : prev.status;
+        return { ...prev, status: newStatus, currentTurn: nextTurn || prev.currentTurn };
+      });
     };
 
     const onWheelSpinning = () => {
@@ -199,6 +238,11 @@ export default function PlayerControllerUI() {
 
     socket.on('game:minigame-started', onMinigameStarted);
     socket.on('game:minigame-progress', onMinigameProgress);
+    socket.on('game:minigame-vault-cracked', onMinigameVaultCracked);
+    socket.on('game:minigame-higher-lower-started', onMinigameHigherLowerStarted);
+    socket.on('game:minigame-higher-lower-countdown-started', onHigherLowerCountdownStarted);
+    socket.on('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
+    socket.on('game:higher-lower-feedback', onHigherLowerFeedback);
     socket.on('game:minigame-finished', onMinigameFinished);
     socket.on('game:wheel-spinning', onWheelSpinning);
     socket.on('player:sync-state-response', onSyncState);
@@ -221,6 +265,10 @@ export default function PlayerControllerUI() {
       
       socket.off('game:minigame-started', onMinigameStarted);
       socket.off('game:minigame-vault-cracked', onMinigameVaultCracked);
+      socket.off('game:minigame-higher-lower-started', onMinigameHigherLowerStarted);
+      socket.off('game:minigame-higher-lower-countdown-started', onHigherLowerCountdownStarted);
+      socket.off('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
+      socket.off('game:higher-lower-feedback', onHigherLowerFeedback);
       socket.off('game:minigame-finished', onMinigameFinished);
       socket.off('game:wheel-spinning', onWheelSpinning);
       socket.off('player:sync-state-response', onSyncState);
@@ -247,6 +295,22 @@ export default function PlayerControllerUI() {
     });
   }, [phase, selectedId, isSkillLockedOut, skillChargesLeft, foxSmokescreen, pin, team, playerSkill, nickname, getSocket]);
 
+  const handleHigherLowerGuess = useCallback((guess) => {
+    getSocket().emit('player:higher-lower-guess', {
+      pin,
+      playerId: playerId.current,
+      guess
+    });
+  }, [pin, getSocket]);
+
+  const handleHigherLowerSetSecret = useCallback((secret) => {
+    getSocket().emit('player:higher-lower-set-secret', {
+      pin,
+      playerId: playerId.current,
+      secret
+    });
+  }, [pin, getSocket]);
+
   // ── RESULT overlay ──
   if (phase === 'RESULT' && resultData) {
     return <ResultOverlay resultData={resultData} />;
@@ -266,6 +330,19 @@ export default function PlayerControllerUI() {
           const socket = getSocket();
           if (socket) socket.emit('player:release-button', { pin, playerId: playerId.current, color });
         }}
+      />
+    );
+  }
+
+  if (phase === 'MINIGAME_HIGHER_LOWER') {
+    return (
+      <HigherLowerPlayer 
+        onGuess={handleHigherLowerGuess}
+        onSetSecret={handleHigherLowerSetSecret}
+        statusObj={higherLowerData.status}
+        subPhase={higherLowerData.subPhase}
+        currentTurn={higherLowerData.currentTurn}
+        team={team}
       />
     );
   }

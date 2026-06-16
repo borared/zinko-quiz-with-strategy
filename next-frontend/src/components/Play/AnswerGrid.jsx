@@ -47,7 +47,7 @@ export default function AnswerGrid({
             `}
           >
             <span className="text-white text-3xl font-black opacity-80">{btn.shape}</span>
-            <span className="text-white font-black text-sm text-center leading-tight">{answer.text}</span>
+            <span className="text-zk-black font-black text-xl md:text-2xl text-center leading-tight">{answer.text}</span>
             {isSelected && (
               <motion.div
                 initial={{ scale: 0 }}

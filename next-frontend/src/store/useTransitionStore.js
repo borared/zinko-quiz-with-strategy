@@ -13,7 +13,9 @@ export const useTransitionStore = create((set, get) => ({
     if (targetPath && router) {
       router.push(targetPath);
     }
-    set({ phase: 'opening' });
+    setTimeout(() => {
+      set({ phase: 'opening' });
+    }, 150);
   },
   
   onOpenDone: () => {

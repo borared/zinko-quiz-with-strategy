@@ -36,7 +36,7 @@ function createGame({ pin, quizId, hostUserId }) {
     timeLeft: QUESTION_TIME_SECONDS,
     timer: null,
     createdAt: Date.now(),
-    background: ['/background_battle/city.jpg', '/background_battle/board.png'][Math.floor(Math.random() * 2)],
+    background: '/background_battle/city.jpg',
   });
   return gamePin;
 }

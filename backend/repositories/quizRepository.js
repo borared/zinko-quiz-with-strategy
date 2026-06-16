@@ -25,8 +25,8 @@ const createQuiz = async (quizData) => {
   // 2. Prepare the Questions for insertion
   const questionsToInsert = questions.map((q, index) => ({
     quiz_id: quiz.id,
-    question_text: q.text,
-    image_url: q.image || null,
+    question_text: q.question_text || q.text || 'Untitled Question',
+    image_url: q.image_url || q.image || null,
     answers: q.answers, // JSONB column
     order_index: index,
     round: q.round || 1, // Store the round index (1, 2, or 3)
@@ -62,8 +62,8 @@ const updateQuiz = async (id, quizData) => {
   // 3. Re-insert updated questions
   const questionsToInsert = questions.map((q, index) => ({
     quiz_id: id,
-    question_text: q.text,
-    image_url: q.image || null,
+    question_text: q.question_text || q.text || 'Untitled Question',
+    image_url: q.image_url || q.image || null,
     answers: q.answers,
     order_index: index,
     round: q.round || 1,

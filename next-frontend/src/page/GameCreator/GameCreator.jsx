@@ -23,7 +23,7 @@ const GameCreatorContent = () => {
     coverImage, setCoverImage,
     activeRound, setActiveRound,
     questions, handleSaveQuiz, fetchQuiz,
-    isSaving, loading, undoDelete, activeQuestionId
+    isSaving, loading, undoDelete, activeQuestionId, resetQuiz
   } = useQuizStore();
 
   useEffect(() => {
@@ -46,8 +46,10 @@ const GameCreatorContent = () => {
   useEffect(() => {
     if (quizId) {
       fetchQuiz(quizId, showToast);
+    } else {
+      resetQuiz();
     }
-  }, [quizId, fetchQuiz, showToast]);
+  }, [quizId, fetchQuiz, showToast, resetQuiz]);
 
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);

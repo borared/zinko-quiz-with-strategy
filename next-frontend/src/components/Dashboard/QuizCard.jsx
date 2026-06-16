@@ -1,10 +1,25 @@
 "use client";
 import React, { useState } from 'react';
-import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2 } from 'lucide-react';
+import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
+
+import { z } from 'zod';
+
+const hostValidationSchema = z.array(
+  z.object({
+    question_text: z.string()
+      .min(1, "A question is missing text")
+      .refine(val => val.trim() !== '' && val !== 'Untitled Question', { message: "Please fill in all question titles" }),
+    answers: z.array(
+      z.object({
+        text: z.string()
+      })
+    ).refine(arr => arr.filter(a => a.text.trim() !== '').length >= 2, { message: "Each question needs at least 2 answers" })
+  })
+);
 
 const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const router = useRouter();
@@ -17,6 +32,9 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const [showPublicModal, setShowPublicModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isPublicLocal, setIsPublicLocal] = useState(quiz.is_public);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const timeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -37,6 +55,17 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const handleHostClick = async () => {
     if (!isReady) {
       setErrorMessage("Please add at least 6 questions per round!");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
+
+    const validationResult = hostValidationSchema.safeParse(questions);
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error?.issues?.[0]?.message 
+        || validationResult.error?.errors?.[0]?.message 
+        || "Please check that all questions and answers are filled.";
+      setErrorMessage(errorMessage);
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
@@ -80,9 +109,9 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const handleTogglePublic = async () => {
     try {
       setIsUpdating(true);
-      await api.patch(`/api/quizzes/${quiz.id}/visibility`, { is_public: !quiz.is_public });
+      await api.patch(`/api/quizzes/${quiz.id}/visibility`, { is_public: !isPublicLocal });
+      setIsPublicLocal(!isPublicLocal);
       setShowPublicModal(false);
-      window.location.reload();
     } catch (err) {
       console.error("Toggle failed:", err);
       setErrorMessage("Failed to update visibility!");
@@ -98,7 +127,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       setIsUpdating(true);
       await api.delete(`/api/quizzes/${quiz.id}`);
       setShowDeleteModal(false);
-      window.location.reload();
+      setIsDeleted(true);
     } catch (err) {
       console.error("Delete failed:", err);
       setErrorMessage("Failed to delete quiz!");
@@ -108,6 +137,8 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       setIsUpdating(false);
     }
   };
+
+  if (isDeleted) return null;
 
   return (
     <>
@@ -126,9 +157,9 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   setShowPublicModal(true);
                 }
               }}
-              className={`p-2 rounded-full border-[2px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all ${quiz.is_public ? 'bg-green-400 text-zk-black' : 'bg-gray-200 text-gray-500'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`p-2 rounded-full border-[2px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all ${isPublicLocal ? 'bg-green-400 text-zk-black' : 'bg-gray-200 text-gray-500'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {quiz.is_public ? <Globe size={16} /> : <Lock size={16} />}
+              {isPublicLocal ? <Globe size={16} /> : <Lock size={16} />}
             </button>
           </div>
         )}
@@ -188,29 +219,37 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
             </AnimatePresence>
 
             {isDiscoveryMode ? (
-              <button
-                onClick={handleCloneClick}
-                disabled={isCloning}
-                className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
-              >
-                {isCloning ? (
-                  <><Loader2 size={14} className="animate-spin" /> Cloning...</>
-                ) : (
-                  <><Copy size={14} /> Clone</>
-                )}
-              </button>
+              <>
+                <button
+                  onClick={() => setShowDetailsModal(true)}
+                  className="flex-1 bg-white text-zk-black border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
+                >
+                  <Eye size={14} /> View
+                </button>
+                <button
+                  onClick={handleCloneClick}
+                  disabled={isCloning}
+                  className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                >
+                  {isCloning ? (
+                    <><Loader2 size={14} className="animate-spin" /> Cloning...</>
+                  ) : (
+                    <><Copy size={14} /> Clone</>
+                  )}
+                </button>
+              </>
             ) : (
               <>
                 <button
                   id={`host-btn-${quiz.id}`}
                   onClick={handleHostClick}
                   disabled={isHosting}
-                  className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
+                  className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
                 >
                   {isHosting ? (
-                    <><Loader2 size={14} className="animate-spin" /> Creating...</>
+                    <><Loader2 size={16} className="animate-spin" /> Creating...</>
                   ) : (
-                    <><Play size={14} fill="currentColor" /> Host</>
+                    <><Play size={16} fill="currentColor" /> Host</>
                   )}
                 </button>
                 <button
@@ -232,19 +271,68 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       </div>
 
       {/* Modals */}
+      {showDetailsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-3xl font-black text-zk-black uppercase leading-none">{quiz.title}</h3>
+                <p className="text-zk-black/70 font-bold mt-1 text-sm">
+                  By {[quiz.creator?.first_name, quiz.creator?.last_name].filter(Boolean).join(' ') || quiz.creator?.username || 'Unknown'} • {questions.length} Questions
+                </p>
+              </div>
+              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-black w-8 h-8 flex items-center justify-center font-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+                X
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
+              {questions.map((q, i) => (
+                <div key={q.id || i} className="bg-white border-[2px] border-zk-black rounded-lg p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-black text-sm uppercase bg-zk-yellow px-2 py-0.5 border-[1.5px] border-zk-black rounded">Q{i + 1} (R{q.round})</span>
+                  </div>
+                  <p className="font-bold text-zk-black mb-2">{q.question_text}</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {q.answers?.map((a, j) => (
+                      <div key={j} className={`border-[1.5px] border-zk-black rounded p-1.5 font-bold ${a.is_correct ? 'bg-green-400 text-zk-black' : 'bg-gray-100 text-gray-500'}`}>
+                        {a.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {questions.length === 0 && (
+                <p className="text-center font-bold text-zk-black/50 py-8">No questions found.</p>
+              )}
+            </div>
+            
+            <div className="mt-4 pt-4 border-t-[3px] border-zk-black flex justify-end">
+              <button
+                onClick={() => { setShowDetailsModal(false); handleCloneClick(); }}
+                disabled={isCloning}
+                className="bg-[#5D3FD3] text-white border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
+              >
+                {isCloning ? <><Loader2 size={16} className="animate-spin" /> Cloning...</> : <><Copy size={16} /> Clone Quiz</>}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {showPublicModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
             <h3 className="text-xl font-black mb-2 text-zk-black uppercase text-center">
-              {quiz.is_public ? "Make Private?" : "Make Public?"}
+              {isPublicLocal ? "Make Private?" : "Make Public?"}
             </h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">
-              {quiz.is_public ? "This quiz will no longer be visible in the Discovery section." : "This quiz will be visible to everyone in the Discovery section!"}
+              {isPublicLocal ? "This quiz will no longer be visible in the Discovery section." : "This quiz will be visible to everyone in the Discovery section!"}
             </p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg">NO</button>
-              <button onClick={handleTogglePublic} disabled={isUpdating} className="flex-1 bg-green-400 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg flex justify-center items-center">
-                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : "YES"}
+              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg leading-none pt-2">NO</button>
+              <button onClick={handleTogglePublic} disabled={isUpdating} className="flex-1 bg-green-400 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg flex justify-center items-center leading-none pt-2">
+                {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "YES"}
               </button>
             </div>
           </motion.div>
@@ -257,9 +345,9 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
             <h3 className="text-xl font-black mb-2 text-zk-black uppercase text-center">Delete Quiz?</h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">Are you sure you want to delete this quiz? This cannot be undone.</p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg">NO</button>
-              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg flex justify-center items-center">
-                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : "DELETE"}
+              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg leading-none pt-2">NO</button>
+              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg flex justify-center items-center leading-none pt-2">
+                {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "DELETE"}
               </button>
             </div>
           </motion.div>

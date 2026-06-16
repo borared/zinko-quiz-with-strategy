@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTransitionStore } from '@/store/useTransitionStore';
 import { useSocketStore } from '@/store/useSocketStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 ;
 import { useToastStore } from '@/store/useToastStore';
 import TeamHeader from './TeamHeader';
@@ -40,7 +40,17 @@ const ChooseTeamSection = () => {
   const { blinkTo } = useTransitionStore();
   const { getSocket } = useSocketStore();
   const router = useRouter();
+  const { pin } = useParams();
   const { showToast } = useToastStore();
+
+  // Redirect if accessed directly without a pin
+  if (!pin) {
+    if (typeof window !== 'undefined') {
+      router.push('/join');
+    }
+    return null; // Return null so it doesn't render until redirect
+  }
+
 
   const countA = 12;
   const countB = 14;
@@ -53,7 +63,7 @@ const ChooseTeamSection = () => {
     setSelectedTeam(team);
 
     // Pull stored session data
-    const pin      = sessionStorage.getItem('game_pin');
+    // Use the pin from the URL directly
     const nickname = sessionStorage.getItem('player_nickname') || 'Player';
     const avatar   = sessionStorage.getItem('player_avatar') || 'avatar1.png';
     const playerId = getOrCreatePlayerId();

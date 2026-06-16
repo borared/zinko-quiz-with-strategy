@@ -20,12 +20,14 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
-        <h2 className="font-black text-2xl text-zk-black uppercase tracking-tight">
-          {isDiscoveryMode ? 'Public Quizzes' : (quizzes.length > 0 ? 'Your Quizzes' : 'No Quizzes Found')}
-        </h2>
-        <button className="text-sm font-bold text-zk-black hover:underline">View All</button>
-      </div>
+      {!isDiscoveryMode && (
+        <div className="flex justify-between items-center">
+          <h2 className="font-black text-2xl uppercase tracking-tight text-zk-black">
+            {quizzes.length > 0 ? 'Your Quizzes' : 'No Quizzes Found'}
+          </h2>
+          <button className="text-sm font-bold text-zk-black hover:underline">View All</button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes.map((quiz) => (

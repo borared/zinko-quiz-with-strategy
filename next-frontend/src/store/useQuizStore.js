@@ -15,6 +15,16 @@ export const useQuizStore = create((set, get) => ({
   setActiveRound: (round) => set({ activeRound: round }),
   setQuizTitle: (title) => set({ quizTitle: title }),
   setCoverImage: (image) => set({ coverImage: image }),
+  resetQuiz: () => set({
+    questions: [],
+    deletedQuestions: [],
+    activeQuestionId: null,
+    activeRound: 1,
+    quizTitle: '',
+    coverImage: null,
+    isSaving: false,
+    loading: false
+  }),
   setQuestions: (questions) => {
     if (typeof questions === 'function') {
       set((state) => ({ questions: questions(state.questions) }));
@@ -33,7 +43,10 @@ export const useQuizStore = create((set, get) => ({
       const formattedQuestions = data.questions.map(q => ({
         id: q.id,
         text: q.question_text,
-        answers: q.answers,
+        answers: (q.answers || []).map(ans => ({
+          ...ans,
+          checked: !!ans.isCorrect
+        })),
         image: q.image_url,
         round: q.round || 1
       }));
@@ -124,6 +137,8 @@ export const useQuizStore = create((set, get) => ({
 
   handleSaveQuiz: async (quizId, userId, router, showToast) => {
     const state = get();
+    if (state.isSaving) return; // Prevent double-clicking race condition
+
     if (!state.quizTitle.trim()) {
       if (showToast) showToast('Please enter a quiz title', 'error');
       return;
@@ -161,10 +176,18 @@ export const useQuizStore = create((set, get) => ({
       });
 
       if (showToast) showToast(quizId ? 'Quiz updated!' : 'Quiz saved!', 'success');
-      if (router) router.push('/dashboard');
+      
+      if (router) {
+        router.push('/dashboard');
+        // Keep button disabled during Next.js route transition to prevent double clicks
+        setTimeout(() => {
+          set({ isSaving: false });
+        }, 3000);
+      } else {
+        set({ isSaving: false });
+      }
     } catch {
       if (showToast) showToast('Failed to save quiz', 'error');
-    } finally {
       set({ isSaving: false });
     }
   },
@@ -188,18 +211,26 @@ export const useQuizStore = create((set, get) => ({
     try {
       const data = await api.postForm('/api/ai/generate-quiz', formData);
 
-      const newFormattedQuestions = data.questions.map((q, index) => ({
-        id: Date.now() + index,
-        text: q.question,
-        answers: q.choices.map((choice, i) => ({
+      const newFormattedQuestions = data.questions.map((q, index) => {
+        const correctIndex = q.correctAnswerIndex !== undefined ? parseInt(q.correctAnswerIndex, 10) : 0;
+        const aiChoices = q.choices || [];
+        
+        // Ensure we always have exactly 4 answers
+        const filledAnswers = Array.from({ length: 4 }).map((_, i) => ({
           id: String.fromCharCode(65 + i),
-          text: choice,
+          text: aiChoices[i] || '',
           color: i === 0 ? 'bg-[#5D3FD3]' : i === 1 ? 'bg-[#FF6B4A]' : i === 2 ? 'bg-[#FF4B4B]' : 'bg-[#2D3436]',
-          checked: i === q.correctAnswerIndex
-        })),
-        image: null,
-        round: activeRound
-      }));
+          checked: i === correctIndex
+        }));
+
+        return {
+          id: Date.now() + index,
+          text: q.question,
+          answers: filledAnswers,
+          image: null,
+          round: activeRound
+        };
+      });
 
       set((state) => {
         const otherRounds = state.questions.filter(q => q.round !== activeRound);

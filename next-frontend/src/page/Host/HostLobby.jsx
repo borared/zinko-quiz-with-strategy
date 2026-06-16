@@ -192,14 +192,22 @@ export default function HostLobby() {
       if (data.background) setBgImage(data.background);
     };
 
+    const onError = (data) => {
+      if (data.message === 'Game PIN not found.') {
+        router.replace('/404');
+      }
+    };
+
     socket.on('host:initialized', onInitialized);
     socket.on('lobby:players-update', onPlayersUpdate);
+    socket.on('error', onError);
 
     return () => {
       socket.off('host:initialized', onInitialized);
       socket.off('lobby:players-update', onPlayersUpdate);
+      socket.off('error', onError);
     };
-  }, [getSocket, isConnected, pin, location.state]);
+  }, [getSocket, isConnected, pin, location.state, router]);
 
   const handleStartGame = useCallback(() => {
     if (players.length === 0) return;
@@ -246,7 +254,6 @@ export default function HostLobby() {
 
       {/* Blinking Eye Decorations */}
       <BlinkingEye size={72} x="5%" y="10%" delay={0} pupilColor="#1a1a1a" />
-      <BlinkingEye size={50} x="85%" y="15%" delay={1.2} pupilColor="#5D3FD3" />
       <BlinkingEye size={40} x="88%" y="70%" delay={0.6} pupilColor="#c0392b" />
       <BlinkingEye size={45} x="3%" y="75%" delay={2} pupilColor="#2ea84a" />
 
@@ -270,24 +277,23 @@ export default function HostLobby() {
       {/* ── Top Right Edge: QR & PIN ───────────────────────────────────── */}
       <motion.div
         {...bounceIn(0.1)}
-        className="absolute top-6 right-6 z-20 flex flex-col items-stretch gap-3 w-40 md:w-44"
+        className="absolute top-6 right-6 z-20 flex flex-col items-end gap-3"
       >
         {/* Game PIN */}
         <div
           onClick={copyPin}
-          className="border-[4px] border-[#000000] rounded-xl py-2.5 flex flex-col items-center justify-center text-center w-full cursor-pointer hover:scale-105 transition-transform"
-          style={{ backgroundColor: '#FFCD29', boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
+          className="flex flex-col items-end justify-center text-right cursor-pointer hover:scale-105 transition-transform"
           title="Click to copy"
         >
           <p
-            className="text-[10px] font-black uppercase tracking-[0.2em] mb-0.5"
-            style={{ color: '#000000' }}
+            className="text-sm md:text-lg font-black uppercase tracking-[0.2em] mb-[-5px] text-white pr-1"
+            style={{ textShadow: '2px 2px 0px #000000' }}
           >
             {copied ? 'Copied!' : 'Game PIN'}
           </p>
           <p
-            className="text-3xl md:text-4xl font-black tracking-wider leading-none"
-            style={{ color: '#000000' }}
+            className="text-[4rem] md:text-[5.5rem] gasoek-one-regular tracking-widest leading-none text-white drop-shadow-[0_4px_0_rgba(0,0,0,1)]"
+            style={{ WebkitTextStroke: '4px #000000' }}
           >
             {pin || '????'}
           </p>
@@ -295,7 +301,7 @@ export default function HostLobby() {
 
         {/* QR Code */}
         <div
-          className="bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-full"
+          className="bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44"
           style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
         >
           <div className="w-full flex justify-center aspect-square">
@@ -360,7 +366,7 @@ export default function HostLobby() {
           id="start-game-btn"
           onClick={handleStartGame}
           disabled={teamAPlayers.length === 0 || teamAPlayers.length !== teamBPlayers.length || startCountdown !== null}
-          className="px-16 py-3 border-[4px] border-[#000000] rounded-xl font-black text-xl uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-16 py-1 border-[4px] border-[#000000] rounded-xl amatic-sc-regular text-4xl uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ backgroundColor: '#FFCD29', color: '#000000', boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)' }}
         >
           {startCountdown !== null ? (
