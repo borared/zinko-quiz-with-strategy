@@ -31,17 +31,7 @@ const Discovery = () => {
   }, [disconnectSocket]);
 
   return (
-    <div className="flex font-sans min-h-screen relative">
-      {/* Cinematic Background Layer */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url("https://res.cloudinary.com/dicrvjstp/image/upload/v1778512239/Gemini_Generated_Image_o8qfs4o8qfs4o8qf_kqpgha.png")',
-          filter: 'brightness(0.8) contrast(1.1)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-zk-black/40 via-transparent to-zk-black/60"></div>
-      </div>
+    <div className="flex bg-[#FFD54F] font-sans min-h-screen">
       {/* Left Sidebar */}
       <Sidebar />
 
