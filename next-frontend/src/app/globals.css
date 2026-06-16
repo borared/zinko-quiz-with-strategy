@@ -51,9 +51,17 @@
   100% { transform: scale(1); }
 }
 
+@keyframes float-nav {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 @layer utilities {
   .animate-boing {
     animation: boing 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .animate-float-nav {
+    animation: float-nav 2.5s ease-in-out infinite;
   }
   .perspective-1000 {
     perspective: 1000px;
