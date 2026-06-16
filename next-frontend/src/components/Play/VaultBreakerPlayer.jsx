@@ -79,11 +79,11 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
         <h2 className="gasoek-one-regular text-4xl text-zk-yellow drop-shadow-md">
           HOLD YOUR COLORS!
         </h2>
-        <p 
+        <p
           className="font-bold text-white/90 mt-2 text-3xl"
           style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
         >
-          Communicate with your team to crack the vault.
+          Talk with your friend to hold the correct 3 color at the same time.
         </p>
       </div>
 
@@ -94,11 +94,13 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
             <motion.button
               key={color}
               initial={{ scale: 1, x: 0, y: 0, boxShadow: "10px 10px 0px 0px rgba(0,0,0,1)" }}
-              whileHover={{ scale: 1.05, x: -2, y: -2, boxShadow: "14px 14px 0px 0px rgba(0,0,0,1)" }}
+              animate={isPressedViaKey
+                ? { scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }
+                : { scale: 1, x: 0, y: 0, boxShadow: "10px 10px 0px 0px rgba(0,0,0,1)" }}
+              whileHover={isPressedViaKey
+                ? { scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }
+                : { scale: 1.05, x: -2, y: -2, boxShadow: "14px 14px 0px 0px rgba(0,0,0,1)" }}
               whileTap={{ scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
-              animate={isPressedViaKey 
-                ? { scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" } 
-                : { scale: 1 }}
               className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-[6px] border-zk-black focus:outline-none flex flex-col items-center justify-center transition-colors"
               style={{ backgroundColor: COLOR_MAP[color] }}
               onPointerDown={(e) => {
@@ -123,7 +125,7 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
       </div>
 
       {/* Bottom Right Instruction */}
-      <div 
+      <div
         className="absolute bottom-6 right-6 z-20 text-right text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
         style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
       >
