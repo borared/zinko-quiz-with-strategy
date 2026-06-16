@@ -1,4 +1,4 @@
-const http = require('http');
+const http = require('http'); // Trigger restart
 const express = require('express');
 const cors = require('cors');
 const { Server } = require('socket.io');
@@ -93,8 +93,8 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on http://localhost:${PORT} and http://172.23.1.212:${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
   console.log(`🔌 Socket.io attached and listening`);
   console.log(`📊 Available routes:`);
   console.log(`   GET  /api/quizzes/user/:userId`);
