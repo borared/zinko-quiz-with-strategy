@@ -16,6 +16,7 @@ const questionSchema = z.object({
   image_url: z.string().nullable().optional(),
   answers: z.array(answerSchema).min(2, 'At least 2 answers required per question'),
   time_limit: z.number().int().positive().optional().default(20),
+  round: z.number().int().positive().optional().default(1),
 });
 
 const quizSchema = z.object({
