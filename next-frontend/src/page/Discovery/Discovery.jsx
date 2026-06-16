@@ -74,7 +74,7 @@ const Discovery = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search public quizzes..."
-              className="w-full max-w-md bg-white border-[3px] border-zk-black rounded-xl p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow"
+              className="w-full max-w-md border-[3px] border-zk-black rounded-xl p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow"
             />
           </div>
           {/* Filtered quizzes */}
