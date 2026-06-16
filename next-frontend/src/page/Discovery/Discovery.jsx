@@ -11,6 +11,7 @@ const Discovery = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     disconnectSocket();
@@ -28,7 +29,11 @@ const Discovery = () => {
     };
 
     fetchPublicQuizzes();
+    
   }, [disconnectSocket]);
+
+  // Filter quizzes based on search term (case‑insensitive)
+  const filteredQuizzes = quizzes.filter(q => q.title && q.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="flex font-sans min-h-screen relative">
@@ -62,7 +67,18 @@ const Discovery = () => {
           </div>
 
           {/* Public Quizzes */}
-          <QuizGrid quizzes={quizzes} loading={loading} isDiscoveryMode={true} />
+          {/* Search Bar */}
+          <div className="my-4">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search public quizzes..."
+              className="w-full max-w-md border-[3px] border-zk-black rounded-xl p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow"
+            />
+          </div>
+          {/* Filtered quizzes */}
+          <QuizGrid quizzes={filteredQuizzes} loading={loading} isDiscoveryMode={true} />
           {fetchError && (
             <div className="text-red-600 font-bold mt-4">Unable to load quizzes: {fetchError}</div>
           )}
