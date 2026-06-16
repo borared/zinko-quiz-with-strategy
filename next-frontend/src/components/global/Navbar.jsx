@@ -53,9 +53,9 @@ const Navbar = () => {
     const isExact = pathname === path;
 
     if (isActive || isExact) {
-      return "bg-zk-blue text-zk-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-bold cursor-pointer transition-colors";
+      return "bg-[#5D3FD3] text-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
     }
-    return "text-zk-black hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold px-4 py-1 transition-colors";
+    return "text-zk-black hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
   };
 
   const handleSignOut = () => {
@@ -71,7 +71,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/create-game')}
-            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-bold text-lg rounded-lg"
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
           >
             Create New Game
           </button>
@@ -183,7 +183,7 @@ const Navbar = () => {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6 font-bold text-sm">
-          <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 px-4 py-1 transition-colors">
+          <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 font-['Amatic_SC'] text-3xl font-bold px-4 py-1 transition-colors leading-none pt-2 inline-block">
             BLOG
           </a>
           <a
@@ -192,7 +192,7 @@ const Navbar = () => {
           >
             PRICING
           </a>
-          <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 px-4 py-1 transition-colors">
+          <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 font-['Amatic_SC'] text-3xl font-bold px-4 py-1 transition-colors leading-none pt-2 inline-block">
             CLASSPIN
           </a>
           <a
