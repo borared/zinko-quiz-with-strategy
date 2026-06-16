@@ -7,9 +7,9 @@ import AuthSync from '@/components/Authentication/AuthSync';
 import ToastContainer from '@/components/global/ToastContainer';
 import { usePathname } from 'next/navigation';
 
+import CustomCursor from '@/components/global/CustomCursor';
+
 const NO_NAVBAR_PATHS = [
-  "/join-nickname",
-  "/choose-team",
   "/team-warmup",
   "/choose-skill",
   "/sso-callback",
@@ -17,12 +17,11 @@ const NO_NAVBAR_PATHS = [
 
 const GAME_FLOW_PATHS = [
   "/join",
-  "/join-nickname",
-  "/choose-team",
   "/team-warmup",
   "/choose-skill",
   "/create-game",
   "/dashboard",
+  "/discovery",
   "/host",
   "/play",
 ];
@@ -37,6 +36,7 @@ export default function ClientLayoutWrapper({ children }) {
 
   return (
     <>
+      <CustomCursor />
       <AuthSync />
       <EyeBlinkOverlay />
       <SoundToggle />
