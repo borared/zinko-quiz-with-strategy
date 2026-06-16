@@ -35,7 +35,7 @@ function buildAnswerStats(game) {
     text: a.text,
     color: a.color,
     count: answerCounts[a.id] || 0,
-    isCorrect: a.checked,
+    isCorrect: a.isCorrect === true || a.checked === true,
   }));
 }
 
@@ -69,7 +69,7 @@ function revealResults(io, pin, games) {
 
   game.phase = 'RESULT';
   const question = game.questions[game.currentQuestionIndex];
-  const correctId = question.answers.find(a => a.checked)?.id;
+  const correctId = question.answers.find(a => a.isCorrect === true || a.checked === true)?.id;
   const stats = buildAnswerStats(game);
 
   // 1. Award base points based on correctness and speed, considering Rabbit
