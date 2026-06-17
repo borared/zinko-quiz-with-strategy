@@ -10,15 +10,11 @@ import { usePathname } from 'next/navigation';
 import CustomCursor from '@/components/global/CustomCursor';
 
 const NO_NAVBAR_PATHS = [
-  "/team-warmup",
-  "/choose-skill",
   "/sso-callback",
 ];
 
 const GAME_FLOW_PATHS = [
   "/join",
-  "/team-warmup",
-  "/choose-skill",
   "/create-game",
   "/dashboard",
   "/discovery",
