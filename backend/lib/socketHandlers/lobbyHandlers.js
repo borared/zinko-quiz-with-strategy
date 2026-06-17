@@ -3,10 +3,26 @@ const supabase = require('../supabaseClient');
 module.exports = function registerLobbyHandlers(io, socket, games) {
   // ── host:initialize ───────────────────────────────────────────────────────
   // Host claims a pre-generated PIN (from REST endpoint) and loads quiz data
-  socket.on('host:initialize', async ({ pin, quizId }) => {
+  socket.on('host:initialize', async ({ pin, quizId, token }) => {
     const game = games.get(pin);
     if (!game) {
       socket.emit('error', { message: 'Game PIN not found.' });
+      return;
+    }
+
+    if (!token) {
+      socket.emit('error', { message: 'Unauthorized host' });
+      return;
+    }
+
+    try {
+      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+      if (decoded.userId !== game.hostUserId) {
+        socket.emit('error', { message: 'Unauthorized host' });
+        return;
+      }
+    } catch (err) {
+      socket.emit('error', { message: 'Unauthorized host' });
       return;
     }
 
@@ -36,9 +52,19 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   });
 
   // ── host:reconnect ────────────────────────────────────────────────────────
-  socket.on('host:reconnect', ({ pin }) => {
+  socket.on('host:reconnect', ({ pin, token }) => {
     const game = games.get(pin);
     if (!game) return;
+
+    if (!token) return;
+
+    try {
+      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+      if (decoded.userId !== game.hostUserId) return;
+    } catch (err) {
+      return;
+    }
+
     game.hostSocketId = socket.id;
     socket.join(pin);
     console.log(`🔌 Host reconnected to game ${pin}`);

@@ -40,11 +40,24 @@ const ChoosingSkillSection = () => {
     };
 
     const onQuestion = (data) => {
-      if (selectedSkill) {
-        sessionStorage.setItem('player_skill', selectedSkill);
+      let finalSkill = selectedSkill;
+      if (!finalSkill && data.teamSkills && data.teamSkills[team]) {
+        for (const [sId, info] of Object.entries(data.teamSkills[team])) {
+          if (info.playerId === playerId) {
+            finalSkill = sId;
+            break;
+          }
+        }
       }
+
+      if (finalSkill) {
+        sessionStorage.setItem('player_skill', finalSkill);
+      } else {
+        sessionStorage.removeItem('player_skill');
+      }
+      
       sessionStorage.setItem('current_question', JSON.stringify(data));
-      router.push(`/play/game/${pin}`);
+      router.push(`/play/${pin}/game`);
     };
 
     socket.on('lobby:skills-update', onSkillsUpdate);
