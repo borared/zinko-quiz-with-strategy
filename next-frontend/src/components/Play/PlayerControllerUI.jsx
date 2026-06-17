@@ -1,7 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useSocketStore } from '@/store/useSocketStore';
+import React from 'react';
 import PlayHeader from './PlayHeader';
 import QuestionPrompt from './QuestionPrompt';
 import AnswerGrid from './AnswerGrid';
@@ -11,305 +9,44 @@ import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
+import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 
 export default function PlayerControllerUI() {
-  const { pin } = useParams();
-  const router = useRouter();
-  const { getSocket } = useSocketStore();
+  const gameState = usePlayerGameState();
 
-  const playerId  = useRef(typeof window !== 'undefined' ? sessionStorage.getItem('player_id') || 'unknown' : 'unknown');
-  const nickname  = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
-  const playerSkill = typeof window !== 'undefined' ? sessionStorage.getItem('player_skill') || null : null;
-  const team        = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
-
-  const [question, setQuestion]         = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('current_question');
-      return stored ? JSON.parse(stored) : null;
-    }
-    return null;
-  });
-  const [selectedId, setSelectedId]     = useState(null);
-  const [phase, setPhase]               = useState('PLAYING'); // PLAYING | ANSWERED | RESULT
-  const [resultData, setResultData]     = useState(null);
-  const [timeLeft, setTimeLeft]         = useState(20);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [questionTotal, setQuestionTotal] = useState(1);
-
-  const [minigameData, setMinigameData] = useState({
-    vaultsToWin: 0,
-    teamVaults: { A: { cracked: 0 }, B: { cracked: 0 } },
-    heldColors: { A: [], B: [] },
-    playerButtons: {},
-    winner: null,
-    players: []
-  });
-
-  const [higherLowerData, setHigherLowerData] = useState({
-    subPhase: null, // 'PICK', 'COUNTDOWN', or 'GUESS'
-    status: null, // 'HIGHER' or 'LOWER'
-    currentTurn: null
-  });
-
-  const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
-  const [isWheelSpinning, setIsWheelSpinning] = useState(false);
-
-  // Skill states
-  const [skillChargesLeft, setSkillChargesLeft] = useState(0);
-  const [isSkillLockedOut, setIsSkillLockedOut] = useState(false);
-  const [skillLockoutMsg, setSkillLockoutMsg] = useState("");
-  const [removedAnswers, setRemovedAnswers] = useState([]);
-  const [foxSmokescreen, setFoxSmokescreen] = useState(false);
-  const [rabbitRush, setRabbitRush] = useState(false);
-  const [butterflyActive, setButterflyActive] = useState(false);
-
-  useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
-
-    const onQuestion = (data) => {
-      setQuestion(data);
-      setSelectedId(null);
-      setPhase('PLAYING');
-      setResultData(null);
-      setTimeLeft(data.timeSeconds || 20);
-      setQuestionIndex(data.index);
-      setQuestionTotal(data.total);
-      
-      if (data.skillCharges && data.skillCharges[team] && playerSkill) {
-        setSkillChargesLeft(data.skillCharges[team][playerSkill]);
-      }
-      setIsSkillLockedOut(false);
-      setSkillLockoutMsg("");
-      setRemovedAnswers([]);
-      setFoxSmokescreen(false);
-      setRabbitRush(false);
-      setButterflyActive(false);
-    };
-
-    const onTimerTick = ({ timeLeft: t }) => setTimeLeft(t);
-
-    const onAnswerReceived = ({ answerId }) => {
-      setSelectedId(answerId);
-      setPhase('ANSWERED');
-    };
-
-    const onPlayerResult = (data) => {
-      setResultData(data);
-      setPhase('RESULT');
-    };
-
-    const onLeaderboard = () => {
-      // Brief pause on result, then show leaderboard
-    };
-
-    const onNextQuestion = (data) => {
-      onQuestion(data);
-    };
-
-    const onSkillLockout = ({ team: lockoutTeam, playerId: lockoutPlayerId, nickname: lockoutName }) => {
-      if (lockoutTeam === team) {
-        setIsSkillLockedOut(true);
-        if (lockoutPlayerId !== playerId.current) {
-          setSkillLockoutMsg(`Active by ${lockoutName}`);
-        } else {
-          setSkillLockoutMsg(`You activated ${playerSkill}`);
-        }
-      }
-    };
-
-    const onFoxAttack = ({ targetTeam }) => {
-      if (targetTeam === team) {
-        setFoxSmokescreen(true);
-        setTimeout(() => setFoxSmokescreen(false), 5000);
-      }
-    };
-
-    const onButterflyResult = ({ team: bTeam, removedAnswers: rAnswers }) => {
-      if (bTeam === team) {
-        setRemovedAnswers(rAnswers);
-        setButterflyActive(true);
-        setTimeout(() => setButterflyActive(false), 3000);
-      }
-    };
-
-    const onRabbitRush = ({ team: rTeam }) => {
-      if (rTeam === team) {
-        setRabbitRush(true);
-        setTimeout(() => setRabbitRush(false), 5000);
-      }
-    };
-
-    const onFinished = ({ leaderboard }) => {
-      const myEntry = leaderboard.find(p => p.id === playerId.current);
-      sessionStorage.setItem('leaderboard_data', JSON.stringify({ leaderboard, myEntry }));
-      router.push(`/play/result/${pin}`);
-    };
-
-    const onMinigameStarted = ({ vaultsToWin, teamVaults, playerButtons, players }) => {
-      setPhase('MINIGAME_RACING');
-      setQuestion(null);
-      setMinigameData({ vaultsToWin, teamVaults, playerButtons, heldColors: { A: [], B: [] }, winner: null, players: players || [] });
-    };
-
-    const onMinigameProgress = ({ teamVaults, heldColors }) => {
-      setMinigameData(prev => ({ 
-        ...prev, 
-        teamVaults: teamVaults || prev.teamVaults, 
-        heldColors: heldColors || prev.heldColors 
-      }));
-    };
-
-    const onMinigameVaultCracked = ({ team, teamVaults }) => {
-      setMinigameData(prev => ({ ...prev, teamVaults: teamVaults || prev.teamVaults }));
-    };
-
-    const onMinigameFinished = ({ spinnerId, spinnerName, preSelectedRewardId }) => {
-      setMinigameSpinner({ id: spinnerId, name: spinnerName, preSelectedRewardId });
-      setIsWheelSpinning(false);
-      setPhase('MINIGAME_REWARD');
-    };
-
-    const onMinigameHigherLowerStarted = () => {
-      setHigherLowerData({ subPhase: 'INTRO', status: null, currentTurn: null });
-      setPhase('MINIGAME_HIGHER_LOWER');
-      setTimeout(() => {
-        setHigherLowerData(prev => ({ ...prev, subPhase: 'PICK' }));
-      }, 3000);
-    };
-
-    const onHigherLowerCountdownStarted = () => {
-      setHigherLowerData(prev => ({ ...prev, subPhase: 'COUNTDOWN' }));
-    };
-
-    const onMinigameHigherLowerGuessingStarted = ({ startingTeam }) => {
-      setHigherLowerData({ subPhase: 'GUESS', status: null, currentTurn: startingTeam });
-      setPhase('MINIGAME_HIGHER_LOWER');
-    };
-
-    const onHigherLowerFeedback = ({ status, playerId: feedbackPlayerId, nextTurn }) => {
-      setHigherLowerData(prev => {
-        // Only show status feedback if THIS player made the guess
-        const newStatus = feedbackPlayerId === playerId.current ? { value: status, ts: Date.now() } : prev.status;
-        return { ...prev, status: newStatus, currentTurn: nextTurn || prev.currentTurn };
-      });
-    };
-
-    const onWheelSpinning = () => {
-      setIsWheelSpinning(true);
-    };
-
-    const onSyncState = (data) => {
-      const clientPhase = data.phase === 'QUESTION' ? 'PLAYING' : data.phase;
-      setPhase(clientPhase);
-      
-      if (data.currentQuestion) {
-        setQuestion(data.currentQuestion);
-        setTimeLeft(data.timeLeft || 20);
-        setQuestionIndex(data.currentQuestion.index);
-        setQuestionTotal(data.currentQuestion.total);
-        
-        if (data.currentQuestion.skillCharges && data.currentQuestion.skillCharges[team] && playerSkill) {
-          setSkillChargesLeft(data.currentQuestion.skillCharges[team][playerSkill]);
-        }
-      }
-      
-      if (data.hasAnswered) {
-        setSelectedId('synced-answer'); // Block answering again
-        if (clientPhase === 'PLAYING') setPhase('ANSWERED');
-      }
-      
-      if (data.minigameData) {
-        setMinigameData(prev => ({ ...prev, ...data.minigameData }));
-      }
-    };
-
-    socket.on('game:question', onQuestion);
-    socket.on('game:timer-tick', onTimerTick);
-    socket.on('player:answer-received', onAnswerReceived);
-    socket.on('game:player-result', onPlayerResult);
-    socket.on('game:leaderboard', onLeaderboard);
-    socket.on('game:finished', onFinished);
+  const {
+    playerId,
+    nickname,
+    playerSkill,
+    team,
+    pin,
     
-    socket.on('game:skill-lockout', onSkillLockout);
-    socket.on('game:fox-attack', onFoxAttack);
-    socket.on('game:butterfly-result', onButterflyResult);
-    socket.on('game:rabbit-rush', onRabbitRush);
-
-    socket.on('game:minigame-started', onMinigameStarted);
-    socket.on('game:minigame-progress', onMinigameProgress);
-    socket.on('game:minigame-vault-cracked', onMinigameVaultCracked);
-    socket.on('game:minigame-higher-lower-started', onMinigameHigherLowerStarted);
-    socket.on('game:minigame-higher-lower-countdown-started', onHigherLowerCountdownStarted);
-    socket.on('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
-    socket.on('game:higher-lower-feedback', onHigherLowerFeedback);
-    socket.on('game:minigame-finished', onMinigameFinished);
-    socket.on('game:wheel-spinning', onWheelSpinning);
-    socket.on('player:sync-state-response', onSyncState);
-
-    // Initial fetch to get the current game state in case of late join or browser refresh
-    socket.emit('player:sync-state', { pin, playerId: playerId.current });
-
-    return () => {
-      socket.off('game:question', onQuestion);
-      socket.off('game:timer-tick', onTimerTick);
-      socket.off('player:answer-received', onAnswerReceived);
-      socket.off('game:player-result', onPlayerResult);
-      socket.off('game:leaderboard', onLeaderboard);
-      socket.off('game:finished', onFinished);
-      
-      socket.off('game:skill-lockout', onSkillLockout);
-      socket.off('game:fox-attack', onFoxAttack);
-      socket.off('game:butterfly-result', onButterflyResult);
-      socket.off('game:rabbit-rush', onRabbitRush);
-      
-      socket.off('game:minigame-started', onMinigameStarted);
-      socket.off('game:minigame-vault-cracked', onMinigameVaultCracked);
-      socket.off('game:minigame-higher-lower-started', onMinigameHigherLowerStarted);
-      socket.off('game:minigame-higher-lower-countdown-started', onHigherLowerCountdownStarted);
-      socket.off('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
-      socket.off('game:higher-lower-feedback', onHigherLowerFeedback);
-      socket.off('game:minigame-finished', onMinigameFinished);
-      socket.off('game:wheel-spinning', onWheelSpinning);
-      socket.off('player:sync-state-response', onSyncState);
-    };
-  }, [pin, getSocket, router, team, playerSkill]);
-
-  const handleAnswer = useCallback((answerId) => {
-    if (phase !== 'PLAYING' || selectedId || removedAnswers.includes(answerId)) return;
-    getSocket().emit('player:submit-answer', {
-      pin,
-      playerId: playerId.current,
-      answerId,
-    });
-  }, [phase, selectedId, removedAnswers, pin, getSocket]);
-
-  const handleUseSkill = useCallback(() => {
-    if (phase !== 'PLAYING' || selectedId || isSkillLockedOut || skillChargesLeft <= 0 || foxSmokescreen) return;
-    getSocket().emit('player:use-skill', {
-      pin,
-      playerId: playerId.current,
-      team,
-      skillId: playerSkill,
-      nickname
-    });
-  }, [phase, selectedId, isSkillLockedOut, skillChargesLeft, foxSmokescreen, pin, team, playerSkill, nickname, getSocket]);
-
-  const handleHigherLowerGuess = useCallback((guess) => {
-    getSocket().emit('player:higher-lower-guess', {
-      pin,
-      playerId: playerId.current,
-      guess
-    });
-  }, [pin, getSocket]);
-
-  const handleHigherLowerSetSecret = useCallback((secret) => {
-    getSocket().emit('player:higher-lower-set-secret', {
-      pin,
-      playerId: playerId.current,
-      secret
-    });
-  }, [pin, getSocket]);
+    question,
+    selectedId,
+    phase,
+    resultData,
+    timeLeft,
+    
+    minigameData,
+    higherLowerData,
+    minigameSpinner,
+    isWheelSpinning,
+    
+    skillChargesLeft,
+    isSkillLockedOut,
+    skillLockoutMsg,
+    removedAnswers,
+    foxSmokescreen,
+    rabbitRush,
+    butterflyActive,
+    
+    handleAnswer,
+    handleUseSkill,
+    handleHigherLowerGuess,
+    handleHigherLowerSetSecret,
+    handleHoldButton,
+    handleReleaseButton
+  } = gameState;
 
   // ── RESULT overlay ──
   if (phase === 'RESULT' && resultData) {
@@ -318,18 +55,12 @@ export default function PlayerControllerUI() {
 
   // ── MINIGAME ──
   if (phase === 'MINIGAME_RACING') {
-    const assignedColors = minigameData.playerButtons[playerId.current] || [];
+    const assignedColors = minigameData.playerButtons[playerId] || [];
     return (
       <VaultBreakerPlayer 
         assignedColors={assignedColors}
-        onHold={(color) => {
-          const socket = getSocket();
-          if (socket) socket.emit('player:hold-button', { pin, playerId: playerId.current, color });
-        }}
-        onRelease={(color) => {
-          const socket = getSocket();
-          if (socket) socket.emit('player:release-button', { pin, playerId: playerId.current, color });
-        }}
+        onHold={handleHoldButton}
+        onRelease={handleReleaseButton}
       />
     );
   }
@@ -348,7 +79,7 @@ export default function PlayerControllerUI() {
   }
 
   if (phase === 'MINIGAME_REWARD') {
-    const isMe = minigameSpinner.id === playerId.current;
+    const isMe = minigameSpinner.id === playerId;
     
     return (
       <RewardWheel 
@@ -359,7 +90,7 @@ export default function PlayerControllerUI() {
         preSelectedRewardId={minigameSpinner.preSelectedRewardId}
         externalSpinTrigger={isWheelSpinning}
         onRewardClaimed={() => {}} // Host handles server transition
-        playerId={playerId.current}
+        playerId={playerId}
         isHost={false}
       />
     );
@@ -407,7 +138,7 @@ export default function PlayerControllerUI() {
           selectedId={selectedId}
           removedAnswers={removedAnswers}
           foxSmokescreen={foxSmokescreen}
-          handleAnswer={handleAnswer}
+          handleAnswer={(answerId) => handleAnswer(answerId, removedAnswers)}
         />
       </div>
     </div>
