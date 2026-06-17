@@ -79,13 +79,21 @@ module.exports = function registerSkillHandlers(io, socket, games) {
       io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam });
     } 
     else if (skillId === 'butterfly') {
-      // Find 2 wrong answers
       const question = game.questions[game.currentQuestionIndex];
-      const correctId = question.answers.find(a => a.isCorrect === true || a.checked === true)?.id;
-      const wrongAnswers = question.answers.filter(a => a.id !== correctId).map(a => a.id);
-      // Shuffle and pick 2
-      const removedAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 2);
+      const correctIds = question.answers
+        .filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
+        .map(a => a.id);
       
+      const wrongAnswers = question.answers
+        .filter(a => !correctIds.includes(a.id))
+        .map(a => a.id);
+      
+      for (let i = wrongAnswers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [wrongAnswers[i], wrongAnswers[j]] = [wrongAnswers[j], wrongAnswers[i]];
+      }
+      
+      const removedAnswers = wrongAnswers.slice(0, 2);
       io.to(pin).emit('game:butterfly-result', { team, removedAnswers });
     } 
     else if (skillId === 'frog') {

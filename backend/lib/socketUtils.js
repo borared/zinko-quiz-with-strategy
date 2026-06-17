@@ -35,7 +35,7 @@ function buildAnswerStats(game) {
     text: a.text,
     color: a.color,
     count: answerCounts[a.id] || 0,
-    isCorrect: a.isCorrect === true || a.checked === true,
+    isCorrect: a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true',
   }));
 }
 
@@ -69,13 +69,16 @@ function revealResults(io, pin, games) {
 
   game.phase = 'RESULT';
   const question = game.questions[game.currentQuestionIndex];
-  const correctId = question.answers.find(a => a.isCorrect === true || a.checked === true)?.id;
+  const correctIds = question.answers
+    .filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
+    .map(a => a.id);
+  const correctId = correctIds.length > 0 ? correctIds[0] : null;
   const stats = buildAnswerStats(game);
 
   // 1. Award base points based on correctness and speed, considering Rabbit
   game.players.forEach(player => {
     const selectedId = game.answers[player.id];
-    const isCorrect = selectedId === correctId;
+    const isCorrect = correctIds.includes(selectedId);
     const timeTaken = game.answerTimes[player.id] || QUESTION_TIME_SECONDS * 1000;
     const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / (QUESTION_TIME_SECONDS * 1000)) * 500)) : 0;
     
@@ -115,7 +118,7 @@ function revealResults(io, pin, games) {
     const frogActive = game.frogActive?.[team];
     if (frogActive) {
       const frogPlayer = game.players.find(p => p.id === frogActive.playerId);
-      if (frogPlayer && frogPlayer.lastCorrect) {
+      if (frogPlayer) {
         // Find fastest correct enemy
         const enemyTeam = team === 'A' ? 'B' : 'A';
         const correctEnemies = game.players.filter(p => p.team === enemyTeam && p.lastCorrect);

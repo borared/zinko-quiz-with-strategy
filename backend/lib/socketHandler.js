@@ -26,11 +26,16 @@ function initSocketHandler(io) {
     socket.on('disconnect', () => {
       console.log(`🔌 Socket disconnected: ${socket.id}`);
       // Mark player offline (don't remove — allow reconnect)
-      games.forEach((game) => {
-        const player = game.players.find(p => p.socketId === socket.id);
-        if (player) {
-          player.socketId = null;
-          console.log(`👤 Player "${player.nickname}" disconnected from game ${game.pin}`);
+      games.forEach((game, pin) => {
+        if (game.hostSocketId === socket.id) {
+          console.log(`👑 Host disconnected from game ${pin}.`);
+          io.to(pin).emit('game:host-disconnected', { message: 'The host has disconnected.' });
+        } else {
+          const player = game.players.find(p => p.socketId === socket.id);
+          if (player) {
+            player.socketId = null;
+            console.log(`👤 Player "${player.nickname}" disconnected from game ${game.pin}`);
+          }
         }
       });
     });

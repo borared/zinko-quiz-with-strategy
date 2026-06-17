@@ -20,6 +20,34 @@ module.exports = function registerGameHandlers(io, socket, games) {
     game.answerTimes = {};
     game.absoluteAnswerTimes = {};
     
+    // Auto-assign missing skills
+    const ALL_SKILLS = ['rabbit', 'fox', 'butterfly', 'frog'];
+    const teams = ['A', 'B'];
+    teams.forEach(team => {
+      if (!game.teamSkills[team]) game.teamSkills[team] = {};
+      const teamPlayers = game.players.filter(p => p.team === team);
+      const playersWithSkill = new Set(Object.values(game.teamSkills[team]).map(s => s.playerId));
+      const playersNeedingSkill = teamPlayers.filter(p => !playersWithSkill.has(p.id));
+      
+      const availableSkills = ALL_SKILLS.filter(s => !game.teamSkills[team][s]);
+      // Fisher-Yates shuffle available skills
+      for (let i = availableSkills.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableSkills[i], availableSkills[j]] = [availableSkills[j], availableSkills[i]];
+      }
+      
+      playersNeedingSkill.forEach(p => {
+        if (availableSkills.length > 0) {
+          const skillToAssign = availableSkills.pop();
+          game.teamSkills[team][skillToAssign] = {
+            playerId: p.id,
+            nickname: p.nickname,
+            avatar: p.avatar
+          };
+        }
+      });
+    });
+
     // Reset skill states for the new round
     game.activeSkillThisRound = { A: null, B: null };
     game.rabbitActive = { A: null, B: null };
@@ -35,6 +63,8 @@ module.exports = function registerGameHandlers(io, socket, games) {
     const question = game.questions[0];
     console.log(`▶️  Game ${pin} started — Q1`);
 
+    io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
+
     io.to(pin).emit('game:question', {
       index: 0,
       round: 1,
@@ -45,6 +75,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
       answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
       timeSeconds: QUESTION_TIME_SECONDS,
       skillCharges: game.skillCharges,
+      teamSkills: game.teamSkills,
     });
 
     startTimer(io, pin, games);
