@@ -58,7 +58,8 @@ export default function HostGameUI() {
   useEffect(() => {
     if (isConnected) {
       const socket = getSocket();
-      socket?.emit("host:reconnect", { pin });
+      const token = localStorage.getItem('zinko_jwt');
+      socket?.emit("host:reconnect", { pin, token });
     }
   }, [isConnected, pin, getSocket]);
 
@@ -89,10 +90,16 @@ export default function HostGameUI() {
     const socket = getSocket();
     if (!socket) return;
 
-    const onError = (err) => alert(`Server Error: ${err.message}`);
+    const onError = (err) => {
+      if (err.message === 'Unauthorized host') {
+        router.replace('/unauthorized');
+      } else {
+        alert(`Server Error: ${err.message}`);
+      }
+    };
     socket.on("error", onError);
     return () => socket.off("error", onError);
-  }, [getSocket]);
+  }, [getSocket, router]);
 
   // Socket listeners
   useEffect(() => {

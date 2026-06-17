@@ -40,7 +40,10 @@ const TeamWarmUpSection = () => {
 
       {/* Test Button for ChoosingSkill Navigation */}
       <button 
-        onClick={() => router.push('/choose-skill')}
+        onClick={() => {
+          const pin = sessionStorage.getItem('game_pin') || '';
+          router.push(`/play/${pin}/choose-skill`);
+        }}
         className="absolute top-4 right-4 z-50 bg-[#5D3FD3] text-white px-4 py-2 rounded-xl font-bold border-2 border-zk-black shadow-[4px_4px_0px_#1a1a1a] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#1a1a1a] transition-all uppercase tracking-widest text-sm"
       >
         Test Choose Skill

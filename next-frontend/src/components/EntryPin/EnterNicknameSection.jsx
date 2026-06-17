@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Rocket, VenetianMask, RefreshCw } from 'lucide-react';
+import { Rocket, VenetianMask, RefreshCw, Edit2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 ;
@@ -80,7 +80,7 @@ const EnterNicknameSection = () => {
           if (response && response.available) {
             sessionStorage.setItem('player_nickname', nickname.trim());
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-            router.push(`/play/choose-team/${pin}`);
+            router.push(`/play/${pin}/choose-team`);
           } else {
             setError(response?.message || 'Nickname already taken');
             showToast(response?.message || 'Nickname already taken', 'error');
@@ -89,7 +89,7 @@ const EnterNicknameSection = () => {
       } else {
         sessionStorage.setItem('player_nickname', nickname.trim());
         sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-        router.push(`/play/choose-team/${pin}`);
+        router.push(`/play/${pin}/choose-team`);
       }
     } else {
       router.push('/join');
@@ -127,12 +127,19 @@ const EnterNicknameSection = () => {
         {loadingAvatars ? (
           <p className="text-sm text-zk-black/70 mb-6">Loading avatars…</p>
         ) : selectedAvatar ? (
-          <div className="mb-6 w-40 h-40 border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden bg-white flex items-center justify-center">
+          <div 
+            onClick={() => setIsAvatarModalOpen(true)}
+            className="relative mb-6 w-40 h-40 border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl bg-white flex items-center justify-center cursor-pointer group hover:-translate-y-1 hover:shadow-[6px_10px_0px_0px_rgba(0,0,0,1)] transition-all"
+          >
             <img
               src={selectedAvatar.image_url}
               alt="Your Avatar"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
             />
+            {/* Edit Badge */}
+            <div className="absolute -top-3 -right-3 bg-white text-zk-black p-2 rounded-full border-[3px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 group-hover:bg-gray-100 transition-all z-20">
+              <Edit2 size={18} strokeWidth={2.5} />
+            </div>
           </div>
         ) : null}
 

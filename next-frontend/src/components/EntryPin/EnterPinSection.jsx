@@ -65,7 +65,7 @@ const EnterPinSection = () => {
       window.dispatchEvent(new Event('audioStarted'));
 
       setTimeout(() => {
-        router.push(`/play/join-nickname/${pin}`);
+        router.push(`/play/${pin}/join-nickname`);
       }, 500);
 
     } catch (err) {

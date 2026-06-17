@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
 
 const SoundToggle = () => {
@@ -37,8 +38,23 @@ const SoundToggle = () => {
     }
   };
 
-  // Only show the button if the audio object exists (meaning it has been initialized at least once)
-  if (!hasAudio) return null;
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // If user navigates away from game routes, stop audio and hide toggle
+    if (!pathname.startsWith('/host') && !pathname.startsWith('/play')) {
+      if (typeof window !== 'undefined' && window.gameAudio) {
+        window.gameAudio.pause();
+        window.gameAudio.currentTime = 0;
+        window.gameAudio = null;
+      }
+      setHasAudio(false);
+      setIsPlaying(false);
+    }
+  }, [pathname]);
+
+  // Only show the button if the audio object exists and we are in a game route
+  if (!hasAudio || (!pathname.startsWith('/host') && !pathname.startsWith('/play'))) return null;
 
   return (
     <button

@@ -84,7 +84,7 @@ const ChooseTeamSection = () => {
           socket.off('player:joined', onJoined);
           socket.off('error', onError);
           setJoining(false);
-          blinkTo(`/play/lobby/${pin}`);
+          blinkTo(`/play/${pin}/lobby`);
         };
 
       const onError = ({ message }) => {
@@ -103,7 +103,7 @@ const ChooseTeamSection = () => {
 
     } else {
       // No PIN in session — fallback to old warmup flow
-      blinkTo('/team-warmup');
+      blinkTo(`/play/${pin}/team-warmup`);
     }
   };
 
