@@ -181,7 +181,8 @@ export default function HostLobby() {
     if (!socket || !isConnected) return;
 
     const storedQuizId = sessionStorage.getItem(`game_${pin}_quizId`);
-    socket.emit('host:initialize', { pin, quizId: storedQuizId });
+    const token = localStorage.getItem('zinko_jwt');
+    socket.emit('host:initialize', { pin, quizId: storedQuizId, token });
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
@@ -195,6 +196,8 @@ export default function HostLobby() {
     const onError = (data) => {
       if (data.message === 'Game PIN not found.') {
         router.replace('/404');
+      } else if (data.message === 'Unauthorized host') {
+        router.replace('/unauthorized');
       }
     };
 

@@ -190,7 +190,7 @@ export default function PlayerLobby() {
     };
 
     const onQuestion = (data) => {
-      router.push(`/play/game/${pin}`, { state: { question: data } });
+      router.push(`/play/${pin}/game`, { state: { question: data } });
     };
 
     const onCountdownStarted = () => {
@@ -200,7 +200,7 @@ export default function PlayerLobby() {
           if (prev <= 1) {
             clearInterval(interval);
             setTimeout(() => {
-              router.push('/choose-skill');
+              router.push(`/play/${pin}/choose-skill`);
             }, 0);
             return null;
           }
