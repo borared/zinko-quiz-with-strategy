@@ -2,6 +2,8 @@
 import React from 'react';
 import { Share2, AtSign } from 'lucide-react';
 
+import Link from 'next/link';
+
 const Footer = () => {
   return (
     <footer className="bg-[#0a0a0a] text-white py-16 px-6 font-sans">
@@ -24,10 +26,10 @@ const Footer = () => {
         {/* Column 2: Products */}
         <div className="flex flex-col gap-4">
           <h4 className="text-zk-yellow font-bold text-lg mb-2">PRODUCTS</h4>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Game Maker</a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Library</a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Pricing</a>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Zinko Pro</a>
+          <Link href="/create-game" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Game Maker</Link>
+          <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Library</Link>
+          <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Pricing</Link>
+          <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Zinko Pro</Link>
         </div>
 
         {/* Column 3: Support */}

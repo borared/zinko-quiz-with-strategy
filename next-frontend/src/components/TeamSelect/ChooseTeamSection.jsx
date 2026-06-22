@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTransitionStore } from '@/store/useTransitionStore';
 import { useSocketStore } from '@/store/useSocketStore';
@@ -50,6 +50,16 @@ const ChooseTeamSection = () => {
     }
     return null; // Return null so it doesn't render until redirect
   }
+
+  // Explicitly leave team when returning to this screen
+  useEffect(() => {
+    const socket = getSocket();
+    const playerId = sessionStorage.getItem('player_id');
+    if (socket && pin && playerId) {
+      socket.emit('player:leave-team', { pin, playerId });
+      sessionStorage.removeItem('player_team');
+    }
+  }, [getSocket, pin]);
 
 
   const countA = 12;

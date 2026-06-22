@@ -231,6 +231,21 @@ export default function HostGameUI() {
       }, 3000);
     };
 
+    const onHostSyncState = (data) => {
+      // If backend is in LOBBY, we are in the initial SKILL_PICK screen, so don't override phase.
+      if (data.phase && data.phase !== 'LOBBY') setPhase(data.phase);
+      if (data.question) setQuestion(data.question);
+      if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
+      if (data.answered !== undefined) setAnswered(data.answered);
+      if (data.total !== undefined) setTotal(data.total);
+      if (data.stats) setStats(data.stats);
+      if (data.correctId) setCorrectId(data.correctId);
+      if (data.leaderboard) setLeaderboard(data.leaderboard);
+      if (data.isFinalLeaderboard !== undefined) setIsFinalLeaderboard(data.isFinalLeaderboard);
+      if (data.minigameData) setMinigameData(prev => ({ ...prev, ...data.minigameData }));
+    };
+
+    socket.on("host:sync-state-response", onHostSyncState);
     socket.on("game:question", onQuestion);
     socket.on("game:timer-tick", onTimerTick);
     socket.on("host:answer-progress", onAnswerProgress);
@@ -251,6 +266,7 @@ export default function HostGameUI() {
     socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
+      socket.off("host:sync-state-response", onHostSyncState);
       socket.off("game:question", onQuestion);
       socket.off("game:timer-tick", onTimerTick);
       socket.off("host:answer-progress", onAnswerProgress);
@@ -305,9 +321,21 @@ export default function HostGameUI() {
     setIsTransitioning(false);
   }, [phase]);
 
-  // Auto-advance removed so host has full control
+  // Auto-advance to leaderboard and next question
   useEffect(() => {
-    // No auto-advance
+    if (phase === "RESULT") {
+      const timer = setTimeout(() => {
+        handleShowLeaderboard();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+    
+    if (phase === "LEADERBOARD" && !isFinalLeaderboard) {
+      const timer = setTimeout(() => {
+        handleNextQuestion();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
   }, [phase, isFinalLeaderboard, handleShowLeaderboard, handleNextQuestion]);
 
   // Loading state

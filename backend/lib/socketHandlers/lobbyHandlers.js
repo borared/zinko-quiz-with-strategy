@@ -66,8 +66,66 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     }
 
     game.hostSocketId = socket.id;
+    if (game.hostDisconnectTimer) {
+      clearTimeout(game.hostDisconnectTimer);
+      game.hostDisconnectTimer = null;
+    }
     socket.join(pin);
     console.log(`🔌 Host reconnected to game ${pin}`);
+
+    // Sync state back to host
+    let currentQuestionPayload = null;
+    if (['QUESTION', 'ANSWERED', 'RESULT', 'LEADERBOARD'].includes(game.phase)) {
+      const q = game.questions[game.currentQuestionIndex];
+      if (q) {
+        currentQuestionPayload = {
+          index: game.currentQuestionIndex,
+          round: Math.floor(game.currentQuestionIndex / 5) + 1,
+          match: (game.currentQuestionIndex % 5) + 1,
+          total: game.questions.length,
+          questionText: q.question_text || '',
+          imageUrl: q.image_url || null,
+          answers: Array.isArray(q.answers) ? q.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
+          timeSeconds: require('../socketUtils').QUESTION_TIME_SECONDS,
+          skillCharges: game.skillCharges,
+          teamSkills: game.teamSkills,
+        };
+      }
+    }
+
+    const { getLeaderboard, buildAnswerStats } = require('../socketUtils');
+    const syncData = {
+      phase: game.phase,
+      timeLeft: game.timeLeft,
+      question: currentQuestionPayload,
+      answered: game.answers ? Object.keys(game.answers).length : 0,
+      total: game.players.length,
+    };
+
+    if (game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
+      syncData.stats = buildAnswerStats(game);
+      const q = game.questions[game.currentQuestionIndex];
+      if (q) {
+        const correctIds = q.answers.filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true').map(a => a.id);
+        syncData.correctId = correctIds.length > 0 ? correctIds[0] : null;
+      }
+    }
+
+    if (game.phase === 'LEADERBOARD' || game.phase === 'FINISHED') {
+      syncData.leaderboard = getLeaderboard(game.players);
+      syncData.isFinalLeaderboard = game.phase === 'FINISHED';
+    }
+
+    if (game.phase === 'MINIGAME_RACING') {
+      syncData.minigameData = {
+        vaultsToWin: game.vaultsToWin,
+        teamVaults: game.teamVaults,
+        playerButtons: game.playerButtons,
+        heldColors: { A: Array.from(game.heldColors?.A || []), B: Array.from(game.heldColors?.B || []) }
+      };
+    }
+
+    socket.emit('host:sync-state-response', syncData);
   });
 
   // ── player:join ───────────────────────────────────────────────────────────
@@ -155,5 +213,25 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     const game = games.get(pin);
     if (!game || game.hostSocketId !== socket.id) return;
     io.to(pin).emit('lobby:countdown-started');
+  });
+
+  // ── player:leave-team ─────────────────────────────────────────────────────
+  socket.on('player:leave-team', ({ pin, playerId }) => {
+    const game = games.get(pin);
+    if (!game) return;
+
+    if (game.phase === 'LOBBY') {
+      const initialCount = game.players.length;
+      game.players = game.players.filter(p => p.id !== playerId);
+      
+      if (game.players.length !== initialCount) {
+        console.log(`👋 Player ${playerId} explicitly left team in lobby ${pin}`);
+        io.to(pin).emit('lobby:players-update', {
+          players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+          count: game.players.length,
+          background: game.background,
+        });
+      }
+    }
   });
 };

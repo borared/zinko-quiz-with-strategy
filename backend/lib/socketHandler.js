@@ -28,13 +28,27 @@ function initSocketHandler(io) {
       // Mark player offline (don't remove — allow reconnect)
       games.forEach((game, pin) => {
         if (game.hostSocketId === socket.id) {
-          console.log(`👑 Host disconnected from game ${pin}.`);
-          io.to(pin).emit('game:host-disconnected', { message: 'The host has disconnected.' });
+          console.log(`👑 Host disconnected from game ${pin}. Waiting 10s for reconnect...`);
+          game.hostDisconnectTimer = setTimeout(() => {
+            console.log(`👑 Host permanently disconnected from game ${pin}.`);
+            io.to(pin).emit('game:host-disconnected', { message: 'The host has disconnected.' });
+          }, 10000);
         } else {
           const player = game.players.find(p => p.socketId === socket.id);
           if (player) {
             player.socketId = null;
-            console.log(`👤 Player "${player.nickname}" disconnected from game ${game.pin}`);
+            console.log(`👤 Player "${player.nickname}" disconnected from game ${pin}`);
+            
+            // If still in lobby, remove player entirely and update lobby so their avatar leaves
+            if (game.phase === 'LOBBY') {
+              game.players = game.players.filter(p => p.id !== player.id);
+              io.to(pin).emit('lobby:players-update', {
+                players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+                count: game.players.length,
+                background: game.background,
+              });
+              console.log(`👋 Player "${player.nickname}" removed from lobby ${pin}`);
+            }
           }
         }
       });
