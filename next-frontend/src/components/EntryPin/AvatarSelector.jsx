@@ -54,7 +54,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                    <img 
                      src={avatar.image_url} 
                      alt="Avatar option" 
-                     loading="lazy"
+                     loading="eager"
                      className="w-[90%] h-[90%] object-cover drop-shadow-md rounded-lg"
                    />
                   
