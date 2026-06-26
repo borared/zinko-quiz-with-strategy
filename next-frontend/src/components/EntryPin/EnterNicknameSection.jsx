@@ -38,6 +38,11 @@ const EnterNicknameSection = () => {
           router.replace('/join');
           return;
         }
+        if (gameRes.playerCount >= 8) {
+          showToast('This game room is already full (max 8 players).', 'error');
+          router.replace('/join');
+          return;
+        }
         if (gameRes.phase !== 'LOBBY') {
           showToast('This game has already started. Ask the host for a new PIN.', 'error');
           router.replace('/join');
@@ -50,6 +55,13 @@ const EnterNicknameSection = () => {
           setAvatars(data);
           const random = data[Math.floor(Math.random() * data.length)];
           setSelectedAvatar(random);
+          // Preload avatar images for instant display when modal opens
+          data.forEach(avatar => {
+            if (avatar.image_url) {
+              const img = new Image();
+              img.src = avatar.image_url;
+            }
+          });
         } else {
           console.error('Failed to load avatars', data);
         }
@@ -111,7 +123,12 @@ const EnterNicknameSection = () => {
         className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 bg-[#FFB020]/60 border-[3px] border-zk-black/10 pointer-events-none rounded-xl"
       />
 
-      <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center">
+      <motion.div 
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className="relative z-10 w-full max-w-[500px] flex flex-col items-center"
+      >
 
         {/* Header */}
         <div className="text-center mb-6">
@@ -172,12 +189,15 @@ const EnterNicknameSection = () => {
           )}
 
           {/* Enter Button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95, y: 4 }}
+            transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-base uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none mb-6 rounded-xl"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-base uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6 rounded-xl"
           >
             Enter <Rocket size={20} />
-          </button>
+          </motion.button>
 
           {/* Divider */}
           <div className="w-full flex items-center gap-4 mb-6">
@@ -203,7 +223,7 @@ const EnterNicknameSection = () => {
           </div>
 
         </div>
-      </div>
+      </motion.div>
 
       {/* Avatar Modal */}
       <AnimatePresence>

@@ -49,6 +49,12 @@ const EnterPinSection = () => {
         return;
       }
 
+      if (data.playerCount >= 8) {
+        setError('This game room is already full (max 8 players).');
+        triggerShake();
+        return;
+      }
+
       if (data.phase !== 'LOBBY') {
         setError('This game has already started. Ask the host for a new PIN.');
         triggerShake();
@@ -84,7 +90,12 @@ const EnterPinSection = () => {
       <div className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 border-[3px] border-black/10 bg-black/5 pointer-events-none" />
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center">
+      <motion.div 
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className="relative z-10 w-full max-w-[500px] flex flex-col items-center"
+      >
 
         {/* Title */}
         <div className="text-center mb-8 permanent-marker-regular">
@@ -98,7 +109,7 @@ const EnterPinSection = () => {
 
         {/* Card */}
         <motion.div
-          animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
+          animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
           className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
         >
@@ -125,11 +136,14 @@ const EnterPinSection = () => {
           )}
 
           {/* Enter Button */}
-          <button
+          <motion.button
             id="enter-pin-btn"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95, y: 4 }}
+            transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
             disabled={loading || pin.length < 6}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl disabled:opacity-50 disabled:cursor-wait disabled:transform-none flex items-center justify-center gap-2"
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {loading ? (
@@ -138,11 +152,11 @@ const EnterPinSection = () => {
                 Checking...
               </>
             ) : 'Enter'}
-          </button>
+          </motion.button>
 
         </motion.div>
 
-      </div>
+      </motion.div>
     </div>
   );
 };

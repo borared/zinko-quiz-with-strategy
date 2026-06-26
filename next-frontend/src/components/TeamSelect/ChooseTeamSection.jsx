@@ -98,7 +98,6 @@ const ChooseTeamSection = () => {
         };
 
       const onError = ({ message }) => {
-        console.error('Join error:', message);
         // Show error toast using Zinko style (red)
         showToast(message, 'error');
         socket.off('player:joined', onJoined);

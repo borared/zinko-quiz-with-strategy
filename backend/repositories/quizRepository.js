@@ -91,17 +91,28 @@ const getQuizById = async (id) => {
 };
 
 /**
- * Fetch all quizzes for a specific creator.
+ * Fetch quizzes for a specific creator with cursor pagination.
  */
-const getQuizzesByUserId = async (userId) => {
-  const { data, error } = await supabase
+const getQuizzesByUserId = async (userId, cursor = null, limit = 10) => {
+  let query = supabase
     .from('quizzes')
     .select('*, questions(*)')
     .eq('creator_id', userId)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(limit + 1);
 
+  if (cursor) {
+    query = query.lt('created_at', cursor);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
-  return data;
+
+  const hasNextPage = data.length > limit;
+  const quizzes = data.slice(0, limit);
+  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at : null;
+
+  return { quizzes, nextCursor, hasNextPage };
 };
 
 /**
@@ -118,17 +129,34 @@ const getAllQuizzesDebug = async () => {
 };
 
 /**
- * Fetch all public quizzes with creator details.
+ * Fetch public quizzes with cursor pagination and optional search.
  */
-const getPublicQuizzes = async () => {
-  const { data: quizzes, error: quizError } = await supabase
+const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) => {
+  let query = supabase
     .from('quizzes')
     .select('*, questions(*)')
     .eq('is_public', true)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(limit + 1);
 
+  if (cursor) {
+    query = query.lt('created_at', cursor);
+  }
+
+  if (searchQuery) {
+    query = query.ilike('title', `%${searchQuery}%`);
+  }
+
+  const { data: results, error: quizError } = await query;
   if (quizError) throw quizError;
-  if (!quizzes || quizzes.length === 0) return [];
+
+  const hasNextPage = results.length > limit;
+  const quizzes = results.slice(0, limit);
+  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at : null;
+
+  if (!quizzes || quizzes.length === 0) {
+    return { quizzes: [], nextCursor: null, hasNextPage: false };
+  }
 
   const creatorIds = [...new Set(quizzes.map(q => q.creator_id))];
   const { data: users, error: usersError } = await supabase
@@ -145,10 +173,12 @@ const getPublicQuizzes = async () => {
     });
   }
 
-  return quizzes.map(q => ({
+  const enrichedQuizzes = quizzes.map(q => ({
     ...q,
     creator: usersMap[q.creator_id] || null,
   }));
+
+  return { quizzes: enrichedQuizzes, nextCursor, hasNextPage };
 };
 
 /**

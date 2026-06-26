@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
@@ -13,14 +13,59 @@ const Discovery = () => {
   const [fetchError, setFetchError] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const fetchMoreQuizzes = async () => {
+    if (!hasNextPage || isFetchingMore) return;
+    setIsFetchingMore(true);
+    try {
+      const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : '';
+      const data = await api.get(`/api/quizzes/public?limit=12&cursor=${encodeURIComponent(nextCursor)}${searchParam}`);
+      setQuizzes(prev => [...prev, ...(data.quizzes || [])]);
+      setNextCursor(data.nextCursor || null);
+      setHasNextPage(data.hasNextPage !== undefined ? data.hasNextPage : false);
+    } catch (error) {
+      console.error('Error fetching more quizzes:', error);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
+
+  const observer = useRef();
+  const lastQuizElementRef = useCallback((node) => {
+    if (loading || isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchMoreQuizzes();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, isFetchingMore, hasNextPage, debouncedSearch, nextCursor]);
 
   useEffect(() => {
     disconnectSocket();
 
-    const fetchPublicQuizzes = async () => {
+    const fetchInitialQuizzes = async () => {
+      setLoading(true);
       try {
-        const data = await api.get('/api/quizzes/public');
-        setQuizzes(data);
+        const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : '';
+        const data = await api.get(`/api/quizzes/public?limit=12${searchParam}`);
+        setQuizzes(data.quizzes || data);
+        setNextCursor(data.nextCursor || null);
+        setHasNextPage(data.hasNextPage !== undefined ? data.hasNextPage : false);
       } catch (error) {
         console.error('Error fetching public quizzes:', error);
         setFetchError(error.message || 'Error fetching public quizzes');
@@ -29,12 +74,8 @@ const Discovery = () => {
       }
     };
 
-    fetchPublicQuizzes();
-  }, [disconnectSocket]);
-
-  const filteredQuizzes = quizzes.filter(quiz => 
-    quiz.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    fetchInitialQuizzes();
+  }, [disconnectSocket, debouncedSearch]);
 
   return (
     <div className="flex font-sans min-h-screen relative">
@@ -81,9 +122,15 @@ const Discovery = () => {
           </div>
 
           {/* Public Quizzes */}
-          <QuizGrid quizzes={filteredQuizzes} loading={loading} isDiscoveryMode={true} />
+          <QuizGrid quizzes={quizzes} loading={loading} isDiscoveryMode={true} />
           {fetchError && (
             <div className="text-red-600 font-bold mt-4">Unable to load quizzes: {fetchError}</div>
+          )}
+
+          {hasNextPage && !loading && (
+            <div ref={lastQuizElementRef} className="h-20 w-full flex items-center justify-center mt-4 z-10 relative">
+              {isFetchingMore && <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-white"></div>}
+            </div>
           )}
         </div>
       </div>

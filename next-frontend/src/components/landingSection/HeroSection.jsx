@@ -78,9 +78,12 @@ const HeroSection = () => {
           </motion.div>
 
           {/* Button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.9, y: 5 }}
+            transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={() => router.push('/join')}
-            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[8px] active:translate-x-[8px] active:shadow-none rounded-xl"
+            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-xl"
           >
             <span className="font-bold text-4xl tracking-wide"
               style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>JOIN</span>
@@ -88,7 +91,7 @@ const HeroSection = () => {
               <circle cx="12" cy="12" r="10"></circle>
               <polygon points="10 8 16 12 10 16 10 8"></polygon>
             </svg>
-          </button>
+          </motion.button>
 
           {/* Character 2 */}
           <motion.div
