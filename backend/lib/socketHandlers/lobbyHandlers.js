@@ -149,6 +149,14 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
 
     // Upsert player (handle reconnects and team/nickname changes)
     const existing = game.players.find(p => p.id === playerId);
+
+    // Check team capacity (max 4 per team)
+    const teamCount = game.players.filter(p => p.team === team && p.id !== playerId).length;
+    if (teamCount >= 4) {
+      socket.emit('error', { message: `Team ${team} is full (max 4 players).` });
+      return;
+    }
+
     if (existing) {
       existing.socketId = socket.id;
       existing.nickname = nickname;
@@ -198,6 +206,10 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     const game = games.get(pin);
     if (!game) {
       callback({ available: false, message: 'Game not found' });
+      return;
+    }
+    if (game.players.length >= 8) {
+      callback({ available: false, message: 'Game room is already full (max 8 players)' });
       return;
     }
     const exists = game.players.some(p => p.nickname.toLowerCase() === nickname.trim().toLowerCase());
