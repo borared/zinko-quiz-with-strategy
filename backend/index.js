@@ -19,9 +19,7 @@ const PORT = process.env.PORT || 5000;
 const FRONTEND_URLS = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'http://localhost:3000',
-  'http://172.23.1.212:3000',
-  'http://172.23.2.1:3000'
+  'http://localhost:3000'
 ].filter(Boolean);
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
@@ -94,7 +92,7 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-const HOST = '172.23.2.1';
+const HOST = '0.0.0.0';
 httpServer.listen(PORT, HOST, () => {
   console.log(`✅ Server running on http://${HOST}:${PORT}`);
   console.log(`🔌 Socket.io attached and listening`);
