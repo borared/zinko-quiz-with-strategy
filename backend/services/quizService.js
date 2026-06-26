@@ -19,8 +19,8 @@ const getQuizById = async (id) => {
   return await quizRepository.getQuizById(id);
 };
 
-const getQuizzesByUserId = async (userId) => {
-  return await quizRepository.getQuizzesByUserId(userId);
+const getQuizzesByUserId = async (userId, cursor, limit) => {
+  return await quizRepository.getQuizzesByUserId(userId, cursor, limit);
 };
 
 const getAllQuizzesDebug = async () => {
@@ -65,8 +65,8 @@ const cloneQuiz = async (quizId, newCreatorId) => {
   return clonedQuiz;
 };
 
-const getPublicQuizzes = async () => {
-  return await quizRepository.getPublicQuizzes();
+const getPublicQuizzes = async (cursor, limit, searchQuery) => {
+  return await quizRepository.getPublicQuizzes(cursor, limit, searchQuery);
 };
 
 const updateQuizVisibility = async (id, is_public) => {
