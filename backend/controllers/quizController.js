@@ -76,16 +76,17 @@ const getAllQuizzesDebug = async (req, res) => {
 
 /**
  * Handle GET /api/quizzes/user/:userId
- * Fetch quizzes by a specific user
+ * Fetch quizzes by a specific user with pagination
  */
 const getQuizzesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { cursor, limit } = req.query;
     console.log(`🔍 Fetching quizzes for user: "${userId}" (length: ${userId.length})`);
 
-    const data = await quizService.getQuizzesByUserId(userId);
+    const data = await quizService.getQuizzesByUserId(userId, cursor, limit ? parseInt(limit, 10) : 10);
 
-    console.log(`✅ Found ${data.length} quizzes for user: ${userId}`);
+    console.log(`✅ Found quizzes for user: ${userId}`);
     res.json(data);
   } catch (err) {
     handleError(res, 'Failed to fetch quizzes', err);
@@ -135,11 +136,12 @@ const updateQuiz = async (req, res) => {
 
 /**
  * Handle GET /api/quizzes/public
- * Fetch public quizzes
+ * Fetch public quizzes with pagination and search
  */
 const getPublicQuizzes = async (req, res) => {
   try {
-    const data = await quizService.getPublicQuizzes();
+    const { cursor, limit, search } = req.query;
+    const data = await quizService.getPublicQuizzes(cursor, limit ? parseInt(limit, 10) : 10, search);
     res.json(data);
   } catch (err) {
     handleError(res, 'Failed to fetch public quizzes', err);
