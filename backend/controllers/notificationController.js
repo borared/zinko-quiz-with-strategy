@@ -14,7 +14,10 @@ const getNotificationsByUserId = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
-    await notificationService.markAsRead(id);
+    const updated = await notificationService.markAsRead(id, req.user.userId);
+    if (!updated) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
     res.json({ success: true });
   } catch (err) {
     handleError(res, 'Failed to mark notification as read', err);
@@ -45,5 +48,5 @@ module.exports = {
   getNotificationsByUserId,
   markAsRead,
   markAllAsRead,
-  clearAllNotifications
+  clearAllNotifications,
 };
