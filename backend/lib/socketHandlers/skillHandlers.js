@@ -1,8 +1,12 @@
+const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
+
+const VALID_SKILLS = new Set(['rabbit', 'fox', 'butterfly', 'frog']);
+
 module.exports = function registerSkillHandlers(io, socket, games) {
   // ── host:skill-timer-sync ────────────────────────────────────────────────
   socket.on('host:skill-timer-sync', ({ pin, timeLeft }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     io.to(pin).emit('game:skill-timer-tick', { timeLeft });
   });
 
@@ -10,6 +14,10 @@ module.exports = function registerSkillHandlers(io, socket, games) {
   socket.on('player:select-skill', ({ pin, playerId, skillId, team, nickname, avatar }) => {
     const game = games.get(pin);
     if (!game) return;
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+    if (!VALID_SKILLS.has(skillId)) return;
+    team = player.team;
     if (!game.teamSkills[team]) game.teamSkills[team] = {};
     
     if (game.teamSkills[team][skillId] && game.teamSkills[team][skillId].playerId !== playerId) {
@@ -31,6 +39,9 @@ module.exports = function registerSkillHandlers(io, socket, games) {
   socket.on('player:cancel-skill', ({ pin, skillId, team, playerId }) => {
     const game = games.get(pin);
     if (!game) return;
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+    team = player.team;
     if (game.teamSkills[team] && game.teamSkills[team][skillId] && game.teamSkills[team][skillId].playerId === playerId) {
       delete game.teamSkills[team][skillId];
       io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
@@ -48,6 +59,10 @@ module.exports = function registerSkillHandlers(io, socket, games) {
   socket.on('player:use-skill', ({ pin, playerId, team, skillId, nickname }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'QUESTION') return;
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+    if (!VALID_SKILLS.has(skillId)) return;
+    team = player.team;
     
     // Check if team already used a skill this round
     if (game.activeSkillThisRound[team]) {
