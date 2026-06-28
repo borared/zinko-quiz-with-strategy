@@ -94,7 +94,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
     }
     try {
       setIsCloning(true);
-      await api.post(`/api/quizzes/${quiz.id}/clone`, { newCreatorId: user.id });
+      await api.post(`/api/quizzes/${quiz.id}/clone`, {});
       router.push('/dashboard');
     } catch (err) {
       console.error("Cloning failed:", err);
