@@ -2,17 +2,23 @@
 import React, { useState } from 'react';
 import ResultOverlay from '@/components/Play/ResultOverlay';
 
+const RESULT_STATES = ['correct', 'incorrect', 'missed'];
+
 export default function TestResultPage() {
-  const [isCorrect, setIsCorrect] = useState(false);
+  const [resultState, setResultState] = useState('correct');
   const [stolenPoints, setStolenPoints] = useState(0);
   const [rabbitBonusApplied, setRabbitBonusApplied] = useState(false);
 
+  const isCorrect = resultState === 'correct';
+  const isMissed = resultState === 'missed';
+
   const dummyResultData = {
     isCorrect,
-    rabbitBonusApplied,
+    isMissed,
+    rabbitBonusApplied: isCorrect && rabbitBonusApplied,
     pointsEarned: isCorrect ? (rabbitBonusApplied ? 1700 : 850) : 0,
     stolenPoints,
-    totalScore: 12450
+    totalScore: 12450,
   };
 
   return (
@@ -24,10 +30,19 @@ export default function TestResultPage() {
         <h3 className="font-black text-xl border-b-2 border-black/10 pb-2">Result Preview Controls</h3>
         
         <button 
-          onClick={() => setIsCorrect(!isCorrect)}
-          className={`px-4 py-2 font-bold border-2 border-black rounded hover:opacity-80 transition-opacity ${isCorrect ? 'bg-green-400 text-black' : 'bg-red-400 text-white'}`}
+          onClick={() => {
+            const nextIndex = (RESULT_STATES.indexOf(resultState) + 1) % RESULT_STATES.length;
+            setResultState(RESULT_STATES[nextIndex]);
+          }}
+          className={`px-4 py-2 font-bold border-2 border-black rounded hover:opacity-80 transition-opacity ${
+            resultState === 'correct'
+              ? 'bg-green-400 text-black'
+              : resultState === 'missed'
+                ? 'bg-orange-400 text-black'
+                : 'bg-red-400 text-white'
+          }`}
         >
-          State: {isCorrect ? '✅ Correct' : '❌ Incorrect'}
+          State: {resultState === 'correct' ? '✅ Correct' : resultState === 'missed' ? '⏰ Missed' : '❌ Incorrect'}
         </button>
         
         <button 
