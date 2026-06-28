@@ -1,17 +1,40 @@
 const quizRepository = require('../repositories/quizRepository');
 const userRepository = require('../repositories/userRepository');
 const notificationService = require('./notificationService');
+const { stripQuizzesCorrectAnswers } = require('../lib/quizSanitizer');
+
+class ForbiddenError extends Error {
+  constructor(message = 'Forbidden') {
+    super(message);
+    this.name = 'ForbiddenError';
+    this.statusCode = 403;
+  }
+}
+
+class NotFoundError extends Error {
+  constructor(message = 'Not found') {
+    super(message);
+    this.name = 'NotFoundError';
+    this.statusCode = 404;
+  }
+}
+
+const assertQuizOwner = async (quizId, userId) => {
+  const quiz = await quizRepository.getQuizById(quizId);
+  if (!quiz) throw new NotFoundError('Quiz not found');
+  if (quiz.creator_id !== userId) throw new ForbiddenError('You do not own this quiz');
+  return quiz;
+};
 
 /**
  * Service: Handles business logic for quizzes
  */
 const createQuiz = async (quizData) => {
-  // In the future, business logic like calculating total time limit
-  // or auto-generating metadata could go here before hitting the DB.
   return await quizRepository.createQuiz(quizData);
 };
 
-const updateQuiz = async (id, quizData) => {
+const updateQuiz = async (id, quizData, userId) => {
+  await assertQuizOwner(id, userId);
   return await quizRepository.updateQuiz(id, quizData);
 };
 
@@ -29,7 +52,10 @@ const getAllQuizzesDebug = async () => {
 
 const cloneQuiz = async (quizId, newCreatorId) => {
   const originalQuiz = await quizRepository.getQuizById(quizId);
-  if (!originalQuiz) throw new Error("Quiz not found");
+  if (!originalQuiz) throw new NotFoundError('Quiz not found');
+  if (!originalQuiz.is_public) {
+    throw new ForbiddenError('Only public quizzes can be cloned');
+  }
 
   const clonedData = {
     title: `${originalQuiz.title} (Clone)`,
@@ -66,14 +92,20 @@ const cloneQuiz = async (quizId, newCreatorId) => {
 };
 
 const getPublicQuizzes = async (cursor, limit, searchQuery) => {
-  return await quizRepository.getPublicQuizzes(cursor, limit, searchQuery);
+  const result = await quizRepository.getPublicQuizzes(cursor, limit, searchQuery);
+  return {
+    ...result,
+    quizzes: stripQuizzesCorrectAnswers(result.quizzes || []),
+  };
 };
 
-const updateQuizVisibility = async (id, is_public) => {
+const updateQuizVisibility = async (id, is_public, userId) => {
+  await assertQuizOwner(id, userId);
   return await quizRepository.updateQuizVisibility(id, is_public);
 };
 
-const deleteQuiz = async (id) => {
+const deleteQuiz = async (id, userId) => {
+  await assertQuizOwner(id, userId);
   return await quizRepository.deleteQuiz(id);
 };
 
@@ -87,4 +119,7 @@ module.exports = {
   getPublicQuizzes,
   updateQuizVisibility,
   deleteQuiz,
+  assertQuizOwner,
+  ForbiddenError,
+  NotFoundError,
 };
