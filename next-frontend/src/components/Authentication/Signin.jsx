@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSignIn, useAuth, useClerk, ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
-import api from '../../services/api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const Signin = () => {
   const { signIn, setActive } = useSignIn();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const clerk = useClerk();
   const router = useRouter();
 
@@ -49,12 +49,25 @@ const Signin = () => {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         
-        // Fetch custom JWT from backend
         try {
-          const { token } = await api.post('/api/auth/token', {});
-          localStorage.setItem('zinko_jwt', token);
+          const clerkToken = await getToken();
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+          const response = await fetch(`${API_URL}/api/auth/token`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${clerkToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (response.ok) {
+            const { token } = await response.json();
+            if (token) {
+              localStorage.setItem('zinko_jwt', token);
+              useAuthStore.getState().setJwtReady(true);
+            }
+          }
         } catch (backendErr) {
-          console.error("Failed to fetch custom JWT:", backendErr);
+          console.error('Failed to fetch custom JWT:', backendErr);
         }
 
         router.push('/');
