@@ -1,5 +1,6 @@
 const express = require('express');
 const { requireClerkAuth, requireCustomAuth } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/security');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
@@ -8,7 +9,7 @@ const router = express.Router();
  * POST /api/auth/token
  * Protected by Clerk — generates a custom JWT
  */
-router.post('/token', requireClerkAuth, authController.generateToken);
+router.post('/token', authLimiter, requireClerkAuth, authController.generateToken);
 
 /**
  * GET /api/auth/me
@@ -19,7 +20,6 @@ router.get('/me', authController.getMe);
 /**
  * GET /api/auth/profile
  * Protected by Custom JWT — returns the authenticated user's info.
- * Returns 401 if not signed in.
  */
 router.get('/profile', requireCustomAuth, authController.getProfile);
 

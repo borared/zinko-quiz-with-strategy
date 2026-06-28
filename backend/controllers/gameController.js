@@ -33,8 +33,13 @@ const hostGame = async (req, res) => {
  * Handle GET /api/game/:pin
  * Validate a PIN and get room status.
  */
+const PIN_PATTERN = /^\d{6}$/;
+
 const getGameStatus = (req, res) => {
   const { pin } = req.params;
+  if (!PIN_PATTERN.test(pin)) {
+    return res.status(400).json({ valid: false, message: 'Invalid PIN format.' });
+  }
   const game = getGame(pin);
 
   if (!game) {
@@ -45,7 +50,6 @@ const getGameStatus = (req, res) => {
     valid: true,
     phase: game.phase,
     playerCount: game.players.length,
-    quizId: game.quizId,
   });
 };
 

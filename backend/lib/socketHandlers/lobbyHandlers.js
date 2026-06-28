@@ -1,4 +1,8 @@
-const supabase = require('../supabaseClient');
+const quizRepository = require('../../repositories/quizRepository');
+const { verifyHostToken, isHostSocket, requirePlayerSocket } = require('../socketAuth');
+
+const NICKNAME_MAX_LENGTH = 20;
+const NICKNAME_PATTERN = /^[a-zA-Z0-9 _-]+$/;
 
 module.exports = function registerLobbyHandlers(io, socket, games) {
   // ── host:initialize ───────────────────────────────────────────────────────
@@ -10,34 +14,22 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
-    if (!token) {
+    if (!verifyHostToken(token, game)) {
       socket.emit('error', { message: 'Unauthorized host' });
       return;
     }
 
-    try {
-      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
-      if (decoded.userId !== game.hostUserId) {
-        socket.emit('error', { message: 'Unauthorized host' });
-        return;
-      }
-    } catch (err) {
-      socket.emit('error', { message: 'Unauthorized host' });
+    if (quizId && game.quizId && quizId !== game.quizId) {
+      socket.emit('error', { message: 'Quiz does not match this game session.' });
       return;
     }
 
     game.hostSocketId = socket.id;
     socket.join(pin);
 
-    // Fetch quiz questions from Supabase
+    // Fetch quiz questions via Prisma
     try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('quiz_id', quizId)
-        .order('order_index', { ascending: true });
-
-      if (error) throw error;
+      const data = await quizRepository.getQuestionsByQuizId(quizId);
 
       // Randomize questions and cap at 15 for 3 rounds of 5 matches
       const shuffled = [...data].sort(() => 0.5 - Math.random());
@@ -56,14 +48,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     const game = games.get(pin);
     if (!game) return;
 
-    if (!token) return;
-
-    try {
-      const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
-      if (decoded.userId !== game.hostUserId) return;
-    } catch (err) {
-      return;
-    }
+    if (!verifyHostToken(token, game)) return;
 
     game.hostSocketId = socket.id;
     if (game.hostDisconnectTimer) {
@@ -140,8 +125,19 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
+    const trimmedNickname = String(nickname || '').trim();
+    if (!trimmedNickname || trimmedNickname.length > NICKNAME_MAX_LENGTH || !NICKNAME_PATTERN.test(trimmedNickname)) {
+      socket.emit('error', { message: 'Invalid nickname. Use 1-20 letters, numbers, spaces, hyphens, or underscores.' });
+      return;
+    }
+
+    if (!['A', 'B'].includes(team)) {
+      socket.emit('error', { message: 'Invalid team selection.' });
+      return;
+    }
+
     // Ensure nickname isn't taken by a DIFFERENT player
-    if (game.players.some(p => p.nickname.toLowerCase() === nickname.toLowerCase() && p.id !== playerId)) {
+    if (game.players.some(p => p.nickname.toLowerCase() === trimmedNickname.toLowerCase() && p.id !== playerId)) {
       socket.emit('error', { message: 'Nickname already taken' });
       return;
     }
@@ -158,15 +154,19 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     }
 
     if (existing) {
+      if (existing.socketId && existing.socketId !== socket.id) {
+        socket.emit('error', { message: 'This player is already connected from another device.' });
+        return;
+      }
       existing.socketId = socket.id;
-      existing.nickname = nickname;
+      existing.nickname = trimmedNickname;
       existing.avatar = avatar || existing.avatar;
       existing.team = team || existing.team;
     } else {
       game.players.push({
         id: playerId,
         socketId: socket.id,
-        nickname,
+        nickname: trimmedNickname,
         avatar: avatar || 'pizza',
         team: team || 'A',
         score: 0,
@@ -184,7 +184,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       background: game.background,
     });
 
-    socket.emit('player:joined', { success: true, nickname, avatar, team });
+    socket.emit('player:joined', { success: true, nickname: trimmedNickname, avatar, team });
   });
 
   // ── lobby:request-players ─────────────────────────────────────────────────
@@ -223,7 +223,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   // ── lobby:start-countdown ─────────────────────────────────────────────────
   socket.on('lobby:start-countdown', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     io.to(pin).emit('lobby:countdown-started');
   });
 
@@ -231,6 +231,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   socket.on('player:leave-team', ({ pin, playerId }) => {
     const game = games.get(pin);
     if (!game) return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
 
     if (game.phase === 'LOBBY') {
       const initialCount = game.players.length;

@@ -1,22 +1,49 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X } from 'lucide-react';
+import { Check, X, Clock } from 'lucide-react';
 import FrogSteal from './Skills/FrogSteal';
+
+const RESULT_VARIANTS = {
+  correct: {
+    bgColor: 'bg-green-600',
+    Icon: Check,
+    title: 'Correct!',
+    titleClass: 'text-[5rem] md:text-[6rem]',
+    showPoints: true,
+  },
+  incorrect: {
+    bgColor: 'bg-red-500',
+    Icon: X,
+    title: 'Incorrect',
+    titleClass: 'text-[5rem] md:text-[6rem]',
+    showPoints: false,
+  },
+  missed: {
+    bgColor: 'bg-orange-500',
+    Icon: Clock,
+    title: 'OOPS you missed',
+    titleClass: 'text-[3.5rem] md:text-[4.5rem]',
+    showPoints: false,
+  },
+};
+
+function getResultVariant(resultData) {
+  if (resultData.isMissed) return 'missed';
+  if (resultData.isCorrect) return 'correct';
+  return 'incorrect';
+}
 
 export default function ResultOverlay({ resultData }) {
   if (!resultData) return null;
 
   const hasStolenPoints = resultData.stolenPoints !== 0 && resultData.stolenPoints !== undefined;
-
-  const isCorrect = resultData.isCorrect;
-  const bgColor = isCorrect ? 'bg-green-600' : 'bg-red-500';
+  const variant = RESULT_VARIANTS[getResultVariant(resultData)];
+  const { bgColor, Icon, title, titleClass, showPoints } = variant;
 
   return (
     <div className={`min-h-screen ${bgColor} flex flex-col items-center justify-center px-6 relative overflow-hidden font-sans`}>
       <FrogSteal isActive={hasStolenPoints} />
-      
-
 
       <motion.div
         initial={{ scale: 0.3, opacity: 0, y: 50 }}
@@ -25,18 +52,14 @@ export default function ResultOverlay({ resultData }) {
         className="text-center z-10 w-full max-w-sm flex flex-col items-center"
       >
         <div className="mb-2">
-          {isCorrect ? (
-            <Check size={120} strokeWidth={4} className="text-white" />
-          ) : (
-            <X size={120} strokeWidth={4} className="text-white" />
-          )}
+          <Icon size={120} strokeWidth={4} className="text-white" />
         </div>
         
-        <h2 className="text-[5rem] md:text-[6rem] leading-none gasoek-one-regular mb-6 text-white tracking-wider">
-          {isCorrect ? 'Correct!' : 'Incorrect'}
+        <h2 className={`${titleClass} leading-none gasoek-one-regular mb-6 text-white tracking-wider`}>
+          {title}
         </h2>
           
-        {isCorrect && (
+        {showPoints && (
           <div className="flex flex-col items-center mb-6 w-full">
 
             <motion.div

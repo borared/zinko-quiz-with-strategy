@@ -1,9 +1,15 @@
-const http = require('http'); // Trigger restart
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { Server } = require('socket.io');
 const { clerkMiddleware } = require('@clerk/express');
 require('dotenv').config();
+
+const { validateEnv } = require('./lib/envValidation');
+const { generalLimiter, devOnly } = require('./middleware/security');
+
+validateEnv();
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
@@ -19,16 +25,24 @@ const PORT = process.env.PORT || 5000;
 const FRONTEND_URLS = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'http://localhost:3000'
+  'http://localhost:3000',
 ].filter(Boolean);
 
-// ─── CORS ────────────────────────────────────────────────────────────────────
+// ─── Security headers ─────────────────────────────────────────────────────────
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
   origin: FRONTEND_URLS,
   credentials: true,
 }));
 
-// ─── Socket.io ───────────────────────────────────────────────────────────────
+// ─── Rate limiting ────────────────────────────────────────────────────────────
+app.use(generalLimiter);
+
+// ─── Socket.io ────────────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
     origin: FRONTEND_URLS,
@@ -39,33 +53,34 @@ const io = new Server(httpServer, {
 
 initSocketHandler(io);
 
-// ─── Webhooks (raw body — MUST come before express.json()) ───────────────────
+// ─── Webhooks (raw body — MUST come before express.json()) ────────────────────
 app.use('/api/webhooks', webhookRoutes);
 
-// ─── Body Parser ─────────────────────────────────────────────────────────────
-app.use(express.json());
+// ─── Body Parser ──────────────────────────────────────────────────────────────
+app.use(express.json({ limit: '1mb' }));
 
-// ─── Request Logger ──────────────────────────────────────────────────────────
-app.use((req, res, next) => {
-  console.log(`📥 ${req.method} ${req.path}`);
-  next();
-});
+// ─── Request Logger (development only) ────────────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log(`📥 ${req.method} ${req.path}`);
+    next();
+  });
+}
 
-// ─── Clerk Middleware ─────────────────────────────────────────────────────────
+// ─── Clerk Middleware ───────────────────────────────────────────────────────────
 app.use(clerkMiddleware());
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
+// ─── Routes ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({ message: 'Zinko API is running.' });
 });
 
-// Debug endpoint to check Clerk user ID
-app.get('/api/debug/me', (req, res) => {
+app.get('/api/debug/me', devOnly, (req, res) => {
   const { getAuth } = require('@clerk/express');
   const { userId } = getAuth(req);
   res.json({
     clerkUserId: userId || 'Not authenticated',
-    message: 'This is your current Clerk user ID. Compare it with the creator_id in your database.'
+    message: 'Development-only debug endpoint.',
   });
 });
 
@@ -77,17 +92,24 @@ app.use('/api/avatars', require('./routes/avatar'));
 app.use('/api/notifications', require('./routes/notification'));
 app.use('/api/game', gameRoutes);
 
-// ─── 404 Handler ─────────────────────────────────────────────────────────────
+// ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found.' });
 });
 
-// ─── Global Error Handler ────────────────────────────────────────────────────
+// ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ error: 'File too large. Maximum size is 10MB.' });
+  }
+  if (err?.message?.includes('Unsupported file type')) {
+    return res.status(400).json({ error: err.message });
+  }
+
   console.error('Server Error:', err.stack || err.message || err);
   res.status(500).json({
     error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong.'
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong.',
   });
 });
 
@@ -96,11 +118,4 @@ const HOST = '0.0.0.0';
 httpServer.listen(PORT, HOST, () => {
   console.log(`✅ Server running on http://${HOST}:${PORT}`);
   console.log(`🔌 Socket.io attached and listening`);
-  console.log(`📊 Available routes:`);
-  console.log(`   GET  /api/quizzes/user/:userId`);
-  console.log(`   GET  /api/quizzes/:id`);
-  console.log(`   POST /api/quizzes`);
-  console.log(`   PUT  /api/quizzes/:id`);
-  console.log(`   POST /api/game/host`);
-  console.log(`   GET  /api/game/:pin`);
 });

@@ -6,19 +6,24 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
   const router = useRouter();
   const { getSocket } = useSocketStore();
 
-  const [question, setQuestion] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('current_question');
-      return stored ? JSON.parse(stored) : null;
-    }
-    return null;
-  });
+  const [question, setQuestion] = useState(null);
   const [selectedId, setSelectedId]     = useState(null);
   const [phase, setPhase]               = useState('PLAYING'); // PLAYING | ANSWERED | RESULT
   const [resultData, setResultData]     = useState(null);
   const [timeLeft, setTimeLeft]         = useState(20);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionTotal, setQuestionTotal] = useState(1);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('current_question');
+    if (stored) {
+      try {
+        setQuestion(JSON.parse(stored));
+      } catch {
+        // Ignore invalid cached question payload
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();

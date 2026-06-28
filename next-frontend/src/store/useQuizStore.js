@@ -170,7 +170,6 @@ export const useQuizStore = create((set, get) => ({
 
       await apiCall(endpoint, {
         title: state.quizTitle,
-        creator_id: userId,
         questions: formattedQuestions,
         cover_image: state.coverImage
       });

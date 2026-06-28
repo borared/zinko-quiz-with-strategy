@@ -1,13 +1,11 @@
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+const prisma = require('../lib/prisma');
 
-supabase.from('users').select('*').limit(5)
-  .then(({ data, error }) => {
-    if (error) {
-      console.error('Error fetching users:', error.message);
-    } else {
-      console.log('Users in Supabase:', data);
-    }
+prisma.users.findMany({ take: 5 })
+  .then((users) => {
+    console.log('Users:', users);
   })
-  .catch(e => console.error(e));
+  .catch((err) => {
+    console.error('Error:', err.message);
+  })
+  .finally(() => prisma.$disconnect());

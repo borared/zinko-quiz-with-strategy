@@ -1,18 +1,11 @@
-const supabase = require('../lib/supabaseClient');
+const prisma = require('../lib/prisma');
 
 const AvatarRepository = {
-  // Fetch all avatars
   getAllAvatars: async () => {
-    const { data, error } = await supabase
-      .from('avatars')
-      .select('*')
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-    return data;
-  }
+    return prisma.avatars.findMany({
+      orderBy: { created_at: 'asc' },
+    });
+  },
 };
 
 module.exports = AvatarRepository;

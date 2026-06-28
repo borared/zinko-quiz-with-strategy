@@ -7,9 +7,9 @@ export const useNotificationStore = create((set, get) => ({
   isLoading: false,
 
   fetchNotifications: async (userId) => {
-    // Only fetch if not already fetching to prevent race conditions
     if (get().isLoading) return;
-    
+    if (!localStorage.getItem('zinko_jwt')) return;
+
     set({ isLoading: true });
     try {
       const data = await api.get(`/api/notifications/user/${userId}`);

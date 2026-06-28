@@ -1,11 +1,12 @@
 const { QUESTION_TIME_SECONDS, getLeaderboard, startTimer, revealResults } = require('../socketUtils');
 const { cleanupGame } = require('../gameState');
+const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
 
 module.exports = function registerGameHandlers(io, socket, games) {
   // ── game:start ────────────────────────────────────────────────────────────
   socket.on('game:start', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     if (game.phase !== 'LOBBY' && game.phase !== 'SKILL_PICK') {
       return; // Prevent duplicate start calls
     }
@@ -84,7 +85,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   // ── game:next-question ────────────────────────────────────────────────────
   socket.on('game:next-question', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     if (game.phase !== 'LEADERBOARD' && game.phase !== 'RESULT' && game.phase !== 'MINIGAME_REWARD') return; // Must be on leaderboard/result to go to next question
 
     const nextIndex = game.currentQuestionIndex + 1;
@@ -135,6 +136,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   socket.on('player:submit-answer', ({ pin, playerId, answerId }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'QUESTION') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
     if (game.answers[playerId] !== undefined) return; // already answered
 
     game.answers[playerId] = answerId;
@@ -164,6 +166,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   socket.on('player:sync-state', ({ pin, playerId }) => {
     const game = games.get(pin);
     if (!game) return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
 
     // Build current question payload if applicable
     let currentQuestionPayload = null;
@@ -206,7 +209,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   // ── host:show-leaderboard ─────────────────────────────────────────────────
   socket.on('host:show-leaderboard', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     if (game.phase !== 'RESULT') return; // Must be on result screen to show leaderboard
 
     game.phase = 'LEADERBOARD';
@@ -221,7 +224,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   // ── host:end-game ─────────────────────────────────────────────────────────
   socket.on('host:end-game', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     cleanupGame(pin);
     console.log(`🗑️  Host explicitly ended game: ${pin}`);
   });

@@ -2,19 +2,35 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const aiController = require('../controllers/aiController');
+const { requireCustomAuth } = require('../middleware/auth');
+const { devOnly, aiLimiter } = require('../middleware/security');
 
-// Configure Multer (Memory Storage)
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+  'text/plain',
+]);
 
-/**
- * GET /api/ai/test
- */
-router.get('/test', aiController.testAI);
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type. Allowed: PDF, DOCX, DOC, TXT'));
+    }
+  },
+});
 
-/**
- * POST /api/ai/generate-quiz
- */
-router.post('/generate-quiz', upload.single('file'), aiController.generateQuiz);
+router.get('/test', devOnly, aiController.testAI);
+router.post(
+  '/generate-quiz',
+  requireCustomAuth,
+  aiLimiter,
+  upload.single('file'),
+  aiController.generateQuiz
+);
 
 module.exports = router;

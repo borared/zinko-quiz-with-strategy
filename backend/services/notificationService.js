@@ -8,8 +8,8 @@ const getNotificationsByUserId = async (userId) => {
   return await notificationRepository.getNotificationsByUserId(userId);
 };
 
-const markAsRead = async (id) => {
-  await notificationRepository.markAsRead(id);
+const markAsRead = async (id, userId) => {
+  return await notificationRepository.markAsRead(id, userId);
 };
 
 const markAllAsRead = async (userId) => {

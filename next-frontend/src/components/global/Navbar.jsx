@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-;
 import { useUser, useAuth } from '@clerk/nextjs';
-import { LayoutDashboard, Bell, Settings, LogOut, ArrowLeft, Check, CheckCheck } from 'lucide-react';
+import { LayoutDashboard, Bell, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useAuthStore, getNavAuthCache, setNavAuthCache, clearNavAuthCache } from '@/store/useAuthStore';
 
 const Navbar = () => {
   const router = useRouter();
@@ -16,13 +17,32 @@ const Navbar = () => {
   const [showModal, setShowModal] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead } = useNotificationStore();
+  const { unreadCount, fetchNotifications } = useNotificationStore();
+  const isJwtReady = useAuthStore((s) => s.isJwtReady);
+
+  const [cachedAuth, setCachedAuth] = useState(null);
 
   useEffect(() => {
-    if (isSignedIn && user?.id) {
-      fetchNotifications(user.id);
+    setCachedAuth(getNavAuthCache());
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      setNavAuthCache(isSignedIn, user);
+      setCachedAuth(getNavAuthCache());
     }
-  }, [isSignedIn, user?.id, fetchNotifications]);
+  }, [isLoaded, isSignedIn, user]);
+
+  const displayIsSignedIn = isLoaded ? isSignedIn : (cachedAuth?.isSignedIn ?? false);
+  const displayUser = isLoaded ? user : cachedAuth?.user;
+  const showAuthSkeleton = !isLoaded && !cachedAuth;
+
+  useEffect(() => {
+    const userId = displayUser?.id;
+    if (displayIsSignedIn && userId && isJwtReady) {
+      fetchNotifications(userId);
+    }
+  }, [displayIsSignedIn, displayUser?.id, isJwtReady, fetchNotifications]);
 
   // Close dropdown when clicking outside or scrolling
   useEffect(() => {
@@ -64,9 +84,11 @@ const Navbar = () => {
 
   // Don't block the whole navbar, just the auth buttons
   const renderAuthButtons = () => {
-    if (!isLoaded) return <div className="w-20 h-8 bg-gray-100 animate-pulse rounded-lg" />;
+    if (showAuthSkeleton) {
+      return <div className="w-20 h-8 bg-gray-100 animate-pulse rounded-lg" />;
+    }
 
-    if (isSignedIn) {
+    if (displayIsSignedIn) {
       return (
         <div className="flex items-center gap-6">
           <button
@@ -82,7 +104,7 @@ const Navbar = () => {
               onClick={() => setMenuOpen(!menuOpen)}
               className="relative w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
             >
-              <img src={user?.imageUrl} alt={user?.firstName} className="w-full h-full object-cover" />
+              <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
             </div>
             {/* Unread Badge on Avatar */}
             {unreadCount > 0 && (
@@ -104,8 +126,8 @@ const Navbar = () => {
                   {/* Default Profile Menu */}
                   <>
                     <div className="px-4 py-3 border-b-[2px] border-zk-black bg-zk-yellow/40">
-                      <p className="font-bold text-zk-black text-sm truncate">{user?.firstName} {user?.lastName}</p>
-                      <p className="text-xs text-zk-black/60 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+                      <p className="font-bold text-zk-black text-sm truncate">{displayUser?.firstName} {displayUser?.lastName}</p>
+                      <p className="text-xs text-zk-black/60 truncate">{displayUser?.email}</p>
                     </div>
 
                     <button
@@ -174,16 +196,19 @@ const Navbar = () => {
 
       {/* Left: Logo */}
       <div className="flex items-center gap-8">
-        <a
+        <Link
           href="/"
           className="bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-1 flex items-center justify-center transform transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
         >
           <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
-        </a>
+        </Link>
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6 font-bold text-sm">
-          <a href="#blog" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 font-['Amatic_SC'] text-3xl font-bold px-4 py-1 transition-colors leading-none pt-2 inline-block">
+          <a
+            onClick={() => router.push('/blog')}
+            className={getLinkClass('/blog')}
+          >
             BLOG
           </a>
           <a
@@ -192,7 +217,10 @@ const Navbar = () => {
           >
             PRICING
           </a>
-          <a href="#classpin" className="text-zk-black hover:underline decoration-[2px] underline-offset-4 font-['Amatic_SC'] text-3xl font-bold px-4 py-1 transition-colors leading-none pt-2 inline-block">
+          <a
+            onClick={() => router.push('/classpin')}
+            className={getLinkClass('/classpin')}
+          >
             CLASSPIN
           </a>
           <a
@@ -236,6 +264,8 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   setShowModal(false);
+                  clearNavAuthCache();
+                  setCachedAuth(null);
                   signOut();
                 }}
                 className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"

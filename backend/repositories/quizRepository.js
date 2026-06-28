@@ -1,214 +1,235 @@
-const supabase = require('../lib/supabaseClient');
+const prisma = require('../lib/prisma');
+const { isValidUuid } = require('../lib/uuid');
+
+const mapQuestionInput = (q, index, quizId) => ({
+  quiz_id: quizId,
+  question_text: q.question_text || q.text || 'Untitled Question',
+  image_url: q.image_url || q.image || null,
+  answers: q.answers,
+  order_index: index,
+  round: q.round || 1,
+});
+
+const syncQuizQuestions = async (tx, quizId, questions = []) => {
+  const existingQuestions = await tx.questions.findMany({
+    where: { quiz_id: quizId },
+    select: { id: true },
+  });
+  const existingIds = new Set(existingQuestions.map((q) => q.id));
+  const keptIds = new Set();
+
+  for (let index = 0; index < questions.length; index++) {
+    const q = questions[index];
+    const data = mapQuestionInput(q, index, quizId);
+    const questionId = q.id != null ? String(q.id) : null;
+
+    if (questionId && isValidUuid(questionId) && existingIds.has(questionId)) {
+      await tx.questions.update({
+        where: { id: questionId },
+        data,
+      });
+      keptIds.add(questionId);
+      continue;
+    }
+
+    const created = await tx.questions.create({ data });
+    keptIds.add(created.id);
+  }
+
+  const idsToDelete = [...existingIds].filter((id) => !keptIds.has(id));
+  if (idsToDelete.length > 0) {
+    await tx.questions.deleteMany({
+      where: { id: { in: idsToDelete } },
+    });
+  }
+};
 
 /**
- * Save a full quiz and its questions to Supabase.
+ * Save a full quiz and its questions.
  */
 const createQuiz = async (quizData) => {
   const { title, creator_id, questions, cover_image, is_public = false, is_cloned = false } = quizData;
 
-  // 1. Insert the Quiz Metadata
-  const { data: quiz, error: quizError } = await supabase
-    .from('quizzes')
-    .insert({
-      title,
-      creator_id,
-      cover_image: cover_image || null,
-      is_public,
-      is_cloned,
-      updated_at: new Date().toISOString()
-    })
-    .select()
-    .single();
+  return prisma.$transaction(async (tx) => {
+    const quiz = await tx.quizzes.create({
+      data: {
+        title,
+        creator_id,
+        cover_image: cover_image || null,
+        is_public,
+        is_cloned,
+      },
+    });
 
-  if (quizError) throw quizError;
+    if (questions?.length) {
+      await tx.questions.createMany({
+        data: questions.map((q, index) => mapQuestionInput(q, index, quiz.id)),
+      });
+    }
 
-  // 2. Prepare the Questions for insertion
-  const questionsToInsert = questions.map((q, index) => ({
-    quiz_id: quiz.id,
-    question_text: q.question_text || q.text || 'Untitled Question',
-    image_url: q.image_url || q.image || null,
-    answers: q.answers, // JSONB column
-    order_index: index,
-    round: q.round || 1, // Store the round index (1, 2, or 3)
-  }));
-
-  // 3. Insert all Questions
-  const { error: questionsError } = await supabase
-    .from('questions')
-    .insert(questionsToInsert);
-
-  if (questionsError) throw questionsError;
-
-  return quiz;
+    return quiz;
+  });
 };
 
 /**
- * Update an existing quiz and its questions.
+ * Update an existing quiz and its questions (upsert by UUID, delete removed).
  */
 const updateQuiz = async (id, quizData) => {
   const { title, questions, cover_image } = quizData;
 
-  // 1. Update Quiz Metadata
-  const { error: quizError } = await supabase
-    .from('quizzes')
-    .update({ title, cover_image, updated_at: new Date().toISOString() })
-    .eq('id', id);
+  await prisma.$transaction(async (tx) => {
+    await tx.quizzes.update({
+      where: { id },
+      data: {
+        title,
+        cover_image,
+        updated_at: new Date(),
+      },
+    });
 
-  if (quizError) throw quizError;
-
-  // 2. Delete existing questions
-  await supabase.from('questions').delete().eq('quiz_id', id);
-
-  // 3. Re-insert updated questions
-  const questionsToInsert = questions.map((q, index) => ({
-    quiz_id: id,
-    question_text: q.question_text || q.text || 'Untitled Question',
-    image_url: q.image_url || q.image || null,
-    answers: q.answers,
-    order_index: index,
-    round: q.round || 1,
-  }));
-
-  const { error: questionsError } = await supabase
-    .from('questions')
-    .insert(questionsToInsert);
-
-  if (questionsError) throw questionsError;
+    await syncQuizQuestions(tx, id, questions || []);
+  });
 };
 
 /**
  * Fetch a single quiz with its questions.
  */
 const getQuizById = async (id) => {
-  const { data, error } = await supabase
-    .from('quizzes')
-    .select('*, questions(*)')
-    .eq('id', id)
-    .single();
+  return prisma.quizzes.findUnique({
+    where: { id },
+    include: {
+      questions: {
+        orderBy: { order_index: 'asc' },
+      },
+    },
+  });
+};
 
-  if (error) throw error;
-  return data;
+/**
+ * Fetch questions for a quiz, ordered for gameplay.
+ */
+const getQuestionsByQuizId = async (quizId) => {
+  return prisma.questions.findMany({
+    where: { quiz_id: quizId },
+    orderBy: { order_index: 'asc' },
+  });
 };
 
 /**
  * Fetch quizzes for a specific creator with cursor pagination.
  */
 const getQuizzesByUserId = async (userId, cursor = null, limit = 10) => {
-  let query = supabase
-    .from('quizzes')
-    .select('*, questions(*)')
-    .eq('creator_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit + 1);
+  const where = {
+    creator_id: userId,
+    ...(cursor ? { created_at: { lt: new Date(cursor) } } : {}),
+  };
 
-  if (cursor) {
-    query = query.lt('created_at', cursor);
+  const queries = [
+    prisma.quizzes.findMany({
+      where,
+      include: {
+        questions: {
+          orderBy: { order_index: 'asc' },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+      take: limit + 1,
+    }),
+  ];
+
+  if (!cursor) {
+    queries.push(prisma.quizzes.count({ where: { creator_id: userId } }));
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
+  const [data, totalCount] = await Promise.all(queries);
 
   const hasNextPage = data.length > limit;
   const quizzes = data.slice(0, limit);
-  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at : null;
+  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at?.toISOString() : null;
 
-  return { quizzes, nextCursor, hasNextPage };
+  return {
+    quizzes,
+    nextCursor,
+    hasNextPage,
+    ...(totalCount !== undefined && { totalCount }),
+  };
 };
 
 /**
  * Debug: fetch all quizzes with creator info.
  */
 const getAllQuizzesDebug = async () => {
-  const { data, error } = await supabase
-    .from('quizzes')
-    .select('id, title, creator_id, created_at')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data;
+  return prisma.quizzes.findMany({
+    select: {
+      id: true,
+      title: true,
+      creator_id: true,
+      created_at: true,
+    },
+    orderBy: { created_at: 'desc' },
+  });
 };
 
 /**
  * Fetch public quizzes with cursor pagination and optional search.
  */
 const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) => {
-  let query = supabase
-    .from('quizzes')
-    .select('*, questions(*)')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(limit + 1);
+  const where = {
+    is_public: true,
+    ...(cursor ? { created_at: { lt: new Date(cursor) } } : {}),
+    ...(searchQuery
+      ? { title: { contains: searchQuery, mode: 'insensitive' } }
+      : {}),
+  };
 
-  if (cursor) {
-    query = query.lt('created_at', cursor);
-  }
-
-  if (searchQuery) {
-    query = query.ilike('title', `%${searchQuery}%`);
-  }
-
-  const { data: results, error: quizError } = await query;
-  if (quizError) throw quizError;
+  const results = await prisma.quizzes.findMany({
+    where,
+    include: {
+      questions: {
+        orderBy: { order_index: 'asc' },
+      },
+      creator: {
+        select: {
+          clerk_id: true,
+          first_name: true,
+          last_name: true,
+          username: true,
+        },
+      },
+    },
+    orderBy: { created_at: 'desc' },
+    take: limit + 1,
+  });
 
   const hasNextPage = results.length > limit;
   const quizzes = results.slice(0, limit);
-  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at : null;
+  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at?.toISOString() : null;
 
-  if (!quizzes || quizzes.length === 0) {
+  if (!quizzes.length) {
     return { quizzes: [], nextCursor: null, hasNextPage: false };
   }
 
-  const creatorIds = [...new Set(quizzes.map(q => q.creator_id))];
-  const { data: users, error: usersError } = await supabase
-    .from('users')
-    .select('clerk_id, first_name, last_name, username')
-    .in('clerk_id', creatorIds);
-
-  if (usersError) throw usersError;
-
-  const usersMap = {};
-  if (users) {
-    users.forEach(u => {
-      usersMap[u.clerk_id] = u;
-    });
-  }
-
-  const enrichedQuizzes = quizzes.map(q => ({
-    ...q,
-    creator: usersMap[q.creator_id] || null,
-  }));
-
-  return { quizzes: enrichedQuizzes, nextCursor, hasNextPage };
+  return { quizzes, nextCursor, hasNextPage };
 };
 
 /**
  * Update the visibility of a quiz.
  */
 const updateQuizVisibility = async (id, is_public) => {
-  const { data, error } = await supabase
-    .from('quizzes')
-    .update({ is_public, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  return prisma.quizzes.update({
+    where: { id },
+    data: {
+      is_public,
+      updated_at: new Date(),
+    },
+  });
 };
 
 /**
- * Delete a quiz.
+ * Delete a quiz (questions cascade via FK).
  */
 const deleteQuiz = async (id) => {
-  // Delete questions first
-  await supabase.from('questions').delete().eq('quiz_id', id);
-
-  const { error } = await supabase
-    .from('quizzes')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
+  await prisma.quizzes.delete({ where: { id } });
   return true;
 };
 
@@ -216,6 +237,7 @@ module.exports = {
   createQuiz,
   updateQuiz,
   getQuizById,
+  getQuestionsByQuizId,
   getQuizzesByUserId,
   getAllQuizzesDebug,
   getPublicQuizzes,

@@ -1,15 +1,17 @@
-const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
+const prisma = require('./lib/prisma');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-async function test() {
-  const { data, error } = await supabase.from('questions').select('*').limit(1);
-  console.log('Error:', error);
-  console.log('Data:', data);
+async function testConnection() {
+  try {
+    const questions = await prisma.questions.findMany({ take: 1 });
+    console.log('✅ Prisma connected to Supabase Postgres');
+    console.log(`   Sample rows fetched: ${questions.length}`);
+  } catch (err) {
+    console.error('❌ Database connection failed:', err.message);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-test();
+testConnection();
