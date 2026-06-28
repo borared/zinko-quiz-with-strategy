@@ -1,0 +1,5 @@
+-- Baseline migration: schema already exists in Supabase.
+-- For an existing database, mark this as applied without running:
+--   npx prisma migrate resolve --applied 20250626120000_baseline
+-- Then apply later migrations with:
+--   npx prisma migrate deploy
