@@ -1,8 +1,10 @@
+const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
+
 module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── host:start-minigame ───────────────────────────────────────────────────
   socket.on('host:start-minigame', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     
     game.phase = 'MINIGAME_RACING'; // keeping same phase name to minimize frontend routing changes, but acts as vault cracking
     
@@ -144,7 +146,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:hold-button', ({ pin, playerId, color }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_RACING') return;
-    
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
     const team = game.playerTeamMap[playerId];
     if (team && game.heldColors[team]) {
       game.heldColors[team].add(color);
@@ -155,7 +158,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:release-button', ({ pin, playerId, color }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_RACING') return;
-    
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
     const team = game.playerTeamMap[playerId];
     if (team && game.heldColors[team]) {
       game.heldColors[team].delete(color);
@@ -167,7 +171,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:spin-wheel', ({ pin, playerId }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_REWARD') return;
-    
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
     if (game.minigameSpinnerId === playerId || game.minigameSpinnerId === null) {
       io.to(pin).emit('game:wheel-spinning');
     }
@@ -176,7 +181,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── host:claim-minigame-reward ────────────────────────────────────────────
   socket.on('host:claim-minigame-reward', ({ pin, team, rewardType }) => {
      const game = games.get(pin);
-     if (!game || game.hostSocketId !== socket.id) return;
+     if (!isHostSocket(socket, game)) return;
      
      if (rewardType === 'SKILL_CHARGE') {
        // Only used as a fallback if needed
@@ -205,7 +210,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:claim-minigame-reward', ({ pin, playerId, rewardType, detail }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_REWARD') return;
-    
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
     // Only the spinner is allowed to claim the reward
     if (game.minigameSpinnerId !== playerId) return;
     
@@ -225,7 +231,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── host:start-minigame-higher-lower ─────────────────────────────────────────
   socket.on('host:start-minigame-higher-lower', ({ pin }) => {
     const game = games.get(pin);
-    if (!game || game.hostSocketId !== socket.id) return;
+    if (!isHostSocket(socket, game)) return;
     
     game.phase = 'MINIGAME_HIGHER_LOWER_PICK';
     game.secretCodes = { A: null, B: null };
@@ -241,6 +247,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:higher-lower-set-secret', ({ pin, playerId, secret }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_HIGHER_LOWER_PICK') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
 
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
@@ -272,7 +279,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
   socket.on('player:higher-lower-guess', ({ pin, playerId, guess }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_HIGHER_LOWER_GUESS') return;
-    
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
 
