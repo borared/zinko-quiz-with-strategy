@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { BellRing, CheckCheck, Loader2 } from 'lucide-react';
 import Navbar from '@/components/global/Navbar';
 import { motion } from 'framer-motion';
@@ -11,6 +12,7 @@ export default function Notifications() {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
   const { notifications, isLoading, fetchNotifications, markAsRead, markAllAsRead, clearAllNotifications } = useNotificationStore();
+  const isJwtReady = useAuthStore((s) => s.isJwtReady);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -19,10 +21,10 @@ export default function Notifications() {
   }, [isLoaded, isSignedIn, router]);
 
   useEffect(() => {
-    if (isSignedIn && user?.id) {
+    if (isSignedIn && user?.id && isJwtReady) {
       fetchNotifications(user.id);
     }
-  }, [isSignedIn, user?.id, fetchNotifications]);
+  }, [isSignedIn, user?.id, isJwtReady, fetchNotifications]);
 
   if (!isLoaded) {
     return (
