@@ -78,7 +78,8 @@ function revealResults(io, pin, games) {
   // 1. Award base points based on correctness and speed, considering Rabbit
   game.players.forEach(player => {
     const selectedId = game.answers[player.id];
-    const isCorrect = correctIds.includes(selectedId);
+    const isMissed = selectedId === undefined;
+    const isCorrect = !isMissed && correctIds.includes(selectedId);
     const timeTaken = game.answerTimes[player.id] || QUESTION_TIME_SECONDS * 1000;
     const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / (QUESTION_TIME_SECONDS * 1000)) * 500)) : 0;
     
@@ -107,6 +108,7 @@ function revealResults(io, pin, games) {
     player.score += points;
     player.lastPoints = points;
     player.lastCorrect = isCorrect;
+    player.lastMissed = isMissed;
     player.rabbitBonusApplied = rabbitBonusApplied;
     player.bonusPointsApplied = bonusPointsApplied;
     player.stolenPoints = 0; // reset
@@ -145,6 +147,7 @@ function revealResults(io, pin, games) {
   game.players.forEach(player => {
     io.to(player.socketId).emit('game:player-result', {
       isCorrect: player.lastCorrect,
+      isMissed: player.lastMissed,
       correctAnswerId: correctId,
       pointsEarned: player.lastPoints,
       totalScore: player.score,
