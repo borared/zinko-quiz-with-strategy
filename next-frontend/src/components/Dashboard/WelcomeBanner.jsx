@@ -2,7 +2,7 @@
 import React from 'react';
 import { useUser } from '@clerk/nextjs';
 
-const WelcomeBanner = ({ totalQuizzes = 0 }) => {
+const WelcomeBanner = ({ totalQuizzes = null }) => {
   const { user } = useUser();
   const firstName = user?.firstName || 'Majora';
 
@@ -23,7 +23,7 @@ const WelcomeBanner = ({ totalQuizzes = 0 }) => {
         {/* Card 1 */}
         <div className="bg-[#7C4DFF] border-[3px] border-zk-black p-6 flex flex-col gap-1 w-64 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white rounded-xl">
           <p className="text-xs font-bold uppercase tracking-wider text-white/80">Total Games Created</p>
-          <p className="text-5xl font-black">{totalQuizzes}</p>
+          <p className="text-5xl font-black">{totalQuizzes ?? '–'}</p>
         </div>
 
         {/* Card 2 */}
