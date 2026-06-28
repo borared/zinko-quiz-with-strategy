@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const notificationController = require('../controllers/notificationController');
-const { requireAuth } = require('@clerk/express');
+const { requireCustomAuth, requireSelf } = require('../middleware/auth');
+const { writeLimiter } = require('../middleware/security');
 
-// Optionally require Auth for these endpoints
-router.get('/user/:userId', notificationController.getNotificationsByUserId);
-router.put('/:id/read', notificationController.markAsRead);
-router.put('/user/:userId/read-all', notificationController.markAllAsRead);
-router.delete('/user/:userId/clear-all', notificationController.clearAllNotifications);
+router.use(requireCustomAuth);
+
+router.get('/user/:userId', requireSelf('userId'), notificationController.getNotificationsByUserId);
+router.put('/:id/read', writeLimiter, notificationController.markAsRead);
+router.put('/user/:userId/read-all', requireSelf('userId'), writeLimiter, notificationController.markAllAsRead);
+router.delete('/user/:userId/clear-all', requireSelf('userId'), writeLimiter, notificationController.clearAllNotifications);
 
 module.exports = router;
