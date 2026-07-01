@@ -1,5 +1,8 @@
 import { create } from 'zustand';
+import { useDashboardQuizStore } from './useDashboardQuizStore';
 import api from '../services/api';
+
+export const QUIZ_TITLE_MAX_LENGTH = 15;
 
 export const useQuizStore = create((set, get) => ({
   questions: [],
@@ -13,7 +16,8 @@ export const useQuizStore = create((set, get) => ({
 
   setActiveQuestionId: (id) => set({ activeQuestionId: id }),
   setActiveRound: (round) => set({ activeRound: round }),
-  setQuizTitle: (title) => set({ quizTitle: title }),
+  setQuizTitle: (title) =>
+    set({ quizTitle: String(title).slice(0, QUIZ_TITLE_MAX_LENGTH) }),
   setCoverImage: (image) => set({ coverImage: image }),
   resetQuiz: () => set({
     questions: [],
@@ -144,6 +148,13 @@ export const useQuizStore = create((set, get) => ({
       return;
     }
 
+    if (state.quizTitle.length > QUIZ_TITLE_MAX_LENGTH) {
+      if (showToast) {
+        showToast(`Quiz title must be ${QUIZ_TITLE_MAX_LENGTH} characters or less`, 'error');
+      }
+      return;
+    }
+
     if (state.questions.length === 0) {
       if (showToast) showToast('A quiz must have at least one question to save', 'error');
       return;
@@ -175,6 +186,8 @@ export const useQuizStore = create((set, get) => ({
       });
 
       if (showToast) showToast(quizId ? 'Quiz updated!' : 'Quiz saved!', 'success');
+
+      useDashboardQuizStore.getState().invalidate();
       
       if (router) {
         router.push('/dashboard');
