@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -8,9 +7,66 @@ import Sidebar from '../../components/GameCreator/Sidebar';
 import QuestionEditor from '../../components/GameCreator/QuestionEditor';
 import AnswerGrid from '../../components/GameCreator/AnswerGrid';
 import AiSidebar from '../../components/GameCreator/AiSidebar';
-import { Wand2, Image, Upload, Link as LinkIcon, X, AlertCircle } from 'lucide-react';
-import { useQuizStore } from '@/store/useQuizStore';
+import { Wand2, Image, Upload, Link as LinkIcon, X } from 'lucide-react';
+import { useQuizStore, QUIZ_TITLE_MAX_LENGTH } from '@/store/useQuizStore';
 import { useToastStore } from '@/store/useToastStore';
+
+const SUBNAV_H = 92;
+const SIDEBAR_W = 320;
+
+const QUIZ_TITLE_PLACEHOLDER = `Name your quiz (max ${QUIZ_TITLE_MAX_LENGTH} chars)`;
+const QUIZ_TITLE_INPUT_CLASS =
+  "bg-transparent border-0 border-b-[3px] border-b-zk-blue font-['Outfit'] font-bold text-zk-black focus:outline-none transition-colors placeholder:font-medium placeholder:italic placeholder:text-zk-black/40 placeholder:normal-case";
+
+const CreatorSkeleton = () => (
+  <div className="min-h-[calc(100vh-76px)] font-sans relative">
+    <div className="fixed inset-0 top-[76px] z-0" aria-hidden="true">
+      <div className="absolute inset-0 zk-workspace-bg-creator" />
+      <div className="absolute inset-0 bg-gradient-to-b from-zk-black/35 via-zk-black/10 to-zk-black/50" />
+    </div>
+    <div className="relative z-10">
+      <div
+        className="fixed top-[76px] left-0 right-0 z-50 zk-panel border-t-0 border-x-0 rounded-none flex items-center px-6 gap-4"
+        style={{ height: SUBNAV_H }}
+        style={{ paddingLeft: SIDEBAR_W + 24 }}
+      >
+        <div className="h-8 w-40 zk-skeleton rounded-lg" />
+        <div className="h-8 w-56 zk-skeleton rounded-lg" />
+        <div className="ml-auto h-10 w-28 zk-skeleton rounded-lg" />
+      </div>
+      <aside
+        className="hidden lg:block fixed top-[76px] left-0 z-40"
+        style={{ width: SIDEBAR_W, height: 'calc(100vh - 76px)' }}
+      >
+        <div className="h-full zk-panel border-t-0 border-l-0 rounded-none flex flex-col">
+          <div className="h-16 border-b-[3px] border-zk-black px-6 flex items-center">
+            <div className="h-4 w-32 zk-skeleton rounded" />
+          </div>
+          <div className="flex-1 p-4 flex flex-col gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-16 zk-skeleton rounded-lg border-[3px] border-zk-black/20" />
+            ))}
+          </div>
+        </div>
+      </aside>
+      <main className="p-6 lg:p-8" style={{ paddingTop: SUBNAV_H + 24, marginLeft: 0 }}>
+        <div className="lg:ml-80 max-w-[1200px] mx-auto flex flex-col gap-6">
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+            ))}
+          </div>
+          <div className="h-64 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+          <div className="grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+);
 
 const GameCreatorContent = () => {
   const router = useRouter();
@@ -19,26 +75,41 @@ const GameCreatorContent = () => {
   const { showToast } = useToastStore();
 
   const {
-    quizTitle, setQuizTitle,
-    coverImage, setCoverImage,
-    activeRound, setActiveRound,
-    questions, handleSaveQuiz, fetchQuiz,
-    isSaving, loading, undoDelete, activeQuestionId, resetQuiz
+    quizTitle,
+    setQuizTitle,
+    coverImage,
+    setCoverImage,
+    activeRound,
+    setActiveRound,
+    questions,
+    handleSaveQuiz,
+    fetchQuiz,
+    isSaving,
+    loading,
+    undoDelete,
+    activeQuestionId,
+    resetQuiz,
+    handleAddQuestion,
+    setActiveQuestionId,
   } = useQuizStore();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         const activeEl = document.activeElement;
-        const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
-        
+        const isInput =
+          activeEl &&
+          (activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.isContentEditable);
+
         if (!isInput) {
           e.preventDefault();
           undoDelete();
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undoDelete]);
@@ -58,110 +129,152 @@ const GameCreatorContent = () => {
     handleSaveQuiz(quizId, user?.id, router, showToast);
   };
 
+  const roundQuestions = questions.filter((q) => q.round === activeRound);
+
+  const rounds = [
+    { id: 1, label: 'Round 1', difficulty: 'Easy', color: 'bg-zk-green' },
+    { id: 2, label: 'Round 2', difficulty: 'Medium', color: 'bg-zk-cream' },
+    { id: 3, label: 'Round 3', difficulty: 'Hard', color: 'bg-zk-coral' },
+  ];
+
   if (loading) {
-    return (
-      <div className="min-h-screen bg-zk-yellow flex items-center justify-center font-black text-2xl uppercase italic tracking-tighter">
-        Loading Quiz Data...
-      </div>
-    );
+    return <CreatorSkeleton />;
   }
 
   return (
-    <div className="min-h-screen font-sans selection:bg-[#5D3FD3] selection:text-white relative">
-      {/* Cinematic Background Layer */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat scale-105"
-        style={{
-          backgroundImage: 'url("https://res.cloudinary.com/dicrvjstp/image/upload/v1778512239/Gemini_Generated_Image_o8qfs4o8qfs4o8qf_kqpgha.png")',
-          filter: 'brightness(0.8) contrast(1.1)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-zk-black/40 via-transparent to-zk-black/60"></div>
+    <div className="min-h-[calc(100vh-76px)] font-sans relative">
+      <div className="fixed inset-0 top-[76px] z-0" aria-hidden="true">
+        <div className="absolute inset-0 zk-workspace-bg-creator" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zk-black/35 via-zk-black/10 to-zk-black/50" />
       </div>
 
       <div className="relative z-10">
-        {/* Header / Navbar */}
-        <nav className="fixed top-[80px] left-0 right-0 ml-80 bg-white/80 backdrop-blur-md border-b-[3px] border-zk-black px-6 h-[80px] flex items-center justify-between z-50 shadow-sm">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="bg-[#5D3FD3] text-white p-1.5 border-[2px] border-zk-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-lg transition-transform hover:scale-110">
-                <Wand2 size={24} strokeWidth={3} />
-              </div>
-              <h1 className="text-2xl font-black italic tracking-tighter uppercase text-zk-black">ZINKO CREATOR</h1>
-            </div>
+        {/* Sub-navigation bar */}
+        <nav
+          className="fixed top-[76px] left-0 lg:left-80 right-0 z-50 zk-panel border-t-0 border-x-0 rounded-none flex flex-col justify-center px-4 lg:px-6 box-border"
+          style={{ height: SUBNAV_H }}
+        >
+          <div className="flex items-center justify-between gap-4 w-full pt-1">
+            <input
+              type="text"
+              value={quizTitle}
+              onChange={(e) => setQuizTitle(e.target.value)}
+              placeholder={QUIZ_TITLE_PLACEHOLDER}
+              maxLength={QUIZ_TITLE_MAX_LENGTH}
+              aria-label={`Quiz title, maximum ${QUIZ_TITLE_MAX_LENGTH} characters`}
+              className={`${QUIZ_TITLE_INPUT_CLASS} flex-1 min-w-0 max-w-[520px] lg:max-w-[640px] text-lg lg:text-xl px-1 py-1.5 leading-normal`}
+            />
 
-            <div className="h-8 w-[3px] bg-zk-black/10 rounded-full"></div>
-
-            <div className="flex items-center gap-4">
-              <input
-                type="text"
-                value={quizTitle}
-                onChange={(e) => setQuizTitle(e.target.value)}
-                placeholder="Enter Quiz Title..."
-                className="bg-transparent border-none text-xl font-black uppercase tracking-tight text-zk-black placeholder-zk-black/30 focus:outline-none w-64 rounded px-2"
-              />
-
+            <div className="flex items-center gap-2 shrink-0 translate-y-1.5">
               <button
+                type="button"
                 onClick={() => setIsImageModalOpen(true)}
-                className={`flex items-center gap-2 border-[3px] border-zk-black px-3 py-1.5 font-bold text-sm rounded-xl transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${coverImage ? 'bg-zk-blue text-white' : 'bg-white text-zk-black'
-                  }`}
+                className={`flex items-center gap-2 px-3 py-1.5 font-bold text-sm rounded-lg border-[3px] border-zk-black shadow-none ${
+                  coverImage ? 'bg-zk-blue text-white' : 'bg-white text-zk-black'
+                }`}
               >
-                <Image size={18} />
-                {coverImage ? 'CHANGE COVER' : 'ADD COVER'}
+                <Image size={16} />
+                <span className="hidden sm:inline">{coverImage ? 'Cover' : 'Add Cover'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAiSidebarOpen(true)}
+                className="lg:hidden zk-btn-press bg-zk-purple text-white p-2 rounded-lg"
+                aria-label="Open AI assistant"
+              >
+                <Wand2 size={18} strokeWidth={3} />
+              </button>
+              <button
+                type="button"
+                onClick={onSave}
+                disabled={isSaving}
+                className="bg-zk-green text-white px-4 lg:px-6 py-2 font-black text-sm uppercase tracking-wider rounded-lg border-[3px] border-zk-black shadow-none disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onSave}
-              disabled={isSaving}
-              className="bg-[#00C853] text-white border-[3px] border-zk-black px-6 py-2 font-black text-sm uppercase tracking-wider rounded-xl transition-all hover:translate-y-[2px] hover:translate-x-[2px] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
-            >
-              {isSaving ? 'SAVING...' : 'SAVE QUIZ'}
-            </button>
-          </div>
         </nav>
 
-        <main className="pt-[80px] p-8 max-w-[1600px] mx-auto">
-          <div className="flex gap-8 items-start">
-            {/* Fixed Sidebar — stays locked on scroll */}
-            <aside className="fixed top-[80px] left-0 w-80 h-[calc(100vh-80px)] z-30">
-              <Sidebar />
-            </aside>
-            {/* Spacer to push content right past the fixed sidebar */}
-            <div className="w-80 shrink-0"></div>
+        {/* Desktop sidebar */}
+        <aside
+          className="hidden lg:block fixed top-[76px] left-0 z-40"
+          style={{ width: SIDEBAR_W, height: 'calc(100vh - 76px)' }}
+        >
+          <Sidebar />
+        </aside>
 
-            {/* Scrollable Editor Workspace */}
-            <div className="flex-1 flex flex-col gap-8 pb-32 mt-4">
-              {/* Round Switcher */}
-              <div className="grid grid-cols-3 gap-6 bg-white/30 backdrop-blur-md p-4 border-[3px] border-zk-black rounded-2xl shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-                {[
-                  { id: 1, label: 'Round 1', difficulty: 'Easy', color: 'bg-[#00C853]' },
-                  { id: 2, label: 'Round 2', difficulty: 'Medium', color: 'bg-[#FFB300]' },
-                  { id: 3, label: 'Round 3', difficulty: 'Hard', color: 'bg-[#D32F2F]' },
-                ].map((round) => {
-                  const count = questions.filter(q => q.round === round.id).length;
+        <main
+          className="px-4 lg:px-8 pb-32"
+          style={{ paddingTop: SUBNAV_H + 16 }}
+        >
+          <div className="lg:ml-80 flex gap-6 lg:gap-8 items-start max-w-[1600px] mx-auto">
+            <div className="flex-1 min-w-0 flex flex-col gap-6 lg:gap-8">
+              {/* Mobile question strip */}
+              <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+                {roundQuestions.map((q, index) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setActiveQuestionId(q.id)}
+                    className={`shrink-0 px-3 py-2 border-[2px] border-zk-black rounded-lg font-bold text-xs transition-all ${
+                      q.id === activeQuestionId
+                        ? 'bg-zk-purple text-white shadow-[2px_2px_0_0_#000]'
+                        : 'bg-white text-zk-black'
+                    }`}
+                  >
+                    Q{index + 1}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAddQuestion}
+                  className="shrink-0 px-3 py-2 border-[2px] border-dashed border-zk-black rounded-lg font-bold text-xs bg-zk-green text-white"
+                >
+                  + Add
+                </button>
+              </div>
+
+              {/* Round switcher */}
+              <div className="zk-panel p-3 lg:p-4 grid grid-cols-3 gap-3 lg:gap-4">
+                {rounds.map((round) => {
+                  const count = questions.filter((q) => q.round === round.id).length;
                   const isActive = activeRound === round.id;
+                  const isComplete = count >= 6;
 
                   return (
                     <button
                       key={round.id}
+                      type="button"
                       onClick={() => setActiveRound(round.id)}
-                      className={`relative border-[3px] border-zk-black p-4 transition-all rounded-xl ${isActive
-                        ? `${round.color} text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -translate-y-1`
-                        : 'bg-white/90 text-zk-black hover:bg-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                        }`}
+                      className={`relative border-[3px] border-zk-black p-3 lg:p-4 transition-all rounded-xl zk-btn-press ${
+                        isActive
+                          ? `${round.color} text-zk-black shadow-[4px_4px_0_0_#000] -translate-y-0.5`
+                          : 'bg-white text-zk-black hover:bg-zk-yellow/20'
+                      }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="text-left">
-                          <p className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-white/70' : 'text-zk-black/50'}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-left min-w-0">
+                          <p
+                            className={`text-[9px] lg:text-[10px] font-black uppercase tracking-widest ${
+                              isActive ? 'text-zk-black/60' : 'text-zk-black/50'
+                            }`}
+                          >
                             {round.difficulty}
                           </p>
-                          <h3 className="text-xl font-black uppercase leading-tight">{round.label}</h3>
+                          <h3 className="text-sm lg:text-lg font-black uppercase leading-tight truncate">
+                            {round.label}
+                          </h3>
                         </div>
-                        <div className={`w-10 h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-lg rounded-lg ${count >= 6 ? 'bg-zk-blue text-white' : count > 0 ? 'bg-white text-zk-black' : 'bg-gray-100 text-gray-400'
-                          }`}>
+                        <div
+                          className={`w-9 h-9 lg:w-10 lg:h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-sm rounded-lg shrink-0 ${
+                            isComplete
+                              ? 'bg-zk-blue text-white'
+                              : count > 0
+                                ? 'bg-white text-zk-black'
+                                : 'bg-zk-black/5 text-zk-black/40'
+                          }`}
+                        >
                           {count}/8
                         </div>
                       </div>
@@ -174,11 +287,11 @@ const GameCreatorContent = () => {
                 {activeQuestionId ? (
                   <motion.div
                     key={activeQuestionId}
-                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    initial={{ opacity: 0, scale: 0.98, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ type: "spring", stiffness: 700, damping: 20, mass: 0.8 }}
-                    className="flex flex-col gap-8"
+                    exit={{ opacity: 0, scale: 0.98, y: -8 }}
+                    transition={{ type: 'spring', stiffness: 700, damping: 24 }}
+                    className="flex flex-col gap-6 lg:gap-8"
                   >
                     <QuestionEditor />
                     <AnswerGrid />
@@ -186,25 +299,44 @@ const GameCreatorContent = () => {
                 ) : (
                   <motion.div
                     key="empty"
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex-1 flex items-center justify-center p-12 bg-white/40 backdrop-blur-md border-[3px] border-dashed border-zk-black rounded-xl"
+                    className="zk-panel border-dashed p-10 lg:p-12 flex flex-col items-center justify-center gap-3 text-center min-h-[200px]"
                   >
-                    <p className="font-black text-2xl text-zk-black/30 uppercase tracking-tighter">Select or Add a question to get started</p>
+                    <p className="font-['Outfit'] text-3xl font-black text-zk-black/40 tracking-tight">
+                      Pick a question
+                    </p>
+                    <p className="font-bold text-sm text-zk-black/50">
+                      Select from the list or add a new one to start editing
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleAddQuestion}
+                      className="zk-btn-press bg-zk-green text-white px-6 py-2 rounded-lg font-bold mt-2 lg:hidden"
+                    >
+                      + Add Question
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Sticky AI Assistant Toggle */}
-            <aside className="sticky top-44 shrink-0">
+            {/* Desktop AI toggle */}
+            <aside className="hidden lg:block sticky top-44 shrink-0">
               <button
+                type="button"
                 onClick={() => setIsAiSidebarOpen(true)}
-                className="bg-[#5D3FD3] text-white border-[3px] border-zk-black p-4 rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col items-center gap-2 group"
+                className="zk-btn-press bg-zk-purple text-white p-4 rounded-xl flex flex-col items-center gap-2 group"
               >
-                <Wand2 size={24} strokeWidth={3} className="group-hover:rotate-12 transition-transform" />
-                <span className="font-black text-[10px] uppercase vertical-text">AI ASSISTANT</span>
+                <Wand2
+                  size={24}
+                  strokeWidth={3}
+                  className="group-hover:rotate-12 transition-transform"
+                />
+                <span className="font-black text-[10px] uppercase tracking-wider [writing-mode:vertical-rl] rotate-180">
+                  AI
+                </span>
               </button>
             </aside>
           </div>
@@ -213,67 +345,98 @@ const GameCreatorContent = () => {
 
       <AiSidebar isOpen={isAiSidebarOpen} onClose={() => setIsAiSidebarOpen(false)} />
 
-      {/* Image Modal */}
+      {/* Cover image modal */}
       <AnimatePresence>
         {isImageModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsImageModalOpen(false)}
               className="absolute inset-0 bg-zk-black/60 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className="bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-md relative z-10 p-8 rounded-2xl"
+              initial={{ scale: 0.95, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 16 }}
+              className="zk-panel shadow-[12px_12px_0_0_#000] w-full max-w-md relative z-10 p-6 lg:p-8"
             >
-              <button onClick={() => setIsImageModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <button
+                type="button"
+                onClick={() => setIsImageModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-zk-black/5 rounded-full transition-colors"
+              >
                 <X size={20} />
               </button>
 
-              <h2 className="text-3xl font-black uppercase tracking-tight italic mb-2">Quiz Cover</h2>
-              <p className="text-zk-black/60 font-bold text-sm mb-8 uppercase tracking-wide">Select a visual for your battle</p>
+              <h2 className="font-['Outfit'] text-4xl font-black text-zk-black tracking-tight uppercase mb-1">Quiz Cover</h2>
+              <p className="text-zk-black/60 font-bold text-sm mb-6 uppercase tracking-wide">
+                Choose a visual for your game
+              </p>
 
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5">
                 <div
-                  className="aspect-video bg-gray-100 border-[3px] border-dashed border-zk-black rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zk-blue/5 transition-all group"
-                  onClick={() => document.getElementById('cover-upload').click()}
+                  role="button"
+                  tabIndex={0}
+                  className="aspect-video bg-zk-black/5 border-[3px] border-dashed border-zk-black rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zk-purple/5 transition-all group"
+                  onClick={() => document.getElementById('cover-upload')?.click()}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && document.getElementById('cover-upload')?.click()
+                  }
                 >
                   {coverImage ? (
                     <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
                   ) : (
                     <>
-                      <Upload size={40} className="text-zk-black/30 group-hover:text-zk-blue transition-colors" />
-                      <span className="font-black text-sm uppercase tracking-wider text-zk-black/40">Upload Image File</span>
+                      <Upload
+                        size={36}
+                        className="text-zk-black/30 group-hover:text-zk-purple transition-colors"
+                      />
+                      <span className="font-bold text-sm uppercase tracking-wider text-zk-black/40">
+                        Upload image
+                      </span>
                     </>
                   )}
-                  <input id="cover-upload" type="file" accept="image/*" className="hidden" onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setCoverImage(reader.result);
-                      reader.readAsDataURL(file);
-                    }
-                  }} />
+                  <input
+                    id="cover-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => setCoverImage(reader.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
                 </div>
 
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-4 flex items-center">
-                    <LinkIcon size={18} className="text-zk-black/40" />
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <LinkIcon size={16} className="text-zk-black/40" />
                   </div>
                   <input
                     type="text"
-                    placeholder="PASTE IMAGE URL..."
-                    value={typeof coverImage === 'string' && coverImage.startsWith('http') ? coverImage : ''}
+                    placeholder="Paste image URL..."
+                    value={
+                      typeof coverImage === 'string' && coverImage.startsWith('http')
+                        ? coverImage
+                        : ''
+                    }
                     onChange={(e) => setCoverImage(e.target.value)}
-                    className="w-full border-[3px] border-zk-black p-4 pl-12 font-black uppercase tracking-widest text-sm focus:outline-none focus:ring-4 focus:ring-zk-blue/20 transition-all rounded-xl"
+                    className="w-full border-[3px] border-zk-black p-3 pl-11 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-zk-purple/20 rounded-xl"
                   />
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setIsImageModalOpen(false)}
-                  className="w-full bg-zk-black text-white py-4 font-black uppercase tracking-widest text-lg rounded-xl hover:bg-zk-black/90 transition-all"
+                  className="w-full zk-btn-press bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl"
                 >
-                  Confirm Image
+                  Done
                 </button>
               </div>
             </motion.div>
@@ -284,10 +447,6 @@ const GameCreatorContent = () => {
   );
 };
 
-const GameCreator = () => (
-  <>
-    <GameCreatorContent />
-  </>
-);
+const GameCreator = () => <GameCreatorContent />;
 
 export default GameCreator;
