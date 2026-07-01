@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from 'react';
-import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2, Eye } from 'lucide-react';
+import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2, Eye, Image } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
+import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 
 import { z } from 'zod';
 
@@ -23,6 +24,8 @@ const hostValidationSchema = z.array(
 
 const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const router = useRouter();
+  const removeQuiz = useDashboardQuizStore((s) => s.removeQuiz);
+  const invalidateDashboardCache = useDashboardQuizStore((s) => s.invalidate);
   const { user } = useUser();
   const [showError, setShowError] = React.useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -95,6 +98,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
     try {
       setIsCloning(true);
       await api.post(`/api/quizzes/${quiz.id}/clone`, {});
+      invalidateDashboardCache();
       router.push('/dashboard');
     } catch (err) {
       console.error("Cloning failed:", err);
@@ -126,6 +130,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
     try {
       setIsUpdating(true);
       await api.delete(`/api/quizzes/${quiz.id}`);
+      if (!isDiscoveryMode) removeQuiz(quiz.id);
       setShowDeleteModal(false);
       setIsDeleted(true);
     } catch (err) {
@@ -142,7 +147,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
 
   return (
     <>
-      <div className="bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col h-[320px] rounded-xl overflow-hidden relative">
+      <div className="zk-panel flex flex-col h-[320px] overflow-hidden relative group hover:-translate-y-0.5 transition-transform">
         
         {/* Toggle Public Button */}
         {!isDiscoveryMode && (
@@ -157,7 +162,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   setShowPublicModal(true);
                 }
               }}
-              className={`p-2 rounded-full border-[2px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all ${isPublicLocal ? 'bg-green-400 text-zk-black' : 'bg-white text-zk-black'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`p-2 rounded-full border-[2px] border-zk-black shadow-[2px_2px_0_0_#000] zk-btn-press ${isPublicLocal ? 'bg-zk-green text-zk-black' : 'bg-white text-zk-black'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isPublicLocal ? <Globe size={16} /> : <Lock size={16} />}
             </button>
@@ -165,13 +170,21 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
         )}
 
         {/* Image Area */}
-        <div className="h-32 border-b-[3px] border-zk-black bg-[#E0E0E0] overflow-hidden">
+        <div className="h-32 border-b-[3px] border-zk-black bg-zk-yellow/30 overflow-hidden relative">
           {quiz.cover_image ? (
             <img src={quiz.cover_image} alt={quiz.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-zk-black/30 font-bold">
-              No Image
+            <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-zk-black/30">
+              <div className="w-10 h-10 border-[2px] border-dashed border-zk-black/20 rounded-lg flex items-center justify-center">
+                <Image size={18} className="opacity-40" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider">No cover</span>
             </div>
+          )}
+          {!isDiscoveryMode && isReady && (
+            <span className="absolute bottom-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-green text-zk-black px-2 py-0.5 border-[1.5px] border-zk-black rounded shadow-[1px_1px_0_0_#000]">
+              Ready to host
+            </span>
           )}
         </div>
 
@@ -179,11 +192,11 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
         <div className="p-4 flex-1 flex flex-col justify-between">
           <div className="flex flex-col gap-1">
             {/* Question Count Tags */}
-            <div className="flex gap-2">
-              <div className={`bg-[#5D3FD3] text-white text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded-lg uppercase`}>
-                {questions.length} Questions
+            <div className="flex flex-wrap gap-1.5">
+              <div className="bg-zk-purple text-white text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded uppercase">
+                {questions.length} Qs
               </div>
-              <div className={`bg-white text-zk-black text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded-lg uppercase`}>
+              <div className="bg-white text-zk-black text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded uppercase">
                 R1:{r1Count} R2:{r2Count} R3:{r3Count}
               </div>
             </div>
@@ -244,7 +257,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   id={`host-btn-${quiz.id}`}
                   onClick={handleHostClick}
                   disabled={isHosting}
-                  className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                  className="flex-1 zk-btn-press bg-zk-purple text-white py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
                 >
                   {isHosting ? (
                     <><Loader2 size={16} className="animate-spin" /> Creating...</>
