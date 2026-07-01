@@ -17,7 +17,7 @@ const generateToken = async (req, res) => {
     // This ensures the user is saved even if local Webhooks drop!
     try {
       const clerkUser = await clerkClient.users.getUser(userId);
-      await userService.upsertUser(clerkUser);
+      await userService.syncUserAndWelcomeGifts(clerkUser);
       console.log(`✅ Auto-Sync successful for user: ${userId}`);
     } catch (syncErr) {
       console.error('⚠️ Auto-Sync failed, but continuing token generation:', syncErr.message);

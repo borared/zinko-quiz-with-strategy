@@ -1,10 +1,18 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 ;
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
-import { Users, Zap } from 'lucide-react';
+import { Users, Zap, ArrowLeft } from 'lucide-react';
+import { useTransitionStore } from '@/store/useTransitionStore';
+import PlayerLobbyChat from '@/components/Play/PlayerLobbyChat';
+import AvatarEmojiBurst from '@/components/Play/AvatarEmojiBurst';
+import { isEmojiHeavy } from '@/lib/lobbyChatUtils';
+import { playEmojiReactionSound } from '@/lib/lobbySounds';
+import { DEFAULT_LOBBY_SCENERY } from '@/lib/lobbyScenery';
+
+const AVATAR_REACTION_MS = 2600;
 
 /* ── Shared animation helper ─────────────────────────────────────────────── */
 const bounceIn = (delay = 0) => ({
@@ -50,7 +58,7 @@ function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
 }
 
 /* ─── PlayerSlot ─────────────────────────────────────────────────────────── */
-function PlayerSlot({ player, isFirst, color, isMe }) {
+function PlayerSlot({ player, isFirst, color, isMe, floatingEmojis = [] }) {
   const darkColor = color === 'green' ? '#1a7a2e' : '#8b1a1a';
   const myHighlight = isMe ? 'border-[#FFCD29] border-[4px]' : 'border-white border-[2px]';
 
@@ -75,41 +83,52 @@ function PlayerSlot({ player, isFirst, color, isMe }) {
   }
 
   return (
-    <div
-      className={`w-full aspect-square ${myHighlight} flex flex-col items-center justify-center relative overflow-hidden rounded`}
-      style={{ backgroundColor: darkColor }}
-    >
-      {isMe && (
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute inset-0 bg-[#FFCD29]/30 pointer-events-none"
-        />
-      )}
-      <div className="absolute inset-0 bg-white/10" />
-      
-        <img 
-          src={player.avatar || ''} 
-          alt="avatar" 
+    <div className="relative w-full aspect-square overflow-visible">
+      <div
+        className={`w-full h-full ${myHighlight} flex flex-col items-center justify-center relative overflow-hidden rounded`}
+        style={{ backgroundColor: darkColor }}
+      >
+        {isMe && (
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute inset-0 bg-[#FFCD29]/30 pointer-events-none"
+          />
+        )}
+        <div className="absolute inset-0 bg-white/10" />
+
+        <img
+          src={player.avatar || ''}
+          alt="avatar"
           className="absolute inset-0 w-full h-full object-cover z-10"
         />
 
-      <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
-        <span className="text-[#000000] font-black text-[10px] md:text-xs uppercase tracking-wider relative block">
-          {player.nickname}
-        </span>
+        <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+          <span className="text-[#000000] font-black text-[10px] md:text-xs uppercase tracking-wider relative block">
+            {player.nickname}
+          </span>
+        </div>
+        {isMe && (
+          <span className="absolute top-1 right-1 text-[8px] bg-[#FFCD29] text-black px-1.5 py-0.5 rounded font-black z-20 border-[2px] border-[#000000]">
+            YOU
+          </span>
+        )}
       </div>
-      {isMe && (
-        <span className="absolute top-1 right-1 text-[8px] bg-[#FFCD29] text-black px-1.5 py-0.5 rounded font-black z-20 border-[2px] border-[#000000]">
-          YOU
-        </span>
-      )}
+
+      {floatingEmojis.map((reaction, index) => (
+        <AvatarEmojiBurst
+          key={reaction.reactionId}
+          emoji={reaction.emoji}
+          reactionId={reaction.reactionId}
+          index={index}
+        />
+      ))}
     </div>
   );
 }
 
 /* ─── TeamPanel ──────────────────────────────────────────────────────────── */
-function TeamPanel({ teamName, color, players, myNickname }) {
+function TeamPanel({ teamName, color, players, myNickname, avatarReactions }) {
   const bgColor = color === 'green' ? '#2ea84a' : '#c0392b';
   const shadowColor = color === 'green' ? '#1a6b2e' : '#7b1515';
   const slots = [...players, ...Array(Math.max(0, 4 - players.length)).fill(null)];
@@ -132,14 +151,15 @@ function TeamPanel({ teamName, color, players, myNickname }) {
       </div>
 
       {/* 2×2 player grid */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 overflow-visible py-2">
         {slots.map((player, i) => (
-          <PlayerSlot 
-            key={i} 
-            player={player} 
-            isFirst={i === 0 && !player} 
-            color={color} 
+          <PlayerSlot
+            key={player?.id || `empty-${i}`}
+            player={player}
+            isFirst={i === 0 && !player}
+            color={color}
             isMe={player && player.nickname === myNickname}
+            floatingEmojis={player ? avatarReactions[player.id] || [] : []}
           />
         ))}
       </div>
@@ -165,14 +185,55 @@ export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
+  const { blinkTo } = useTransitionStore();
 
   const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
   const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
 
-  const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
+  const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
   const [startCountdown, setStartCountdown] = useState(null);
+  const [avatarReactions, setAvatarReactions] = useState({});
+  const reactionTimers = useRef(new Map());
+
+  const triggerAvatarReaction = useCallback((targetPlayerId, emoji) => {
+    if (!targetPlayerId || !emoji) return;
+
+    playEmojiReactionSound(emoji);
+
+    const reactionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    setAvatarReactions((prev) => ({
+      ...prev,
+      [targetPlayerId]: [...(prev[targetPlayerId] || []).slice(-2), { emoji, reactionId }],
+    }));
+
+    if (reactionTimers.current.has(reactionId)) {
+      clearTimeout(reactionTimers.current.get(reactionId));
+    }
+
+    const timer = setTimeout(() => {
+      setAvatarReactions((prev) => ({
+        ...prev,
+        [targetPlayerId]: (prev[targetPlayerId] || []).filter((r) => r.reactionId !== reactionId),
+      }));
+      reactionTimers.current.delete(reactionId);
+    }, AVATAR_REACTION_MS);
+
+    reactionTimers.current.set(reactionId, timer);
+  }, []);
+
+  const handleLobbyChatMessage = useCallback((msg) => {
+    if (isEmojiHeavy(msg.message)) {
+      triggerAvatarReaction(msg.playerId, msg.message.trim());
+    }
+  }, [triggerAvatarReaction]);
+
+  useEffect(() => () => {
+    reactionTimers.current.forEach((timer) => clearTimeout(timer));
+    reactionTimers.current.clear();
+  }, []);
 
   // Socket logic
   useEffect(() => {
@@ -186,6 +247,10 @@ export default function PlayerLobby() {
 
     const onPlayersUpdate = (data) => {
       setPlayers(data.players || []);
+      if (data.background) setBgImage(data.background);
+    };
+
+    const onBackgroundUpdate = (data) => {
       if (data.background) setBgImage(data.background);
     };
 
@@ -210,11 +275,13 @@ export default function PlayerLobby() {
     };
 
     socket.on('lobby:players-update', onPlayersUpdate);
+    socket.on('lobby:background-update', onBackgroundUpdate);
     socket.on('game:question', onQuestion);
     socket.on('lobby:countdown-started', onCountdownStarted);
 
     return () => {
       socket.off('lobby:players-update', onPlayersUpdate);
+      socket.off('lobby:background-update', onBackgroundUpdate);
       socket.off('game:question', onQuestion);
       socket.off('lobby:countdown-started', onCountdownStarted);
     };
@@ -223,9 +290,20 @@ export default function PlayerLobby() {
   const teamAPlayers = players.filter((p) => p.team === 'A');
   const teamBPlayers = players.filter((p) => p.team === 'B');
 
+  const handleGoBack = () => {
+    if (startCountdown !== null) return;
+
+    const socket = getSocket();
+    if (socket && pin && playerId) {
+      socket.emit('player:leave-team', { pin, playerId });
+    }
+    sessionStorage.removeItem('player_team');
+    blinkTo(`/play/${pin}/choose-team`);
+  };
+
   return (
     <div
-      className="relative w-full h-screen max-h-screen overflow-hidden flex flex-col font-sans pt-6 pb-24 px-6"
+      className="relative w-full h-screen max-h-screen overflow-x-hidden flex flex-col font-sans pt-6 pb-24 px-6"
       style={{
         backgroundImage: `url('${bgImage}')`,
         backgroundSize: 'cover',
@@ -284,23 +362,48 @@ export default function PlayerLobby() {
           </div>
         </motion.div>
 
-        {/* Team Panels Container */}
-        <div className="flex-1 flex flex-row items-center justify-center gap-2 md:gap-6 w-full max-w-5xl mx-auto min-h-0">
-          <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
-            <TeamPanel teamName="Team A" color="green" players={teamAPlayers} myNickname={nickname} />
-          </motion.div>
+        {/* Team Panels + Go Back */}
+        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-5xl mx-auto min-h-0">
+          <div className="flex flex-row items-center justify-center gap-2 md:gap-6 w-full">
+            <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
+              <TeamPanel teamName="Team A" color="green" players={teamAPlayers} myNickname={nickname} avatarReactions={avatarReactions} />
+            </motion.div>
 
-          <motion.div {...bounceIn(0.2)}>
-            <VsCard />
-          </motion.div>
+            <motion.div {...bounceIn(0.2)}>
+              <VsCard />
+            </motion.div>
 
-          <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
-            <TeamPanel teamName="Team B" color="red" players={teamBPlayers} myNickname={nickname} />
-          </motion.div>
+            <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
+              <TeamPanel teamName="Team B" color="red" players={teamBPlayers} myNickname={nickname} avatarReactions={avatarReactions} />
+            </motion.div>
+          </div>
+
+          <motion.button
+            {...bounceIn(0.18)}
+            type="button"
+            onClick={handleGoBack}
+            disabled={startCountdown !== null}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95, y: 4 }}
+            className="mt-6 flex items-center justify-center gap-2 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase font-black shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2rem', letterSpacing: '2px' }}
+          >
+            <ArrowLeft size={28} strokeWidth={3} />
+            Go Back
+          </motion.button>
         </div>
 
       </div>
 
+      {pin && playerId && (
+        <PlayerLobbyChat
+          pin={pin}
+          playerId={playerId}
+          nickname={nickname}
+          disabled={startCountdown !== null}
+          onChatMessage={handleLobbyChatMessage}
+        />
+      )}
     </div>
   );
 }

@@ -69,7 +69,6 @@ const ChooseTeamSection = () => {
     if (joining) return;
     setJoining(true);
 
-    new Audio('/audio/clicksound.mp3').play().catch(() => {});
     setSelectedTeam(team);
 
     // Pull stored session data

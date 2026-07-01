@@ -8,6 +8,7 @@ import ToastContainer from '@/components/global/ToastContainer';
 import { usePathname } from 'next/navigation';
 
 import CustomCursor from '@/components/global/CustomCursor';
+import { useButtonClickSound } from '@/hooks/useButtonClickSound';
 
 const NO_NAVBAR_PATHS = [
   "/sso-callback",
@@ -24,6 +25,7 @@ const GAME_FLOW_PATHS = [
 
 export default function ClientLayoutWrapper({ children }) {
   const pathname = usePathname();
+  useButtonClickSound();
   
   const isFullScreen = pathname.startsWith("/host/") || pathname.startsWith("/play/");
   const showNavbar = !NO_NAVBAR_PATHS.includes(pathname) && !isFullScreen;

@@ -1,18 +1,138 @@
 'use client';
-import { useEffect } from 'react';
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { BellRing, CheckCheck, Loader2 } from 'lucide-react';
+import { BellRing, CheckCheck, Loader2, Gift } from 'lucide-react';
 import Navbar from '@/components/global/Navbar';
 import { motion } from 'framer-motion';
+import { ZINKO_SENDER_AVATAR, ZINKO_SENDER_NAME } from '@/lib/lobbyScenery';
+
+function NotificationCard({
+  notif,
+  onMarkRead,
+  onCollectScenery,
+  collectingId,
+}) {
+  const isSceneryGift = notif.type === 'SCENERY_GIFT';
+  const metadata = notif.metadata || {};
+  const senderName = isSceneryGift
+    ? (metadata.sender_name || ZINKO_SENDER_NAME)
+    : (metadata.cloner_name || 'Someone');
+  const senderAvatar = isSceneryGift
+    ? ZINKO_SENDER_AVATAR
+    : (metadata.cloner_avatar || '/assets/default_avatar.png');
+  const isCollected = metadata.collected === true;
+  const canCollect = isSceneryGift && !isCollected;
+
+  const handleCardClick = () => {
+    if (canCollect) return;
+    if (!notif.is_read) onMarkRead(notif.id);
+  };
+
+  return (
+    <div
+      onClick={handleCardClick}
+      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-black transition-all ${
+        notif.is_read
+          ? 'bg-white opacity-70 hover:opacity-100 shadow-[2px_2px_0_0_rgba(0,0,0,0.18)] cursor-default'
+          : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 shadow-[2px_2px_0_0_rgba(0,0,0,0.22)] hover:translate-y-[-1px] cursor-pointer'
+      }`}
+    >
+      {!notif.is_read && !canCollect && (
+        <div className="absolute top-4 right-4 sm:top-auto sm:right-6 w-3 h-3 bg-red-500 border-[2px] border-black rounded-full" />
+      )}
+
+      <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
+        <img
+          src={senderAvatar}
+          alt={senderName}
+          className={isSceneryGift ? 'w-full h-full object-contain' : 'w-full h-full object-cover'}
+        />
+      </div>
+
+      <div className="flex-1 min-w-0 pr-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
+          <span className={`inline-block text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded border-[2px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] ${
+            isSceneryGift ? 'bg-orange-600' : 'bg-[#5D3FD3]'
+          }`}>
+            {notif.type.replace(/_/g, ' ')}
+          </span>
+          <span className="text-xs font-bold text-zk-black/50">
+            {new Date(notif.created_at).toLocaleDateString(undefined, {
+              month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+            })}
+          </span>
+        </div>
+
+        <p className="text-base sm:text-lg text-zk-black font-semibold mt-2">
+          <span className={`font-black ${isSceneryGift ? 'text-orange-700' : 'text-zk-blue'}`}>
+            {senderName}
+          </span>{' '}
+          {notif.message}
+        </p>
+
+        {isSceneryGift && metadata.scenery_image && (
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div
+              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] overflow-hidden"
+              style={{
+                backgroundImage: `url('${metadata.scenery_image}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-black uppercase tracking-wide text-zk-black">
+                {metadata.scenery_name || 'Background Scenery'}
+              </span>
+              {isCollected ? (
+                <span className="inline-flex items-center gap-1 text-xs font-black uppercase text-green-700">
+                  <CheckCheck size={14} /> Collected
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onCollectScenery(notif.id);
+                  }}
+                  disabled={collectingId === notif.id}
+                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-transform hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-[#268f3f] disabled:opacity-60"
+                >
+                  {collectingId === notif.id ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <Gift size={18} />
+                  )}
+                  Collect Scenery
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Notifications() {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
-  const { notifications, isLoading, fetchNotifications, markAsRead, markAllAsRead, clearAllNotifications } = useNotificationStore();
+  const {
+    notifications,
+    isLoading,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    clearAllNotifications,
+    collectSceneryGift,
+  } = useNotificationStore();
+  const { fetchOwnedScenery, syncNewScenerySlugs } = useOwnedSceneryStore();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
+  const [collectingId, setCollectingId] = useState(null);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -25,6 +145,19 @@ export default function Notifications() {
       fetchNotifications(user.id);
     }
   }, [isSignedIn, user?.id, isJwtReady, fetchNotifications]);
+
+  const handleCollectScenery = async (notificationId) => {
+    setCollectingId(notificationId);
+    try {
+      await collectSceneryGift(notificationId);
+      await fetchOwnedScenery();
+      syncNewScenerySlugs();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCollectingId(null);
+    }
+  };
 
   if (!isLoaded) {
     return (
@@ -40,14 +173,14 @@ export default function Notifications() {
 
       {/* Floating Background Shapes */}
       <motion.div
-        className="absolute top-[15%] left-[5%] text-zk-blue -z-10"
+        className="absolute top-[15%] left-[5%] text-zk-blue -z-10 pointer-events-none"
         animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
       >
         <BellRing size={120} />
       </motion.div>
       <motion.svg
-        className="absolute top-[40%] right-[10%] -z-10"
+        className="absolute top-[40%] right-[10%] -z-10 pointer-events-none"
         width="128"
         height="128"
         viewBox="0 0 128 128"
@@ -57,12 +190,12 @@ export default function Notifications() {
         <circle cx="64" cy="64" r="56" fill="none" stroke="#FFCD29" strokeWidth="8" />
       </motion.svg>
       <motion.div
-        className="absolute bottom-[20%] left-[15%] w-24 h-24 bg-red-400 rounded-full -z-10"
+        className="absolute bottom-[20%] left-[15%] w-24 h-24 bg-red-400 rounded-full -z-10 pointer-events-none"
         animate={{ y: [0, 30, 0], scale: [1, 1.05, 1] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute bottom-[10%] right-[25%] text-[#5D3FD3] -z-10"
+        className="absolute bottom-[10%] right-[25%] text-[#5D3FD3] -z-10 pointer-events-none"
         animate={{ y: [0, -15, 0], rotate: [0, -15, 15, 0] }}
         transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
       >
@@ -70,15 +203,14 @@ export default function Notifications() {
       </motion.div>
 
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 mt-4 relative z-10">
-        {/* Header section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border-[4px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,0.22)] p-6 rounded-2xl">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-zk-yellow border-[3px] border-zk-black rounded-xl flex items-center justify-center shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
               <BellRing className="text-zk-black" size={24} />
             </div>
             <div>
               <h1 className="text-3xl font-black text-zk-black uppercase tracking-tight">Notifications</h1>
-              <p className="text-zk-black/60 font-bold">Stay up to date with your game activities.</p>
+              <p className="text-zk-black/60 font-bold">Collect scenery gifts and stay up to date.</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -97,7 +229,6 @@ export default function Notifications() {
           </div>
         </div>
 
-        {/* Notifications List */}
         <div className="flex flex-col gap-4">
           {isLoading ? (
             <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
@@ -106,54 +237,19 @@ export default function Notifications() {
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
-              <h2 className="text-2xl font-black text-zk-black">You're all caught up!</h2>
+              <h2 className="text-2xl font-black text-zk-black">You&apos;re all caught up!</h2>
               <p className="text-zk-black/60 font-bold mt-2">No new notifications to display.</p>
             </div>
           ) : (
-            notifications.map((notif) => {
-              const clonerName = notif.metadata?.cloner_name || 'Someone';
-              const clonerAvatar = notif.metadata?.cloner_avatar || '/assets/default_avatar.png'; // fallback avatar
-              
-              return (
-                <div
-                  key={notif.id}
-                  onClick={() => !notif.is_read && markAsRead(notif.id)}
-                  className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-black transition-all ${
-                    notif.is_read
-                      ? 'bg-white opacity-70 hover:opacity-100 shadow-[4px_4px_0_0_rgba(0,0,0,1)] cursor-default'
-                      : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-y-[-2px] cursor-pointer'
-                  }`}
-                >
-                  {/* Unread indicator */}
-                  {!notif.is_read && (
-                    <div className="absolute top-4 right-4 sm:top-auto sm:right-6 w-3 h-3 bg-red-500 border-[2px] border-black rounded-full" />
-                  )}
-
-                  {/* Cloner Avatar */}
-                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] overflow-hidden bg-white">
-                    <img src={clonerAvatar} alt={clonerName} className="w-full h-full object-cover" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 pr-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
-                      <span className="inline-block bg-[#5D3FD3] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded border-[2px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                        {notif.type.replace('_', ' ')}
-                      </span>
-                      <span className="text-xs font-bold text-zk-black/50">
-                        {new Date(notif.created_at).toLocaleDateString(undefined, { 
-                          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
-                        })}
-                      </span>
-                    </div>
-
-                    <p className="text-base sm:text-lg text-zk-black font-semibold mt-2">
-                      <span className="font-black text-zk-blue">{clonerName}</span> {notif.message}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
+            notifications.map((notif) => (
+              <NotificationCard
+                key={notif.id}
+                notif={notif}
+                onMarkRead={markAsRead}
+                onCollectScenery={handleCollectScenery}
+                collectingId={collectingId}
+              />
+            ))
           )}
         </div>
       </main>

@@ -1,5 +1,21 @@
+const { Prisma } = require('@prisma/client');
 const prisma = require('../lib/prisma');
 const { isValidUuid } = require('../lib/uuid');
+const { normalizeSearchTerm } = require('../lib/searchUtils');
+
+const PUBLIC_QUIZ_INCLUDE = {
+  questions: {
+    orderBy: { order_index: 'asc' },
+  },
+  creator: {
+    select: {
+      clerk_id: true,
+      first_name: true,
+      last_name: true,
+      username: true,
+    },
+  },
+};
 
 const mapQuestionInput = (q, index, quizId) => ({
   quiz_id: quizId,
@@ -171,32 +187,72 @@ const getAllQuizzesDebug = async () => {
 };
 
 /**
- * Fetch public quizzes with cursor pagination and optional search.
+ * Fetch public quizzes with cursor pagination and optional fuzzy title search.
+ * Matches literal substrings and normalized titles (ignores spaces, hyphens, etc.).
  */
 const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) => {
+  const trimmedSearch = searchQuery?.trim();
+
+  if (trimmedSearch) {
+    const normalized = normalizeSearchTerm(trimmedSearch);
+    const cursorDate = cursor ? new Date(cursor) : null;
+
+    const rows =
+      normalized.length > 0
+        ? await prisma.$queryRaw`
+            SELECT id, created_at
+            FROM quizzes
+            WHERE is_public = true
+            ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+            AND (
+              title ILIKE ${`%${trimmedSearch}%`}
+              OR REGEXP_REPLACE(LOWER(title), '[^a-z0-9]', '', 'g') LIKE ${`%${normalized}%`}
+            )
+            ORDER BY created_at DESC
+            LIMIT ${limit + 1}
+          `
+        : await prisma.$queryRaw`
+            SELECT id, created_at
+            FROM quizzes
+            WHERE is_public = true
+            ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+            AND title ILIKE ${`%${trimmedSearch}%`}
+            ORDER BY created_at DESC
+            LIMIT ${limit + 1}
+          `;
+
+    const hasNextPage = rows.length > limit;
+    const pageRows = rows.slice(0, limit);
+    const ids = pageRows.map((row) => row.id);
+
+    if (!ids.length) {
+      return { quizzes: [], nextCursor: null, hasNextPage: false };
+    }
+
+    const quizzes = await prisma.quizzes.findMany({
+      where: { id: { in: ids } },
+      include: PUBLIC_QUIZ_INCLUDE,
+    });
+
+    const orderMap = new Map(pageRows.map((row, index) => [row.id, index]));
+    quizzes.sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id));
+
+    const nextCursor = hasNextPage
+      ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
+        new Date(pageRows[pageRows.length - 1].created_at).toISOString()
+      : null;
+
+    return { quizzes, nextCursor, hasNextPage };
+  }
+
   const where = {
     is_public: true,
     ...(cursor ? { created_at: { lt: new Date(cursor) } } : {}),
-    ...(searchQuery
-      ? { title: { contains: searchQuery, mode: 'insensitive' } }
-      : {}),
   };
 
   const results = await prisma.quizzes.findMany({
     where,
-    include: {
-      questions: {
-        orderBy: { order_index: 'asc' },
-      },
-      creator: {
-        select: {
-          clerk_id: true,
-          first_name: true,
-          last_name: true,
-          username: true,
-        },
-      },
-    },
+    include: PUBLIC_QUIZ_INCLUDE,
     orderBy: { created_at: 'desc' },
     take: limit + 1,
   });

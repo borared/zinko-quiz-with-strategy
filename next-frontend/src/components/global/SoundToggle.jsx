@@ -41,8 +41,10 @@ const SoundToggle = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // If user navigates away from game routes, stop audio and hide toggle
-    if (!pathname.startsWith('/host') && !pathname.startsWith('/play')) {
+    const isHostRoute = pathname.startsWith('/host');
+
+    // Stop audio on player routes and anywhere outside host lobby/game
+    if (!isHostRoute) {
       if (typeof window !== 'undefined' && window.gameAudio) {
         window.gameAudio.pause();
         window.gameAudio.currentTime = 0;
@@ -53,8 +55,8 @@ const SoundToggle = () => {
     }
   }, [pathname]);
 
-  // Only show the button if the audio object exists and we are in a game route
-  if (!hasAudio || (!pathname.startsWith('/host') && !pathname.startsWith('/play'))) return null;
+  // Host-only — players stay muted throughout the join/play flow
+  if (!hasAudio || !pathname.startsWith('/host')) return null;
 
   return (
     <button

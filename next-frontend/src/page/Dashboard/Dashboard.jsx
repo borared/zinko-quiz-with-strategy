@@ -3,10 +3,12 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
+import WorkspaceShell from '@/components/layout/WorkspaceShell';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
 import { useSocketStore } from '@/store/useSocketStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -19,11 +21,18 @@ const Dashboard = () => {
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
   const router = useRouter();
 
-  const [quizzes, setQuizzes] = useState([]);
-  const [totalQuizCount, setTotalQuizCount] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    quizzes,
+    totalQuizCount,
+    hasNextPage,
+    nextCursor,
+    isCachedForUser,
+    setInitialCache,
+    appendQuizzes,
+  } = useDashboardQuizStore();
+
+  const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const [hasMoreQuizzes, setHasMoreQuizzes] = useState(false);
 
   const paginationRef = useRef({
     nextCursor: null,
@@ -31,6 +40,12 @@ const Dashboard = () => {
     isFetching: false,
   });
   const sentinelRef = useRef(null);
+  const initializedForUserRef = useRef(null);
+
+  const syncPaginationRef = useCallback((cursor, hasMore) => {
+    paginationRef.current.nextCursor = cursor;
+    paginationRef.current.hasNextPage = hasMore;
+  }, []);
 
   const fetchMoreQuizzes = useCallback(async () => {
     const pagination = paginationRef.current;
@@ -43,20 +58,31 @@ const Dashboard = () => {
         `/api/quizzes/user/${user.id}?cursor=${cursorParam}&limit=${PAGE_SIZE}`
       );
 
-      setQuizzes((prev) => [...prev, ...(data.quizzes || [])]);
+      appendQuizzes({
+        quizzes: data.quizzes || [],
+        nextCursor: data.nextCursor || null,
+        hasNextPage: data.hasNextPage === true,
+      });
+
       pagination.nextCursor = data.nextCursor || null;
       pagination.hasNextPage = data.hasNextPage === true;
-      setHasMoreQuizzes(pagination.hasNextPage);
 
-      if (pagination.hasNextPage) {
+      const storeState = useDashboardQuizStore.getState();
+      const allLoaded =
+        storeState.totalQuizCount != null &&
+        storeState.quizzes.length >= storeState.totalQuizCount;
+
+      if (pagination.hasNextPage && !allLoaded) {
         queueMicrotask(() => fetchMoreQuizzes());
+      } else if (allLoaded) {
+        pagination.hasNextPage = false;
       }
     } catch (error) {
       console.error('Error fetching more quizzes:', error);
     } finally {
       pagination.isFetching = false;
     }
-  }, [user]);
+  }, [user, appendQuizzes]);
 
   const loadInitialQuizzes = useCallback(async () => {
     if (!user) {
@@ -66,7 +92,6 @@ const Dashboard = () => {
 
     setLoading(true);
     setFetchError(null);
-    setHasMoreQuizzes(false);
     paginationRef.current = {
       nextCursor: null,
       hasNextPage: false,
@@ -75,16 +100,18 @@ const Dashboard = () => {
 
     try {
       const data = await api.get(`/api/quizzes/user/${user.id}?limit=${PAGE_SIZE}`);
-      setQuizzes(data.quizzes || []);
-      if (data.totalCount !== undefined) {
-        setTotalQuizCount(data.totalCount);
-      }
 
-      paginationRef.current.nextCursor = data.nextCursor || null;
-      paginationRef.current.hasNextPage = data.hasNextPage === true;
-      setHasMoreQuizzes(paginationRef.current.hasNextPage);
+      setInitialCache({
+        userId: user.id,
+        quizzes: data.quizzes || [],
+        totalQuizCount: data.totalCount,
+        nextCursor: data.nextCursor || null,
+        hasNextPage: data.hasNextPage === true,
+      });
 
-      if (paginationRef.current.hasNextPage) {
+      syncPaginationRef(data.nextCursor || null, data.hasNextPage === true);
+
+      if (data.hasNextPage === true) {
         fetchMoreQuizzes();
       }
     } catch (error) {
@@ -93,20 +120,51 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, fetchMoreQuizzes]);
+  }, [user, setInitialCache, syncPaginationRef, fetchMoreQuizzes]);
 
   useEffect(() => {
     disconnectSocket();
   }, [disconnectSocket]);
 
   useEffect(() => {
-    if (!isLoaded || !isJwtReady) return;
+    if (!isLoaded || !isJwtReady || !user?.id) return;
+    if (initializedForUserRef.current === user.id) return;
+    initializedForUserRef.current = user.id;
+
+    if (isCachedForUser(user.id)) {
+      setLoading(false);
+      setFetchError(null);
+      syncPaginationRef(nextCursor, hasNextPage);
+      paginationRef.current.isFetching = false;
+
+      const allQuizzesLoaded =
+        totalQuizCount != null && quizzes.length >= totalQuizCount;
+
+      if (hasNextPage && !allQuizzesLoaded) {
+        fetchMoreQuizzes();
+      }
+      return;
+    }
+
+    setLoading(true);
     loadInitialQuizzes();
-  }, [isLoaded, isJwtReady, loadInitialQuizzes]);
+  }, [
+    isLoaded,
+    isJwtReady,
+    user?.id,
+    isCachedForUser,
+    nextCursor,
+    hasNextPage,
+    totalQuizCount,
+    quizzes.length,
+    loadInitialQuizzes,
+    fetchMoreQuizzes,
+    syncPaginationRef,
+  ]);
 
   useEffect(() => {
     const node = sentinelRef.current;
-    if (!node || loading || !hasMoreQuizzes) return;
+    if (!node || loading || !hasNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -119,34 +177,37 @@ const Dashboard = () => {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [fetchMoreQuizzes, loading, hasMoreQuizzes, quizzes.length]);
+  }, [fetchMoreQuizzes, loading, hasNextPage, quizzes.length]);
 
   return (
-    <div className="flex bg-[#FFD54F] font-sans min-h-screen">
-      <Sidebar />
+    <WorkspaceShell sidebar={<Sidebar />}>
+      <WelcomeBanner />
 
-      <div className="flex-1 p-8 ml-64">
-        <div className="max-w-7xl mx-auto flex flex-col gap-8">
-          <WelcomeBanner totalQuizzes={totalQuizCount} />
+      <QuizGrid
+        quizzes={quizzes}
+        loading={loading && quizzes.length === 0}
+        totalQuizCount={totalQuizCount}
+      />
 
-          <QuizGrid quizzes={quizzes} loading={loading} />
-          {fetchError && (
-            <div className="text-red-600 font-bold mt-4">Unable to load your quizzes: {fetchError}</div>
-          )}
-
-          {!loading && hasMoreQuizzes && (
-            <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
-          )}
+      {fetchError && (
+        <div className="zk-panel bg-red-50 text-red-700 font-bold p-4">
+          Unable to load your quizzes: {fetchError}
         </div>
-      </div>
+      )}
+
+      {!loading && hasNextPage && (
+        <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
+      )}
 
       <button
+        type="button"
         onClick={() => router.push('/create-game')}
-        className="fixed bottom-10 right-10 z-50 flex items-center justify-center w-16 h-16 bg-[#5D3FD3] hover:bg-zk-blue text-white rounded-full shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] border-[3px] border-zk-black transition-all hover:-translate-y-1 active:translate-y-1 active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
+        aria-label="Create new game"
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-zk-purple hover:bg-zk-blue text-white rounded-full zk-btn-press"
       >
         <Plus size={32} strokeWidth={4} />
       </button>
-    </div>
+    </WorkspaceShell>
   );
 };
 

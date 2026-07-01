@@ -1,8 +1,20 @@
 const quizRepository = require('../../repositories/quizRepository');
-const { verifyHostToken, isHostSocket, requirePlayerSocket } = require('../socketAuth');
+const { verifyHostToken, isHostSocket, requirePlayerSocket, getPlayerBySocket } = require('../socketAuth');
+const sceneryService = require('../../services/sceneryService');
 
 const NICKNAME_MAX_LENGTH = 20;
 const NICKNAME_PATTERN = /^[a-zA-Z0-9 _-]+$/;
+const CHAT_MESSAGE_MAX_LENGTH = 200;
+const CHAT_HISTORY_MAX = 50;
+
+function getPlayerLobbyRoom(pin) {
+  return `${pin}-lobby-players`;
+}
+
+/** Broadcast to every player in the lobby — both teams, host excluded. */
+function emitLobbyChatToAllPlayers(io, pin, event, payload) {
+  io.to(getPlayerLobbyRoom(pin)).emit(event, payload);
+}
 
 module.exports = function registerLobbyHandlers(io, socket, games) {
   // ── host:initialize ───────────────────────────────────────────────────────
@@ -142,6 +154,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
     socket.join(pin);
+    socket.join(getPlayerLobbyRoom(pin));
 
     // Upsert player (handle reconnects and team/nickname changes)
     const existing = game.players.find(p => p.id === playerId);
@@ -194,6 +207,9 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       socket.emit('error', { message: 'Game not found' });
       return;
     }
+    if (getPlayerBySocket(game, socket.id)) {
+      socket.join(getPlayerLobbyRoom(pin));
+    }
     socket.emit('lobby:players-update', {
       players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
       count: game.players.length,
@@ -220,11 +236,76 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     }
   });
 
+  // ── lobby:set-background (host only) ──────────────────────────────────────
+  socket.on('lobby:set-background', async ({ pin, background }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (!isHostSocket(socket, game)) return;
+    if (!game.hostUserId) return;
+
+    try {
+      const ownsScenery = await sceneryService.userOwnsSceneryImage(game.hostUserId, background);
+      if (!ownsScenery) return;
+    } catch (err) {
+      console.error('Failed to validate scenery ownership:', err.message);
+      return;
+    }
+
+    game.background = background;
+    io.to(pin).emit('lobby:background-update', { background });
+  });
+
   // ── lobby:start-countdown ─────────────────────────────────────────────────
   socket.on('lobby:start-countdown', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     io.to(pin).emit('lobby:countdown-started');
+  });
+
+  // ── lobby:chat-send (players only — host never receives) ─────────────────
+  socket.on('lobby:chat-send', ({ pin, playerId, message }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (isHostSocket(socket, game)) return;
+
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+
+    const trimmed = String(message || '').trim();
+    if (!trimmed || trimmed.length > CHAT_MESSAGE_MAX_LENGTH) {
+      socket.emit('error', { message: 'Message must be 1–200 characters.' });
+      return;
+    }
+
+    const payload = {
+      id: `${Date.now()}-${playerId}`,
+      playerId,
+      nickname: player.nickname,
+      team: player.team,
+      message: trimmed,
+      timestamp: Date.now(),
+    };
+
+    if (!Array.isArray(game.lobbyChat)) game.lobbyChat = [];
+    game.lobbyChat.push(payload);
+    if (game.lobbyChat.length > CHAT_HISTORY_MAX) {
+      game.lobbyChat = game.lobbyChat.slice(-CHAT_HISTORY_MAX);
+    }
+
+    emitLobbyChatToAllPlayers(io, pin, 'lobby:chat-message', payload);
+  });
+
+  // ── lobby:chat-history (players only) ────────────────────────────────────
+  socket.on('lobby:chat-history', ({ pin, playerId }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (isHostSocket(socket, game)) return;
+
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+
+    socket.join(getPlayerLobbyRoom(pin));
+    socket.emit('lobby:chat-history', { messages: game.lobbyChat || [] });
   });
 
   // ── player:leave-team ─────────────────────────────────────────────────────
@@ -236,7 +317,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     if (game.phase === 'LOBBY') {
       const initialCount = game.players.length;
       game.players = game.players.filter(p => p.id !== playerId);
-      
+      socket.leave(getPlayerLobbyRoom(pin));
+
       if (game.players.length !== initialCount) {
         console.log(`👋 Player ${playerId} explicitly left team in lobby ${pin}`);
         io.to(pin).emit('lobby:players-update', {

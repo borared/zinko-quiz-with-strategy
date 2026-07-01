@@ -6,6 +6,12 @@ import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
 import QRCodePackage from 'react-qr-code';
+import LobbySceneryPicker from '@/components/Host/LobbySceneryPicker';
+import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
+import { DEFAULT_LOBBY_SCENERY, isHalloweenScenery, isOwnedSceneryImage } from '@/lib/lobbyScenery';
+import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
+import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // Handle commonJS/ESM interop issues with react-qr-code
 const QRCode = typeof QRCodePackage === 'function' 
@@ -156,8 +162,17 @@ export default function HostLobby() {
   const location = usePathname();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
+  const isJwtReady = useAuthStore((s) => s.isJwtReady);
+  const {
+    ownedScenery,
+    newScenerySlugs,
+    fetchOwnedScenery,
+    getDefaultImage,
+    syncNewScenerySlugs,
+    acknowledgeNewScenery,
+  } = useOwnedSceneryStore();
 
-  const [bgImage, setBgImage] = useState('/background_battle/city.jpg');
+  const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
   const [startCountdown, setStartCountdown] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -174,6 +189,26 @@ export default function HostLobby() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isJwtReady) {
+      fetchOwnedScenery();
+      syncNewScenerySlugs();
+    }
+  }, [isJwtReady, fetchOwnedScenery, syncNewScenerySlugs]);
+
+  useEffect(() => {
+    const onNewSceneryChanged = () => syncNewScenerySlugs();
+    window.addEventListener('newSceneryChanged', onNewSceneryChanged);
+    return () => window.removeEventListener('newSceneryChanged', onNewSceneryChanged);
+  }, [syncNewScenerySlugs]);
+
+  useEffect(() => {
+    if (!ownedScenery.length) return;
+    if (!isOwnedSceneryImage(bgImage, ownedScenery)) {
+      setBgImage(getDefaultImage());
+    }
+  }, [ownedScenery, bgImage, getDefaultImage]);
 
   // Connect to socket and get real players
   useEffect(() => {
@@ -193,6 +228,10 @@ export default function HostLobby() {
       if (data.background) setBgImage(data.background);
     };
 
+    const onBackgroundUpdate = (data) => {
+      if (data.background) setBgImage(data.background);
+    };
+
     const onError = (data) => {
       if (data.message === 'Game PIN not found.') {
         router.replace('/404');
@@ -203,14 +242,26 @@ export default function HostLobby() {
 
     socket.on('host:initialized', onInitialized);
     socket.on('lobby:players-update', onPlayersUpdate);
+    socket.on('lobby:background-update', onBackgroundUpdate);
     socket.on('error', onError);
 
     return () => {
       socket.off('host:initialized', onInitialized);
       socket.off('lobby:players-update', onPlayersUpdate);
+      socket.off('lobby:background-update', onBackgroundUpdate);
       socket.off('error', onError);
     };
   }, [getSocket, isConnected, pin, location.state, router]);
+
+  const handleSceneryChange = useCallback((image) => {
+    setBgImage(image);
+    const socket = getSocket();
+    if (socket && isConnected && pin) {
+      socket.emit('lobby:set-background', { pin, background: image });
+    }
+  }, [getSocket, isConnected, pin]);
+
+  useHalloweenSceneryAudio(bgImage, pin);
 
   const handleStartGame = useCallback(() => {
     if (players.length === 0) return;
@@ -365,6 +416,30 @@ export default function HostLobby() {
         className="absolute bottom-0 left-0 w-full py-4 flex items-center justify-center z-20"
         style={{ backgroundColor: '#000000', borderTop: '4px solid #000000' }}
       >
+        <motion.div
+          {...bounceIn(0.05)}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-30"
+        >
+          <HalloweenSoundToggle
+            visible={isHalloweenScenery(bgImage)}
+            disabled={startCountdown !== null}
+          />
+        </motion.div>
+
+        <motion.div
+          {...bounceIn(0.05)}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-30"
+        >
+          <LobbySceneryPicker
+            currentImage={bgImage}
+            ownedScenery={ownedScenery}
+            newScenerySlugs={newScenerySlugs}
+            onSelect={handleSceneryChange}
+            onAcknowledgeNew={acknowledgeNewScenery}
+            disabled={startCountdown !== null}
+          />
+        </motion.div>
+
         <button
           id="start-game-btn"
           onClick={handleStartGame}

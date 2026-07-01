@@ -19,7 +19,7 @@ const QuestionEditor = () => {
   const questionNumber = roundQuestions.findIndex(q => q.id === activeQuestion.id) + 1;
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-white/90 backdrop-blur-lg border-[3px] border-zk-black rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <div className="flex flex-col gap-6 p-6 zk-panel">
       {/* Question Title */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center">

@@ -19,7 +19,12 @@ const upsertUser = async (clerkUser) => {
     primaryEmail = primaryEmailObj?.email_address || clerkUser.email_addresses[0]?.email_address;
   }
 
-  return prisma.users.upsert({
+  const existing = await prisma.users.findUnique({
+    where: { clerk_id: clerkUser.id },
+    select: { clerk_id: true },
+  });
+
+  const user = await prisma.users.upsert({
     where: { clerk_id: clerkUser.id },
     update: {
       email: primaryEmail,
@@ -38,6 +43,8 @@ const upsertUser = async (clerkUser) => {
       avatar_url: clerkUser.image_url || clerkUser.imageUrl || null,
     },
   });
+
+  return { user, isNew: !existing };
 };
 
 /**

@@ -11,9 +11,7 @@ export default function AuthSync() {
     const syncToken = async () => {
       if (isSignedIn) {
         const hasExistingToken = !!localStorage.getItem('zinko_jwt');
-        if (hasExistingToken) {
-          setJwtReady(true);
-        } else {
+        if (!hasExistingToken) {
           setJwtReady(false);
         }
 
@@ -43,11 +41,19 @@ export default function AuthSync() {
             }
           } else {
             console.error('[AuthSync] Failed to sync token:', response.statusText);
-            if (!hasExistingToken) setJwtReady(false);
+            if (hasExistingToken) {
+              setJwtReady(true);
+            } else {
+              setJwtReady(false);
+            }
           }
         } catch (error) {
           console.error('[AuthSync] Error syncing token:', error);
-          if (!hasExistingToken) setJwtReady(false);
+          if (hasExistingToken) {
+            setJwtReady(true);
+          } else {
+            setJwtReady(false);
+          }
         }
       } else if (isSignedIn === false) {
         localStorage.removeItem('zinko_jwt');

@@ -64,15 +64,14 @@ const EnterPinSection = () => {
       // Store PIN for use in the next steps
       sessionStorage.setItem('game_pin', pin);
 
-      // 🎵 Play the success sound
-      window.gameAudio = new Audio('/audio/n2kstudio-music-for-game-fun-kid-game-163649.mp3');
-      window.gameAudio.loop = true;
-      window.gameAudio.play().catch(() => { }); // handle autoplay block silently
-      window.dispatchEvent(new Event('audioStarted'));
+      // Players stay muted — no background music on join flow
+      if (typeof window !== 'undefined' && window.gameAudio) {
+        window.gameAudio.pause();
+        window.gameAudio.currentTime = 0;
+        window.gameAudio = null;
+      }
 
-      setTimeout(() => {
-        router.push(`/play/${pin}/join-nickname`);
-      }, 500);
+      router.push(`/play/${pin}/join-nickname`);
 
     } catch (err) {
       setError('Game not found. Check your PIN and try again.');
