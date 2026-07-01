@@ -57,7 +57,7 @@ const HeroSection = () => {
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             Empower your classroom with interactive quizzes that feel like real games. No<br className="hidden md:block" />
-            toxic, no hassle just pure fun.
+            topic limits, no hassle — just pure fun.
           </p>
         </div>
 
