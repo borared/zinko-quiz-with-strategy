@@ -1,4 +1,5 @@
 const { generatePin, QUESTION_TIME_SECONDS } = require('./socketUtils');
+const { DEFAULT_LOBBY_SCENERY } = require('./lobbyScenery');
 
 // ─── Type Definitions (JSDoc) ─────────────────────────────────────────────────
 // Note: Global type definitions (@typedef) are stored in `types.js` so they can be
@@ -36,7 +37,8 @@ function createGame({ pin, quizId, hostUserId }) {
     timeLeft: QUESTION_TIME_SECONDS,
     timer: null,
     createdAt: Date.now(),
-    background: '/background_battle/city.jpg',
+    background: DEFAULT_LOBBY_SCENERY,
+    lobbyChat: [],
   });
   return gamePin;
 }
