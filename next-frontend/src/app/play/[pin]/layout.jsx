@@ -11,6 +11,14 @@ export default function PlayLayout({ children }) {
   const [hostDisconnected, setHostDisconnected] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.gameAudio) {
+      window.gameAudio.pause();
+      window.gameAudio.currentTime = 0;
+      window.gameAudio = null;
+    }
+  }, []);
+
+  useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
