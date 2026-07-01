@@ -54,6 +54,38 @@ export const useNotificationStore = create((set, get) => ({
     }
   },
 
+  collectSceneryGift: async (notificationId) => {
+    try {
+      const result = await api.post('/api/sceneries/collect', { notificationId });
+      const slug = result?.scenery?.slug || result?.scenery?.id;
+      if (slug) {
+        const { markSceneryAsNew } = await import('@/lib/newSceneryNotice');
+        markSceneryAsNew(slug);
+      }
+      set((state) => {
+        const updated = state.notifications.map((n) => {
+          if (n.id !== notificationId) return n;
+          return {
+            ...n,
+            is_read: true,
+            metadata: {
+              ...(n.metadata || {}),
+              collected: true,
+            },
+          };
+        });
+        return {
+          notifications: updated,
+          unreadCount: updated.filter((n) => !n.is_read).length,
+        };
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to collect scenery gift:', error);
+      throw error;
+    }
+  },
+
   clearAllNotifications: async (userId) => {
     try {
       await api.delete(`/api/notifications/user/${userId}/clear-all`);
