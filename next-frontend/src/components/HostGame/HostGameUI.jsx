@@ -11,6 +11,9 @@ import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import RewardWheel from "./RewardWheel";
+import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
+import { useResumeHalloweenAudio } from '@/hooks/useHalloweenSceneryAudio';
+import { halloweenScenerySessionKey } from '@/lib/lobbyScenery';
 
 export default function HostGameUI() {
   const { pin } = useParams();
@@ -53,6 +56,14 @@ export default function HostGameUI() {
   });
 
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
+  const [halloweenSceneryActive, setHalloweenSceneryActive] = useState(false);
+
+  useResumeHalloweenAudio(pin);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !pin) return;
+    setHalloweenSceneryActive(sessionStorage.getItem(halloweenScenerySessionKey(pin)) === '1');
+  }, [pin]);
 
   // Re-register as host if socket reconnects
   useEffect(() => {
@@ -354,6 +365,10 @@ export default function HostGameUI() {
 
   return (
     <div className="min-h-screen flex flex-col overflow-hidden relative font-sans">
+      <div className="fixed bottom-6 left-6 z-[120] pointer-events-auto">
+        <HalloweenSoundToggle visible={halloweenSceneryActive} />
+      </div>
+
       <AnimatePresence mode="wait">
         {phase === "SKILL_PICK" && (
           <SkillPickPhase skillTimeLeft={skillTimeLeft} />
