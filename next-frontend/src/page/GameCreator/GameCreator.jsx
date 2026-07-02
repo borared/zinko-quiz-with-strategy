@@ -6,6 +6,9 @@ import { useUser } from '@clerk/nextjs';
 import Sidebar from '../../components/GameCreator/Sidebar';
 import QuestionEditor from '../../components/GameCreator/QuestionEditor';
 import AnswerGrid from '../../components/GameCreator/AnswerGrid';
+import DragLayersEditor from '../../components/GameCreator/DragLayersEditor';
+import LineMatchingEditor from '../../components/GameCreator/LineMatchingEditor';
+import { QUESTION_TYPES } from '@/lib/questionTypes';
 import AiSidebar from '../../components/GameCreator/AiSidebar';
 import { Wand2, Image, Upload, Link as LinkIcon, X } from 'lucide-react';
 import { useQuizStore, QUIZ_TITLE_MAX_LENGTH } from '@/store/useQuizStore';
@@ -92,6 +95,8 @@ const GameCreatorContent = () => {
     handleAddQuestion,
     setActiveQuestionId,
   } = useQuizStore();
+
+  const activeQuestion = questions.find((q) => q.id === activeQuestionId);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -294,7 +299,13 @@ const GameCreatorContent = () => {
                     className="flex flex-col gap-6 lg:gap-8"
                   >
                     <QuestionEditor />
-                    <AnswerGrid />
+                    {activeQuestion?.questionType === QUESTION_TYPES.DRAG_LAYERS ? (
+                      <DragLayersEditor />
+                    ) : activeQuestion?.questionType === QUESTION_TYPES.LINE_MATCHING ? (
+                      <LineMatchingEditor />
+                    ) : (
+                      <AnswerGrid />
+                    )}
                   </motion.div>
                 ) : (
                   <motion.div
