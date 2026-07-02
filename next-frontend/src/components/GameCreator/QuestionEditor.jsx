@@ -2,9 +2,19 @@
 import React from 'react';
 import { Image, Clock, Star, Settings, Trash2 } from 'lucide-react';
 import { useQuizStore } from '@/store/useQuizStore';
+import { QUESTION_TYPES } from '@/lib/questionTypes';
+import { DEFAULT_TIME_LIMIT, TIME_LIMIT_OPTIONS, normalizeTimeLimit } from '@/lib/timeLimit';
+import QuestionTypePicker from './QuestionTypePicker';
 
 const QuestionEditor = () => {
-  const { questions, activeQuestionId, activeRound, updateActiveQuestion, deleteQuestion } = useQuizStore();
+  const {
+    questions,
+    activeQuestionId,
+    activeRound,
+    updateActiveQuestion,
+    deleteQuestion,
+    setActiveQuestionType,
+  } = useQuizStore();
   const activeQuestion = questions.find(q => q.id === activeQuestionId);
 
   if (!activeQuestion) {
@@ -17,20 +27,27 @@ const QuestionEditor = () => {
 
   const roundQuestions = questions.filter(q => q.round === activeRound);
   const questionNumber = roundQuestions.findIndex(q => q.id === activeQuestion.id) + 1;
+  const timeLimit = normalizeTimeLimit(activeQuestion.time_limit ?? DEFAULT_TIME_LIMIT);
 
   return (
     <div className="flex flex-col gap-6 p-6 zk-panel">
       {/* Question Title */}
       <div className="flex flex-col gap-2">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-3">
           <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {questionNumber}</label>
-          <button 
-            onClick={() => deleteQuestion(activeQuestion.id)}
-            className="flex items-center gap-1.5 text-[#E74C3C] border-[2px] border-[#E74C3C] hover:bg-[#E74C3C] hover:text-white px-3 py-1.5 rounded-lg transition-all font-black text-sm uppercase tracking-widest"
-          >
-            <Trash2 size={18} strokeWidth={3} />
-            Delete
-          </button>
+          <div className="flex items-center gap-2">
+            <QuestionTypePicker
+              value={activeQuestion.questionType || QUESTION_TYPES.MULTIPLE_CHOICE}
+              onChange={setActiveQuestionType}
+            />
+            <button
+              onClick={() => deleteQuestion(activeQuestion.id)}
+              className="flex items-center gap-1.5 text-[#E74C3C] border-[2px] border-[#E74C3C] hover:bg-[#E74C3C] hover:text-white px-3 py-1.5 rounded-lg transition-all font-black text-sm uppercase tracking-widest"
+            >
+              <Trash2 size={18} strokeWidth={3} />
+              Delete
+            </button>
+          </div>
         </div>
         <textarea 
           value={activeQuestion.text || ''}
@@ -79,10 +96,16 @@ const QuestionEditor = () => {
             <div className="flex-1 flex flex-col gap-1">
               <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Time Limit</label>
               <div className="relative">
-                <select className="w-full border-[2px] border-zk-black p-2 font-bold text-zk-black focus:outline-none bg-white/80 appearance-none rounded-lg">
-                  <option>30 Seconds</option>
-                  <option>20 Seconds</option>
-                  <option>60 Seconds</option>
+                <select
+                  value={timeLimit}
+                  onChange={(e) => updateActiveQuestion({ time_limit: Number(e.target.value) })}
+                  className="w-full border-[2px] border-zk-black p-2 font-bold text-zk-black focus:outline-none bg-white/80 appearance-none rounded-lg"
+                >
+                  {TIME_LIMIT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
                 <Clock size={16} className="absolute right-3 top-3 text-zk-black/50 pointer-events-none" />
               </div>
