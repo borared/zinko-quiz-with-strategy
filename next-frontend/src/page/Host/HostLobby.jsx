@@ -8,7 +8,7 @@ import { Users, Zap } from 'lucide-react';
 import QRCodePackage from 'react-qr-code';
 import LobbySceneryPicker from '@/components/Host/LobbySceneryPicker';
 import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
-import { DEFAULT_LOBBY_SCENERY, isHalloweenScenery, isOwnedSceneryImage } from '@/lib/lobbyScenery';
+import { DEFAULT_LOBBY_SCENERY, isHalloweenScenery, isOwnedSceneryImage, setStoredGameBackground } from '@/lib/lobbyScenery';
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
 import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -209,6 +209,10 @@ export default function HostLobby() {
       setBgImage(getDefaultImage());
     }
   }, [ownedScenery, bgImage, getDefaultImage]);
+
+  useEffect(() => {
+    if (pin && bgImage) setStoredGameBackground(pin, bgImage);
+  }, [pin, bgImage]);
 
   // Connect to socket and get real players
   useEffect(() => {
