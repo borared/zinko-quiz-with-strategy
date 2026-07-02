@@ -17,10 +17,14 @@ const PUBLIC_QUIZ_INCLUDE = {
   },
 };
 
+const { QUESTION_TYPES } = require('../lib/questionTypes');
+
 const mapQuestionInput = (q, index, quizId) => ({
   quiz_id: quizId,
   question_text: q.question_text || q.text || 'Untitled Question',
   image_url: q.image_url || q.image || null,
+  question_type: q.question_type || q.questionType || QUESTION_TYPES.MULTIPLE_CHOICE,
+  time_limit: Number.isInteger(q.time_limit) ? q.time_limit : 20,
   answers: q.answers,
   order_index: index,
   round: q.round || 1,
@@ -32,32 +36,36 @@ const syncQuizQuestions = async (tx, quizId, questions = []) => {
     select: { id: true },
   });
   const existingIds = new Set(existingQuestions.map((q) => q.id));
-  const keptIds = new Set();
 
-  for (let index = 0; index < questions.length; index++) {
-    const q = questions[index];
-    const data = mapQuestionInput(q, index, quizId);
-    const questionId = q.id != null ? String(q.id) : null;
+  const keptIds = await Promise.all(
+    questions.map(async (q, index) => {
+      const data = mapQuestionInput(q, index, quizId);
+      const questionId = q.id != null ? String(q.id) : null;
 
-    if (questionId && isValidUuid(questionId) && existingIds.has(questionId)) {
-      await tx.questions.update({
-        where: { id: questionId },
-        data,
-      });
-      keptIds.add(questionId);
-      continue;
-    }
+      if (questionId && isValidUuid(questionId) && existingIds.has(questionId)) {
+        await tx.questions.update({
+          where: { id: questionId },
+          data,
+        });
+        return questionId;
+      }
 
-    const created = await tx.questions.create({ data });
-    keptIds.add(created.id);
-  }
+      const created = await tx.questions.create({ data });
+      return created.id;
+    })
+  );
 
-  const idsToDelete = [...existingIds].filter((id) => !keptIds.has(id));
+  const idsToDelete = [...existingIds].filter((id) => !keptIds.includes(id));
   if (idsToDelete.length > 0) {
     await tx.questions.deleteMany({
       where: { id: { in: idsToDelete } },
     });
   }
+};
+
+const TRANSACTION_OPTIONS = {
+  maxWait: 10_000,
+  timeout: 60_000,
 };
 
 /**
@@ -84,7 +92,7 @@ const createQuiz = async (quizData) => {
     }
 
     return quiz;
-  });
+  }, TRANSACTION_OPTIONS);
 };
 
 /**
@@ -98,13 +106,13 @@ const updateQuiz = async (id, quizData) => {
       where: { id },
       data: {
         title,
-        cover_image,
+        cover_image: cover_image ?? null,
         updated_at: new Date(),
       },
     });
 
     await syncQuizQuestions(tx, id, questions || []);
-  });
+  }, TRANSACTION_OPTIONS);
 };
 
 /**

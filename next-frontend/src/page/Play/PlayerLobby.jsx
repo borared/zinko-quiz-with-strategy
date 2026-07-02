@@ -10,7 +10,7 @@ import PlayerLobbyChat from '@/components/Play/PlayerLobbyChat';
 import AvatarEmojiBurst from '@/components/Play/AvatarEmojiBurst';
 import { isEmojiHeavy } from '@/lib/lobbyChatUtils';
 import { playEmojiReactionSound } from '@/lib/lobbySounds';
-import { DEFAULT_LOBBY_SCENERY } from '@/lib/lobbyScenery';
+import { DEFAULT_LOBBY_SCENERY, setStoredGameBackground } from '@/lib/lobbyScenery';
 
 const AVATAR_REACTION_MS = 2600;
 
@@ -196,6 +196,10 @@ export default function PlayerLobby() {
   const [startCountdown, setStartCountdown] = useState(null);
   const [avatarReactions, setAvatarReactions] = useState({});
   const reactionTimers = useRef(new Map());
+
+  useEffect(() => {
+    if (pin && bgImage) setStoredGameBackground(pin, bgImage);
+  }, [pin, bgImage]);
 
   const triggerAvatarReaction = useCallback((targetPlayerId, emoji) => {
     if (!targetPlayerId || !emoji) return;

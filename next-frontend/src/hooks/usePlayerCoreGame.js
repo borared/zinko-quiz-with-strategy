@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSocketStore } from '@/store/useSocketStore';
+import { DEFAULT_TIME_LIMIT } from '@/lib/timeLimit';
 
 export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
   const router = useRouter();
@@ -10,7 +11,8 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
   const [selectedId, setSelectedId]     = useState(null);
   const [phase, setPhase]               = useState('PLAYING'); // PLAYING | ANSWERED | RESULT
   const [resultData, setResultData]     = useState(null);
-  const [timeLeft, setTimeLeft]         = useState(20);
+  const [timeLeft, setTimeLeft]         = useState(DEFAULT_TIME_LIMIT);
+  const [questionTimeLimit, setQuestionTimeLimit] = useState(DEFAULT_TIME_LIMIT);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionTotal, setQuestionTotal] = useState(1);
 
@@ -34,7 +36,9 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
       setSelectedId(null);
       setPhase('PLAYING');
       setResultData(null);
-      setTimeLeft(data.timeSeconds || 20);
+      const limit = data.timeSeconds || DEFAULT_TIME_LIMIT;
+      setQuestionTimeLimit(limit);
+      setTimeLeft(limit);
       setQuestionIndex(data.index);
       setQuestionTotal(data.total);
     };
@@ -63,7 +67,9 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
       
       if (data.currentQuestion) {
         setQuestion(data.currentQuestion);
-        setTimeLeft(data.timeLeft || 20);
+        const limit = data.currentQuestion.timeSeconds || DEFAULT_TIME_LIMIT;
+        setQuestionTimeLimit(limit);
+        setTimeLeft(data.timeLeft ?? limit);
         setQuestionIndex(data.currentQuestion.index);
         setQuestionTotal(data.currentQuestion.total);
       }
@@ -101,14 +107,35 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     });
   }, [phase, selectedId, pin, playerId, getSocket]);
 
+  const handleSubmitLayerOrder = useCallback((order) => {
+    if (phase !== 'PLAYING' || selectedId || !Array.isArray(order) || order.length === 0) return;
+    getSocket().emit('player:submit-answer', {
+      pin,
+      playerId,
+      answerId: JSON.stringify(order),
+    });
+  }, [phase, selectedId, pin, playerId, getSocket]);
+
+  const handleSubmitMatches = useCallback((payload) => {
+    if (phase !== 'PLAYING' || selectedId || !payload) return;
+    getSocket().emit('player:submit-answer', {
+      pin,
+      playerId,
+      answerId: payload,
+    });
+  }, [phase, selectedId, pin, playerId, getSocket]);
+
   return {
     question, setQuestion,
     selectedId, setSelectedId,
     phase, setPhase,
     resultData,
     timeLeft,
+    questionTimeLimit,
     questionIndex,
     questionTotal,
-    handleAnswer
+    handleAnswer,
+    handleSubmitLayerOrder,
+    handleSubmitMatches,
   };
 }

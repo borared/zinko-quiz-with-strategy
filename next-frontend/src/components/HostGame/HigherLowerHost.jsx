@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 
-export default function HigherLowerHost({ teamA, teamB, winner, subPhase, currentTurn }) {
+export default function HigherLowerHost({ teamA, teamB, winner, subPhase, currentTurn, background }) {
   // teamA: { guess: 500, status: 'HIGHER', lockedIn: true/false }
 
   const [countdown, setCountdown] = useState(3);
@@ -103,7 +104,7 @@ export default function HigherLowerHost({ teamA, teamB, winner, subPhase, curren
       {subPhase === 'INTRO' && (
         <motion.div 
           className="absolute inset-0 z-50 flex items-center justify-center bg-cover bg-center"
-          style={{ backgroundImage: `url('/background_battle/city.jpg')` }}
+          style={battleBackgroundStyle(background)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

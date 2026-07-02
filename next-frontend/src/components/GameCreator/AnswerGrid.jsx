@@ -2,6 +2,7 @@
 import React, { useState, useCallback, memo } from 'react';
 import { Check, Image as ImageIcon } from 'lucide-react';
 import { useQuizStore } from '@/store/useQuizStore';
+import { QUESTION_TYPES } from '@/lib/questionTypes';
 
 const AnswerGrid = memo(() => {
   const { questions, activeQuestionId, updateActiveQuestion } = useQuizStore();
@@ -36,8 +37,10 @@ const AnswerGrid = memo(() => {
   // Guard render (not an early hook return)
   if (!activeQuestion) return null;
 
+  const isTrueFalse = activeQuestion.questionType === QUESTION_TYPES.TRUE_FALSE;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-4 mt-6">
       {/* Custom CSS for contenteditable placeholder */}
       <style>{`
         .rich-input:empty:before {
@@ -50,10 +53,10 @@ const AnswerGrid = memo(() => {
       {activeQuestion.answers.map((ans) => (
         <div 
           key={ans.id}
-          className={`flex items-center gap-4 p-4 border-[3px] border-zk-black rounded-xl ${ans.color} text-white relative ${ans.checked ? 'animate-boing shadow-[0_0_15px_rgba(0,200,83,0.5)]' : ''}`}
+          className={`flex items-center gap-4 p-4 border-[3px] border-zk-black rounded-xl ${ans.color} text-white relative w-full min-w-0 ${ans.checked ? 'animate-boing shadow-[0_0_15px_rgba(0,200,83,0.5)]' : ''}`}
         >
           {/* Math/Formatting Toolbar (shown when focused) */}
-          {focusedAnswerId === ans.id && (
+          {!isTrueFalse && focusedAnswerId === ans.id && (
             <div 
               className="absolute bottom-full left-0 mb-2 bg-[#E0E0E0] border-[2px] border-zk-black flex items-center gap-3 p-1.5 text-zk-black font-bold z-20 rounded-lg"
               onMouseDown={(e) => e.preventDefault()} // Prevent losing focus on input
@@ -76,16 +79,22 @@ const AnswerGrid = memo(() => {
             {ans.id}
           </div>
 
-          <div 
-            contentEditable="true"
-            className="flex-1 bg-transparent border-none text-white font-bold text-lg focus:outline-none min-h-[1.5em] rich-input"
-            onFocus={() => setFocusedAnswerId(ans.id)}
-            onBlur={(e) => {
-              setFocusedAnswerId(null);
-              handleAnswerTextChange(ans.id, e.target.innerHTML);
-            }}
-            dangerouslySetInnerHTML={{ __html: ans.text || "" }}
-          />
+          {isTrueFalse ? (
+            <div className="flex-1 text-white font-black text-xl uppercase tracking-wide">
+              {ans.text}
+            </div>
+          ) : (
+            <div
+              contentEditable="true"
+              className="flex-1 bg-transparent border-none text-white font-bold text-lg focus:outline-none min-h-[1.5em] rich-input"
+              onFocus={() => setFocusedAnswerId(ans.id)}
+              onBlur={(e) => {
+                setFocusedAnswerId(null);
+                handleAnswerTextChange(ans.id, e.target.innerHTML);
+              }}
+              dangerouslySetInnerHTML={{ __html: ans.text || '' }}
+            />
+          )}
 
           <div 
             onClick={() => handleToggleAnswer(ans.id)}

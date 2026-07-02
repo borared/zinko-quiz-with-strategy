@@ -1,4 +1,5 @@
 const { QUESTION_TIME_SECONDS, getLeaderboard, startTimer, revealResults } = require('../socketUtils');
+const { buildGameQuestionPayload } = require('../gameQuestionPayload');
 const { cleanupGame } = require('../gameState');
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
 
@@ -66,18 +67,9 @@ module.exports = function registerGameHandlers(io, socket, games) {
 
     io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
 
-    io.to(pin).emit('game:question', {
-      index: 0,
-      round: 1,
-      match: 1,
-      total: game.questions.length,
-      questionText: question.question_text || '',
-      imageUrl: question.image_url || null,
-      answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
-      timeSeconds: QUESTION_TIME_SECONDS,
-      skillCharges: game.skillCharges,
+    io.to(pin).emit('game:question', buildGameQuestionPayload(question, game, 0, {
       teamSkills: game.teamSkills,
-    });
+    }));
 
     startTimer(io, pin, games);
   });
@@ -117,17 +109,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
       return;
     }
 
-    io.to(pin).emit('game:question', {
-      index: nextIndex,
-      round: Math.floor(nextIndex / 5) + 1,
-      match: (nextIndex % 5) + 1,
-      total: game.questions.length,
-      questionText: question.question_text || '',
-      imageUrl: question.image_url || null,
-      answers: Array.isArray(question.answers) ? question.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
-      timeSeconds: QUESTION_TIME_SECONDS,
-      skillCharges: game.skillCharges,
-    });
+    io.to(pin).emit('game:question', buildGameQuestionPayload(question, game, nextIndex));
 
     startTimer(io, pin, games);
   });
@@ -140,7 +122,8 @@ module.exports = function registerGameHandlers(io, socket, games) {
     if (game.answers[playerId] !== undefined) return; // already answered
 
     game.answers[playerId] = answerId;
-    game.answerTimes[playerId] = (QUESTION_TIME_SECONDS - (game.timeLeft || 0)) * 1000;
+    const timeLimit = game.currentTimeLimit || QUESTION_TIME_SECONDS;
+    game.answerTimes[playerId] = (timeLimit - (game.timeLeft || 0)) * 1000;
     game.absoluteAnswerTimes = game.absoluteAnswerTimes || {};
     game.absoluteAnswerTimes[playerId] = Date.now();
 
@@ -173,17 +156,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
     if (game.phase === 'QUESTION' || game.phase === 'ANSWERED' || game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
       const q = game.questions[game.currentQuestionIndex];
       if (q) {
-        currentQuestionPayload = {
-          index: game.currentQuestionIndex,
-          round: Math.floor(game.currentQuestionIndex / 5) + 1,
-          match: (game.currentQuestionIndex % 5) + 1,
-          total: game.questions.length,
-          questionText: q.question_text || '',
-          imageUrl: q.image_url || null,
-          answers: Array.isArray(q.answers) ? q.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
-          timeSeconds: QUESTION_TIME_SECONDS,
-          skillCharges: game.skillCharges,
-        };
+        currentQuestionPayload = buildGameQuestionPayload(q, game, game.currentQuestionIndex);
       }
     }
 
@@ -202,7 +175,8 @@ module.exports = function registerGameHandlers(io, socket, games) {
       timeLeft: game.timeLeft,
       currentQuestion: currentQuestionPayload,
       hasAnswered: game.answers[playerId] !== undefined,
-      minigameData
+      minigameData,
+      background: game.background,
     });
   });
 

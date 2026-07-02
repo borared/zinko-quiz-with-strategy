@@ -1,4 +1,5 @@
 const quizRepository = require('../../repositories/quizRepository');
+const { buildGameQuestionPayload } = require('../gameQuestionPayload');
 const { verifyHostToken, isHostSocket, requirePlayerSocket, getPlayerBySocket } = require('../socketAuth');
 const sceneryService = require('../../services/sceneryService');
 
@@ -75,18 +76,9 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     if (['QUESTION', 'ANSWERED', 'RESULT', 'LEADERBOARD'].includes(game.phase)) {
       const q = game.questions[game.currentQuestionIndex];
       if (q) {
-        currentQuestionPayload = {
-          index: game.currentQuestionIndex,
-          round: Math.floor(game.currentQuestionIndex / 5) + 1,
-          match: (game.currentQuestionIndex % 5) + 1,
-          total: game.questions.length,
-          questionText: q.question_text || '',
-          imageUrl: q.image_url || null,
-          answers: Array.isArray(q.answers) ? q.answers.map(a => ({ id: a.id, text: a.text, color: a.color })) : [],
-          timeSeconds: require('../socketUtils').QUESTION_TIME_SECONDS,
-          skillCharges: game.skillCharges,
+        currentQuestionPayload = buildGameQuestionPayload(q, game, game.currentQuestionIndex, {
           teamSkills: game.teamSkills,
-        };
+        });
       }
     }
 
@@ -97,14 +89,28 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       question: currentQuestionPayload,
       answered: game.answers ? Object.keys(game.answers).length : 0,
       total: game.players.length,
+      background: game.background,
     };
 
     if (game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
       syncData.stats = buildAnswerStats(game);
       const q = game.questions[game.currentQuestionIndex];
       if (q) {
-        const correctIds = q.answers.filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true').map(a => a.id);
-        syncData.correctId = correctIds.length > 0 ? correctIds[0] : null;
+        const { resolveQuestionType, QUESTION_TYPES } = require('../questionTypes');
+        const { getCorrectLayerOrder } = require('../dragLayersUtils');
+        const { getCorrectMatches } = require('../lineMatchingUtils');
+        const questionType = resolveQuestionType(q);
+
+        if (questionType === QUESTION_TYPES.DRAG_LAYERS) {
+          syncData.correctId = JSON.stringify(getCorrectLayerOrder(q.answers));
+        } else if (questionType === QUESTION_TYPES.LINE_MATCHING) {
+          syncData.correctId = JSON.stringify(getCorrectMatches(q.answers));
+        } else {
+          const correctIds = q.answers
+            .filter((a) => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
+            .map((a) => a.id);
+          syncData.correctId = correctIds.length > 0 ? correctIds[0] : null;
+        }
       }
     }
 

@@ -65,7 +65,11 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
 
         {/* Bar chart */}
         <div className="mb-4 mt-2">
-          <AnswerBarChart stats={stats} revealed={true} />
+          <AnswerBarChart
+            stats={stats}
+            revealed={true}
+            questionType={question?.questionType}
+          />
         </div>
 
         {/* Mini leaderboard */}

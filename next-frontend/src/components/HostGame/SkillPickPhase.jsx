@@ -9,7 +9,7 @@ export default function SkillPickPhase({ skillTimeLeft }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-zk-yellow flex flex-col items-center justify-center relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
     >
       {/* Floating decorations */}
       <motion.div

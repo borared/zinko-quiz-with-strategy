@@ -2,7 +2,7 @@ const officeParser = require('officeparser');
 const Groq = require('groq-sdk');
 const fs = require('fs');
 const path = require('path');
-const { QUIZ_RULES } = require('../../packages/shared/src/constants/quiz.js');
+const { buildGenerateQuizPrompt } = require('../lib/aiQuizPrompt');
 
 /**
  * Handle GET /api/ai/test
@@ -77,43 +77,12 @@ const generateQuiz = async (req, res) => {
 
     // 2. Call Groq API
     console.log('Calling Groq API...');
-    const prompt = `
-You are the "Zinko Game Editor". Your job is to manage questions for a specific round.
-PLATFORM CONTEXT:
-- Round Structure: R1 (Easy), R2 (Medium), R3 (Hard).
-- Goal: Exactly ${QUIZ_RULES.MAX_QUESTIONS_PER_ROUND} questions per round.
-
-CURRENT STATE OF THIS ROUND:
-${existingQuestions.length > 0 ? existingQuestions.join('\n') : '(Empty Round)'}
-
-USER REQUEST: "${userPrompt}"
-${extractedText ? `REFERENCE CONTENT:\n${extractedText}` : ''}
-
-INSTRUCTIONS:
-1. ACT AS AN EDITOR. You are modifying the "CURRENT STATE" based on the "USER REQUEST".
-2. If the user asks to REMOVE a question (e.g., "Remove Q8"), do not include that question in your output.
-3. If the user asks to ADD questions, create new ones that are unique from the current list.
-4. If the user asks to MODIFY, update the existing question's text or choices.
-5. If the user provides a topic or file without specific edit instructions, generate ${numQuestions} questions that fit the context.
-6. If the USER REQUEST is written in Khmer or explicitly asks for Khmer language, generate the quiz in Khmer.
-7. If the USER REQUEST is in any other non-English language, respond in that language.
-
-9. CRITICAL: Randomize the 'correctAnswerIndex' across the questions so it is an even mix of 0, 1, 2, and 3. DO NOT always make it 0.
-10. CRITICAL: Make the incorrect choices (distractors) plausible, tricky, and related to the topic so the quiz is challenging.
-
-Return the FINAL, COMPLETE list of questions for this round after applying the changes.
-Match the difficulty requested (Easy, Medium, or Hard).
-
-Format the output as a JSON array:
-[
-  {
-    "question": "Question text",
-    "choices": ["Choice A", "Choice B", "Choice C", "Choice D"],
-    "correctAnswerIndex": 0
-  }
-]
-Return ONLY the raw JSON array.
-`;
+    const prompt = buildGenerateQuizPrompt({
+      numQuestions,
+      userPrompt,
+      extractedText,
+      existingQuestions,
+    });
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [

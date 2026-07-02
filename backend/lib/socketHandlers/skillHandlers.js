@@ -95,6 +95,11 @@ module.exports = function registerSkillHandlers(io, socket, games) {
     } 
     else if (skillId === 'butterfly') {
       const question = game.questions[game.currentQuestionIndex];
+      const { resolveQuestionType, QUESTION_TYPES } = require('../questionTypes');
+      if (resolveQuestionType(question) === QUESTION_TYPES.DRAG_LAYERS) {
+        return;
+      }
+
       const correctIds = question.answers
         .filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
         .map(a => a.id);
