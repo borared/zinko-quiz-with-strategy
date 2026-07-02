@@ -34,6 +34,30 @@ export function isHalloweenScenery(image) {
   return image === HALLOWEEN_SCENERY_IMAGE;
 }
 
+export function gameBackgroundSessionKey(pin) {
+  return `game_${pin}_background`;
+}
+
+export function getStoredGameBackground(pin) {
+  if (typeof window === 'undefined' || !pin) return DEFAULT_LOBBY_SCENERY;
+  return sessionStorage.getItem(gameBackgroundSessionKey(pin)) || DEFAULT_LOBBY_SCENERY;
+}
+
+export function setStoredGameBackground(pin, image) {
+  if (typeof window === 'undefined' || !pin || !image) return;
+  sessionStorage.setItem(gameBackgroundSessionKey(pin), image);
+}
+
+/** Shared battle-phase background styling for host and player screens. */
+export function battleBackgroundStyle(image, fallbackColor = '#C4962C') {
+  return {
+    backgroundImage: `url('${image || DEFAULT_LOBBY_SCENERY}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundColor: fallbackColor,
+  };
+}
+
 export function halloweenScenerySessionKey(pin) {
   return `game_${pin}_halloween_scenery`;
 }
