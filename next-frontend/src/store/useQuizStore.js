@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import { useDashboardQuizStore } from './useDashboardQuizStore';
 import api from '../services/api';
+import {
+  QUESTION_TYPES,
+  convertQuestionType,
+  createMultipleChoiceAnswers,
+  resolveQuestionType,
+} from '@/lib/questionTypes';
+import { formatAiQuestions } from '@/lib/formatAiQuestions';
+import { answersToPairs } from '@/lib/lineMatchingUtils';
+import { getCorrectLayerOrder } from '@/lib/dragLayersUtils';
+import { DEFAULT_TIME_LIMIT, normalizeTimeLimit } from '@/lib/timeLimit';
+import { formatQuestionForSave, validateQuizForSave } from '@/lib/validateQuizSave';
 
 export const QUIZ_TITLE_MAX_LENGTH = 15;
 
@@ -44,16 +55,25 @@ export const useQuizStore = create((set, get) => ({
       const data = await api.get(`/api/quizzes/${quizId}`);
       set({ quizTitle: data.title, coverImage: data.cover_image });
 
-      const formattedQuestions = data.questions.map(q => ({
-        id: q.id,
-        text: q.question_text,
-        answers: (q.answers || []).map(ans => ({
+      const formattedQuestions = data.questions.map(q => {
+        const answers = (q.answers || []).map((ans, index) => ({
           ...ans,
-          checked: !!ans.isCorrect
-        })),
-        image: q.image_url,
-        round: q.round || 1
-      }));
+          checked: !!ans.isCorrect,
+          layerIndex: Number.isInteger(ans.layerIndex) ? ans.layerIndex : index,
+          side: ans.side,
+          matchId: ans.matchId,
+          pairIndex: Number.isInteger(ans.pairIndex) ? ans.pairIndex : undefined,
+        }));
+        return {
+          id: q.id,
+          text: q.question_text,
+          answers,
+          questionType: resolveQuestionType({ ...q, answers }),
+          image: q.image_url,
+          round: q.round || 1,
+          time_limit: normalizeTimeLimit(q.time_limit),
+        };
+      });
 
       set({ questions: formattedQuestions });
       if (formattedQuestions.length > 0) {
@@ -73,13 +93,10 @@ export const useQuizStore = create((set, get) => ({
       id: newId,
       text: '',
       round: state.activeRound,
-      answers: [
-        { id: 'A', text: '', color: 'bg-[#5D3FD3]', checked: true },
-        { id: 'B', text: '', color: 'bg-[#FF6B4A]', checked: false },
-        { id: 'C', text: '', color: 'bg-[#FF4B4B]', checked: false },
-        { id: 'D', text: '', color: 'bg-[#2D3436]', checked: false },
-      ],
-      image: null
+      questionType: QUESTION_TYPES.MULTIPLE_CHOICE,
+      answers: createMultipleChoiceAnswers('A'),
+      image: null,
+      time_limit: DEFAULT_TIME_LIMIT,
     };
     set((state) => ({
       questions: [...state.questions, newQuestion],
@@ -92,6 +109,23 @@ export const useQuizStore = create((set, get) => ({
       questions: state.questions.map(q =>
         q.id === state.activeQuestionId ? { ...q, ...updates } : q
       )
+    }));
+  },
+
+  setActiveQuestionType: (questionType) => {
+    set((state) => ({
+      questions: state.questions.map((question) => {
+        if (question.id !== state.activeQuestionId) return question;
+        return {
+          ...question,
+          questionType,
+          answers: convertQuestionType(
+            question.questionType || QUESTION_TYPES.MULTIPLE_CHOICE,
+            questionType,
+            question.answers
+          ),
+        };
+      }),
     }));
   },
 
@@ -143,11 +177,6 @@ export const useQuizStore = create((set, get) => ({
     const state = get();
     if (state.isSaving) return; // Prevent double-clicking race condition
 
-    if (!state.quizTitle.trim()) {
-      if (showToast) showToast('Please enter a quiz title', 'error');
-      return;
-    }
-
     if (state.quizTitle.length > QUIZ_TITLE_MAX_LENGTH) {
       if (showToast) {
         showToast(`Quiz title must be ${QUIZ_TITLE_MAX_LENGTH} characters or less`, 'error');
@@ -155,8 +184,17 @@ export const useQuizStore = create((set, get) => ({
       return;
     }
 
-    if (state.questions.length === 0) {
-      if (showToast) showToast('A quiz must have at least one question to save', 'error');
+    const validationError = validateQuizForSave({
+      quizTitle: state.quizTitle,
+      questions: state.questions,
+    });
+    if (validationError) {
+      if (showToast) showToast(validationError, 'error');
+      return;
+    }
+
+    if (!localStorage.getItem('zinko_jwt')) {
+      if (showToast) showToast('Please sign in again to save your quiz.', 'error');
       return;
     }
 
@@ -164,20 +202,7 @@ export const useQuizStore = create((set, get) => ({
       set({ isSaving: true });
       const endpoint = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';
       const apiCall = quizId ? api.put : api.post;
-
-      const formattedQuestions = state.questions.map(q => ({
-        id: typeof q.id === 'string' ? q.id : undefined,
-        question_text: q.text || 'Untitled Question',
-        image_url: q.image || null,
-        round: q.round || 1,
-        time_limit: q.time_limit || 20,
-        answers: q.answers.map(a => ({
-          id: String(a.id),
-          text: a.text || '',
-          isCorrect: a.checked !== undefined ? a.checked : !!a.isCorrect,
-          color: a.color || 'bg-[#5D3FD3]'
-        }))
-      }));
+      const formattedQuestions = state.questions.map(formatQuestionForSave);
 
       await apiCall(endpoint, {
         title: state.quizTitle,
@@ -198,8 +223,9 @@ export const useQuizStore = create((set, get) => ({
       } else {
         set({ isSaving: false });
       }
-    } catch {
-      if (showToast) showToast('Failed to save quiz', 'error');
+    } catch (error) {
+      const message = error?.message || 'Failed to save quiz';
+      if (showToast) showToast(message, 'error');
       set({ isSaving: false });
     }
   },
@@ -212,7 +238,23 @@ export const useQuizStore = create((set, get) => ({
 
     const existingQuestionsInRound = state.questions
       .filter(q => q.round === activeRound)
-      .map((q, idx) => `Q${idx + 1}: ${q.text}`);
+      .map((q, idx) => {
+        const type = q.questionType || QUESTION_TYPES.MULTIPLE_CHOICE;
+        let line = `Q${idx + 1} [${type}]: ${q.text}`;
+
+        if (type === QUESTION_TYPES.LINE_MATCHING) {
+          const pairSummary = answersToPairs(q.answers || [])
+            .map((pair) => `${pair.leftText} ↔ ${pair.rightText}`)
+            .filter((entry) => entry !== ' ↔ ')
+            .join('; ');
+          if (pairSummary) line += ` | pairs: ${pairSummary}`;
+        } else if (type === QUESTION_TYPES.DRAG_LAYERS) {
+          const steps = getCorrectLayerOrder(q.answers || []).join(' → ');
+          if (steps) line += ` | steps: ${steps}`;
+        }
+
+        return line;
+      });
 
     const formData = new FormData();
     if (file) formData.append('file', file);
@@ -223,26 +265,7 @@ export const useQuizStore = create((set, get) => ({
     try {
       const data = await api.postForm('/api/ai/generate-quiz', formData);
 
-      const newFormattedQuestions = data.questions.map((q, index) => {
-        const correctIndex = q.correctAnswerIndex !== undefined ? parseInt(q.correctAnswerIndex, 10) : 0;
-        const aiChoices = q.choices || [];
-        
-        // Ensure we always have exactly 4 answers
-        const filledAnswers = Array.from({ length: 4 }).map((_, i) => ({
-          id: String.fromCharCode(65 + i),
-          text: aiChoices[i] || '',
-          color: i === 0 ? 'bg-[#5D3FD3]' : i === 1 ? 'bg-[#FF6B4A]' : i === 2 ? 'bg-[#FF4B4B]' : 'bg-[#2D3436]',
-          checked: i === correctIndex
-        }));
-
-        return {
-          id: Date.now() + index,
-          text: q.question,
-          answers: filledAnswers,
-          image: null,
-          round: activeRound
-        };
-      });
+      const newFormattedQuestions = formatAiQuestions(data.questions, activeRound);
 
       set((state) => {
         const otherRounds = state.questions.filter(q => q.round !== activeRound);
