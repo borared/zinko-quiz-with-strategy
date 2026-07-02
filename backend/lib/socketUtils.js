@@ -1,4 +1,17 @@
 // Utility functions and constants for socket handling
+const { resolveQuestionType, QUESTION_TYPES } = require('./questionTypes');
+const {
+  getCorrectLayerOrder,
+  parseDragLayerAnswer,
+  isLayerOrderCorrect,
+  sortAnswersByLayer,
+} = require('./dragLayersUtils');
+const {
+  getCorrectMatches,
+  parseLineMatchingAnswer,
+  isLineMatchingCorrect,
+  buildLineMatchingStats,
+} = require('./lineMatchingUtils');
 
 // Game timer length (seconds)
 const QUESTION_TIME_SECONDS = 20;
@@ -23,28 +36,64 @@ function getLeaderboard(players) {
 function buildAnswerStats(game) {
   const question = game.questions[game.currentQuestionIndex];
   if (!question) return [];
+
+  const questionType = resolveQuestionType(question);
+
+  if (questionType === QUESTION_TYPES.LINE_MATCHING) {
+    return buildLineMatchingStats(game, question);
+  }
+
+  if (questionType === QUESTION_TYPES.DRAG_LAYERS) {
+    const layers = sortAnswersByLayer(question.answers);
+    const correctOrder = getCorrectLayerOrder(question.answers);
+    const layerCounts = layers.map(() => 0);
+
+    Object.values(game.answers).forEach((rawAnswer) => {
+      const submitted = parseDragLayerAnswer(rawAnswer);
+      if (!submitted) return;
+      submitted.forEach((answerId, index) => {
+        if (answerId === correctOrder[index]) {
+          layerCounts[index] += 1;
+        }
+      });
+    });
+
+    return layers.map((answer, index) => ({
+      id: answer.id,
+      text: answer.text,
+      color: answer.color,
+      count: layerCounts[index] || 0,
+      isCorrect: true,
+      layerLabel: `Step ${index + 1}`,
+    }));
+  }
+
   const answerCounts = {};
-  // initialise all answer counters
-  question.answers.forEach(a => { answerCounts[a.id] = 0; });
-  // tally submitted answers
-  Object.values(game.answers).forEach(ans => {
-    if (answerCounts[ans] !== undefined) answerCounts[ans]++;
+  question.answers.forEach((answer) => { answerCounts[answer.id] = 0; });
+  Object.values(game.answers).forEach((ans) => {
+    if (answerCounts[ans] !== undefined) answerCounts[ans] += 1;
   });
-  return question.answers.map(a => ({
-    id: a.id,
-    text: a.text,
-    color: a.color,
-    count: answerCounts[a.id] || 0,
-    isCorrect: a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true',
+
+  return question.answers.map((answer) => ({
+    id: answer.id,
+    text: answer.text,
+    color: answer.color,
+    count: answerCounts[answer.id] || 0,
+    isCorrect: answer.isCorrect === true || answer.checked === true || String(answer.isCorrect) === 'true' || String(answer.checked) === 'true',
   }));
 }
+
+const { getQuestionTimeLimit } = require('./questionTimeLimit');
 
 // Start the per-question countdown timer and emit ticks
 function startTimer(io, pin, games) {
   const game = games.get(pin);
   if (!game) return;
 
-  let timeLeft = QUESTION_TIME_SECONDS;
+  const question = game.questions[game.currentQuestionIndex];
+  const timeLimit = getQuestionTimeLimit(question);
+  game.currentTimeLimit = timeLimit;
+  let timeLeft = timeLimit;
   game.timeLeft = timeLeft;
 
   clearInterval(game.timer);
@@ -69,19 +118,35 @@ function revealResults(io, pin, games) {
 
   game.phase = 'RESULT';
   const question = game.questions[game.currentQuestionIndex];
-  const correctIds = question.answers
-    .filter(a => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
-    .map(a => a.id);
-  const correctId = correctIds.length > 0 ? correctIds[0] : null;
+  const questionType = resolveQuestionType(question);
+  const isDragLayers = questionType === QUESTION_TYPES.DRAG_LAYERS;
+  const isLineMatching = questionType === QUESTION_TYPES.LINE_MATCHING;
+  const correctLayerOrder = isDragLayers ? getCorrectLayerOrder(question.answers) : [];
+  const correctMatches = isLineMatching ? getCorrectMatches(question.answers) : {};
+  const correctIds = isDragLayers
+    ? correctLayerOrder
+    : question.answers
+      .filter((answer) => answer.isCorrect === true || answer.checked === true || String(answer.isCorrect) === 'true' || String(answer.checked) === 'true')
+      .map((answer) => answer.id);
+  const correctId = isDragLayers
+    ? JSON.stringify(correctLayerOrder)
+    : isLineMatching
+      ? JSON.stringify(correctMatches)
+      : (correctIds.length > 0 ? correctIds[0] : null);
   const stats = buildAnswerStats(game);
 
   // 1. Award base points based on correctness and speed, considering Rabbit
   game.players.forEach(player => {
     const selectedId = game.answers[player.id];
     const isMissed = selectedId === undefined;
-    const isCorrect = !isMissed && correctIds.includes(selectedId);
-    const timeTaken = game.answerTimes[player.id] || QUESTION_TIME_SECONDS * 1000;
-    const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / (QUESTION_TIME_SECONDS * 1000)) * 500)) : 0;
+    const isCorrect = isDragLayers
+      ? !isMissed && isLayerOrderCorrect(parseDragLayerAnswer(selectedId), correctLayerOrder)
+      : isLineMatching
+        ? !isMissed && isLineMatchingCorrect(parseLineMatchingAnswer(selectedId), correctMatches)
+        : !isMissed && correctIds.includes(selectedId);
+    const timeLimitMs = (game.currentTimeLimit || QUESTION_TIME_SECONDS) * 1000;
+    const timeTaken = game.answerTimes[player.id] || timeLimitMs;
+    const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / timeLimitMs) * 500)) : 0;
     
     let points = isCorrect ? 1000 + speedBonus : 0;
     
