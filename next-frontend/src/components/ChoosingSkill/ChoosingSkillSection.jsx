@@ -16,6 +16,8 @@ const bounceIn = () => ({
 });
 
 import { SKILLS } from "../../config/skills";
+import { useGameBackground } from '@/hooks/useGameBackground';
+import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 
 const ChoosingSkillSection = () => {
   const [selectedSkill, setSelectedSkill] = useState(null);
@@ -24,6 +26,7 @@ const ChoosingSkillSection = () => {
   const router = useRouter();
   const { getSocket } = useSocketStore();
   const pin = typeof window !== 'undefined' ? sessionStorage.getItem('game_pin') || '' : '';
+  const background = useGameBackground(pin);
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') || '' : '';
   const team = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
   const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || '' : '';
@@ -102,7 +105,7 @@ const ChoosingSkillSection = () => {
   return (
     <div
       className="relative w-full h-screen max-h-screen overflow-hidden flex flex-col items-center justify-center font-sans bg-cover bg-center"
-      style={{ backgroundImage: `url('/background_battle/city.jpg')` }}
+      style={battleBackgroundStyle(background)}
     >
       {/* Dark overlay for better readability */}
       <div className="absolute inset-0 bg-black/30 pointer-events-none" />
