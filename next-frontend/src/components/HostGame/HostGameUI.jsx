@@ -6,27 +6,31 @@ import { AnimatePresence } from "framer-motion";
 
 import SkillPickPhase from "./SkillPickPhase";
 import QuestionPhase from "./QuestionPhase";
+import DragLayersPhase from "./DragLayersPhase";
+import LineMatchingPhase from "./LineMatchingPhase";
+import { isDragLayersQuestion, isLineMatchingQuestion } from '@/lib/questionTypes';
 import ResultPhase from "./ResultPhase";
 import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import RewardWheel from "./RewardWheel";
 import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
-import { useResumeHalloweenAudio } from '@/hooks/useHalloweenSceneryAudio';
-import { halloweenScenerySessionKey } from '@/lib/lobbyScenery';
+import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
+import { useGameBackground } from '@/hooks/useGameBackground';
+import { battleBackgroundStyle, isHalloweenScenery } from '@/lib/lobbyScenery';
+import { DEFAULT_TIME_LIMIT } from '@/lib/timeLimit';
 
 export default function HostGameUI() {
   const { pin } = useParams();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
 
-  const TOTAL_TIME = 20;
-
   const [phase, setPhase] = useState("SKILL_PICK");
   const [question, setQuestion] = useState(null);
   const [skillTimeLeft, setSkillTimeLeft] = useState(20);
 
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME_LIMIT);
+  const [questionTimeLimit, setQuestionTimeLimit] = useState(DEFAULT_TIME_LIMIT);
   const [answered, setAnswered] = useState(0);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState([]);
@@ -56,14 +60,9 @@ export default function HostGameUI() {
   });
 
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
-  const [halloweenSceneryActive, setHalloweenSceneryActive] = useState(false);
 
-  useResumeHalloweenAudio(pin);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !pin) return;
-    setHalloweenSceneryActive(sessionStorage.getItem(halloweenScenerySessionKey(pin)) === '1');
-  }, [pin]);
+  const background = useGameBackground(pin);
+  useHalloweenSceneryAudio(background, pin);
 
   // Re-register as host if socket reconnects
   useEffect(() => {
@@ -120,7 +119,9 @@ export default function HostGameUI() {
     const onQuestion = (data) => {
       setQuestion(data);
       setPhase("QUESTION");
-      setTimeLeft(data.timeSeconds || TOTAL_TIME);
+      const limit = data.timeSeconds || DEFAULT_TIME_LIMIT;
+      setQuestionTimeLimit(limit);
+      setTimeLeft(limit);
       setAnswered(0);
       setTotal(0);
       setStats([]);
@@ -245,7 +246,11 @@ export default function HostGameUI() {
     const onHostSyncState = (data) => {
       // If backend is in LOBBY, we are in the initial SKILL_PICK screen, so don't override phase.
       if (data.phase && data.phase !== 'LOBBY') setPhase(data.phase);
-      if (data.question) setQuestion(data.question);
+      if (data.question) {
+        setQuestion(data.question);
+        const limit = data.question.timeSeconds || DEFAULT_TIME_LIMIT;
+        setQuestionTimeLimit(limit);
+      }
       if (data.timeLeft !== undefined) setTimeLeft(data.timeLeft);
       if (data.answered !== undefined) setAnswered(data.answered);
       if (data.total !== undefined) setTotal(data.total);
@@ -296,7 +301,7 @@ export default function HostGameUI() {
       socket.off("game:wheel-spinning", onWheelSpinning);
       socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
-  }, [getSocket, TOTAL_TIME, pin]);
+  }, [getSocket, pin]);
 
   const handleShowLeaderboard = useCallback(() => {
     if (isTransitioning) return;
@@ -352,7 +357,7 @@ export default function HostGameUI() {
   // Loading state
   if (!question && phase !== "SKILL_PICK") {
     return (
-      <div className="min-h-screen bg-zk-yellow flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={battleBackgroundStyle(background)}>
         <div className="text-center">
           <div className="w-14 h-14 border-[5px] border-zk-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="font-black uppercase tracking-widest text-zk-black/50">
@@ -364,24 +369,48 @@ export default function HostGameUI() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden relative font-sans">
+    <div
+      className="min-h-screen flex flex-col overflow-hidden relative font-sans"
+      style={battleBackgroundStyle(background)}
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none z-0" />
+
       <div className="fixed bottom-6 left-6 z-[120] pointer-events-auto">
-        <HalloweenSoundToggle visible={halloweenSceneryActive} />
+        <HalloweenSoundToggle visible={isHalloweenScenery(background)} />
       </div>
 
+      <div className="relative z-10 flex flex-col flex-1">
       <AnimatePresence mode="wait">
         {phase === "SKILL_PICK" && (
           <SkillPickPhase skillTimeLeft={skillTimeLeft} />
         )}
 
         {phase === "QUESTION" && (
-          <QuestionPhase
-            question={question}
-            timeLeft={timeLeft}
-            totalTime={TOTAL_TIME}
-            answered={answered}
-            total={total}
-          />
+          isDragLayersQuestion(question?.questionType) ? (
+            <DragLayersPhase
+              question={question}
+              timeLeft={timeLeft}
+              totalTime={questionTimeLimit}
+              answered={answered}
+              total={total}
+            />
+          ) : isLineMatchingQuestion(question?.questionType) ? (
+            <LineMatchingPhase
+              question={question}
+              timeLeft={timeLeft}
+              totalTime={questionTimeLimit}
+              answered={answered}
+              total={total}
+            />
+          ) : (
+            <QuestionPhase
+              question={question}
+              timeLeft={timeLeft}
+              totalTime={questionTimeLimit}
+              answered={answered}
+              total={total}
+            />
+          )
         )}
 
         {phase === "RESULT" && (
@@ -419,6 +448,7 @@ export default function HostGameUI() {
             winner={higherLowerData.winner}
             subPhase={higherLowerData.subPhase}
             currentTurn={higherLowerData.currentTurn}
+            background={background}
           />
         )}
 
@@ -437,6 +467,7 @@ export default function HostGameUI() {
           />
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
