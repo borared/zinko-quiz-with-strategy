@@ -66,6 +66,8 @@ const cloneQuiz = async (quizId, newCreatorId) => {
     questions: originalQuiz.questions.map(q => ({
       text: q.question_text,
       image: q.image_url,
+      question_type: q.question_type,
+      time_limit: q.time_limit ?? 20,
       answers: q.answers,
       round: q.round
     }))

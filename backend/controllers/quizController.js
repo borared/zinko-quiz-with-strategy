@@ -7,17 +7,103 @@ const { stripQuizCorrectAnswers } = require('../lib/quizSanitizer');
 const answerSchema = z.object({
   id: z.string(),
   text: z.string(),
-  isCorrect: z.boolean(),
+  isCorrect: z.boolean().optional(),
   color: z.string().optional(),
+  layerIndex: z.number().int().min(0).optional(),
+  side: z.enum(['left', 'right']).optional(),
+  matchId: z.string().optional(),
+  pairIndex: z.number().int().min(0).optional(),
 });
 
 const questionSchema = z.object({
   id: z.string().optional(),
   question_text: z.string().min(1, 'Question text is required'),
   image_url: z.string().nullable().optional(),
+  question_type: z.enum(['multiple_choice', 'true_false', 'drag_layers', 'line_matching']).optional().default('multiple_choice'),
   answers: z.array(answerSchema).min(2, 'At least 2 answers required per question'),
-  time_limit: z.number().int().positive().optional().default(20),
+  time_limit: z.number().int().refine((value) => [20, 30, 60].includes(value), {
+    message: 'Time limit must be 20, 30, or 60 seconds',
+  }).optional().default(20),
   round: z.number().int().positive().optional().default(1),
+}).superRefine((question, ctx) => {
+  if (question.question_type === 'true_false') {
+    if (question.answers.length !== 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'True or False questions must have exactly 2 answers',
+        path: ['answers'],
+      });
+    }
+    return;
+  }
+
+  if (question.question_type === 'drag_layers') {
+    if (question.answers.length < 2 || question.answers.length > 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Drag & Order questions must have 2 to 10 steps',
+        path: ['answers'],
+      });
+      return;
+    }
+
+    const layerIndexes = question.answers.map((answer) => answer.layerIndex);
+    const uniqueIndexes = new Set(layerIndexes);
+    if (
+      layerIndexes.some((index) => !Number.isInteger(index))
+      || uniqueIndexes.size !== question.answers.length
+      || Math.max(...layerIndexes) !== question.answers.length - 1
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Drag & Order steps must have unique layer positions from 0 upward',
+        path: ['answers'],
+      });
+    }
+    return;
+  }
+
+  if (question.question_type === 'line_matching') {
+    const leftItems = question.answers.filter((answer) => answer.side === 'left');
+    const rightItems = question.answers.filter((answer) => answer.side === 'right');
+    const pairCount = leftItems.length;
+
+    if (pairCount < 2 || pairCount > 8 || rightItems.length !== pairCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Line Matching questions must have 2 to 8 pairs',
+        path: ['answers'],
+      });
+      return;
+    }
+
+    const invalidLeft = leftItems.some(
+      (left) => !left.matchId || !rightItems.some((right) => right.id === left.matchId)
+    );
+    const pairIndexes = leftItems.map((left) => left.pairIndex);
+    const uniquePairIndexes = new Set(pairIndexes);
+
+    if (
+      invalidLeft
+      || pairIndexes.some((index) => !Number.isInteger(index))
+      || uniquePairIndexes.size !== pairCount
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Line Matching pairs must link each left item to a right match',
+        path: ['answers'],
+      });
+    }
+    return;
+  }
+
+  if (question.answers.length < 2 || question.answers.length > 4) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Multiple choice questions must have 2 to 4 answers',
+      path: ['answers'],
+    });
+  }
 });
 
 const quizSchema = z.object({
