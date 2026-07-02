@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock } from "lucide-react";
+import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 
-export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, subPhase, currentTurn, team }) {
+export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, subPhase, currentTurn, team, background }) {
   const [input, setInput] = useState("");
   const [showStatus, setShowStatus] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -67,7 +68,7 @@ export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, sub
       {subPhase === 'INTRO' && (
         <motion.div 
           className="absolute inset-0 z-50 flex items-center justify-center bg-cover bg-center"
-          style={{ backgroundImage: `url('/background_battle/city.jpg')` }}
+          style={battleBackgroundStyle(background)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

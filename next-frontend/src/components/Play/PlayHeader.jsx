@@ -2,7 +2,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function PlayHeader({ nickname, question, timeLeft }) {
+import { DEFAULT_TIME_LIMIT } from '@/lib/timeLimit';
+
+export default function PlayHeader({ nickname, question, timeLeft, totalTime = DEFAULT_TIME_LIMIT }) {
   return (
     <div className="flex flex-col px-5 pt-5 pb-3">
       <div className="flex items-center justify-between">
@@ -35,7 +37,7 @@ export default function PlayHeader({ nickname, question, timeLeft }) {
         <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
           <motion.div
             className="h-full bg-[#FFCD29] rounded-full"
-            animate={{ width: `${(timeLeft / 20) * 100}%` }}
+            animate={{ width: `${(timeLeft / totalTime) * 100}%` }}
             transition={{ duration: 1, ease: 'linear' }}
           />
         </div>
