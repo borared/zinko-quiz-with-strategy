@@ -1,5 +1,22 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+function buildApiError(errorBody, statusText) {
+  const base = errorBody?.error || `API Error: ${statusText}`;
+  const details = Array.isArray(errorBody?.details)
+    ? errorBody.details
+      .map((issue) => issue.message || issue.path?.join('.'))
+      .filter(Boolean)
+      .join(' · ')
+    : '';
+
+  const extra = errorBody?.message && errorBody.message !== base ? errorBody.message : '';
+  const message = [base, details, extra].filter(Boolean).join(': ');
+  const err = new Error(message);
+  err.status = errorBody?.status;
+  err.details = errorBody?.details;
+  return err;
+}
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('zinko_jwt');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -24,7 +41,7 @@ const api = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
+      throw buildApiError(error, response.statusText);
     }
     return response.json();
   },
@@ -38,7 +55,7 @@ const api = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
+      throw buildApiError(error, response.statusText);
     }
     return response.json();
   },
@@ -52,7 +69,7 @@ const api = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
+      throw buildApiError(error, response.statusText);
     }
     return response.json();
   },
@@ -66,7 +83,7 @@ const api = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
+      throw buildApiError(error, response.statusText);
     }
     return response.json();
   },
@@ -79,7 +96,7 @@ const api = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || `API Error: ${response.statusText}`);
+      throw buildApiError(error, response.statusText);
     }
     return response.json();
   },
