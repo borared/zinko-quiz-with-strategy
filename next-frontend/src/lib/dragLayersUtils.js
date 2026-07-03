@@ -8,29 +8,29 @@ export const LAYER_COLORS = [
 ];
 
 export const PLAY_LAYER_COLORS = [
-  'bg-[#2A1B7A]',
-  'bg-[#8F2E18]',
-  'bg-[#5C4204]',
-  'bg-[#0F4D22]',
-  'bg-[#1A3A8F]',
-  'bg-[#0D0D0D]',
-  'bg-[#7A1212]',
-  'bg-[#3D1678]',
-  'bg-[#084D48]',
-  'bg-[#852D08]',
+  'bg-[#3A2898]',
+  'bg-[#A83C24]',
+  'bg-[#755A0C]',
+  'bg-[#17632E]',
+  'bg-[#254AA8]',
+  'bg-[#262626]',
+  'bg-[#961E1E]',
+  'bg-[#4E2088]',
+  'bg-[#0C6058]',
+  'bg-[#A03810]',
 ];
 
 const CREATOR_TO_PLAY_COLOR = {
-  'bg-[#5D3FD3]': 'bg-[#2A1B7A]',
-  'bg-[#FF6B4A]': 'bg-[#8F2E18]',
-  'bg-[#FFCD29]': 'bg-[#5C4204]',
-  'bg-[#2ea84a]': 'bg-[#0F4D22]',
-  'bg-[#3B68FF]': 'bg-[#1A3A8F]',
-  'bg-[#2D3436]': 'bg-[#0D0D0D]',
-  'bg-[#E74C3C]': 'bg-[#7A1212]',
-  'bg-[#9B59B6]': 'bg-[#3D1678]',
-  'bg-[#1ABC9C]': 'bg-[#084D48]',
-  'bg-[#F39C12]': 'bg-[#852D08]',
+  'bg-[#5D3FD3]': 'bg-[#3A2898]',
+  'bg-[#FF6B4A]': 'bg-[#A83C24]',
+  'bg-[#FFCD29]': 'bg-[#755A0C]',
+  'bg-[#2ea84a]': 'bg-[#17632E]',
+  'bg-[#3B68FF]': 'bg-[#254AA8]',
+  'bg-[#2D3436]': 'bg-[#262626]',
+  'bg-[#E74C3C]': 'bg-[#961E1E]',
+  'bg-[#9B59B6]': 'bg-[#4E2088]',
+  'bg-[#1ABC9C]': 'bg-[#0C6058]',
+  'bg-[#F39C12]': 'bg-[#A03810]',
 };
 
 export function getPlayLayerColor(color, index = 0) {
