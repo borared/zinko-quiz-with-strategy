@@ -1,10 +1,17 @@
 "use client";
-import React from 'react';
-import { Image, Clock, Star, Settings, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Image, Settings, Trash2 } from 'lucide-react';
 import { useQuizStore } from '@/store/useQuizStore';
 import { QUESTION_TYPES } from '@/lib/questionTypes';
 import { DEFAULT_TIME_LIMIT, TIME_LIMIT_OPTIONS, normalizeTimeLimit } from '@/lib/timeLimit';
 import QuestionTypePicker from './QuestionTypePicker';
+import CreatorSelectPicker from './CreatorSelectPicker';
+
+const POINTS_OPTIONS = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'double', label: 'Double' },
+  { value: 'none', label: 'No Points' },
+];
 
 const QuestionEditor = () => {
   const {
@@ -28,6 +35,11 @@ const QuestionEditor = () => {
   const roundQuestions = questions.filter(q => q.round === activeRound);
   const questionNumber = roundQuestions.findIndex(q => q.id === activeQuestion.id) + 1;
   const timeLimit = normalizeTimeLimit(activeQuestion.time_limit ?? DEFAULT_TIME_LIMIT);
+  const [pointsMode, setPointsMode] = useState('standard');
+
+  useEffect(() => {
+    setPointsMode('standard');
+  }, [activeQuestionId]);
 
   return (
     <div className="flex flex-col gap-6 p-6 zk-panel">
@@ -91,35 +103,27 @@ const QuestionEditor = () => {
         </div>
 
         {/* Question Settings */}
-        <div className="border-[3px] border-zk-black p-6 bg-white/40 backdrop-blur-md flex flex-col gap-4 rounded-lg">
-          <div className="flex gap-4">
-            <div className="flex-1 flex flex-col gap-1">
+        <div className="border-[3px] border-zk-black p-6 bg-white/40 backdrop-blur-md flex flex-col gap-4 rounded-lg overflow-visible">
+          <div className="flex gap-4 overflow-visible">
+            <div className="flex-1 flex flex-col gap-1 relative z-20">
               <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Time Limit</label>
-              <div className="relative">
-                <select
-                  value={timeLimit}
-                  onChange={(e) => updateActiveQuestion({ time_limit: Number(e.target.value) })}
-                  className="w-full border-[2px] border-zk-black p-2 font-bold text-zk-black focus:outline-none bg-white/80 appearance-none rounded-lg"
-                >
-                  {TIME_LIMIT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <Clock size={16} className="absolute right-3 top-3 text-zk-black/50 pointer-events-none" />
-              </div>
+              <CreatorSelectPicker
+                fullWidth
+                placement="top"
+                value={timeLimit}
+                onChange={(value) => updateActiveQuestion({ time_limit: Number(value) })}
+                options={TIME_LIMIT_OPTIONS}
+              />
             </div>
-            <div className="flex-1 flex flex-col gap-1">
+            <div className="flex-1 flex flex-col gap-1 relative z-20">
               <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Points</label>
-              <div className="relative">
-                <select className="w-full border-[2px] border-zk-black p-2 font-bold text-zk-black focus:outline-none bg-white/80 appearance-none rounded-lg">
-                  <option>Standard</option>
-                  <option>Double</option>
-                  <option>No Points</option>
-                </select>
-                <Star size={16} className="absolute right-3 top-3 text-zk-black/50 pointer-events-none" />
-              </div>
+              <CreatorSelectPicker
+                fullWidth
+                placement="top"
+                value={pointsMode}
+                onChange={setPointsMode}
+                options={POINTS_OPTIONS}
+              />
             </div>
           </div>
 

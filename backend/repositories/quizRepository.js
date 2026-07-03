@@ -3,6 +3,15 @@ const prisma = require('../lib/prisma');
 const { isValidUuid } = require('../lib/uuid');
 const { normalizeSearchTerm } = require('../lib/searchUtils');
 
+const DISCOVERY_CREATOR_EXISTS = Prisma.sql`
+  AND EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.clerk_id = quizzes.creator_id
+    AND COALESCE((u.settings->>'discoveryOptIn')::boolean, true) = true
+    AND COALESCE((u.settings->'privacy'->>'showOnDiscovery')::boolean, true) = true
+  )
+`;
+
 const PUBLIC_QUIZ_INCLUDE = {
   questions: {
     orderBy: { order_index: 'asc' },
@@ -211,6 +220,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             SELECT id, created_at
             FROM quizzes
             WHERE is_public = true
+            ${DISCOVERY_CREATOR_EXISTS}
             ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
             AND (
               title ILIKE ${`%${trimmedSearch}%`}
@@ -223,6 +233,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             SELECT id, created_at
             FROM quizzes
             WHERE is_public = true
+            ${DISCOVERY_CREATOR_EXISTS}
             ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
             AND title ILIKE ${`%${trimmedSearch}%`}
             ORDER BY created_at DESC
@@ -253,25 +264,37 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
     return { quizzes, nextCursor, hasNextPage };
   }
 
-  const where = {
-    is_public: true,
-    ...(cursor ? { created_at: { lt: new Date(cursor) } } : {}),
-  };
+  const cursorDate = cursor ? new Date(cursor) : null;
+  const rows = await prisma.$queryRaw`
+    SELECT id, created_at
+    FROM quizzes
+    WHERE is_public = true
+    ${DISCOVERY_CREATOR_EXISTS}
+    ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+    ORDER BY created_at DESC
+    LIMIT ${limit + 1}
+  `;
 
-  const results = await prisma.quizzes.findMany({
-    where,
-    include: PUBLIC_QUIZ_INCLUDE,
-    orderBy: { created_at: 'desc' },
-    take: limit + 1,
-  });
+  const hasNextPage = rows.length > limit;
+  const pageRows = rows.slice(0, limit);
+  const ids = pageRows.map((row) => row.id);
 
-  const hasNextPage = results.length > limit;
-  const quizzes = results.slice(0, limit);
-  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at?.toISOString() : null;
-
-  if (!quizzes.length) {
+  if (!ids.length) {
     return { quizzes: [], nextCursor: null, hasNextPage: false };
   }
+
+  const quizzes = await prisma.quizzes.findMany({
+    where: { id: { in: ids } },
+    include: PUBLIC_QUIZ_INCLUDE,
+  });
+
+  const orderMap = new Map(pageRows.map((row, index) => [row.id, index]));
+  quizzes.sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id));
+
+  const nextCursor = hasNextPage
+    ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
+      new Date(pageRows[pageRows.length - 1].created_at).toISOString()
+    : null;
 
   return { quizzes, nextCursor, hasNextPage };
 };

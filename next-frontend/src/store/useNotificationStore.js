@@ -1,27 +1,75 @@
 import { create } from 'zustand';
 import api from '../services/api';
 
+function normalizeNotifications(data) {
+  return Array.isArray(data) ? data : (data?.notifications || []);
+}
+
+function countUnread(notifications) {
+  return notifications.filter((n) => !n.is_read).length;
+}
+
 export const useNotificationStore = create((set, get) => ({
+  userId: null,
   notifications: [],
   unreadCount: 0,
   isLoading: false,
+  isHydrated: false,
+  isFetching: false,
 
-  fetchNotifications: async (userId) => {
-    if (get().isLoading) return;
+  isCachedForUser: (userId) => {
+    const state = get();
+    return Boolean(userId && state.isHydrated && state.userId === userId);
+  },
+
+  setCache: ({ userId, notifications, unreadCount }) => {
+    const validData = normalizeNotifications(notifications);
+    set({
+      userId,
+      notifications: validData,
+      unreadCount: unreadCount ?? countUnread(validData),
+      isHydrated: true,
+      isLoading: false,
+    });
+  },
+
+  invalidate: () =>
+    set({
+      userId: null,
+      notifications: [],
+      unreadCount: 0,
+      isLoading: false,
+      isHydrated: false,
+      isFetching: false,
+    }),
+
+  fetchNotifications: async (userId, { silent } = {}) => {
     if (!localStorage.getItem('zinko_jwt')) return;
+    if (!userId) return;
 
-    set({ isLoading: true });
+    const cached = get().isCachedForUser(userId);
+    const isSilent = silent ?? cached;
+
+    if (get().isFetching) return;
+
+    const showLoading = !isSilent && !cached;
+    if (showLoading) set({ isLoading: true });
+
+    set({ isFetching: true });
     try {
       const data = await api.get(`/api/notifications/user/${userId}`);
-      const validData = Array.isArray(data) ? data : (data.notifications || []);
-      set({ 
+      const validData = normalizeNotifications(data);
+      set({
+        userId,
         notifications: validData,
-        unreadCount: validData.filter(n => !n.is_read).length,
-        isLoading: false 
+        unreadCount: countUnread(validData),
+        isHydrated: true,
+        isLoading: false,
+        isFetching: false,
       });
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-      set({ isLoading: false });
+      console.error('Failed to fetch notifications:', error);
+      set({ isLoading: false, isFetching: false });
     }
   },
 
@@ -29,16 +77,16 @@ export const useNotificationStore = create((set, get) => ({
     try {
       await api.put(`/api/notifications/${id}/read`);
       set((state) => {
-        const updated = state.notifications.map(n => 
+        const updated = state.notifications.map((n) =>
           n.id === id ? { ...n, is_read: true } : n
         );
         return {
           notifications: updated,
-          unreadCount: updated.filter(n => !n.is_read).length
+          unreadCount: countUnread(updated),
         };
       });
     } catch (error) {
-      console.error("Failed to mark notification as read:", error);
+      console.error('Failed to mark notification as read:', error);
     }
   },
 
@@ -46,11 +94,11 @@ export const useNotificationStore = create((set, get) => ({
     try {
       await api.put(`/api/notifications/user/${userId}/read-all`);
       set((state) => ({
-        notifications: state.notifications.map(n => ({ ...n, is_read: true })),
-        unreadCount: 0
+        notifications: state.notifications.map((n) => ({ ...n, is_read: true })),
+        unreadCount: 0,
       }));
     } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
+      console.error('Failed to mark all notifications as read:', error);
     }
   },
 
@@ -76,7 +124,7 @@ export const useNotificationStore = create((set, get) => ({
         });
         return {
           notifications: updated,
-          unreadCount: updated.filter((n) => !n.is_read).length,
+          unreadCount: countUnread(updated),
         };
       });
       return result;
@@ -91,10 +139,10 @@ export const useNotificationStore = create((set, get) => ({
       await api.delete(`/api/notifications/user/${userId}/clear-all`);
       set({
         notifications: [],
-        unreadCount: 0
+        unreadCount: 0,
       });
     } catch (error) {
-      console.error("Failed to clear notifications:", error);
+      console.error('Failed to clear notifications:', error);
     }
-  }
+  },
 }));

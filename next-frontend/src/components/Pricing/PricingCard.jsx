@@ -32,7 +32,7 @@ const PricingCard = ({
   };
 
   return (
-    <div className={`relative flex flex-col h-full bg-white border-[4px] ${cardBorderClass} shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 transition-transform duration-300 hover:-translate-y-4`}>
+    <div className={`relative flex flex-col h-full bg-white border-[4px] ${cardBorderClass} rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-8 transition-transform duration-300 hover:-translate-y-4`}>
       
       {isPopular && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF6B4A] text-white font-black text-[10px] sm:text-xs px-3 sm:px-4 py-1 uppercase tracking-wider border-[3px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] whitespace-nowrap z-10 rounded-lg">
@@ -60,7 +60,7 @@ const PricingCard = ({
         ))}
       </ul>
 
-      <button className={`w-full py-4 font-black uppercase tracking-wider text-sm border-[3px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none ${buttonBgClass}`}>
+      <button className={`w-full py-4 font-black uppercase tracking-wider text-sm border-[3px] rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none ${buttonBgClass}`}>
         {buttonText}
       </button>
       

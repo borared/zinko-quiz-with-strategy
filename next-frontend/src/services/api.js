@@ -28,7 +28,10 @@ const api = {
       headers: { ...getAuthHeaders() },
       credentials: 'include',
     });
-    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw buildApiError(error, response.statusText);
+    }
     return response.json();
   },
   

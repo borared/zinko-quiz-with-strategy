@@ -67,7 +67,7 @@ export default function QuestionPrompt({
               {skillButton || (
                 <p className="inline-block max-w-full px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-zk-black border-[3px] border-zk-black text-white font-black text-xs sm:text-sm uppercase tracking-wide sm:tracking-widest">
                   {isLineMatching
-                    ? 'Drag a line left to right, or tap left then right, then lock in'
+                    ? 'Drag or tap to connect · lock in when done'
                     : 'Drag or tap steps into order, then lock in'}
                 </p>
               )}

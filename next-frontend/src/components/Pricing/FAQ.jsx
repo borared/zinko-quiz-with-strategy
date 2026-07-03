@@ -16,12 +16,12 @@ const FAQ = () => {
   return (
     <div className="w-full max-w-6xl mx-auto mb-24 px-4">
       <h2 className="text-3xl md:text-4xl font-black text-center text-zk-black mb-12 uppercase tracking-tight">
-        FAG
+        FAQ
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {faqs.map((faq, idx) => (
-          <div key={idx} className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 rounded-xl">
+          <div key={idx} className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-8 rounded-xl">
             <h3 className="text-xl font-bold text-zk-black mb-4">{faq.question}</h3>
             <p className="text-sm font-bold text-zk-black/70 leading-relaxed">
               {faq.answer}

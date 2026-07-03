@@ -1,6 +1,20 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  pointerWithin,
+  rectIntersection,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GripVertical, Send } from 'lucide-react';
 import { displayAnswerText, isDragLayersQuestion } from '@/lib/questionTypes';
 import {
@@ -12,7 +26,93 @@ import {
 
 const LAYER_SPRING = { type: 'spring', stiffness: 520, damping: 34, mass: 0.8 };
 const CHIP_LAYOUT = { type: 'spring', stiffness: 620, damping: 38, mass: 0.65 };
-const DRAG_THRESHOLD_PX = 4;
+const BANK_DROP_ID = 'answer-bank';
+const BANK_ZONE_DROP_ID = 'answer-bank-zone';
+
+function isBankDropId(id) {
+  return id === BANK_DROP_ID || id === BANK_ZONE_DROP_ID;
+}
+
+function isPointerOverBank(clientX, clientY) {
+  const bank = document.querySelector('[data-answer-bank]');
+  if (!bank) return false;
+
+  const rect = bank.getBoundingClientRect();
+  return (
+    clientX >= rect.left
+    && clientX <= rect.right
+    && clientY >= rect.top
+    && clientY <= rect.bottom
+  );
+}
+
+function shouldReturnToBank(pointer, draggedId, slots) {
+  if (!pointer) return false;
+  if (isPointerOverBank(pointer.x, pointer.y)) return true;
+
+  const sourceLayer = Object.entries(slots).find(([, id]) => id === draggedId)?.[0];
+  if (sourceLayer === undefined) return false;
+
+  const slotEl = document.querySelector(`[data-layer-index="${sourceLayer}"]`);
+  const bank = document.querySelector('[data-answer-bank]');
+  if (!slotEl || !bank) return false;
+
+  const slotRect = slotEl.getBoundingClientRect();
+  const bankRect = bank.getBoundingClientRect();
+
+  // Dragged downward from a slot into the bank corridor (handles overlap / missed collisions).
+  return (
+    pointer.y > slotRect.bottom - 10
+    && pointer.y <= bankRect.bottom + 12
+    && pointer.x >= bankRect.left - 16
+    && pointer.x <= bankRect.right + 16
+  );
+}
+
+function playCollisionDetection(args) {
+  const pointerHits = pointerWithin(args);
+  if (pointerHits.length > 0) {
+    const bankHit = pointerHits.find(({ id }) => isBankDropId(String(id)));
+    if (bankHit) return [bankHit];
+    return pointerHits;
+  }
+
+  return rectIntersection(args);
+}
+
+function getPointerFromDragEvent(event) {
+  const { activatorEvent, delta } = event;
+  if (activatorEvent && 'clientX' in activatorEvent && 'clientY' in activatorEvent) {
+    return {
+      x: activatorEvent.clientX + delta.x,
+      y: activatorEvent.clientY + delta.y,
+    };
+  }
+  return null;
+}
+
+function resolveOverFromDom(clientX, clientY) {
+  const elements = document.elementsFromPoint(clientX, clientY);
+  for (const element of elements) {
+    if (element.closest('[data-answer-bank]')) {
+      return BANK_DROP_ID;
+    }
+
+    const layerNode = element.closest('[data-layer-index]');
+    if (layerNode) {
+      const layerIndex = Number(layerNode.getAttribute('data-layer-index'));
+      if (Number.isInteger(layerIndex)) {
+        return layerDropId(layerIndex);
+      }
+    }
+  }
+
+  return null;
+}
+
+function findBankCollision(collisions = []) {
+  return collisions.find(({ id }) => isBankDropId(String(id))) ?? null;
+}
 
 function getGridCols(layerCount, roomy = false) {
   const gapX = roomy ? 'gap-x-2 sm:gap-x-3' : 'gap-x-2 sm:gap-x-3';
@@ -26,21 +126,30 @@ function getGridCols(layerCount, roomy = false) {
   return `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${gapX}`;
 }
 
+function layerDropId(index) {
+  return `layer-${index}`;
+}
+
+function parseLayerDropId(id) {
+  if (typeof id !== 'string' || !id.startsWith('layer-')) return null;
+  const layerIndex = Number(id.slice('layer-'.length));
+  return Number.isInteger(layerIndex) ? layerIndex : null;
+}
+
 function PoolChip({
   answer,
-  onPointerDown,
   onClick,
   disabled,
   isDragging,
   isSelected,
   fillWidth = false,
   compact = false,
+  dragHandleProps,
 }) {
   return (
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      onPointerDown={disabled ? undefined : onPointerDown}
       onClick={disabled ? undefined : onClick}
       onKeyDown={disabled ? undefined : (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -55,6 +164,7 @@ function PoolChip({
       } ${getPlayLayerColor(answer.color, answer.layerIndex)} text-white min-w-0 ${fillWidth ? 'w-full' : compact ? 'w-full' : 'shrink-0'} ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
       } ${isDragging ? 'opacity-[0.35]' : isSelected ? 'scale-[1.02]' : ''}`}
+      {...dragHandleProps}
     >
       <GripVertical size={compact ? 16 : 14} className="opacity-70 shrink-0 pointer-events-none" />
       <span
@@ -64,6 +174,203 @@ function PoolChip({
       >
         {displayAnswerText(answer.text)}
       </span>
+    </div>
+  );
+}
+
+function DraggableChip({
+  itemId,
+  answer,
+  disabled,
+  isDragging,
+  isSelected,
+  onClick,
+  fillWidth = false,
+  compact = false,
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging: isDraggingLocal } = useDraggable({
+    id: itemId,
+    disabled,
+  });
+
+  const dragging = isDragging || isDraggingLocal;
+  const style = isDraggingLocal
+    ? undefined
+    : transform
+      ? { transform: CSS.Translate.toString(transform) }
+      : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="min-w-0 w-full"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <PoolChip
+        answer={answer}
+        onClick={onClick}
+        disabled={disabled}
+        isDragging={dragging}
+        isSelected={isSelected}
+        fillWidth={fillWidth}
+        compact={compact}
+        dragHandleProps={{ ...listeners, ...attributes }}
+      />
+    </div>
+  );
+}
+
+function LayerSlot({
+  index,
+  highlighted,
+  emptySlotBg,
+  filledSlotBg,
+  dragOverSlotBg,
+  emptyBorderColor,
+  inPanel,
+  isDisabled,
+  selectedChipId,
+  onLayerTap,
+  hasAnswer,
+  children,
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: layerDropId(index) });
+
+  return (
+    <motion.div
+      layout
+      transition={LAYER_SPRING}
+      className="relative min-w-0 pt-2"
+    >
+      <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-[2px] sm:border-[3px] border-zk-black min-w-[24px] sm:min-w-[28px] text-center">
+        {index + 1}
+      </span>
+
+      <motion.div
+        ref={setNodeRef}
+        layout
+        transition={LAYER_SPRING}
+        data-layer-index={index}
+        onClick={() => onLayerTap(index)}
+        animate={{
+          scale: highlighted || isOver ? 1.02 : 1,
+          backgroundColor: highlighted || isOver
+            ? dragOverSlotBg
+            : hasAnswer
+              ? filledSlotBg
+              : emptySlotBg,
+          borderColor: highlighted || isOver ? '#FFCD29' : hasAnswer ? '#000000' : emptyBorderColor,
+        }}
+        className={`${
+          inPanel ? 'min-h-[96px] sm:min-h-[108px]' : 'min-h-[72px] sm:min-h-[80px]'
+        } rounded-lg sm:rounded-xl border-[2px] sm:border-[3px] border-dashed p-1.5 sm:p-2 pt-4 sm:pt-5 flex items-stretch justify-center ${
+          isDisabled ? 'opacity-50' : selectedChipId ? 'cursor-pointer' : ''
+        }`}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function EmptyBankDropZoneVisual({
+  selectedChipId,
+  isDisabled,
+  isHighlighted,
+}) {
+  const active = isHighlighted;
+
+  return (
+    <div
+      className={`col-span-full min-h-[120px] sm:min-h-[140px] rounded-lg border-2 border-dashed flex items-center justify-center px-3 ${
+        (selectedChipId && !isDisabled) || active
+          ? 'border-[#5D3FD3] bg-[#5D3FD3]/10'
+          : 'border-zk-black/20 bg-transparent'
+      }`}
+    >
+      <p className="text-xs sm:text-sm font-bold text-zk-black/40 text-center leading-tight">
+        {selectedChipId && !isDisabled
+          ? 'Tap or drop here to return a step'
+          : 'Drag steps back here to reorder'}
+      </p>
+    </div>
+  );
+}
+
+function AnswerBank({
+  inPanel,
+  selectedChipId,
+  isDisabled,
+  onReturnSelected,
+  poolGrid,
+  pool,
+  answerMap,
+  activeId,
+  selectedChipIdState,
+  onChipSelect,
+  isDisabledState,
+  bankHighlighted,
+}) {
+  const { setNodeRef: setBankRef, isOver: isBankOver } = useDroppable({ id: BANK_DROP_ID });
+  const { setNodeRef: setZoneRef, isOver: isZoneOver } = useDroppable({ id: BANK_ZONE_DROP_ID });
+  const bankActive = bankHighlighted || isBankOver || isZoneOver;
+
+  return (
+    <div
+      ref={setBankRef}
+      data-answer-bank
+      onClick={onReturnSelected}
+      className={`rounded-xl border-[3px] border-zk-black flex flex-col w-full shrink-0 transition-shadow ${
+        inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-white/90 p-2 gap-1.5'
+      } ${!isDisabled && selectedChipId ? 'cursor-pointer ring-2 ring-[#5D3FD3]/30' : ''} ${
+        bankActive ? 'ring-2 ring-[#5D3FD3]/40 shadow-[0_0_0_3px_#5D3FD3]' : ''
+      }`}
+    >
+      <p className="text-xs font-black uppercase tracking-widest text-zk-black/50 px-0.5">
+        Answer bank {selectedChipId ? '· tap here to return' : ''}
+      </p>
+      <div
+        ref={setZoneRef}
+        className={`${poolGrid} w-full ${pool.length === 0 ? 'min-h-[120px] sm:min-h-[140px]' : ''}`}
+      >
+        {pool.length === 0 ? (
+          <EmptyBankDropZoneVisual
+            selectedChipId={selectedChipId}
+            isDisabled={isDisabled}
+            isHighlighted={bankHighlighted}
+          />
+        ) : (
+          <AnimatePresence mode="popLayout" initial={false}>
+            {pool.map((itemId) => {
+              const answer = answerMap[itemId];
+              if (!answer) return null;
+              return (
+                <motion.div
+                  key={itemId}
+                  layout
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={CHIP_LAYOUT}
+                  className="min-w-0"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <DraggableChip
+                    itemId={itemId}
+                    answer={answer}
+                    disabled={isDisabledState}
+                    isDragging={activeId === itemId}
+                    isSelected={selectedChipIdState === itemId}
+                    onClick={() => onChipSelect(itemId)}
+                    compact
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
+      </div>
     </div>
   );
 }
@@ -87,41 +394,19 @@ export default function DragLayersPlay({
   const [slots, setSlots] = useState({});
   const [pool, setPool] = useState([]);
   const [dragOverIndex, setDragOverIndex] = useState(null);
-  const [draggingId, setDraggingId] = useState(null);
+  const [bankHighlighted, setBankHighlighted] = useState(false);
+  const [activeId, setActiveId] = useState(null);
   const [selectedChipId, setSelectedChipId] = useState(null);
 
-  const slotsRef = useRef(slots);
-  const stepAnswersRef = useRef(stepAnswers);
-  const isDisabledRef = useRef(false);
-  const dragRef = useRef(null);
-  const removeListenersRef = useRef(null);
-
-  useEffect(() => {
-    slotsRef.current = slots;
-  }, [slots]);
-
-  useEffect(() => {
-    stepAnswersRef.current = stepAnswers;
-  }, [stepAnswers]);
-
-  const isDisabled = phase !== 'PLAYING' || !!selectedId || foxSmokescreen;
-  isDisabledRef.current = isDisabled;
-
-  const stopDrag = useCallback(() => {
-    removeListenersRef.current?.();
-    removeListenersRef.current = null;
-    dragRef.current?.ghost?.remove();
-    dragRef.current = null;
-    document.body.style.removeProperty('user-select');
-    document.body.style.removeProperty('touch-action');
-    setDraggingId(null);
-    setDragOverIndex(null);
-  }, []);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
+    useSensor(KeyboardSensor)
+  );
 
   useEffect(() => {
     if (!isDragLayersQuestion(question?.questionType) || layerCount < 1) return;
 
-    stopDrag();
     const emptySlots = Object.fromEntries(
       Array.from({ length: layerCount }, (_, index) => [index, null])
     );
@@ -129,137 +414,175 @@ export default function DragLayersPlay({
     setSlots(emptySlots);
     setPool(ids);
     setSelectedChipId(null);
-  }, [question?.index, question?.questionType, layerCount, stepAnswers, stopDrag]);
+    setActiveId(null);
+    setDragOverIndex(null);
+    setBankHighlighted(false);
+  }, [question?.index, question?.questionType, layerCount, stepAnswers]);
 
-  useEffect(() => () => stopDrag(), [stopDrag]);
-
+  const isDisabled = phase !== 'PLAYING' || !!selectedId || foxSmokescreen;
   const filledCount = Object.values(slots).filter(Boolean).length;
   const isComplete = filledCount === layerCount && layerCount > 0;
 
   const placeChip = useCallback((itemId, targetLayer) => {
-    if (!itemId || !answerMap[itemId] || isDisabledRef.current) return;
-    const result = applyLayerPlacement(slotsRef.current, stepAnswersRef.current, itemId, targetLayer);
+    if (!itemId || !answerMap[itemId] || isDisabled) return;
+    const result = applyLayerPlacement(slots, stepAnswers, itemId, targetLayer);
     setSlots(result.slots);
     setPool(result.pool);
     setSelectedChipId(null);
-  }, [answerMap]);
+  }, [answerMap, isDisabled, slots, stepAnswers]);
 
-  const getDropTarget = (clientX, clientY) => {
-    const element = document.elementFromPoint(clientX, clientY);
-    if (!element) return null;
+  const handleDragStart = useCallback((event) => {
+    if (isDisabled) return;
+    setActiveId(String(event.active.id));
+    setSelectedChipId(String(event.active.id));
+  }, [isDisabled]);
 
-    const layerNode = element.closest('[data-layer-index]');
-    if (layerNode) {
-      const layerIndex = Number(layerNode.getAttribute('data-layer-index'));
-      return Number.isInteger(layerIndex) ? { type: 'layer', layerIndex } : null;
+  const handleDragOver = useCallback((event) => {
+    const overId = event.over ? String(event.over.id) : null;
+    if (!overId) {
+      setDragOverIndex(null);
+      setBankHighlighted(false);
+      return;
     }
 
-    if (element.closest('[data-answer-bank]')) {
+    if (isBankDropId(overId)) {
+      setBankHighlighted(true);
+      setDragOverIndex(null);
+      return;
+    }
+
+    setBankHighlighted(false);
+
+    const layerFromId = parseLayerDropId(overId);
+    if (layerFromId !== null) {
+      setDragOverIndex(layerFromId);
+      return;
+    }
+
+    if (answerMap[overId]) {
+      const occupiedLayer = Object.entries(slots).find(([, id]) => id === overId)?.[0];
+      setDragOverIndex(occupiedLayer !== undefined ? Number(occupiedLayer) : null);
+      return;
+    }
+
+    setDragOverIndex(null);
+  }, [answerMap, slots]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+    setDragOverIndex(null);
+    setBankHighlighted(false);
+  }, []);
+
+  const resolveDropTarget = useCallback((overId, currentSlots, currentPool) => {
+    if (!overId) return null;
+    if (isBankDropId(overId) || currentPool.includes(overId)) {
       return { type: 'bank' };
     }
 
-    return null;
-  };
+    const layerFromId = parseLayerDropId(overId);
+    if (layerFromId !== null) {
+      return { type: 'layer', layerIndex: layerFromId };
+    }
 
-  const handlePointerDown = (itemId) => (event) => {
-    if (isDisabledRef.current) return;
-    event.preventDefault();
-
-    const sourceEl = event.currentTarget;
-    const rect = sourceEl.getBoundingClientRect();
-    const offsetX = event.clientX - rect.left;
-    const offsetY = event.clientY - rect.top;
-
-    stopDrag();
-
-    const ghost = sourceEl.cloneNode(true);
-    ghost.style.position = 'fixed';
-    ghost.style.left = `${event.clientX - offsetX}px`;
-    ghost.style.top = `${event.clientY - offsetY}px`;
-    ghost.style.width = `${rect.width}px`;
-    ghost.style.margin = '0';
-    ghost.style.opacity = '0.9';
-    ghost.style.pointerEvents = 'none';
-    ghost.style.zIndex = '99999';
-    ghost.style.transform = 'none';
-    document.body.appendChild(ghost);
-
-    dragRef.current = {
-      itemId,
-      startX: event.clientX,
-      startY: event.clientY,
-      moved: false,
-      offsetX,
-      offsetY,
-      ghost,
-    };
-
-    document.body.style.userSelect = 'none';
-    document.body.style.touchAction = 'none';
-    setSelectedChipId(itemId);
-    setDraggingId(itemId);
-
-    const onMove = (ev) => {
-      const drag = dragRef.current;
-      if (!drag) return;
-
-      drag.ghost.style.left = `${ev.clientX - drag.offsetX}px`;
-      drag.ghost.style.top = `${ev.clientY - drag.offsetY}px`;
-
-      if (Math.hypot(ev.clientX - drag.startX, ev.clientY - drag.startY) > DRAG_THRESHOLD_PX) {
-        drag.moved = true;
+    if (answerMap[overId]) {
+      const occupiedLayer = Object.entries(currentSlots).find(([, id]) => id === overId)?.[0];
+      if (occupiedLayer !== undefined) {
+        return { type: 'layer', layerIndex: Number(occupiedLayer) };
       }
+      if (currentPool.includes(overId)) {
+        return { type: 'bank' };
+      }
+    }
 
-      const target = getDropTarget(ev.clientX, ev.clientY);
-      setDragOverIndex(target?.type === 'layer' ? target.layerIndex : null);
-    };
+    return null;
+  }, [answerMap]);
 
-    const onUp = (ev) => {
-      const drag = dragRef.current;
-      if (!drag) return;
+  const returnDraggedToBank = useCallback((draggedId) => {
+    const result = returnChipToPool(slots, stepAnswers, draggedId);
+    setSlots(result.slots);
+    setPool(result.pool);
+    setSelectedChipId(null);
+  }, [slots, stepAnswers]);
 
-      const { itemId: draggedId, moved } = drag;
-      stopDrag();
+  const handleDragEnd = useCallback((event) => {
+    const draggedId = String(event.active.id);
+    let overId = event.over ? String(event.over.id) : null;
 
-      if (moved) {
-        const target = getDropTarget(ev.clientX, ev.clientY);
-        if (target?.type === 'layer') {
-          placeChip(draggedId, target.layerIndex);
-        } else if (target?.type === 'bank') {
-          const result = returnChipToPool(slotsRef.current, stepAnswersRef.current, draggedId);
-          setSlots(result.slots);
-          setPool(result.pool);
-          setSelectedChipId(null);
+    const pointer = getPointerFromDragEvent(event);
+    const domOverId = pointer ? resolveOverFromDom(pointer.x, pointer.y) : null;
+    const bankCollision = findBankCollision(event.collisions);
+    const draggedFromSlot = Object.values(slots).includes(draggedId);
+    const pointerWantsBank = draggedFromSlot && shouldReturnToBank(pointer, draggedId, slots);
+
+    setActiveId(null);
+    setDragOverIndex(null);
+    setBankHighlighted(false);
+
+    if (isDisabled) return;
+
+    if (pointerWantsBank) {
+      returnDraggedToBank(draggedId);
+      return;
+    }
+
+    const wantsBankReturn = draggedFromSlot && (
+      isBankDropId(overId)
+      || isBankDropId(domOverId)
+      || Boolean(bankCollision)
+    );
+
+    if (wantsBankReturn) {
+      overId = isBankDropId(domOverId)
+        ? domOverId
+        : isBankDropId(overId)
+          ? overId
+          : String(bankCollision.id);
+    } else if (isBankDropId(domOverId)) {
+      overId = domOverId;
+    } else if (!overId && domOverId) {
+      overId = domOverId;
+    } else if (!overId && event.collisions?.length) {
+      overId = bankCollision
+        ? String(bankCollision.id)
+        : String(event.collisions[0].id);
+    } else if (overId === draggedId && bankCollision) {
+      overId = String(bankCollision.id);
+    }
+
+    if (!overId) return;
+
+    const target = resolveDropTarget(overId, slots, pool);
+
+    if (target?.type === 'bank') {
+      returnDraggedToBank(draggedId);
+      return;
+    }
+
+    if (target?.type === 'layer') {
+      const sourceLayer = Object.entries(slots).find(([, id]) => id === draggedId)?.[0];
+      if (sourceLayer !== undefined && Number(sourceLayer) === target.layerIndex) {
+        if (shouldReturnToBank(pointer, draggedId, slots)) {
+          returnDraggedToBank(draggedId);
         }
         return;
       }
-
-      setSelectedChipId((prev) => (prev === draggedId ? null : draggedId));
-    };
-
-    document.addEventListener('pointermove', onMove);
-    document.addEventListener('pointerup', onUp);
-    document.addEventListener('pointercancel', onUp);
-
-    removeListenersRef.current = () => {
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onUp);
-      document.removeEventListener('pointercancel', onUp);
-    };
-  };
+      placeChip(draggedId, target.layerIndex);
+    }
+  }, [isDisabled, placeChip, pool, resolveDropTarget, returnDraggedToBank, slots]);
 
   const handleChipSelect = (itemId) => {
-    if (isDisabled || draggingId) return;
+    if (isDisabled || activeId) return;
     setSelectedChipId((prev) => (prev === itemId ? null : itemId));
   };
 
   const handleLayerTap = (layerIndex) => {
-    if (isDisabled || draggingId || !selectedChipId) return;
+    if (isDisabled || activeId || !selectedChipId) return;
     placeChip(selectedChipId, layerIndex);
   };
 
   const returnSelectedToPool = () => {
-    if (isDisabled || draggingId || !selectedChipId) return;
+    if (isDisabled || activeId || !selectedChipId) return;
     const result = returnChipToPool(slots, stepAnswers, selectedChipId);
     setSlots(result.slots);
     setPool(result.pool);
@@ -292,9 +615,18 @@ export default function DragLayersPlay({
     ? 'text-zk-black/45 font-bold text-xs sm:text-sm text-center px-1 self-center leading-tight'
     : 'text-white/70 font-bold text-xs sm:text-sm text-center px-1 self-center leading-tight';
 
+  const activeAnswer = activeId ? answerMap[activeId] : null;
+
   return (
-    <div className={`flex flex-col h-auto relative ${inPanel ? 'w-full gap-3 sm:gap-4' : 'flex-1 min-h-0 gap-2.5 sm:gap-3 px-3 pb-4 mt-3'}`}>
-      <LayoutGroup>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={playCollisionDetection}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className={`flex flex-col h-auto relative ${inPanel ? 'w-full gap-3 sm:gap-4' : 'flex-1 min-h-0 gap-2.5 sm:gap-3 px-3 pb-4 mt-3'}`}>
         <motion.div
           layout
           className={`${slotsGrid} w-full shrink-0 ${inPanel ? 'pt-1' : 'pt-3 mt-2'}`}
@@ -304,145 +636,88 @@ export default function DragLayersPlay({
             const answer = itemId ? answerMap[itemId] : null;
 
             return (
-              <motion.div
+              <LayerSlot
                 key={`play-layer-${index}`}
-                layout
-                transition={LAYER_SPRING}
-                className="relative min-w-0 pt-2"
+                index={index}
+                highlighted={dragOverIndex === index}
+                emptySlotBg={emptySlotBg}
+                filledSlotBg={filledSlotBg}
+                dragOverSlotBg={dragOverSlotBg}
+                emptyBorderColor={emptyBorderColor}
+                inPanel={inPanel}
+                isDisabled={isDisabled}
+                selectedChipId={selectedChipId}
+                onLayerTap={handleLayerTap}
+                hasAnswer={Boolean(answer)}
               >
-                <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-[2px] sm:border-[3px] border-zk-black min-w-[24px] sm:min-w-[28px] text-center">
-                  {index + 1}
-                </span>
-
-                <motion.div
-                  layout
-                  transition={LAYER_SPRING}
-                  data-layer-index={index}
-                  onClick={() => handleLayerTap(index)}
-                  animate={{
-                    scale: dragOverIndex === index ? 1.02 : 1,
-                    backgroundColor: dragOverIndex === index
-                      ? dragOverSlotBg
-                      : answer
-                        ? filledSlotBg
-                        : emptySlotBg,
-                    borderColor: dragOverIndex === index ? '#FFCD29' : answer ? '#000000' : emptyBorderColor,
-                  }}
-                  className={`${
-                    inPanel ? 'min-h-[96px] sm:min-h-[108px]' : 'min-h-[72px] sm:min-h-[80px]'
-                  } rounded-lg sm:rounded-xl border-[2px] sm:border-[3px] border-dashed p-1.5 sm:p-2 pt-4 sm:pt-5 flex items-stretch justify-center ${
-                    isDisabled ? 'opacity-50' : selectedChipId ? 'cursor-pointer' : ''
-                  }`}
-                >
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    {answer ? (
-                      <PoolChip
-                        key={answer.id}
-                        answer={answer}
-                        onPointerDown={handlePointerDown(answer.id)}
-                        onClick={() => handleChipSelect(answer.id)}
-                        disabled={isDisabled}
-                        isDragging={draggingId === answer.id}
-                        isSelected={selectedChipId === answer.id}
-                        fillWidth
-                        compact
-                      />
-                    ) : (
-                      <motion.span
-                        key="placeholder"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className={placeholderClass}
-                      >
-                        {selectedChipId ? 'Tap here' : 'Drop here'}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </motion.div>
+                {answer ? (
+                  <DraggableChip
+                    itemId={answer.id}
+                    answer={answer}
+                    disabled={isDisabled}
+                    isDragging={activeId === answer.id}
+                    isSelected={selectedChipId === answer.id}
+                    onClick={() => handleChipSelect(answer.id)}
+                    fillWidth
+                    compact
+                  />
+                ) : (
+                  <motion.span
+                    key="placeholder"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className={placeholderClass}
+                  >
+                    {selectedChipId ? 'Tap here' : 'Drop here'}
+                  </motion.span>
+                )}
+              </LayerSlot>
             );
           })}
         </motion.div>
 
-        <motion.div
-          layout
-          transition={LAYER_SPRING}
-          data-answer-bank
-          onClick={returnSelectedToPool}
-          className={`rounded-xl border-[3px] border-zk-black flex flex-col w-full shrink-0 ${
-            inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-white/90 p-2 gap-1.5'
-          } ${!isDisabled && selectedChipId ? 'cursor-pointer ring-2 ring-[#5D3FD3]/30' : ''}`}
-        >
-          <p className="text-xs font-black uppercase tracking-widest text-zk-black/50 px-0.5">
-            Answer bank {selectedChipId ? '· tap here to return' : ''}
-          </p>
-          <motion.div layout className={`${poolGrid} w-full`}>
-            {pool.length === 0 ? (
-              <div
-                className={`col-span-full min-h-[64px] sm:min-h-[72px] rounded-lg border-2 border-dashed flex items-center justify-center px-3 ${
-                  selectedChipId && !isDisabled
-                    ? 'border-[#5D3FD3] bg-[#5D3FD3]/10'
-                    : 'border-zk-black/20 bg-transparent'
-                }`}
-              >
-                <p className="text-xs sm:text-sm font-bold text-zk-black/40 text-center leading-tight">
-                  {selectedChipId && !isDisabled
-                    ? 'Tap or drop here to return a step'
-                    : 'Drag steps back here to reorder'}
-                </p>
-              </div>
-            ) : (
-              <AnimatePresence mode="popLayout" initial={false}>
-                {pool.map((itemId) => {
-                  const answer = answerMap[itemId];
-                  if (!answer) return null;
-                  return (
-                    <motion.div
-                      key={itemId}
-                      layout
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.92 }}
-                      transition={CHIP_LAYOUT}
-                      className="min-w-0"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      <PoolChip
-                        answer={answer}
-                        onPointerDown={handlePointerDown(itemId)}
-                        onClick={() => handleChipSelect(itemId)}
-                        disabled={isDisabled}
-                        isDragging={draggingId === itemId}
-                        isSelected={selectedChipId === itemId}
-                        compact
-                      />
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            )}
-          </motion.div>
-        </motion.div>
-      </LayoutGroup>
+        <AnswerBank
+          inPanel={inPanel}
+          selectedChipId={selectedChipId}
+          isDisabled={isDisabled}
+          onReturnSelected={returnSelectedToPool}
+          poolGrid={poolGrid}
+          pool={pool}
+          answerMap={answerMap}
+          activeId={activeId}
+          selectedChipIdState={selectedChipId}
+          onChipSelect={handleChipSelect}
+          isDisabledState={isDisabled}
+          bankHighlighted={bankHighlighted}
+        />
 
-      <motion.button
-        type="button"
-        layout
-        whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
-        onClick={handleSubmit}
-        disabled={!isComplete || isDisabled}
-        className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
-          isComplete && !isDisabled
-            ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
-            : inPanel
-              ? 'bg-zk-black/10 text-zk-black/35 cursor-not-allowed'
-              : 'bg-white/30 text-white/50 cursor-not-allowed'
-        }`}
-      >
-        <Send size={16} />
-        Lock in order
-      </motion.button>
-    </div>
+        <motion.button
+          type="button"
+          layout
+          whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
+          onClick={handleSubmit}
+          disabled={!isComplete || isDisabled}
+          className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
+            isComplete && !isDisabled
+              ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
+              : inPanel
+                ? 'bg-zk-black/10 text-zk-black/35 cursor-not-allowed'
+                : 'bg-white/30 text-white/50 cursor-not-allowed'
+          }`}
+        >
+          <Send size={16} />
+          Lock in order
+        </motion.button>
+      </div>
+
+      <DragOverlay dropAnimation={null}>
+        {activeAnswer ? (
+          <div className="opacity-90 cursor-grabbing pointer-events-none">
+            <PoolChip answer={activeAnswer} disabled compact fillWidth />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }

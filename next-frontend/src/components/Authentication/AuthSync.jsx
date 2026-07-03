@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 export default function AuthSync() {
   const { isSignedIn, getToken } = useAuth();
@@ -58,6 +59,7 @@ export default function AuthSync() {
       } else if (isSignedIn === false) {
         localStorage.removeItem('zinko_jwt');
         setJwtReady(false);
+        useNotificationStore.getState().invalidate();
         console.log('[AuthSync] Token removed due to sign out');
       }
     };

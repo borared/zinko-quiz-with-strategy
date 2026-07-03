@@ -5,7 +5,7 @@ import { Quote } from 'lucide-react';
 const Testimonial = () => {
   return (
     <div className="w-full max-w-6xl mx-auto mt-20 mb-20">
-      <div className="bg-zk-blue border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 flex flex-col lg:flex-row items-center gap-10 rounded-xl">
+      <div className="bg-zk-blue border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 flex flex-col lg:flex-row items-center gap-10 rounded-xl">
         
         {/* Left Side: Quote */}
         <div className="flex-1 text-white">
