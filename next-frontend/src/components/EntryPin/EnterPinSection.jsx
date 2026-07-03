@@ -110,7 +110,7 @@ const EnterPinSection = () => {
         <motion.div
           animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
-          className="w-full bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
+          className="w-full bg-white border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
         >
 
           {/* Input Box */}
@@ -123,7 +123,7 @@ const EnterPinSection = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
               placeholder="0 0 0 0 0 0"
               disabled={loading}
-              className="w-full border-[3px] border-zk-black p-4 text-center text-3xl md:text-4xl tracking-[0.3em] md:tracking-[0.5em] font-bold text-zk-black placeholder-gray-200 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl disabled:opacity-60"
+              className="w-full border-[3px] border-zk-black p-4 text-center text-4xl md:text-5xl gasoek-one-regular tracking-widest leading-none text-zk-black placeholder:text-gray-200 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl disabled:opacity-60"
             />
           </div>
 
@@ -142,7 +142,7 @@ const EnterPinSection = () => {
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
             disabled={loading || pin.length < 6}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {loading ? (
