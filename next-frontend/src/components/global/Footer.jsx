@@ -1,14 +1,13 @@
 "use client";
 import React from 'react';
-import { Share2, AtSign } from 'lucide-react';
-
 import Link from 'next/link';
+import { Share2, AtSign } from 'lucide-react';
+import FooterLottie from '@/components/global/FooterLottie';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0a0a0a] text-white py-16 px-6 font-sans">
+    <footer className="relative z-20 bg-[#0a0a0a] text-white py-16 px-6 font-sans">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-        
         {/* Column 1: Brand & About */}
         <div className="flex flex-col gap-6">
           <div className="inline-block">
@@ -45,15 +44,15 @@ const Footer = () => {
         <div className="flex flex-col gap-4">
           <h4 className="text-zk-yellow font-bold text-lg mb-2">FOLLOW US</h4>
           <div className="flex items-center gap-4">
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="bg-white text-black p-2 hover:bg-gray-200 transition-colors flex items-center justify-center"
               aria-label="Share"
             >
               <Share2 size={24} strokeWidth={2} />
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="bg-white text-black p-2 hover:bg-gray-200 transition-colors flex items-center justify-center"
               aria-label="Email / At"
             >
@@ -61,11 +60,14 @@ const Footer = () => {
             </a>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto flex justify-center py-6">
+        <FooterLottie />
       </div>
 
       {/* Copyright */}
-      <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+      <div className="max-w-6xl mx-auto pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
         Copyright © 2026, Zinko All Rights Reserved.
       </div>
     </footer>

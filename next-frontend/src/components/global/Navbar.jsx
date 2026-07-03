@@ -152,10 +152,10 @@ const Navbar = () => {
                     </button>
 
                     <button
-                      onClick={() => { setMenuOpen(false); }}
+                      onClick={() => { setMenuOpen(false); router.push('/settings'); }}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[2px] border-zk-black font-bold text-zk-black text-sm transition-colors"
                     >
-                      <Settings size={16} /> Setting
+                      <Settings size={16} /> Settings
                     </button>
 
                     <button
@@ -266,6 +266,7 @@ const Navbar = () => {
                   setShowModal(false);
                   clearNavAuthCache();
                   setCachedAuth(null);
+                  useNotificationStore.getState().invalidate();
                   signOut();
                 }}
                 className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
