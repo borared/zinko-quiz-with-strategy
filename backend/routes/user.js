@@ -4,10 +4,10 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-/**
- * GET /api/user/dashboard
- * Protected — example of a user-specific protected route.
- */
 router.get('/dashboard', requireCustomAuth, userController.getDashboard);
+router.get('/settings', requireCustomAuth, userController.getSettings);
+router.patch('/settings', requireCustomAuth, userController.patchSettings);
+router.patch('/username', requireCustomAuth, userController.patchUsername);
+router.delete('/account', requireCustomAuth, userController.deleteAccount);
 
 module.exports = router;
