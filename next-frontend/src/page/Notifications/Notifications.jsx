@@ -129,7 +129,9 @@ export default function Notifications() {
     markAllAsRead,
     clearAllNotifications,
     collectSceneryGift,
+    isCachedForUser,
   } = useNotificationStore();
+  const notificationsCached = Boolean(user?.id && isCachedForUser(user.id));
   const { fetchOwnedScenery, syncNewScenerySlugs } = useOwnedSceneryStore();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
   const [collectingId, setCollectingId] = useState(null);
@@ -230,7 +232,7 @@ export default function Notifications() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {isLoading ? (
+          {isLoading && !notificationsCached ? (
             <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
               <Loader2 className="animate-spin w-12 h-12 text-zk-black mb-4" />
               <h2 className="text-2xl font-black text-zk-black">Loading Notifications...</h2>
