@@ -43,4 +43,22 @@ export const useDiscoveryQuizStore = create((set, get) => ({
       };
     });
   },
+
+  updateCreatorUsername: (clerkId, username) => {
+    if (!clerkId) return;
+    set((state) => {
+      const nextCaches = {};
+      for (const [key, cache] of Object.entries(state.caches)) {
+        nextCaches[key] = {
+          ...cache,
+          quizzes: cache.quizzes.map((quiz) =>
+            quiz.creator?.clerk_id === clerkId
+              ? { ...quiz, creator: { ...quiz.creator, username } }
+              : quiz
+          ),
+        };
+      }
+      return { caches: nextCaches };
+    });
+  },
 }));
