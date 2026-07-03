@@ -1,7 +1,9 @@
 const { z } = require('zod');
 const quizService = require('../services/quizService');
+const userRepository = require('../repositories/userRepository');
 const handleError = require('../lib/errorHandler');
 const { stripQuizCorrectAnswers } = require('../lib/quizSanitizer');
+const { ALLOWED_TIME_LIMITS } = require('../lib/questionTimeLimit');
 
 // ─── Zod Validation Schemas ──────────────────────────────────────────────────
 const answerSchema = z.object({
@@ -21,8 +23,8 @@ const questionSchema = z.object({
   image_url: z.string().nullable().optional(),
   question_type: z.enum(['multiple_choice', 'true_false', 'drag_layers', 'line_matching']).optional().default('multiple_choice'),
   answers: z.array(answerSchema).min(2, 'At least 2 answers required per question'),
-  time_limit: z.number().int().refine((value) => [20, 30, 60].includes(value), {
-    message: 'Time limit must be 20, 30, or 60 seconds',
+  time_limit: z.number().int().refine((value) => ALLOWED_TIME_LIMITS.includes(value), {
+    message: `Time limit must be one of: ${ALLOWED_TIME_LIMITS.join(', ')} seconds`,
   }).optional().default(20),
   round: z.number().int().positive().optional().default(1),
 }).superRefine((question, ctx) => {
@@ -142,7 +144,16 @@ const createQuiz = async (req, res) => {
     const { title, questions, cover_image } = parsed.data;
     const creator_id = req.user.userId;
 
-    const quiz = await quizService.createQuiz({ title, creator_id, questions, cover_image });
+    const user = await userRepository.getUserSettings(creator_id);
+    const defaultVisibility = user?.settings?.privacy?.defaultQuizVisibility === 'public';
+
+    const quiz = await quizService.createQuiz({
+      title,
+      creator_id,
+      questions,
+      cover_image,
+      is_public: defaultVisibility,
+    });
 
     console.log(`✅ Quiz saved: ${quiz.title} by ${creator_id}`);
     res.status(201).json({ message: 'Quiz saved successfully', quiz });
