@@ -10,6 +10,19 @@ import {
 import { getPlayLayerColor } from '@/lib/dragLayersUtils';
 
 const DRAG_THRESHOLD_PX = 6;
+const CURVE_SPREAD_PX = 34;
+
+function getCurveBend(leftIndex, totalItems) {
+  if (totalItems <= 1) return 0;
+  const center = (totalItems - 1) / 2;
+  return (leftIndex - center) * CURVE_SPREAD_PX;
+}
+
+function buildCurvePath(x1, y1, x2, y2, bend = 0) {
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2 + bend;
+  return `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`;
+}
 
 function MatchItem({
   item,
@@ -26,11 +39,12 @@ function MatchItem({
   const isRightConnected = side === 'right' && isConnected;
   const showFullColor = isRightConnected || !disabled;
   const playColor = getPlayLayerColor(item.color, colorIndex);
+  const showLinkIcon = isSelected || isDropTarget || isConnected;
+  const isTapReady = side === 'right' && isDropTarget;
 
   return (
     <motion.button
       type="button"
-      layout
       ref={itemRef}
       data-match-id={item.id}
       data-match-side={side}
@@ -38,30 +52,40 @@ function MatchItem({
       onPointerDown={onPointerDown}
       disabled={disabled}
       animate={{
-        scale: isSelected || isDropTarget ? 1.02 : 1,
-        opacity: showFullColor ? 1 : 0.45,
+        scale: isSelected ? 1.04 : isDropTarget ? 1.02 : 1,
+        opacity: showFullColor ? 1 : 0.5,
         boxShadow: isSelected
-          ? '0 0 0 3px #FFCD29'
+          ? '0 0 0 4px #FFCD29, 0 0 18px rgba(255,205,41,0.45)'
           : isDropTarget
-            ? '0 0 0 3px #FFCD29'
+            ? '0 0 0 3px #FFCD29, 0 0 12px rgba(255,205,41,0.3)'
             : isConnected
-              ? '0 0 0 2px #5D3FD3'
+              ? '0 0 0 2px rgba(93,63,211,0.85)'
               : '0 0 0 rgba(0,0,0,0)',
       }}
-      transition={{ layout: { type: 'spring', stiffness: 420, damping: 32 } }}
-      className={`flex items-start gap-2 px-3 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black ${playColor} text-white w-full max-w-[12rem] sm:max-w-[14rem] min-w-0 text-left select-none ${
+      transition={{ duration: 0.15 }}
+      className={`flex items-center gap-2 px-3 py-3 rounded-xl border-[3px] border-zk-black ${playColor} text-white w-full max-w-[12rem] sm:max-w-[14rem] min-w-0 min-h-[4.25rem] sm:min-h-[4.75rem] text-left select-none ${
+        side === 'right' ? 'sm:max-w-[15rem]' : ''
+      } ${
         disabled && !isRightConnected ? 'cursor-not-allowed' : side === 'left' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
-      }`}
+      } ${isTapReady ? 'ring-2 ring-[#FFCD29]/80' : ''}`}
     >
-      <Link2 size={14} className="shrink-0 opacity-70 mt-0.5" />
-      <span className="font-black text-sm sm:text-base leading-snug break-words pointer-events-none line-clamp-3">
+      {showLinkIcon && (
+        <Link2 size={14} className="shrink-0 opacity-80" />
+      )}
+      <span
+        className={`font-black leading-snug break-words pointer-events-none flex-1 ${
+          side === 'right'
+            ? 'text-xs sm:text-sm line-clamp-2'
+            : 'text-sm sm:text-base line-clamp-2'
+        }`}
+      >
         {displayAnswerText(item.text) || '—'}
       </span>
     </motion.button>
   );
 }
 
-export default function LineMatchingPlay({
+function LineMatchingBoard({
   question,
   phase,
   selectedId,
@@ -75,11 +99,11 @@ export default function LineMatchingPlay({
 
   const [connections, setConnections] = useState({});
   const [activeLeftId, setActiveLeftId] = useState(null);
-  const [lineCoords, setLineCoords] = useState([]);
   const [dragLine, setDragLine] = useState(null);
   const [hoverRightId, setHoverRightId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [settledLines, setSettledLines] = useState([]);
 
   const boardRef = useRef(null);
   const itemRefs = useRef({});
@@ -107,7 +131,6 @@ export default function LineMatchingPlay({
     cleanupDragListeners();
     setConnections({});
     setActiveLeftId(null);
-    setLineCoords([]);
     setDragLine(null);
     setHoverRightId(null);
     setIsDragging(false);
@@ -144,6 +167,47 @@ export default function LineMatchingPlay({
     };
   }, []);
 
+  const refreshSettledLines = useCallback(() => {
+    const lines = Object.entries(connections).map(([leftId, rightId]) => {
+      const start = getAnchorPoint(leftId, 'left');
+      const end = getAnchorPoint(rightId, 'right');
+      if (!start || !end) return null;
+
+      const leftIndex = leftItems.findIndex((item) => item.id === leftId);
+      const bend = getCurveBend(leftIndex, leftItems.length);
+
+      return {
+        leftId,
+        rightId,
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        bend,
+        path: buildCurvePath(start.x, start.y, end.x, end.y, bend),
+      };
+    }).filter(Boolean);
+    setSettledLines(lines);
+  }, [connections, getAnchorPoint, leftItems]);
+
+  useLayoutEffect(() => {
+    refreshSettledLines();
+  }, [refreshSettledLines]);
+
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board) return undefined;
+
+    const observer = new ResizeObserver(() => refreshSettledLines());
+    observer.observe(board);
+    window.addEventListener('resize', refreshSettledLines);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', refreshSettledLines);
+    };
+  }, [refreshSettledLines]);
+
   const getRightIdAtPoint = useCallback((clientX, clientY) => {
     for (const item of rightItems) {
       const node = itemRefs.current[item.id];
@@ -167,30 +231,6 @@ export default function LineMatchingPlay({
     setActiveLeftId(null);
   }, [isDisabled]);
 
-  const updateLines = useCallback(() => {
-    const nextLines = Object.entries(connections).map(([leftId, rightId]) => {
-      const start = getAnchorPoint(leftId, 'left');
-      const end = getAnchorPoint(rightId, 'right');
-      if (!start || !end) return null;
-
-      return {
-        key: `${leftId}-${rightId}`,
-        x1: start.x,
-        y1: start.y,
-        x2: end.x,
-        y2: end.y,
-      };
-    }).filter(Boolean);
-
-    setLineCoords(nextLines);
-  }, [connections, getAnchorPoint]);
-
-  useLayoutEffect(() => {
-    updateLines();
-    window.addEventListener('resize', updateLines);
-    return () => window.removeEventListener('resize', updateLines);
-  }, [updateLines, leftItems, rightItems, connections, dragLine, hoverRightId]);
-
   const updateDragPointer = useCallback((clientX, clientY) => {
     const { leftId, startX, startY } = dragRef.current;
     if (!leftId) return;
@@ -203,15 +243,22 @@ export default function LineMatchingPlay({
 
     const point = getBoardPoint(clientX, clientY);
     const anchor = getAnchorPoint(leftId, 'left');
+    const x1 = anchor?.x ?? point.x;
+    const y1 = anchor?.y ?? point.y;
+    const leftIndex = leftItems.findIndex((item) => item.id === leftId);
+    const bend = getCurveBend(leftIndex, leftItems.length);
+
     setDragLine({
       leftId,
-      x1: anchor?.x ?? point.x,
-      y1: anchor?.y ?? point.y,
+      x1,
+      y1,
       x2: point.x,
       y2: point.y,
+      bend,
+      path: buildCurvePath(x1, y1, point.x, point.y, bend),
     });
     setHoverRightId(getRightIdAtPoint(clientX, clientY));
-  }, [getAnchorPoint, getBoardPoint, getRightIdAtPoint]);
+  }, [getAnchorPoint, getBoardPoint, getRightIdAtPoint, leftItems]);
 
   const finishDrag = useCallback((clientX, clientY) => {
     cleanupDragListeners();
@@ -277,6 +324,7 @@ export default function LineMatchingPlay({
       pointerId: event.pointerId,
     };
 
+    setActiveLeftId(leftId);
     setDragActive(true);
     attachDragListeners(event.pointerId);
     updateDragPointer(event.clientX, event.clientY);
@@ -301,36 +349,39 @@ export default function LineMatchingPlay({
   const dropModeReady = dragActive || isDragging;
 
   return (
-    <div className={`flex flex-col flex-1 min-h-0 gap-3 relative ${inPanel ? '' : 'px-3 pb-4 mt-3'}`}>
-      <p className="text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/45">
-        Drag a line from left to right, or tap left then right
-      </p>
+    <div
+      className={`flex flex-col relative ${
+        inPanel ? 'w-full h-auto gap-3 sm:gap-4' : 'flex-1 min-h-0 gap-3 px-3 pb-4 mt-3'
+      }`}
+    >
+      {!inPanel && (
+        <p className="text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/45 shrink-0">
+          Drag a line from left to right, or tap left then right
+        </p>
+      )}
 
       <div
         ref={boardRef}
-        className={`relative flex-1 min-h-0 ${dragActive ? 'cursor-grabbing' : ''}`}
+        className={`relative shrink-0 ${dragActive ? 'cursor-grabbing' : ''}`}
         style={{ touchAction: dragActive ? 'none' : 'manipulation' }}
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-[1]" aria-hidden="true">
-          {lineCoords.map((line) => (
-            <line
-              key={line.key}
-              x1={line.x1}
-              y1={line.y1}
-              x2={line.x2}
-              y2={line.y2}
+          {settledLines.map((line) => (
+            <path
+              key={`${line.leftId}-${line.rightId}`}
+              d={line.path}
+              fill="none"
               stroke="#5D3FD3"
               strokeWidth="4"
               strokeLinecap="round"
+              opacity="0.92"
             />
           ))}
           {dragLine && (
             <>
-              <line
-                x1={dragLine.x1}
-                y1={dragLine.y1}
-                x2={dragLine.x2}
-                y2={dragLine.y2}
+              <path
+                d={dragLine.path}
+                fill="none"
                 stroke="#5D3FD3"
                 strokeWidth="4"
                 strokeLinecap="round"
@@ -348,9 +399,9 @@ export default function LineMatchingPlay({
           )}
         </svg>
 
-        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-0 sm:gap-x-24 md:gap-x-32">
-          <div className="flex flex-col gap-2 min-w-0 items-center sm:items-end">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/40 w-full max-w-[12rem] sm:max-w-[14rem] text-center sm:text-right">Left</p>
+        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-0 sm:gap-x-20 md:gap-x-28">
+          <div className="flex flex-col gap-3 min-w-0 items-center sm:items-end">
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/55 w-full max-w-[12rem] sm:max-w-[14rem] text-center sm:text-right">Left</p>
             {leftItems.map((item, index) => (
               <MatchItem
                 key={item.id}
@@ -367,8 +418,8 @@ export default function LineMatchingPlay({
             ))}
           </div>
 
-          <div className="flex flex-col gap-2 min-w-0 items-center sm:items-start">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/40 w-full max-w-[12rem] sm:max-w-[14rem] text-center sm:text-left">Right</p>
+          <div className="flex flex-col gap-3 min-w-0 items-center sm:items-start">
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/55 w-full max-w-[12rem] sm:max-w-[15rem] text-center sm:text-left">Right</p>
             {rightItems.map((item, index) => (
               <MatchItem
                 key={item.id}
@@ -389,11 +440,10 @@ export default function LineMatchingPlay({
 
       <motion.button
         type="button"
-        layout
         whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
         onClick={handleSubmit}
         disabled={!isComplete || isDisabled}
-        className={`w-full sm:w-auto mx-auto shrink-0 mt-2 flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
+        className={`w-full sm:w-auto mx-auto shrink-0 ${inPanel ? 'mt-4 sm:mt-5 mb-2 sm:mb-3' : 'mt-4 sm:mt-5'} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
           isComplete && !isDisabled
             ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
             : inPanel
@@ -406,4 +456,12 @@ export default function LineMatchingPlay({
       </motion.button>
     </div>
   );
+}
+
+export default function LineMatchingPlay(props) {
+  if (!isLineMatchingQuestion(props.question?.questionType)) {
+    return null;
+  }
+
+  return <LineMatchingBoard {...props} />;
 }
