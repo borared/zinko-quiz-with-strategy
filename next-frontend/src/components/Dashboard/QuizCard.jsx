@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
 import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
+import { formatDiscoveryCreatorName } from '@/lib/creatorDisplay';
 
 import { z } from 'zod';
 
@@ -162,7 +163,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   setShowPublicModal(true);
                 }
               }}
-              className={`p-2 rounded-full border-[2px] border-zk-black shadow-[2px_2px_0_0_#000] zk-btn-press ${isPublicLocal ? 'bg-zk-green text-zk-black' : 'bg-white text-zk-black'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`p-2 rounded-full border-[2px] border-zk-black shadow-none ${isPublicLocal ? 'bg-zk-green text-zk-black' : 'bg-white text-zk-black'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isPublicLocal ? <Globe size={16} /> : <Lock size={16} />}
             </button>
@@ -210,7 +211,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
             </p>
             {isDiscoveryMode && quiz.creator && (
               <p className="text-xs text-zk-blue font-bold">
-                By {[quiz.creator.first_name, quiz.creator.last_name].filter(Boolean).join(' ') || quiz.creator.username || 'Unknown'}
+                By {formatDiscoveryCreatorName(quiz.creator)}
               </p>
             )}
           </div>
@@ -291,7 +292,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               <div>
                 <h3 className="text-3xl font-black text-zk-black uppercase leading-none">{quiz.title}</h3>
                 <p className="text-zk-black/70 font-bold mt-1 text-sm">
-                  By {[quiz.creator?.first_name, quiz.creator?.last_name].filter(Boolean).join(' ') || quiz.creator?.username || 'Unknown'} • {questions.length} Questions
+                  By {formatDiscoveryCreatorName(quiz.creator)} • {questions.length} Questions
                 </p>
               </div>
               <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-black w-8 h-8 flex items-center justify-center font-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
@@ -336,7 +337,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       {showPublicModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
-            <h3 className="text-xl font-black mb-2 text-zk-black uppercase text-center">
+            <h3 className="font-['Outfit'] text-xl font-black mb-2 text-zk-black uppercase text-center">
               {isPublicLocal ? "Make Private?" : "Make Public?"}
             </h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">
