@@ -27,6 +27,8 @@ export default function RootLayout({ children }) {
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://content-panda-63.clerk.accounts.dev" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://content-panda-63.clerk.accounts.dev" />
           <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet" />
         </head>
         <body className={`min-h-screen bg-zk-yellow flex flex-col font-sans ${amaticSC.variable}`}>
