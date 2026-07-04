@@ -53,7 +53,7 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
           onClick={() => router.push('/create-game')}
           className="zk-panel border-dashed p-12 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white transition-colors min-h-[280px] text-center"
         >
-          <div className="w-16 h-16 rounded-full border-[3px] border-zk-black bg-zk-yellow flex items-center justify-center shadow-[4px_4px_0_0_#000]">
+          <div className="w-16 h-16 rounded-full border-[3px] border-zk-black bg-zk-yellow flex items-center justify-center">
             <Plus size={32} strokeWidth={3} />
           </div>
           <h3 className="zk-section-title text-3xl">Start Your First Quiz</h3>
@@ -75,7 +75,7 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
               onKeyDown={(e) => e.key === 'Enter' && router.push('/create-game')}
               className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/70 cursor-pointer hover:bg-white hover:-translate-y-0.5 transition-all h-[320px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl group"
             >
-              <div className="w-14 h-14 rounded-full border-[3px] border-zk-black flex items-center justify-center bg-zk-purple text-white group-hover:scale-105 transition-transform shadow-[3px_3px_0_0_#000]">
+              <div className="w-14 h-14 rounded-full border-[3px] border-zk-black flex items-center justify-center bg-zk-purple text-white group-hover:scale-105 transition-transform">
                 <Plus size={28} strokeWidth={3} />
               </div>
               <p className="font-bold text-zk-black amatic-sc-regular text-2xl">Create New Quiz</p>
