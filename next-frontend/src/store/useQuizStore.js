@@ -15,6 +15,24 @@ import { formatQuestionForSave, validateQuizForSave } from '@/lib/validateQuizSa
 
 export const QUIZ_TITLE_MAX_LENGTH = 15;
 
+function normalizeRound(round) {
+  const parsed = Number(round);
+  return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
+}
+
+function getRoundQuestions(questions, round) {
+  const normalizedRound = normalizeRound(round);
+  return questions.filter((question) => normalizeRound(question.round) === normalizedRound);
+}
+
+function pickActiveQuestionIdForRound(questions, round, currentActiveId = null) {
+  const roundQuestions = getRoundQuestions(questions, round);
+  if (roundQuestions.some((question) => question.id === currentActiveId)) {
+    return currentActiveId;
+  }
+  return roundQuestions[0]?.id ?? null;
+}
+
 export const useQuizStore = create((set, get) => ({
   questions: [],
   deletedQuestions: [],
@@ -26,7 +44,17 @@ export const useQuizStore = create((set, get) => ({
   loading: false,
 
   setActiveQuestionId: (id) => set({ activeQuestionId: id }),
-  setActiveRound: (round) => set({ activeRound: round }),
+  setActiveRound: (round) => set((state) => {
+    const nextRound = normalizeRound(round);
+    return {
+      activeRound: nextRound,
+      activeQuestionId: pickActiveQuestionIdForRound(
+        state.questions,
+        nextRound,
+        state.activeQuestionId
+      ),
+    };
+  }),
   setQuizTitle: (title) =>
     set({ quizTitle: String(title).slice(0, QUIZ_TITLE_MAX_LENGTH) }),
   setCoverImage: (image) => set({ coverImage: image }),
@@ -55,30 +83,58 @@ export const useQuizStore = create((set, get) => ({
       const data = await api.get(`/api/quizzes/${quizId}`);
       set({ quizTitle: data.title, coverImage: data.cover_image });
 
-      const formattedQuestions = data.questions.map(q => {
-        const answers = (q.answers || []).map((ans, index) => ({
-          ...ans,
-          checked: !!ans.isCorrect,
-          layerIndex: Number.isInteger(ans.layerIndex) ? ans.layerIndex : index,
-          side: ans.side,
-          matchId: ans.matchId,
-          pairIndex: Number.isInteger(ans.pairIndex) ? ans.pairIndex : undefined,
-        }));
+      const formattedQuestions = data.questions.map((q) => {
+        const questionType = resolveQuestionType({
+          question_type: q.question_type,
+          questionType: q.question_type,
+          answers: q.answers || [],
+        });
+
+        const answers = (q.answers || []).map((ans, index) => {
+          const base = {
+            ...ans,
+            checked: !!ans.isCorrect,
+          };
+
+          if (questionType === QUESTION_TYPES.DRAG_LAYERS) {
+            return {
+              ...base,
+              layerIndex: Number.isInteger(ans.layerIndex) ? ans.layerIndex : index,
+            };
+          }
+
+          if (questionType === QUESTION_TYPES.LINE_MATCHING) {
+            return {
+              ...base,
+              side: ans.side,
+              matchId: ans.matchId,
+              pairIndex: Number.isInteger(ans.pairIndex) ? ans.pairIndex : undefined,
+            };
+          }
+
+          return base;
+        });
+
         return {
           id: q.id,
           text: q.question_text,
           answers,
-          questionType: resolveQuestionType({ ...q, answers }),
+          questionType,
           image: q.image_url,
-          round: q.round || 1,
+          round: normalizeRound(q.round),
           time_limit: normalizeTimeLimit(q.time_limit),
         };
       });
 
-      set({ questions: formattedQuestions });
-      if (formattedQuestions.length > 0) {
-        set({ activeQuestionId: formattedQuestions[0].id });
-      }
+      const initialRound = 1;
+      set({
+        questions: formattedQuestions,
+        activeRound: initialRound,
+        activeQuestionId: pickActiveQuestionIdForRound(
+          formattedQuestions,
+          initialRound
+        ),
+      });
     } catch {
       if (showToast) showToast('Failed to load quiz data', 'error');
     } finally {
@@ -92,7 +148,7 @@ export const useQuizStore = create((set, get) => ({
     const newQuestion = {
       id: newId,
       text: '',
-      round: state.activeRound,
+      round: normalizeRound(state.activeRound),
       questionType: QUESTION_TYPES.MULTIPLE_CHOICE,
       answers: createMultipleChoiceAnswers('A'),
       image: null,
@@ -135,7 +191,7 @@ export const useQuizStore = create((set, get) => ({
       const globalIndexToDelete = state.questions.findIndex(q => q.id === id);
       
       // Calculate what to select based on the current round's visual list
-      const roundQuestions = state.questions.filter(q => q.round === state.activeRound);
+      const roundQuestions = getRoundQuestions(state.questions, state.activeRound);
       const indexInRound = roundQuestions.findIndex(q => q.id === id);
       const remainingInRound = roundQuestions.filter(q => q.id !== id);
       
@@ -236,8 +292,7 @@ export const useQuizStore = create((set, get) => ({
     const difficulty = activeRound === 1 ? 'Easy' : activeRound === 2 ? 'Medium' : 'Hard';
     const enhancedPrompt = `[Round ${activeRound} - ${difficulty} Difficulty] ${prompt}`;
 
-    const existingQuestionsInRound = state.questions
-      .filter(q => q.round === activeRound)
+    const existingQuestionsInRound = getRoundQuestions(state.questions, activeRound)
       .map((q, idx) => {
         const type = q.questionType || QUESTION_TYPES.MULTIPLE_CHOICE;
         let line = `Q${idx + 1} [${type}]: ${q.text}`;
@@ -268,7 +323,9 @@ export const useQuizStore = create((set, get) => ({
       const newFormattedQuestions = formatAiQuestions(data.questions, activeRound);
 
       set((state) => {
-        const otherRounds = state.questions.filter(q => q.round !== activeRound);
+        const otherRounds = state.questions.filter(
+          (q) => normalizeRound(q.round) !== normalizeRound(activeRound)
+        );
         const updatedQuestions = [...otherRounds, ...newFormattedQuestions];
         const newActiveId = newFormattedQuestions.length > 0 ? newFormattedQuestions[0].id : state.activeQuestionId;
         
