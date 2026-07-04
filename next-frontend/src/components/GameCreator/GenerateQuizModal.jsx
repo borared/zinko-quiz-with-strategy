@@ -41,7 +41,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full p-6 relative rounded-xl">
+      <div className="bg-white border-[4px] border-zk-black max-w-lg w-full p-6 relative rounded-xl">
         {/* Close Button */}
         <button 
           onClick={onClose}
@@ -91,7 +91,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
           <button 
             type="submit" 
             disabled={loading}
-            className="bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+            className="border-[3px] border-zk-black bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
           >
             {loading ? (
               <>
