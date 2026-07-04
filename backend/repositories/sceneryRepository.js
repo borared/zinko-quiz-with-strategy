@@ -1,9 +1,44 @@
 const prisma = require('../lib/prisma');
+const { SCENERY_PRICES_CENTS } = require('../lib/shopConstants');
 
 const ensureCatalog = async () => {
   const catalog = [
-    { slug: 'city', name: 'City', image_url: '/background_battle/city.jpg', is_default: true },
-    { slug: 'halloween', name: 'Halloween', image_url: '/background_battle/halloween_scenery.jpg', is_default: false },
+    {
+      slug: 'city',
+      name: 'City',
+      image_url: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/city.jpg',
+      is_default: true,
+      is_purchasable: false,
+      price_coins: null,
+      price_cents: null,
+    },
+    {
+      slug: 'halloween',
+      name: 'Halloween',
+      image_url: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/halloween_scenery.jpg',
+      is_default: false,
+      is_purchasable: true,
+      price_coins: null,
+      price_cents: SCENERY_PRICES_CENTS.halloween,
+    },
+    {
+      slug: 'inside',
+      name: 'Inside',
+      image_url: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/inside_scenery.jpg',
+      is_default: false,
+      is_purchasable: true,
+      price_coins: null,
+      price_cents: SCENERY_PRICES_CENTS.inside,
+    },
+    {
+      slug: 'ghost-station',
+      name: 'Ghost Station',
+      image_url: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/ghost_station.jpg',
+      is_default: false,
+      is_purchasable: true,
+      price_coins: null,
+      price_cents: SCENERY_PRICES_CENTS['ghost-station'],
+    },
   ];
 
   await Promise.all(
@@ -14,6 +49,9 @@ const ensureCatalog = async () => {
           name: entry.name,
           image_url: entry.image_url,
           is_default: entry.is_default,
+          is_purchasable: entry.is_purchasable,
+          price_coins: entry.price_coins,
+          price_cents: entry.price_cents,
         },
         create: entry,
       })
