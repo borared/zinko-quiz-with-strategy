@@ -22,9 +22,27 @@ const getAuthHeaders = () => {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
+function buildNetworkError(error) {
+  const message =
+    error?.message === 'Failed to fetch'
+      ? `Unable to reach the Zinko API at ${API_URL}. Check your internet connection and confirm the backend server is running.`
+      : error?.message || 'Network request failed.';
+  const err = new Error(message);
+  err.isNetworkError = true;
+  return err;
+}
+
+async function request(url, options = {}) {
+  try {
+    return await fetch(url, options);
+  } catch (error) {
+    throw buildNetworkError(error);
+  }
+}
+
 const api = {
   get: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       headers: { ...getAuthHeaders() },
       credentials: 'include',
     });
@@ -36,7 +54,7 @@ const api = {
   },
   
   post: async (endpoint, data) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       credentials: 'include',
@@ -50,7 +68,7 @@ const api = {
   },
 
   postForm: async (endpoint, formData) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       method: 'POST',
       headers: { ...getAuthHeaders() },
       credentials: 'include',
@@ -64,7 +82,7 @@ const api = {
   },
 
   put: async (endpoint, data) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       credentials: 'include',
@@ -78,7 +96,7 @@ const api = {
   },
 
   patch: async (endpoint, data) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       credentials: 'include',
@@ -92,7 +110,7 @@ const api = {
   },
 
   delete: async (endpoint) => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await request(`${API_URL}${endpoint}`, {
       method: 'DELETE',
       headers: { ...getAuthHeaders() },
       credentials: 'include',
