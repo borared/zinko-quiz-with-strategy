@@ -3,7 +3,10 @@ import { normalizeTimeLimit } from '@/lib/timeLimit';
 
 function validateQuestion(question, index) {
   const label = `Question ${index + 1}`;
-  const questionType = resolveQuestionType(question);
+  const questionType =
+    question.questionType ||
+    question.question_type ||
+    resolveQuestionType(question);
   const answers = question.answers || [];
   if (answers.length < 2) {
     return `${label}: needs at least 2 answers.`;
@@ -71,14 +74,20 @@ function validateQuestion(question, index) {
 }
 
 export function formatQuestionForSave(question) {
-  const questionType = resolveQuestionType(question);
+  const questionType =
+    question.questionType ||
+    question.question_type ||
+    resolveQuestionType(question);
 
   return {
     id: typeof question.id === 'string' ? question.id : undefined,
     question_text: (question.text || '').trim() || 'Untitled Question',
     image_url: question.image || null,
     question_type: questionType,
-    round: question.round || 1,
+    round: (() => {
+      const parsed = Number(question.round);
+      return Number.isFinite(parsed) && parsed >= 1 ? parsed : 1;
+    })(),
     time_limit: normalizeTimeLimit(question.time_limit),
     answers: (question.answers || []).map((answer, index) => ({
       id: String(answer.id),

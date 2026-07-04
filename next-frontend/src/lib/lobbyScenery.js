@@ -4,14 +4,28 @@ export const LOBBY_SCENERY = [
     id: 'city',
     slug: 'city',
     name: 'City',
-    image: '/background_battle/city.jpg',
+    image: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/city.jpg',
     is_default: true,
   },
   {
     id: 'halloween',
     slug: 'halloween',
     name: 'Halloween',
-    image: '/background_battle/halloween_scenery.jpg',
+    image: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/halloween_scenery.jpg',
+    is_default: false,
+  },
+  {
+    id: 'inside',
+    slug: 'inside',
+    name: 'Inside',
+    image: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/inside_scenery.jpg',
+    is_default: false,
+  },
+  {
+    id: 'ghost-station',
+    slug: 'ghost-station',
+    name: 'Ghost Station',
+    image: 'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/ghost_station.jpg',
     is_default: false,
   },
 ];
@@ -29,9 +43,28 @@ export function isOwnedSceneryImage(image, ownedScenery = LOBBY_SCENERY) {
 export const DEFAULT_LOBBY_SCENERY = LOBBY_SCENERY[0].image;
 
 export const HALLOWEEN_SCENERY_IMAGE = LOBBY_SCENERY.find((s) => s.id === 'halloween')?.image ?? '';
+export const INSIDE_SCENERY_IMAGE = LOBBY_SCENERY.find((s) => s.id === 'inside')?.image ?? '';
+
+const LEGACY_HALLOWEEN_SCENERY_IMAGE = '/background_battle/halloween_scenery.jpg';
+
+export const SCENERY_AUDIO_SLUGS = ['halloween', 'inside'];
 
 export function isHalloweenScenery(image) {
-  return image === HALLOWEEN_SCENERY_IMAGE;
+  return image === HALLOWEEN_SCENERY_IMAGE || image === LEGACY_HALLOWEEN_SCENERY_IMAGE;
+}
+
+export function isInsideScenery(image) {
+  return image === INSIDE_SCENERY_IMAGE;
+}
+
+export function getSceneryAudioSlugFromImage(image) {
+  if (isHalloweenScenery(image)) return 'halloween';
+  if (isInsideScenery(image)) return 'inside';
+  return null;
+}
+
+export function sceneryAudioSessionKey(pin, slug) {
+  return `game_${pin}_scenery_audio_${slug}`;
 }
 
 export function gameBackgroundSessionKey(pin) {
