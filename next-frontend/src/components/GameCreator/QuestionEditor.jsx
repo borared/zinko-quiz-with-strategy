@@ -23,6 +23,11 @@ const QuestionEditor = () => {
     setActiveQuestionType,
   } = useQuizStore();
   const activeQuestion = questions.find(q => q.id === activeQuestionId);
+  const [pointsMode, setPointsMode] = useState('standard');
+
+  useEffect(() => {
+    setPointsMode('standard');
+  }, [activeQuestionId]);
 
   if (!activeQuestion) {
     return (
@@ -32,14 +37,11 @@ const QuestionEditor = () => {
     );
   }
 
-  const roundQuestions = questions.filter(q => q.round === activeRound);
+  const roundQuestions = questions.filter(
+    (q) => Number(q.round) === Number(activeRound)
+  );
   const questionNumber = roundQuestions.findIndex(q => q.id === activeQuestion.id) + 1;
   const timeLimit = normalizeTimeLimit(activeQuestion.time_limit ?? DEFAULT_TIME_LIMIT);
-  const [pointsMode, setPointsMode] = useState('standard');
-
-  useEffect(() => {
-    setPointsMode('standard');
-  }, [activeQuestionId]);
 
   return (
     <div className="flex flex-col gap-6 p-6 zk-panel">
@@ -127,7 +129,7 @@ const QuestionEditor = () => {
             </div>
           </div>
 
-          <button className="w-full bg-white text-zk-black border-[2px] border-zk-black py-2 font-bold text-sm flex items-center justify-center gap-2 transition-colors hover:bg-gray-50 rounded-lg mt-auto shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <button className="w-full bg-white text-zk-black border-[2px] border-zk-black py-2 font-bold text-sm flex items-center justify-center gap-2 transition-colors hover:bg-gray-50 rounded-lg mt-auto">
             <Settings size={16} />
             Advanced Question Settings
           </button>
