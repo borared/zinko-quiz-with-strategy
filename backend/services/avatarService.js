@@ -1,7 +1,7 @@
 const avatarRepository = require('../repositories/avatarRepository');
 
-const getAllAvatars = async () => {
-  return await avatarRepository.getAllAvatars();
+const getAllAvatars = async (userId = null) => {
+  return avatarRepository.getPlayableAvatars(userId);
 };
 
 module.exports = {
