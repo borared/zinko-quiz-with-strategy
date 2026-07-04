@@ -12,6 +12,7 @@ import { mergeQuizzesById } from '@/store/useDashboardQuizStore';
 import { useDiscoveryQuizStore } from '@/store/useDiscoveryQuizStore';
 import { useDayNight } from '@/hooks/useDayNight';
 
+
 const DISCOVERY_DAY_IMAGE = '/images/discovery-day.jpg';
 const DISCOVERY_NIGHT_IMAGE = '/images/discovery-night.jpg';
 
@@ -22,29 +23,22 @@ const SEARCH_PREFETCH_DEBOUNCE_MS = 200;
 
 const BROWSE_KEY = '';
 
-function getBrowseBootstrap() {
-  const cache = useDiscoveryQuizStore.getState().getCache(BROWSE_KEY);
-  if (!cache?.isHydrated) {
-    return { loading: true, quizzes: [], hasMore: false };
-  }
-  return {
-    loading: false,
-    quizzes: cache.quizzes,
-    hasMore: cache.hasNextPage,
-  };
-}
-
 const Discovery = () => {
   const { disconnectSocket } = useSocketStore();
   const isDay = useDayNight();
+  const {
+    isCached,
+    getCache,
+    setInitialCache,
+    appendQuizzes,
+    hasPersistedQuizzes,
+  } = useDiscoveryQuizStore();
 
-  const { isCached, getCache, setInitialCache, appendQuizzes } = useDiscoveryQuizStore();
-
-  const browseBootstrap = useRef(getBrowseBootstrap());
-  const [quizzes, setQuizzes] = useState(browseBootstrap.current.quizzes);
-  const [loading, setLoading] = useState(browseBootstrap.current.loading);
+  const [clientReady, setClientReady] = useState(false);
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
-  const [hasMoreQuizzes, setHasMoreQuizzes] = useState(browseBootstrap.current.hasMore);
+  const [hasMoreQuizzes, setHasMoreQuizzes] = useState(false);
 
   const [inputValue, setInputValue] = useState('');
   const [committedSearch, setCommittedSearch] = useState('');
@@ -164,10 +158,13 @@ const Discovery = () => {
   );
 
   const loadInitialQuizzes = useCallback(
-    async (search = committedSearch, { useCache = true, showSkeleton = true } = {}) => {
+    async (
+      search = committedSearch,
+      { useCache = true, showSkeleton = true, silent = false } = {}
+    ) => {
       const trimmed = search.trim();
 
-      if (useCache && isCached(trimmed) && applyCache(trimmed)) {
+      if (!silent && useCache && isCached(trimmed) && applyCache(trimmed)) {
         const cache = getCache(trimmed);
         if (cache?.hasNextPage) {
           fetchMoreQuizzes(trimmed);
@@ -175,19 +172,25 @@ const Discovery = () => {
         return;
       }
 
-      if (showSkeleton) {
-        setQuizzes([]);
-        setLoading(true);
-      }
+      if (!silent) {
+        if (showSkeleton) {
+          setQuizzes([]);
+          setLoading(true);
+        } else if (!isCached(trimmed)) {
+          setLoading(true);
+        }
 
-      setFetchError(null);
-      setHasMoreQuizzes(false);
-      paginationRef.current = {
-        nextCursor: null,
-        hasNextPage: false,
-        isFetching: false,
-        activeSearch: trimmed,
-      };
+        setFetchError(null);
+        setHasMoreQuizzes(false);
+        paginationRef.current = {
+          nextCursor: null,
+          hasNextPage: false,
+          isFetching: false,
+          activeSearch: trimmed,
+        };
+      } else {
+        paginationRef.current.activeSearch = trimmed;
+      }
 
       try {
         const searchParam = buildSearchParam(trimmed);
@@ -201,8 +204,10 @@ const Discovery = () => {
         }
       } catch (error) {
         console.error('Error fetching public quizzes:', error);
-        setFetchError(error.message || 'Error fetching public quizzes');
-        setLoading(false);
+        if (!silent) {
+          setFetchError(error.message || 'Error fetching public quizzes');
+          setLoading(false);
+        }
       }
     },
     [
@@ -261,29 +266,38 @@ const Discovery = () => {
     ]
   );
 
-  const didMountRef = useRef(false);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    useDiscoveryQuizStore.getState().hydrateFromSession();
+    setClientReady(true);
+  }, []);
 
   useEffect(() => {
     disconnectSocket();
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      if (isCached(BROWSE_KEY)) {
-        applyCache(BROWSE_KEY);
-        const cache = getCache(BROWSE_KEY);
-        if (cache?.hasNextPage) {
-          fetchMoreQuizzes(BROWSE_KEY);
-        }
-      } else {
-        loadInitialQuizzes(BROWSE_KEY);
-      }
+  }, [disconnectSocket]);
+
+  useEffect(() => {
+    if (!clientReady) return;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    if (isCached(BROWSE_KEY)) {
+      applyCache(BROWSE_KEY);
+      loadInitialQuizzes(BROWSE_KEY, {
+        useCache: false,
+        showSkeleton: false,
+        silent: true,
+      });
+      return;
     }
+
+    loadInitialQuizzes(BROWSE_KEY);
   }, [
-    disconnectSocket,
+    clientReady,
     loadInitialQuizzes,
     isCached,
     applyCache,
-    getCache,
-    fetchMoreQuizzes,
   ]);
 
   useEffect(() => {
@@ -380,7 +394,11 @@ const Discovery = () => {
     }
   };
 
-  const showGridSkeleton = loading && quizzes.length === 0;
+  const browseCached = isCached(BROWSE_KEY);
+  const hasPersistedBrowse = hasPersistedQuizzes(BROWSE_KEY);
+  const showGridSkeleton =
+    !clientReady
+    || (loading && quizzes.length === 0 && !(browseCached || hasPersistedBrowse));
 
   return (
     <WorkspaceShell sidebar={<Sidebar />}>

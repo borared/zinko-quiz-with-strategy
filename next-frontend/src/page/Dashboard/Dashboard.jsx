@@ -27,10 +27,15 @@ const Dashboard = () => {
     hasNextPage,
     nextCursor,
     isCachedForUser,
+    hasPersistedQuizzes,
     setInitialCache,
     appendQuizzes,
   } = useDashboardQuizStore();
 
+  const quizzesCached = Boolean(user?.id && isCachedForUser(user.id));
+  const hasPersistedData = hasPersistedQuizzes();
+
+  const [clientReady, setClientReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
 
@@ -84,14 +89,17 @@ const Dashboard = () => {
     }
   }, [user, appendQuizzes]);
 
-  const loadInitialQuizzes = useCallback(async () => {
+  const loadInitialQuizzes = useCallback(async ({ silent = false } = {}) => {
     if (!user) {
-      setLoading(false);
+      if (!silent) setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setFetchError(null);
+    if (!silent) {
+      setLoading(true);
+      setFetchError(null);
+    }
+
     paginationRef.current = {
       nextCursor: null,
       hasNextPage: false,
@@ -116,18 +124,35 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching quizzes:', error);
-      setFetchError(error.message || 'Error fetching quizzes');
+      if (!silent) {
+        setFetchError(error.message || 'Error fetching quizzes');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [user, setInitialCache, syncPaginationRef, fetchMoreQuizzes]);
+
+  useEffect(() => {
+    useDashboardQuizStore.getState().hydrateFromSession();
+    setClientReady(true);
+  }, []);
 
   useEffect(() => {
     disconnectSocket();
   }, [disconnectSocket]);
 
   useEffect(() => {
-    if (!isLoaded || !isJwtReady || !user?.id) return;
+    if (!user?.id) return;
+
+    const state = useDashboardQuizStore.getState();
+    if (state.isHydrated && state.userId && state.userId !== user.id) {
+      useDashboardQuizStore.getState().invalidate();
+      initializedForUserRef.current = null;
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!clientReady || !isLoaded || !isJwtReady || !user?.id) return;
     if (initializedForUserRef.current === user.id) return;
     initializedForUserRef.current = user.id;
 
@@ -143,12 +168,14 @@ const Dashboard = () => {
       if (hasNextPage && !allQuizzesLoaded) {
         fetchMoreQuizzes();
       }
+
+      loadInitialQuizzes({ silent: true });
       return;
     }
 
-    setLoading(true);
     loadInitialQuizzes();
   }, [
+    clientReady,
     isLoaded,
     isJwtReady,
     user?.id,
@@ -185,7 +212,11 @@ const Dashboard = () => {
 
       <QuizGrid
         quizzes={quizzes}
-        loading={loading && quizzes.length === 0}
+        loading={
+          !clientReady
+          || (((!isLoaded || !isJwtReady) && !hasPersistedData)
+          || (loading && !quizzesCached && quizzes.length === 0))
+        }
         totalQuizCount={totalQuizCount}
       />
 
@@ -203,7 +234,7 @@ const Dashboard = () => {
         type="button"
         onClick={() => router.push('/create-game')}
         aria-label="Create new game"
-        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-zk-purple hover:bg-zk-blue text-white rounded-full zk-btn-press"
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border-[3px] border-zk-black bg-zk-purple text-white shadow-[2px_2px_0_0_#000] transition-colors hover:bg-zk-blue"
       >
         <Plus size={32} strokeWidth={4} />
       </button>
