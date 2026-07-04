@@ -3,38 +3,38 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import {
-  clearHalloweenAudioOnHostExit,
-  resumeHalloweenAudioForPin,
-  syncHalloweenAudioForScenery,
+  clearSceneryAudioOnHostExit,
+  resumeSceneryAudioForPin,
+  syncSceneryAudioForImage,
 } from '@/lib/sceneryAudio';
-/** Keeps Halloween ambience in sync with scenery and host route lifecycle. */
+/** Keeps scenery ambience in sync with lobby background and host route lifecycle. */
 export function useHalloweenSceneryAudio(sceneryImage, pin) {
   const pathname = usePathname();
 
   useEffect(() => {
     if (!pathname.startsWith('/host')) {
-      clearHalloweenAudioOnHostExit();
+      clearSceneryAudioOnHostExit();
       return;
     }
 
     if (sceneryImage) {
-      syncHalloweenAudioForScenery(sceneryImage, pin);
+      syncSceneryAudioForImage(sceneryImage, pin);
     }
   }, [sceneryImage, pin, pathname]);
 }
 
-/** Resume Halloween audio on host game mount after lobby scenery selection. */
+/** Resume scenery audio on host game mount after lobby scenery selection. */
 export function useResumeHalloweenAudio(pin) {
   const pathname = usePathname();
 
   useEffect(() => {
     if (!pathname.startsWith('/host') || !pin) return;
-    resumeHalloweenAudioForPin(pin);
+    resumeSceneryAudioForPin(pin);
   }, [pin, pathname]);
 
   useEffect(() => {
     if (!pathname.startsWith('/host')) {
-      clearHalloweenAudioOnHostExit();
+      clearSceneryAudioOnHostExit();
     }
   }, [pathname]);
 }

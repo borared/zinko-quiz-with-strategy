@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
 import QRCodePackage from 'react-qr-code';
 import LobbySceneryPicker from '@/components/Host/LobbySceneryPicker';
-import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
-import { DEFAULT_LOBBY_SCENERY, isHalloweenScenery, isOwnedSceneryImage, setStoredGameBackground } from '@/lib/lobbyScenery';
+import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
+import { DEFAULT_LOBBY_SCENERY, getSceneryAudioSlugFromImage, isOwnedSceneryImage, setStoredGameBackground } from '@/lib/lobbyScenery';
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
 import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -424,8 +424,9 @@ export default function HostLobby() {
           {...bounceIn(0.05)}
           className="absolute left-6 top-1/2 -translate-y-1/2 z-30"
         >
-          <HalloweenSoundToggle
-            visible={isHalloweenScenery(bgImage)}
+          <ScenerySoundToggle
+            visible={Boolean(getSceneryAudioSlugFromImage(bgImage))}
+            scenerySlug={getSceneryAudioSlugFromImage(bgImage)}
             disabled={startCountdown !== null}
           />
         </motion.div>

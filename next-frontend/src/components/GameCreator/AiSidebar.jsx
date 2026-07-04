@@ -111,7 +111,7 @@ const AiSidebar = ({ isOpen, onClose }) => {
         <button 
           type="submit" 
           disabled={loading}
-          className="mt-auto bg-[#5D3FD3] text-white font-black py-3 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+          className="mt-auto border-[3px] border-zk-black bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
         >
           {loading ? (
             <>

@@ -11,6 +11,7 @@
   --zk-purple-light: #7C4DFF;
   --zk-green: #00C853;
   --zk-coral: #FF6B4A;
+  --zk-pink: #FF5FA8;
   --zk-cream: #FFD54F;
   --zk-shadow-sm: 2px 2px 0 0 #000;
   --zk-shadow-md: 4px 4px 0 0 #000;
@@ -29,6 +30,7 @@
   --color-zk-purple-light: var(--zk-purple-light);
   --color-zk-green: var(--zk-green);
   --color-zk-coral: var(--zk-coral);
+  --color-zk-pink: var(--zk-pink);
   --color-zk-cream: var(--zk-cream);
 }
 
@@ -108,6 +110,18 @@
   .zk-panel {
     @apply bg-white border-[3px] border-zk-black rounded-xl;
     box-shadow: var(--zk-shadow-md);
+  }
+
+  .creator-shell .zk-panel,
+  .creator-shell .zk-panel-glass {
+    box-shadow: none;
+  }
+
+  .creator-shell .zk-btn-press,
+  .creator-shell .zk-btn-press:hover,
+  .creator-shell .zk-btn-press:active {
+    box-shadow: none;
+    transform: none;
   }
 
   .zk-panel-glass {

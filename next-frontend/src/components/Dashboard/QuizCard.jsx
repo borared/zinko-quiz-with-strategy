@@ -1,11 +1,13 @@
 "use client";
 import React, { useState } from 'react';
-import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2, Eye, Image } from 'lucide-react';
+import { Pencil, Play, Loader2, Copy, Globe, Lock, Trash2, Eye, Image, CheckCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
 import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
+import { useDiscoveryQuizStore } from '@/store/useDiscoveryQuizStore';
+import { useToastStore } from '@/store/useToastStore';
 import { formatDiscoveryCreatorName } from '@/lib/creatorDisplay';
 
 import { z } from 'zod';
@@ -27,7 +29,16 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const router = useRouter();
   const removeQuiz = useDashboardQuizStore((s) => s.removeQuiz);
   const invalidateDashboardCache = useDashboardQuizStore((s) => s.invalidate);
+  const markQuizCloned = useDiscoveryQuizStore((s) => s.markQuizCloned);
+  const { showToast } = useToastStore();
   const { user } = useUser();
+
+  const isOwnQuiz = Boolean(
+    isDiscoveryMode
+    && user?.id
+    && (quiz.creator_id === user.id || quiz.creator?.clerk_id === user.id || quiz.is_mine)
+  );
+  const alreadyCloned = Boolean(quiz.already_cloned);
   const [showError, setShowError] = React.useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -89,6 +100,10 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
     }
   };
 
+  const showAlreadyClonedToast = () => {
+    showToast('You already cloned this quiz.', 'orange');
+  };
+
   const handleCloneClick = async () => {
     if (!user) {
       setErrorMessage("Please sign in to clone quizzes!");
@@ -96,14 +111,26 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       setTimeout(() => setShowError(false), 3000);
       return;
     }
+    if (isOwnQuiz) return;
+    if (alreadyCloned) {
+      showAlreadyClonedToast();
+      return;
+    }
+
     try {
       setIsCloning(true);
       await api.post(`/api/quizzes/${quiz.id}/clone`, {});
+      markQuizCloned(quiz.id);
       invalidateDashboardCache();
       router.push('/dashboard');
     } catch (err) {
       console.error("Cloning failed:", err);
-      setErrorMessage("Failed to clone quiz!");
+      if (err.message?.toLowerCase().includes('already cloned')) {
+        markQuizCloned(quiz.id);
+        showAlreadyClonedToast();
+        return;
+      }
+      setErrorMessage(err.message || "Failed to clone quiz!");
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
     } finally {
@@ -148,7 +175,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
 
   return (
     <>
-      <div className="zk-panel flex flex-col h-[320px] overflow-hidden relative group hover:-translate-y-0.5 transition-transform">
+      <div className="zk-panel !shadow-[2px_2px_0_0_rgba(0,0,0,1)] flex flex-col h-[320px] overflow-hidden relative group hover:-translate-y-0.5 transition-transform">
         
         {/* Toggle Public Button */}
         {!isDiscoveryMode && (
@@ -181,6 +208,11 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider">No cover</span>
             </div>
+          )}
+          {isDiscoveryMode && isOwnQuiz && (
+            <span className="absolute top-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-blue text-white px-2 py-0.5 border-[1.5px] border-zk-black rounded shadow-[1px_1px_0_0_#000]">
+              Yours
+            </span>
           )}
           {!isDiscoveryMode && isReady && (
             <span className="absolute bottom-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-green text-zk-black px-2 py-0.5 border-[1.5px] border-zk-black rounded shadow-[1px_1px_0_0_#000]">
@@ -236,21 +268,34 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               <>
                 <button
                   onClick={() => setShowDetailsModal(true)}
-                  className="flex-1 bg-white text-zk-black border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
+                  className="flex-1 bg-white text-zk-black border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-yellow/30 flex items-center justify-center gap-1.5 leading-none pt-2"
                 >
                   <Eye size={14} /> View
                 </button>
-                <button
-                  onClick={handleCloneClick}
-                  disabled={isCloning}
-                  className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
-                >
-                  {isCloning ? (
-                    <><Loader2 size={14} className="animate-spin" /> Cloning...</>
+                {!isOwnQuiz && (
+                  alreadyCloned ? (
+                    <button
+                      type="button"
+                      onClick={showAlreadyClonedToast}
+                      className="flex-1 bg-zk-green/25 text-zk-black border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
+                    >
+                      <CheckCheck size={14} /> Cloned
+                    </button>
                   ) : (
-                    <><Copy size={14} /> Clone</>
-                  )}
-                </button>
+                    <button
+                      type="button"
+                      onClick={handleCloneClick}
+                      disabled={isCloning}
+                      className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                    >
+                      {isCloning ? (
+                        <><Loader2 size={14} className="animate-spin" /> Cloning...</>
+                      ) : (
+                        <><Copy size={14} /> Clone</>
+                      )}
+                    </button>
+                  )
+                )}
               </>
             ) : (
               <>
@@ -258,7 +303,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   id={`host-btn-${quiz.id}`}
                   onClick={handleHostClick}
                   disabled={isHosting}
-                  className="flex-1 zk-btn-press bg-zk-purple text-white py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                  className="flex-1 bg-zk-purple text-white border-[2px] border-zk-black py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-purple-light flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
                 >
                   {isHosting ? (
                     <><Loader2 size={16} className="animate-spin" /> Creating...</>
@@ -268,13 +313,13 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                 </button>
                 <button
                   onClick={() => router.push('/create-game/' + quiz.id)}
-                  className="bg-white text-zk-black border-[2px] border-zk-black p-2 font-bold text-sm flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg"
+                  className="bg-white text-zk-black border-[2px] border-zk-black p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-zk-yellow/30"
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="bg-[#FF4B4B] text-white border-[2px] border-zk-black p-2 font-bold text-sm flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg"
+                  className="bg-[#FF4B4B] text-white border-[2px] border-zk-black p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-[#e63e3e]"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -287,7 +332,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       {/* Modals */}
       {showDetailsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-zk-white border-[4px] border-zk-black p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden sm:mt-20">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-3xl font-black text-zk-black uppercase leading-none">{quiz.title}</h3>
@@ -295,7 +340,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   By {formatDiscoveryCreatorName(quiz.creator)} • {questions.length} Questions
                 </p>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-black w-8 h-8 flex items-center justify-center font-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-black w-8 h-8 flex items-center justify-center font-black rounded-lg transition-colors hover:bg-[#e63e3e]">
                 X
               </button>
             </div>
@@ -321,15 +366,28 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               )}
             </div>
             
-            <div className="mt-4 pt-4 border-t-[3px] border-zk-black flex justify-end">
-              <button
-                onClick={() => { setShowDetailsModal(false); handleCloneClick(); }}
-                disabled={isCloning}
-                className="bg-[#5D3FD3] text-white border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
-              >
-                {isCloning ? <><Loader2 size={16} className="animate-spin" /> Cloning...</> : <><Copy size={16} /> Clone Quiz</>}
-              </button>
-            </div>
+            {!isOwnQuiz && (
+              <div className="mt-4 pt-4 border-t-[3px] border-zk-black flex justify-end">
+                {alreadyCloned ? (
+                  <button
+                    type="button"
+                    onClick={showAlreadyClonedToast}
+                    className="bg-zk-green/25 text-zk-black border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
+                  >
+                    <CheckCheck size={16} /> Cloned
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setShowDetailsModal(false); handleCloneClick(); }}
+                    disabled={isCloning}
+                    className="bg-[#5D3FD3] text-white border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none rounded-lg transition-all flex items-center justify-center gap-1.5 leading-none pt-2"
+                  >
+                    {isCloning ? <><Loader2 size={16} className="animate-spin" /> Cloning...</> : <><Copy size={16} /> Clone Quiz</>}
+                  </button>
+                )}
+              </div>
+            )}
           </motion.div>
         </div>
       )}
@@ -355,12 +413,12 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
-            <h3 className="text-xl font-black mb-2 text-zk-black uppercase text-center">Delete Quiz?</h3>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
+            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-black text-center">Delete Quiz?</h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">Are you sure you want to delete this quiz? This cannot be undone.</p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg leading-none pt-2">NO</button>
-              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-2 font-['Amatic_SC'] text-2xl font-black transition-all hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg flex justify-center items-center leading-none pt-2">
+              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg leading-none pt-2 transition-colors hover:bg-zk-yellow/30 disabled:opacity-60">NO</button>
+              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-black py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg flex justify-center items-center leading-none pt-2 transition-colors hover:bg-[#e63e3e] disabled:opacity-60">
                 {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "DELETE"}
               </button>
             </div>

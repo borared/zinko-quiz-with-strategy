@@ -81,7 +81,15 @@ const TRANSACTION_OPTIONS = {
  * Save a full quiz and its questions.
  */
 const createQuiz = async (quizData) => {
-  const { title, creator_id, questions, cover_image, is_public = false, is_cloned = false } = quizData;
+  const {
+    title,
+    creator_id,
+    questions,
+    cover_image,
+    is_public = false,
+    is_cloned = false,
+    cloned_from_id = null,
+  } = quizData;
 
   return prisma.$transaction(async (tx) => {
     const quiz = await tx.quizzes.create({
@@ -91,6 +99,7 @@ const createQuiz = async (quizData) => {
         cover_image: cover_image || null,
         is_public,
         is_cloned,
+        cloned_from_id,
       },
     });
 
@@ -258,13 +267,23 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
 
     const nextCursor = hasNextPage
       ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
-        new Date(pageRows[pageRows.length - 1].created_at).toISOString()
+      new Date(pageRows[pageRows.length - 1].created_at).toISOString()
       : null;
 
     return { quizzes, nextCursor, hasNextPage };
   }
 
   const cursorDate = cursor ? new Date(cursor) : null;
+  console.log(JSON.stringify(DISCOVERY_CREATOR_EXISTS));
+  console.log(JSON.stringify(`query: 
+    SELECT id, created_at
+    FROM quizzes
+    WHERE is_public = true
+    ${DISCOVERY_CREATOR_EXISTS}
+    ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+    ORDER BY created_at DESC
+    LIMIT ${limit + 1}
+  `));
   const rows = await prisma.$queryRaw`
     SELECT id, created_at
     FROM quizzes
@@ -279,6 +298,8 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
   const pageRows = rows.slice(0, limit);
   const ids = pageRows.map((row) => row.id);
 
+  console.log("rows", rows);
+  console.log("pageRows", pageRows);
   if (!ids.length) {
     return { quizzes: [], nextCursor: null, hasNextPage: false };
   }
@@ -293,7 +314,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
 
   const nextCursor = hasNextPage
     ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
-      new Date(pageRows[pageRows.length - 1].created_at).toISOString()
+    new Date(pageRows[pageRows.length - 1].created_at).toISOString()
     : null;
 
   return { quizzes, nextCursor, hasNextPage };
@@ -320,6 +341,34 @@ const deleteQuiz = async (id) => {
   return true;
 };
 
+const findClonedSourceIdsForUser = async (userId, sourceQuizIds = []) => {
+  if (!userId || !sourceQuizIds.length) return new Set();
+
+  const rows = await prisma.quizzes.findMany({
+    where: {
+      creator_id: userId,
+      cloned_from_id: { in: sourceQuizIds },
+    },
+    select: { cloned_from_id: true },
+  });
+
+  return new Set(rows.map((row) => row.cloned_from_id).filter(Boolean));
+};
+
+const hasUserClonedQuiz = async (userId, sourceQuizId) => {
+  if (!userId || !sourceQuizId) return false;
+
+  const existing = await prisma.quizzes.findFirst({
+    where: {
+      creator_id: userId,
+      cloned_from_id: sourceQuizId,
+    },
+    select: { id: true },
+  });
+
+  return Boolean(existing);
+};
+
 module.exports = {
   createQuiz,
   updateQuiz,
@@ -330,4 +379,6 @@ module.exports = {
   getPublicQuizzes,
   updateQuizVisibility,
   deleteQuiz,
+  findClonedSourceIdsForUser,
+  hasUserClonedQuiz,
 };

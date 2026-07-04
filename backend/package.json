@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "free-port": "node scripts/free-port.js",
+    "dev": "node scripts/free-port.js && prisma generate && nodemon",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
@@ -35,6 +36,7 @@
     "officeparser": "^6.1.1",
     "pdf-parse": "^2.4.5",
     "socket.io": "^4.8.3",
+    "stripe": "^22.3.0",
     "svix": "^1.93.0",
     "zod": "^4.4.3"
   },

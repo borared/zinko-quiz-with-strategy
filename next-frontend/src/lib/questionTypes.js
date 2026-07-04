@@ -73,37 +73,16 @@ export function isLineMatchingQuestion(type) {
   return type === QUESTION_TYPES.LINE_MATCHING;
 }
 
+const VALID_QUESTION_TYPES = new Set(Object.values(QUESTION_TYPES));
+
 export function resolveQuestionType(question = {}) {
-  const explicit =
-    question.question_type || question.questionType;
+  const explicit = question.question_type || question.questionType;
 
-  if (explicit === QUESTION_TYPES.LINE_MATCHING) {
-    return QUESTION_TYPES.LINE_MATCHING;
-  }
-  if (explicit === QUESTION_TYPES.DRAG_LAYERS) {
-    return QUESTION_TYPES.DRAG_LAYERS;
-  }
-  if (explicit === QUESTION_TYPES.TRUE_FALSE) {
-    return QUESTION_TYPES.TRUE_FALSE;
+  if (explicit && VALID_QUESTION_TYPES.has(explicit)) {
+    return explicit;
   }
 
-  const answers = question.answers || [];
-  if (hasLineMatchingStructure(answers)) {
-    return QUESTION_TYPES.LINE_MATCHING;
-  }
-  if (answers.some((answer) => {
-    const idx = Number(answer.layerIndex);
-    return Number.isFinite(idx);
-  })) {
-    return QUESTION_TYPES.DRAG_LAYERS;
-  }
-
-  const inferred = inferQuestionType(answers);
-  if (inferred === QUESTION_TYPES.TRUE_FALSE) {
-    return QUESTION_TYPES.TRUE_FALSE;
-  }
-
-  return explicit || QUESTION_TYPES.MULTIPLE_CHOICE;
+  return inferQuestionType(question.answers || []);
 }
 
 export function inferQuestionType(answers = []) {

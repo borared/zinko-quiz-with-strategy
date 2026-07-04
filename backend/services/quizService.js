@@ -19,6 +19,14 @@ class NotFoundError extends Error {
   }
 }
 
+class ConflictError extends Error {
+  constructor(message = 'Conflict') {
+    super(message);
+    this.name = 'ConflictError';
+    this.statusCode = 409;
+  }
+}
+
 const assertQuizOwner = async (quizId, userId) => {
   const quiz = await quizRepository.getQuizById(quizId);
   if (!quiz) throw new NotFoundError('Quiz not found');
@@ -56,6 +64,14 @@ const cloneQuiz = async (quizId, newCreatorId) => {
   if (!originalQuiz.is_public) {
     throw new ForbiddenError('Only public quizzes can be cloned');
   }
+  if (originalQuiz.creator_id === newCreatorId) {
+    throw new ForbiddenError('You cannot clone your own quiz');
+  }
+
+  const alreadyCloned = await quizRepository.hasUserClonedQuiz(newCreatorId, quizId);
+  if (alreadyCloned) {
+    throw new ConflictError('You have already cloned this quiz');
+  }
 
   const clonedData = {
     title: `${originalQuiz.title} (Clone)`,
@@ -63,6 +79,7 @@ const cloneQuiz = async (quizId, newCreatorId) => {
     cover_image: originalQuiz.cover_image,
     is_public: false,
     is_cloned: true,
+    cloned_from_id: quizId,
     questions: originalQuiz.questions.map(q => ({
       text: q.question_text,
       image: q.image_url,
@@ -93,11 +110,29 @@ const cloneQuiz = async (quizId, newCreatorId) => {
   return clonedQuiz;
 };
 
-const getPublicQuizzes = async (cursor, limit, searchQuery) => {
+const annotateDiscoveryQuizzes = async (quizzes, viewerId) => {
+  if (!Array.isArray(quizzes) || !quizzes.length) return [];
+
+  const sourceIds = quizzes.map((quiz) => quiz.id);
+  const clonedSourceIds = viewerId
+    ? await quizRepository.findClonedSourceIdsForUser(viewerId, sourceIds)
+    : new Set();
+
+  return quizzes.map((quiz) => ({
+    ...quiz,
+    is_mine: Boolean(viewerId && quiz.creator_id === viewerId),
+    already_cloned: clonedSourceIds.has(quiz.id),
+  }));
+};
+
+const getPublicQuizzes = async (cursor, limit, searchQuery, viewerId = null) => {
   const result = await quizRepository.getPublicQuizzes(cursor, limit, searchQuery);
+  const sanitized = stripQuizzesCorrectAnswers(result.quizzes || []);
+  const annotated = await annotateDiscoveryQuizzes(sanitized, viewerId);
+
   return {
     ...result,
-    quizzes: stripQuizzesCorrectAnswers(result.quizzes || []),
+    quizzes: annotated,
   };
 };
 
@@ -124,4 +159,5 @@ module.exports = {
   assertQuizOwner,
   ForbiddenError,
   NotFoundError,
+  ConflictError,
 };

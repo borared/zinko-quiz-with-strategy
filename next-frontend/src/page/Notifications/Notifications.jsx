@@ -35,17 +35,17 @@ function NotificationCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-black transition-all ${
+      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-black transition-colors ${
         notif.is_read
-          ? 'bg-white opacity-70 hover:opacity-100 shadow-[2px_2px_0_0_rgba(0,0,0,0.18)] cursor-default'
-          : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 shadow-[2px_2px_0_0_rgba(0,0,0,0.22)] hover:translate-y-[-1px] cursor-pointer'
+          ? 'bg-white opacity-70 hover:opacity-100 cursor-default'
+          : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 cursor-pointer'
       }`}
     >
       {!notif.is_read && !canCollect && (
         <div className="absolute top-4 right-4 sm:top-auto sm:right-6 w-3 h-3 bg-red-500 border-[2px] border-black rounded-full" />
       )}
 
-      <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
+      <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
         <img
           src={senderAvatar}
           alt={senderName}
@@ -55,7 +55,7 @@ function NotificationCard({
 
       <div className="flex-1 min-w-0 pr-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
-          <span className={`inline-block text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded border-[2px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] ${
+          <span className={`inline-block text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded border-[2px] border-black ${
             isSceneryGift ? 'bg-orange-600' : 'bg-[#5D3FD3]'
           }`}>
             {notif.type.replace(/_/g, ' ')}
@@ -77,7 +77,7 @@ function NotificationCard({
         {isSceneryGift && metadata.scenery_image && (
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div
-              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] overflow-hidden"
+              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-black overflow-hidden"
               style={{
                 backgroundImage: `url('${metadata.scenery_image}')`,
                 backgroundSize: 'cover',
@@ -100,7 +100,7 @@ function NotificationCard({
                     onCollectScenery(notif.id);
                   }}
                   disabled={collectingId === notif.id}
-                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-transform hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-[#268f3f] disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-black px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#268f3f] disabled:opacity-60"
                 >
                   {collectingId === notif.id ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -205,9 +205,9 @@ export default function Notifications() {
       </motion.div>
 
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 mt-4 relative z-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border-[4px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,0.22)] p-6 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border-[4px] border-zk-black p-6 rounded-2xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-zk-yellow border-[3px] border-zk-black rounded-xl flex items-center justify-center shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+            <div className="w-12 h-12 bg-zk-yellow border-[3px] border-zk-black rounded-xl flex items-center justify-center">
               <BellRing className="text-zk-black" size={24} />
             </div>
             <div>
@@ -218,13 +218,13 @@ export default function Notifications() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => user?.id && markAllAsRead(user.id)}
-              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-[3px] border-zk-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-[3px] border-zk-black px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-blue/90 whitespace-nowrap"
             >
               <CheckCheck size={20} /> Mark as read
             </button>
             <button
               onClick={() => user?.id && clearAllNotifications(user.id)}
-              className="flex items-center justify-center gap-2 bg-red-500 text-white border-[3px] border-zk-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-red-500 text-white border-[3px] border-zk-black px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-red-600 whitespace-nowrap"
             >
               Clear all
             </button>

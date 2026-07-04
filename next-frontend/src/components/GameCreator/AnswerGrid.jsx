@@ -53,7 +53,7 @@ const AnswerGrid = memo(() => {
       {activeQuestion.answers.map((ans) => (
         <div 
           key={ans.id}
-          className={`flex items-center gap-4 p-4 border-[3px] border-zk-black rounded-xl ${ans.color} text-white relative w-full min-w-0 ${ans.checked ? 'animate-boing shadow-[0_0_15px_rgba(0,200,83,0.5)]' : ''}`}
+          className={`flex items-center gap-4 p-4 border-[3px] border-zk-black rounded-xl ${ans.color} text-white relative w-full min-w-0 ${ans.checked ? 'animate-boing' : ''}`}
         >
           {/* Math/Formatting Toolbar (shown when focused) */}
           {!isTrueFalse && focusedAnswerId === ans.id && (

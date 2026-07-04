@@ -22,7 +22,7 @@ const QUIZ_TITLE_INPUT_CLASS =
   "bg-transparent border-0 border-b-[3px] border-b-zk-blue font-['Outfit'] font-bold text-zk-black focus:outline-none transition-colors placeholder:font-medium placeholder:italic placeholder:text-zk-black/40 placeholder:normal-case";
 
 const CreatorSkeleton = () => (
-  <div className="min-h-[calc(100vh-76px)] font-sans relative">
+  <div className="creator-shell min-h-[calc(100vh-76px)] font-sans relative">
     <div className="fixed inset-0 top-[76px] z-0" aria-hidden="true">
       <div className="absolute inset-0 zk-workspace-bg-creator" />
       <div className="absolute inset-0 bg-gradient-to-b from-zk-black/35 via-zk-black/10 to-zk-black/50" />
@@ -30,8 +30,7 @@ const CreatorSkeleton = () => (
     <div className="relative z-10">
       <div
         className="fixed top-[76px] left-0 right-0 z-50 zk-panel border-t-0 border-x-0 rounded-none flex items-center px-6 gap-4"
-        style={{ height: SUBNAV_H }}
-        style={{ paddingLeft: SIDEBAR_W + 24 }}
+        style={{ height: SUBNAV_H, paddingLeft: SIDEBAR_W + 24 }}
       >
         <div className="h-8 w-40 zk-skeleton rounded-lg" />
         <div className="h-8 w-56 zk-skeleton rounded-lg" />
@@ -96,7 +95,11 @@ const GameCreatorContent = () => {
     setActiveQuestionId,
   } = useQuizStore();
 
-  const activeQuestion = questions.find((q) => q.id === activeQuestionId);
+  const roundQuestions = questions.filter(
+    (q) => Number(q.round) === Number(activeRound)
+  );
+  const activeQuestion =
+    roundQuestions.find((q) => q.id === activeQuestionId) ?? null;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -134,8 +137,6 @@ const GameCreatorContent = () => {
     handleSaveQuiz(quizId, user?.id, router, showToast);
   };
 
-  const roundQuestions = questions.filter((q) => q.round === activeRound);
-
   const rounds = [
     { id: 1, label: 'Round 1', difficulty: 'Easy', color: 'bg-zk-green' },
     { id: 2, label: 'Round 2', difficulty: 'Medium', color: 'bg-zk-cream' },
@@ -147,7 +148,7 @@ const GameCreatorContent = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-76px)] font-sans relative">
+    <div className="creator-shell min-h-[calc(100vh-76px)] font-sans relative">
       <div className="fixed inset-0 top-[76px] z-0" aria-hidden="true">
         <div className="absolute inset-0 zk-workspace-bg-creator" />
         <div className="absolute inset-0 bg-gradient-to-b from-zk-black/35 via-zk-black/10 to-zk-black/50" />
@@ -184,7 +185,7 @@ const GameCreatorContent = () => {
               <button
                 type="button"
                 onClick={() => setIsAiSidebarOpen(true)}
-                className="lg:hidden zk-btn-press bg-zk-purple text-white p-2 rounded-lg"
+                className="lg:hidden border-[3px] border-zk-black bg-zk-purple text-white p-2 rounded-lg transition-colors hover:bg-zk-purple-light"
                 aria-label="Open AI assistant"
               >
                 <Wand2 size={18} strokeWidth={3} />
@@ -222,10 +223,10 @@ const GameCreatorContent = () => {
                     key={q.id}
                     type="button"
                     onClick={() => setActiveQuestionId(q.id)}
-                    className={`shrink-0 px-3 py-2 border-[2px] border-zk-black rounded-lg font-bold text-xs transition-all ${
+                    className={`shrink-0 px-3 py-2 border-[2px] border-zk-black rounded-lg font-bold text-xs transition-colors ${
                       q.id === activeQuestionId
-                        ? 'bg-zk-purple text-white shadow-[2px_2px_0_0_#000]'
-                        : 'bg-white text-zk-black'
+                        ? 'bg-zk-purple text-white'
+                        : 'bg-white text-zk-black hover:bg-zk-yellow/20'
                     }`}
                   >
                     Q{index + 1}
@@ -243,7 +244,9 @@ const GameCreatorContent = () => {
               {/* Round switcher */}
               <div className="zk-panel p-3 lg:p-4 grid grid-cols-3 gap-3 lg:gap-4">
                 {rounds.map((round) => {
-                  const count = questions.filter((q) => q.round === round.id).length;
+                  const count = questions.filter(
+                    (q) => Number(q.round) === round.id
+                  ).length;
                   const isActive = activeRound === round.id;
                   const isComplete = count >= 6;
 
@@ -252,9 +255,9 @@ const GameCreatorContent = () => {
                       key={round.id}
                       type="button"
                       onClick={() => setActiveRound(round.id)}
-                      className={`relative border-[3px] border-zk-black p-3 lg:p-4 transition-all rounded-xl zk-btn-press ${
+                      className={`relative border-[3px] border-zk-black p-3 lg:p-4 transition-colors rounded-xl ${
                         isActive
-                          ? `${round.color} text-zk-black shadow-[4px_4px_0_0_#000] -translate-y-0.5`
+                          ? `${round.color} text-zk-black`
                           : 'bg-white text-zk-black hover:bg-zk-yellow/20'
                       }`}
                     >
@@ -289,9 +292,9 @@ const GameCreatorContent = () => {
               </div>
 
               <AnimatePresence mode="wait">
-                {activeQuestionId ? (
+                {activeQuestion ? (
                   <motion.div
-                    key={activeQuestionId}
+                    key={activeQuestion.id}
                     initial={{ opacity: 0, scale: 0.98, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98, y: -8 }}
@@ -324,7 +327,7 @@ const GameCreatorContent = () => {
                     <button
                       type="button"
                       onClick={handleAddQuestion}
-                      className="zk-btn-press bg-zk-green text-white px-6 py-2 rounded-lg font-bold mt-2 lg:hidden"
+                      className="border-[3px] border-zk-black bg-zk-green text-white px-6 py-2 rounded-lg font-bold mt-2 transition-colors hover:bg-[#00b34a] lg:hidden"
                     >
                       + Add Question
                     </button>
@@ -338,7 +341,7 @@ const GameCreatorContent = () => {
               <button
                 type="button"
                 onClick={() => setIsAiSidebarOpen(true)}
-                className="zk-btn-press bg-zk-purple text-white p-4 rounded-xl flex flex-col items-center gap-2 group"
+                className="border-[3px] border-zk-black bg-zk-purple text-white p-4 rounded-xl flex flex-col items-center gap-2 transition-colors hover:bg-zk-purple-light group"
               >
                 <Wand2
                   size={24}
@@ -371,7 +374,7 @@ const GameCreatorContent = () => {
               initial={{ scale: 0.95, y: 16 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 16 }}
-              className="zk-panel shadow-[12px_12px_0_0_#000] w-full max-w-md relative z-10 p-6 lg:p-8"
+              className="zk-panel w-full max-w-md relative z-10 p-6 lg:p-8"
             >
               <button
                 type="button"
@@ -445,7 +448,7 @@ const GameCreatorContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsImageModalOpen(false)}
-                  className="w-full zk-btn-press bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl"
+                  className="w-full border-[3px] border-zk-black bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl transition-colors hover:bg-zk-black/90"
                 >
                   Done
                 </button>

@@ -5,6 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   '/create-game(.*)',
   '/host(.*)',
   '/settings(.*)',
+  '/shop(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

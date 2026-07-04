@@ -8,7 +8,7 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex w-64 bg-zk-purple border-r-[3px] border-zk-black flex-col h-[calc(100vh-76px)] fixed top-[76px] left-0 text-white z-40 rounded-r-xl shadow-[4px_0_0_0_#000]">
+    <aside className="hidden md:flex w-64 bg-zk-purple border-r-[3px] border-zk-black flex-col h-[calc(100vh-76px)] fixed top-[76px] left-0 text-white z-40">
       <div className="p-6 border-b-[3px] border-zk-black">
         <h1 className="font-black text-3xl text-white uppercase tracking-tighter permanent-marker-regular">
           ZINKO
@@ -31,7 +31,7 @@ const Sidebar = () => {
               onClick={() => router.push(item.path)}
               className={`w-full flex items-center justify-between gap-3 p-3 font-bold text-sm cursor-pointer transition-all border-[2px] rounded-lg text-left ${
                 isActive
-                  ? 'bg-zk-purple-light border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-white'
+                  ? 'bg-zk-purple-light border-zk-black shadow-[2px_2px_0_0_#000] text-white'
                   : 'border-transparent hover:bg-white/10 text-white/90'
               }`}
             >

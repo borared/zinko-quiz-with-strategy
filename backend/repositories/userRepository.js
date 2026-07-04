@@ -1,6 +1,7 @@
 const prisma = require('../lib/prisma');
 const { mergeSettings, sanitizePatch } = require('../lib/userSettings');
 
+
 /**
  * Upsert a user into the database.
  * Called when Clerk fires user.created or user.updated.

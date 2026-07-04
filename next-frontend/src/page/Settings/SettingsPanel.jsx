@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -27,7 +27,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { clearNavAuthCache } from '@/store/useAuthStore';
 import { useUserSettingsStore } from '@/store/useUserSettingsStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 import { useDiscoveryQuizStore } from '@/store/useDiscoveryQuizStore';
+import { useShopStore } from '@/store/useShopStore';
+import { useToastStore } from '@/store/useToastStore';
 import api from '@/services/api';
 import { PLAN_COPY, VISIBILITY_OPTIONS } from '@/lib/userSettings';
 import profileLottieData from '@/lib/settings-profile-lottie.json';
@@ -54,7 +57,7 @@ function ProfileLottie({ className = '' }) {
 
   return (
     <div
-      className={`flex items-center justify-center rounded-2xl bg-zk-yellow/15 overflow-hidden w-[200px] h-[200px] shrink-0 ${className}`}
+      className={`flex items-center justify-center overflow-hidden w-[200px] h-[200px] shrink-0 ${className}`}
       aria-hidden
     >
       {mounted ? (
@@ -64,7 +67,7 @@ function ProfileLottie({ className = '' }) {
           style={{ width: 180, height: 180 }}
         />
       ) : (
-        <div className="w-[160px] h-[160px] rounded-full border-[3px] border-dashed border-zk-black/20 animate-pulse bg-white/50" />
+        <div className="w-[160px] h-[160px] rounded-full border-[3px] border-dashed border-zk-black/20 animate-pulse" />
       )}
     </div>
   );
@@ -109,7 +112,7 @@ function SettingsAlertModal({ open, children }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 24 }}
             transition={ALERT_SPRING}
-            className="bg-white border-[4px] border-zk-black rounded-2xl p-6 max-w-md w-full shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+            className="bg-white border-[4px] border-zk-black rounded-2xl p-6 max-w-md w-full shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
           >
             {children}
           </motion.div>
@@ -154,16 +157,23 @@ export default function SettingsPanel() {
   const { signOut } = useAuth();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
 
+  const [clientReady, setClientReady] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initializedForUserRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [usernameSaving, setUsernameSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteStep, setDeleteStep] = useState('clarify');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+
+  const DELETE_ACCOUNT_CONFIRM_PHRASE = 'Delete account';
+  const isDeleteConfirmPhraseMatch =
+    deleteConfirmText.trim() === DELETE_ACCOUNT_CONFIRM_PHRASE;
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
   const [manageAccountOpen, setManageAccountOpen] = useState(false);
+  const { showToast } = useToastStore();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -175,6 +185,7 @@ export default function SettingsPanel() {
   const updateUsernameCache = useUserSettingsStore((s) => s.updateUsername);
   const invalidateSettingsCache = useUserSettingsStore((s) => s.invalidate);
   const isSettingsCachedForUser = useUserSettingsStore((s) => s.isCachedForUser);
+  const hasPersistedSettings = useUserSettingsStore((s) => s.hasPersistedSettings);
   const updateDiscoveryCreatorUsername = useDiscoveryQuizStore((s) => s.updateCreatorUsername);
 
   const [usernameDraft, setUsernameDraft] = useState('');
@@ -194,12 +205,17 @@ export default function SettingsPanel() {
     } catch (error) {
       console.error('Failed to load settings:', error);
       if (!silent) {
-        setStatusMessage('Could not load all settings. Some values may be unavailable.');
+        showToast('Could not load all settings. Some values may be unavailable.', 'error');
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [setSettingsCache]);
+  }, [setSettingsCache, showToast]);
+
+  useEffect(() => {
+    useUserSettingsStore.getState().hydrateFromSession();
+    setClientReady(true);
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -212,7 +228,19 @@ export default function SettingsPanel() {
   }, [isLoaded, isSignedIn, user, router]);
 
   useEffect(() => {
-    if (!isSignedIn || !isJwtReady || !user?.id) return;
+    if (!user?.id) return;
+
+    const state = useUserSettingsStore.getState();
+    if (state.isHydrated && state.userId && state.userId !== user.id) {
+      invalidateSettingsCache();
+      initializedForUserRef.current = null;
+    }
+  }, [user?.id, invalidateSettingsCache]);
+
+  useEffect(() => {
+    if (!clientReady || !isSignedIn || !isJwtReady || !user?.id) return;
+    if (initializedForUserRef.current === user.id) return;
+    initializedForUserRef.current = user.id;
 
     const cached = isSettingsCachedForUser(user.id);
     if (cached) {
@@ -223,17 +251,23 @@ export default function SettingsPanel() {
     }
 
     loadSettings({ userId: user.id });
-  }, [isSignedIn, isJwtReady, user?.id, isSettingsCachedForUser, loadSettings]);
+  }, [
+    clientReady,
+    isSignedIn,
+    isJwtReady,
+    user?.id,
+    isSettingsCachedForUser,
+    loadSettings,
+  ]);
 
   const saveSettings = async (patch) => {
     setSaving(true);
-    setStatusMessage('');
     try {
       const data = await api.patch('/api/user/settings', { settings: patch });
       updateSettingsCache(data.settings);
-      setStatusMessage('Settings saved.');
+      showToast('Settings Saved.', 'success');
     } catch (error) {
-      setStatusMessage(error.message || 'Failed to save settings.');
+      showToast(error.message || 'Failed to save settings.', 'error');
     } finally {
       setSaving(false);
     }
@@ -248,12 +282,11 @@ export default function SettingsPanel() {
   const saveProfileNames = async () => {
     if (!user) return;
     setSaving(true);
-    setStatusMessage('');
     try {
       await user.update({ firstName: firstName.trim(), lastName: lastName.trim() });
-      setStatusMessage('Profile updated.');
+      showToast('Profile updated.', 'success');
     } catch (error) {
-      setStatusMessage(error?.errors?.[0]?.message || 'Failed to update profile.');
+      showToast(error?.errors?.[0]?.message || 'Failed to update profile.', 'error');
     } finally {
       setSaving(false);
     }
@@ -261,7 +294,6 @@ export default function SettingsPanel() {
 
   const saveUsername = async () => {
     setUsernameSaving(true);
-    setStatusMessage('');
     try {
       const data = await api.patch('/api/user/username', { username: usernameDraft });
       const savedUsername = data.user?.username || usernameDraft;
@@ -270,9 +302,9 @@ export default function SettingsPanel() {
       if (user?.id) {
         updateDiscoveryCreatorUsername(user.id, savedUsername);
       }
-      setStatusMessage('Username saved. Your public quizzes will show this on Discovery.');
+      showToast('Username saved. Your public quizzes will show this on Discovery.', 'success');
     } catch (error) {
-      setStatusMessage(error.message || 'Failed to save username.');
+      showToast(error.message || 'Failed to save username.', 'error');
     } finally {
       setUsernameSaving(false);
     }
@@ -286,6 +318,7 @@ export default function SettingsPanel() {
   const closeDeleteModal = () => {
     setDeleteOpen(false);
     setDeleteStep('clarify');
+    setDeleteConfirmText('');
     setDeleting(false);
   };
 
@@ -295,10 +328,13 @@ export default function SettingsPanel() {
       clearNavAuthCache();
       invalidateSettingsCache();
       useNotificationStore.getState().invalidate();
+      useDashboardQuizStore.getState().invalidate();
+      useShopStore.getState().invalidate();
+      useDiscoveryQuizStore.getState().invalidate();
       await signOut();
       setSignOutOpen(false);
     } catch (error) {
-      setStatusMessage(error.message || 'Failed to sign out.');
+      showToast(error.message || 'Failed to sign out.', 'error');
       setSigningOut(false);
     }
   };
@@ -311,10 +347,13 @@ export default function SettingsPanel() {
       clearNavAuthCache();
       invalidateSettingsCache();
       useNotificationStore.getState().invalidate();
+      useDashboardQuizStore.getState().invalidate();
+      useDiscoveryQuizStore.getState().invalidate();
+      useShopStore.getState().invalidate();
       await signOut();
       router.push('/');
     } catch (error) {
-      setStatusMessage(error.message || 'Failed to delete account.');
+      showToast(error.message || 'Failed to delete account.', 'error');
       setDeleting(false);
     }
   };
@@ -322,7 +361,7 @@ export default function SettingsPanel() {
   const plan = PLAN_COPY[usage.plan] || PLAN_COPY.basic;
   const settingsCached = isSettingsCachedForUser(user?.id);
 
-  if (!isLoaded || (loading && !settingsCached)) {
+  if (!clientReady || !isLoaded || (loading && !settingsCached && !hasPersistedSettings())) {
     return (
       <div className="min-h-screen bg-[#FDF9F1] flex items-center justify-center relative overflow-hidden">
         <SettingsFloatingDecor />
@@ -347,12 +386,6 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        {statusMessage && (
-          <div className="mb-4 px-4 py-3 rounded-xl border-[2px] border-zk-black bg-zk-yellow/30 text-sm font-bold text-zk-black">
-            {statusMessage}
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
           <SettingSection icon={User} title="Profile" description="Your name and account details." className="md:col-span-2">
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px] xl:grid-cols-[minmax(0,1fr)_240px] gap-5 items-stretch min-h-0">
@@ -374,23 +407,19 @@ export default function SettingsPanel() {
                 </div>
               </div>
               <div className="hidden md:flex items-center justify-center h-full min-h-[200px] lg:min-h-0 mx-auto lg:mx-0 lg:-translate-y-12">
-                <ProfileLottie className="p-2" />
+                <ProfileLottie />
               </div>
             </div>
-            <AnimatePresence initial={false}>
-              {manageAccountOpen && (
-                <motion.div
-                  key="manage-account-panel"
-                  initial={{ opacity: 0, y: -16, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.8 }}
-                  className="overflow-hidden"
-                >
-                  <ManageAccountPanel onClose={() => setManageAccountOpen(false)} onStatus={setStatusMessage} />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {manageAccountOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.8 }}
+                className="overflow-hidden"
+              >
+                <ManageAccountPanel onClose={() => setManageAccountOpen(false)} onToast={showToast} />
+              </motion.div>
+            )}
           </SettingSection>
 
           <SettingSection
@@ -651,7 +680,10 @@ export default function SettingsPanel() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDeleteStep('confirm')}
+                  onClick={() => {
+                    setDeleteConfirmText('');
+                    setDeleteStep('confirm');
+                  }}
                   className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-black bg-zk-yellow text-zk-black font-black uppercase text-sm"
                 >
                   I understand
@@ -666,18 +698,36 @@ export default function SettingsPanel() {
               exit={{ opacity: 0, scale: 0.96, y: -10 }}
               transition={{ type: 'spring', stiffness: 400, damping: 24 }}
             >
-              <h3 className="text-2xl font-black uppercase text-zk-black mb-2">Delete account?</h3>
-              <p className="text-sm font-bold text-zk-black/65 mb-6">
+              <h3 className="text-2xl font-black uppercase text-zk-black mb-2">Confirm deletion</h3>
+              <p className="text-sm font-bold text-zk-black/65 mb-3">
                 This will permanently delete your account
                 {usage.quizzesCreated > 0
                   ? ` and all ${usage.quizzesCreated} quiz${usage.quizzesCreated === 1 ? '' : 'zes'} you created`
                   : ' and every quiz you created'}
                 . This action cannot be undone.
               </p>
+              <p className="text-sm font-bold text-zk-black/65 mb-3">
+                Type{' '}
+                <span className="font-black text-zk-black">{DELETE_ACCOUNT_CONFIRM_PHRASE}</span>{' '}
+                below to confirm.
+              </p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(event) => setDeleteConfirmText(event.target.value)}
+                placeholder={DELETE_ACCOUNT_CONFIRM_PHRASE}
+                autoComplete="off"
+                autoFocus
+                disabled={deleting}
+                className="w-full border-[3px] border-zk-black rounded-xl px-4 py-2.5 font-bold text-zk-black mb-6 focus:outline-none focus:ring-4 focus:ring-[#FF4B4B]/20 disabled:opacity-60"
+              />
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setDeleteStep('clarify')}
+                  onClick={() => {
+                    setDeleteConfirmText('');
+                    setDeleteStep('clarify');
+                  }}
                   disabled={deleting}
                   className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-black font-black uppercase text-sm disabled:opacity-60"
                 >
@@ -686,8 +736,8 @@ export default function SettingsPanel() {
                 <button
                   type="button"
                   onClick={handleDeleteAccount}
-                  disabled={deleting}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-black bg-[#FF4B4B] text-white font-black uppercase text-sm disabled:opacity-60"
+                  disabled={deleting || !isDeleteConfirmPhraseMatch}
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-black bg-[#FF4B4B] text-white font-black uppercase text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {deleting ? 'Deleting…' : 'Delete account'}
                 </button>

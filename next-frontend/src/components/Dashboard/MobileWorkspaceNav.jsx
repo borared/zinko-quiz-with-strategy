@@ -25,7 +25,7 @@ const MobileWorkspaceNav = () => {
               onClick={() => router.push(item.path)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all min-w-0 flex-1 ${
                 isActive
-                  ? 'bg-zk-purple-light border-[2px] border-zk-black shadow-[2px_2px_0_0_#000] text-white'
+                  ? 'bg-zk-purple-light border-[2px] border-zk-black shadow-[1px_1px_0_0_#000] text-white'
                   : 'text-white/80 hover:text-white'
               }`}
             >

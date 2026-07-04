@@ -124,6 +124,9 @@ const handleServiceError = (res, err, fallbackMessage) => {
   if (err?.statusCode === 404) {
     return res.status(404).json({ error: err.message });
   }
+  if (err?.statusCode === 409) {
+    return res.status(409).json({ error: err.message });
+  }
   return handleError(res, fallbackMessage, err);
 };
 
@@ -259,7 +262,13 @@ const updateQuiz = async (req, res) => {
 const getPublicQuizzes = async (req, res) => {
   try {
     const { cursor, limit, search } = req.query;
-    const data = await quizService.getPublicQuizzes(cursor, limit ? parseInt(limit, 10) : 10, search);
+    const viewerId = req.user?.userId ?? null;
+    const data = await quizService.getPublicQuizzes(
+      cursor,
+      limit ? parseInt(limit, 10) : 10,
+      search,
+      viewerId
+    );
     res.json(data);
   } catch (err) {
     handleServiceError(res, err, 'Failed to fetch public quizzes');

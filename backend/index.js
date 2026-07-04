@@ -91,6 +91,7 @@ app.use('/api/quizzes', require('./routes/quiz'));
 app.use('/api/avatars', require('./routes/avatar'));
 app.use('/api/notifications', require('./routes/notification'));
 app.use('/api/sceneries', require('./routes/scenery'));
+app.use('/api/shop', require('./routes/shop'));
 app.use('/api/game', gameRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
@@ -116,7 +117,36 @@ app.use((err, req, res, next) => {
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 const HOST = '0.0.0.0';
+
+function shutdown(signal) {
+  console.log(`\n${signal} received. Closing server...`);
+  io.close(() => {
+    httpServer.close(() => {
+      console.log('Server closed.');
+      process.exit(0);
+    });
+  });
+
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout.');
+    process.exit(1);
+  }, 10000);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+httpServer.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use.`);
+    console.error('Run: npm run free-port');
+    console.error('Or:  npm run dev (frees the port automatically)');
+    process.exit(1);
+  }
+  throw err;
+});
+
 httpServer.listen(PORT, HOST, () => {
-  console.log(`✅ Server running on http://${HOST}:${PORT}`);
-  console.log(`🔌 Socket.io attached and listening`);
+  console.log(`Server running on http://${HOST}:${PORT}`);
+  console.log('Socket.io attached and listening');
 });

@@ -5,7 +5,7 @@ const { requireCustomAuth, optionalCustomAuth, requireSelf } = require('../middl
 const { devOnly, writeLimiter } = require('../middleware/security');
 
 // ─── Public read routes (specific paths before /:id) ─────────────────────────
-router.get('/public', quizController.getPublicQuizzes);
+router.get('/public', optionalCustomAuth, quizController.getPublicQuizzes);
 router.get('/debug/all', devOnly, quizController.getAllQuizzesDebug);
 router.get('/user/:userId', requireCustomAuth, requireSelf('userId'), quizController.getQuizzesByUser);
 

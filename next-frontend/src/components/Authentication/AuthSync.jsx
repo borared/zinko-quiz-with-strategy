@@ -3,6 +3,9 @@ import { useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
+import { useDiscoveryQuizStore } from '@/store/useDiscoveryQuizStore';
+import { useShopStore } from '@/store/useShopStore';
 
 export default function AuthSync() {
   const { isSignedIn, getToken } = useAuth();
@@ -49,7 +52,14 @@ export default function AuthSync() {
             }
           }
         } catch (error) {
-          console.error('[AuthSync] Error syncing token:', error);
+          const isNetworkError =
+            error?.message === 'Failed to fetch' || error?.name === 'TypeError';
+          console.error(
+            isNetworkError
+              ? '[AuthSync] Network error while syncing token. Clerk or the Zinko API may be unreachable.'
+              : '[AuthSync] Error syncing token:',
+            error
+          );
           if (hasExistingToken) {
             setJwtReady(true);
           } else {
@@ -60,6 +70,9 @@ export default function AuthSync() {
         localStorage.removeItem('zinko_jwt');
         setJwtReady(false);
         useNotificationStore.getState().invalidate();
+        useDashboardQuizStore.getState().invalidate();
+        useDiscoveryQuizStore.getState().invalidate();
+        useShopStore.getState().invalidate();
         console.log('[AuthSync] Token removed due to sign out');
       }
     };

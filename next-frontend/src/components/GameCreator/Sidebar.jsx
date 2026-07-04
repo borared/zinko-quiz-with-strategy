@@ -14,7 +14,7 @@ const Sidebar = memo(() => {
   } = useQuizStore();
 
   const roundQuestions = useMemo(
-    () => questions.filter((q) => q.round === activeRound),
+    () => questions.filter((q) => Number(q.round) === Number(activeRound)),
     [questions, activeRound]
   );
 
@@ -41,7 +41,7 @@ const Sidebar = memo(() => {
               transition={{ duration: 0.15 }}
               key={q.id}
               onClick={() => setActiveQuestionId(q.id)}
-              className={`relative w-full text-left p-3 border-[3px] border-zk-black rounded-lg transition-all zk-btn-press ${
+              className={`relative w-full text-left p-3 border-[3px] border-zk-black rounded-lg transition-colors ${
                 q.id === activeQuestionId
                   ? 'bg-zk-purple text-white'
                   : 'bg-white text-zk-black hover:bg-zk-yellow/20'
@@ -62,7 +62,7 @@ const Sidebar = memo(() => {
             <button
               type="button"
               onClick={handleAddQuestion}
-              className="w-full zk-btn-press bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl"
+              className="w-full border-[3px] border-zk-black bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl transition-colors hover:bg-[#00b34a]"
             >
               <Plus size={20} strokeWidth={3} />
               Add Question
@@ -75,7 +75,7 @@ const Sidebar = memo(() => {
           <button
             type="button"
             onClick={handleAddQuestion}
-            className="w-full zk-btn-press bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl mt-1"
+            className="w-full border-[3px] border-zk-black bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl mt-1 transition-colors hover:bg-[#00b34a]"
           >
             <Plus size={20} strokeWidth={3} />
             Add Question

@@ -23,7 +23,7 @@ export default function ProfileLottie({ className = '' }) {
 
   return (
     <div
-      className={`flex items-center justify-center rounded-2xl border-[3px] border-zk-black bg-[#FDF9F1] overflow-hidden ${className}`}
+      className={`flex items-center justify-center overflow-hidden ${className}`}
       aria-hidden
     >
       {animationData ? (
