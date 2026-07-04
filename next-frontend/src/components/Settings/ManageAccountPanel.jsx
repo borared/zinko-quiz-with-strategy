@@ -15,7 +15,7 @@ const btnPrimary =
 const btnSecondary =
   'px-5 py-2.5 rounded-xl border-[3px] border-zk-black bg-white text-zk-black font-black text-sm uppercase tracking-widest hover:bg-zk-yellow/20';
 
-export default function ManageAccountPanel({ onClose, onStatus }) {
+export default function ManageAccountPanel({ onClose, onToast }) {
   const { user } = useUser();
   const fileInputRef = useRef(null);
 
@@ -38,12 +38,11 @@ export default function ManageAccountPanel({ onClose, onStatus }) {
     if (!file) return;
 
     setPhotoLoading(true);
-    onStatus?.('');
     try {
       await user.setProfileImage({ file });
-      onStatus?.('Profile photo updated.');
+      onToast?.('Profile photo updated.', 'success');
     } catch (error) {
-      onStatus?.(error?.errors?.[0]?.message || 'Failed to update profile photo.');
+      onToast?.(error?.errors?.[0]?.message || 'Failed to update profile photo.', 'error');
     } finally {
       setPhotoLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -55,16 +54,15 @@ export default function ManageAccountPanel({ onClose, onStatus }) {
     const { currentPassword, newPassword, confirmPassword } = passwordForm;
 
     if (newPassword.length < 8) {
-      onStatus?.('New password must be at least 8 characters.');
+      onToast?.('New password must be at least 8 characters.', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
-      onStatus?.('New passwords do not match.');
+      onToast?.('New passwords do not match.', 'error');
       return;
     }
 
     setPasswordLoading(true);
-    onStatus?.('');
     try {
       await user.updatePassword({
         currentPassword,
@@ -72,9 +70,9 @@ export default function ManageAccountPanel({ onClose, onStatus }) {
         signOutOfOtherSessions: false,
       });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      onStatus?.('Password updated.');
+      onToast?.('Password updated.', 'success');
     } catch (error) {
-      onStatus?.(error?.errors?.[0]?.message || 'Failed to update password.');
+      onToast?.(error?.errors?.[0]?.message || 'Failed to update password.', 'error');
     } finally {
       setPasswordLoading(false);
     }
