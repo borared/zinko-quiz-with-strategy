@@ -3,9 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser, useAuth } from '@clerk/nextjs';
-import { LayoutDashboard, Bell, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Bell, Settings, LogOut, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
+import { useShopStore } from '@/store/useShopStore';
 import { useAuthStore, getNavAuthCache, setNavAuthCache, clearNavAuthCache } from '@/store/useAuthStore';
 
 const Navbar = () => {
@@ -93,7 +95,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/create-game')}
-            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
           >
             Create New Game
           </button>
@@ -102,7 +104,7 @@ const Navbar = () => {
           <div className="relative" ref={dropdownRef}>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
-              className="relative w-12 h-12 border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
+              className="relative w-12 h-12 border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
             >
               <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
             </div>
@@ -121,7 +123,7 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
                 >
                   {/* Default Profile Menu */}
                   <>
@@ -135,6 +137,13 @@ const Navbar = () => {
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
                     >
                       <LayoutDashboard size={16} /> Dashboard
+                    </button>
+
+                    <button
+                      onClick={() => { setMenuOpen(false); router.push('/shop'); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                    >
+                      <ShoppingBag size={16} /> Shop
                     </button>
 
                     <button
@@ -230,6 +239,12 @@ const Navbar = () => {
             DISCOVERY
           </a>
           <a
+            onClick={() => router.push('/shop')}
+            className={getLinkClass('/shop')}
+          >
+            SHOP
+          </a>
+          <a
             onClick={() => router.push('/dashboard')}
             className={getLinkClass('/dashboard')}
           >
@@ -249,14 +264,14 @@ const Navbar = () => {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            className="bg-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 max-w-sm w-full mx-4 flex flex-col items-center rounded-xl"
+            className="bg-zk-white border-[4px] border-zk-black p-8 max-w-sm w-full mx-4 flex flex-col items-center rounded-xl"
           >
-            <h3 className="text-2xl font-bold mb-2 text-zk-black permanent-marker-regular">SIGN OUT?</h3>
+            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-black">Sign out?</h3>
             <p className="text-zk-black/70 mb-6 text-center font-bold">Are you sure you want to sign out of your account?</p>
             <div className="flex gap-4 w-full">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-zk-yellow/20"
                 style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 CANCEL
@@ -267,9 +282,11 @@ const Navbar = () => {
                   clearNavAuthCache();
                   setCachedAuth(null);
                   useNotificationStore.getState().invalidate();
+                  useDashboardQuizStore.getState().invalidate();
+                  useShopStore.getState().invalidate();
                   signOut();
                 }}
-                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-2 font-black text-2xl transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-[#e63e3e]"
                 style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 SURE!
