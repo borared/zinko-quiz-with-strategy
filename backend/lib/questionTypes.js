@@ -30,29 +30,16 @@ function inferQuestionType(answers = []) {
   return QUESTION_TYPES.MULTIPLE_CHOICE;
 }
 
+const VALID_QUESTION_TYPES = new Set(Object.values(QUESTION_TYPES));
+
 function resolveQuestionType(question = {}) {
-  if (question.question_type === QUESTION_TYPES.LINE_MATCHING) {
-    return QUESTION_TYPES.LINE_MATCHING;
-  }
-  if (question.question_type === QUESTION_TYPES.DRAG_LAYERS) {
-    return QUESTION_TYPES.DRAG_LAYERS;
-  }
-  if (question.question_type === QUESTION_TYPES.TRUE_FALSE) {
-    return QUESTION_TYPES.TRUE_FALSE;
+  const explicit = question.question_type || question.questionType;
+
+  if (explicit && VALID_QUESTION_TYPES.has(explicit)) {
+    return explicit;
   }
 
-  const inferred = inferQuestionType(question.answers || []);
-  if (inferred === QUESTION_TYPES.LINE_MATCHING) {
-    return QUESTION_TYPES.LINE_MATCHING;
-  }
-  if (inferred === QUESTION_TYPES.TRUE_FALSE) {
-    return QUESTION_TYPES.TRUE_FALSE;
-  }
-  if (inferred === QUESTION_TYPES.DRAG_LAYERS) {
-    return QUESTION_TYPES.DRAG_LAYERS;
-  }
-
-  return question.question_type || QUESTION_TYPES.MULTIPLE_CHOICE;
+  return inferQuestionType(question.answers || []);
 }
 
 module.exports = {
