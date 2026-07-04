@@ -14,10 +14,10 @@ import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import RewardWheel from "./RewardWheel";
-import HalloweenSoundToggle from '@/components/Host/HalloweenSoundToggle';
+import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
 import { useGameBackground } from '@/hooks/useGameBackground';
-import { battleBackgroundStyle, isHalloweenScenery } from '@/lib/lobbyScenery';
+import { battleBackgroundStyle, getSceneryAudioSlugFromImage } from '@/lib/lobbyScenery';
 import { DEFAULT_TIME_LIMIT } from '@/lib/timeLimit';
 
 export default function HostGameUI() {
@@ -376,7 +376,10 @@ export default function HostGameUI() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none z-0" />
 
       <div className="fixed bottom-6 left-6 z-[120] pointer-events-auto">
-        <HalloweenSoundToggle visible={isHalloweenScenery(background)} />
+        <ScenerySoundToggle
+          visible={Boolean(getSceneryAudioSlugFromImage(background))}
+          scenerySlug={getSceneryAudioSlugFromImage(background)}
+        />
       </div>
 
       <div className="relative z-10 flex flex-col flex-1">
