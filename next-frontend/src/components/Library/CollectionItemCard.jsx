@@ -58,18 +58,16 @@ export default function CollectionItemCard({ item, onDetails }) {
         </div>
 
         <div className="flex flex-col gap-3 p-4">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-black/50">
-              {isScenery ? 'Quiz Scenery' : item.is_free ? 'Free Avatar' : 'Player Avatar'}
-            </p>
-            <h3
-              className={`text-xl font-black tracking-tight text-zk-black ${
-                isScenery ? "font-['Outfit'] normal-case" : 'permanent-marker-regular uppercase'
-              }`}
-            >
-              {item.name}
-            </h3>
-          </div>
+          {isScenery && (
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-black/50">
+                Quiz Scenery
+              </p>
+              <h3 className="text-xl font-black tracking-tight text-zk-black font-['Outfit'] normal-case">
+                {item.name}
+              </h3>
+            </div>
+          )}
 
           {isScenery ? (
             hasSceneryDetails ? (

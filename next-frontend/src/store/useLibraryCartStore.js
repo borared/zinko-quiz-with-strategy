@@ -10,7 +10,11 @@ function loadCart() {
     const raw = localStorage.getItem(CART_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) {
+      // Filter out avatars since they are free/obtained by default now
+      return parsed.filter(item => item.item_type !== 'avatar');
+    }
+    return [];
   } catch {
     return [];
   }
@@ -87,12 +91,19 @@ export const useLibraryCartStore = create((set, get) => ({
 
   hydrateCart: () => {
     const items = loadCart();
-    const cartAlertCount = loadUnseenCount();
+    // Ensure alert count doesn't exceed actual items if we filtered avatars out
+    const cartAlertCount = Math.min(loadUnseenCount(), items.length);
+    
     set({
       items,
       cartAlertCount,
       cartAlertPending: cartAlertCount > 0,
     });
+    
+    // Resync local storage in case we removed items
+    persistCart(items);
+    persistUnseenCount(cartAlertCount);
+    persistCartAlertPending(cartAlertCount > 0);
   },
 
   markCartSeen: () => {

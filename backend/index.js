@@ -70,6 +70,11 @@ if (process.env.NODE_ENV !== 'production') {
 // ─── Clerk Middleware ───────────────────────────────────────────────────────────
 app.use(clerkMiddleware());
 
+// ─── Swagger API Documentation ────────────────────────────────────────────────
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({ message: 'Zinko API is running.' });

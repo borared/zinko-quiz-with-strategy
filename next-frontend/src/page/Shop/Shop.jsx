@@ -228,10 +228,14 @@ export default function Shop() {
 
         {showSkeleton ? (
           <ShopSkeleton count={skeletonCount} isScenery={activeTab === 'scenery'} />
+        ) : activeTab === 'avatar' ? (
+          <p className="font-['Outfit'] font-bold text-zk-black/70 text-center text-xl my-10">
+            (Not yet product)
+          </p>
         ) : activeItems.length === 0 ? (
           <div className="zk-panel !shadow-none p-10 text-center">
             <p className="text-lg font-bold text-zk-black/70">
-              No {activeTab === 'scenery' ? 'scenery' : 'avatars'} for sale right now. Check back soon!
+              No scenery for sale right now. Check back soon!
             </p>
           </div>
         ) : (
