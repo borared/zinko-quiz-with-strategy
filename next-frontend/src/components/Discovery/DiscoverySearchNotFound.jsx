@@ -27,7 +27,7 @@ const DiscoverySearchNotFound = ({ query, onClear }) => (
       <button
         type="button"
         onClick={onClear}
-        className="flex items-center justify-center gap-2 bg-white text-zk-black border-[3px] border-zk-black px-6 py-2.5 rounded-xl font-bold text-sm uppercase transition-transform hover:-translate-y-0.5 shadow-[3px_3px_0_0_#000] hover:shadow-[4px_4px_0_0_#000] active:translate-y-0.5 active:shadow-none"
+        className="flex items-center justify-center gap-2 bg-white text-zk-black border-[3px] border-zk-black px-6 py-2.5 rounded-xl font-bold text-sm uppercase !shadow-none transition-colors hover:bg-zk-yellow/30"
       >
         <RotateCcw size={16} />
         Clear search
@@ -37,13 +37,13 @@ const DiscoverySearchNotFound = ({ query, onClear }) => (
     <motion.div
       animate={{ y: [0, -6, 0], rotate: [0, 8, 0] }}
       transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute top-4 left-6 w-10 h-10 bg-zk-coral border-[3px] border-zk-black rounded-lg shadow-[3px_3px_0_0_#000] opacity-80 pointer-events-none hidden md:block"
+      className="absolute top-4 left-6 w-10 h-10 bg-zk-coral border-[3px] border-zk-black rounded-lg !shadow-none opacity-80 pointer-events-none hidden md:block"
       aria-hidden="true"
     />
     <motion.div
       animate={{ y: [0, 6, 0], rotate: [0, -10, 0] }}
       transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute bottom-6 right-8 w-12 h-12 bg-zk-purple border-[3px] border-zk-black rounded-full shadow-[3px_3px_0_0_#000] opacity-80 pointer-events-none hidden md:block"
+      className="absolute bottom-6 right-8 w-12 h-12 bg-zk-purple border-[3px] border-zk-black rounded-full !shadow-none opacity-80 pointer-events-none hidden md:block"
       aria-hidden="true"
     />
     <Search
