@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Rocket, VenetianMask, RefreshCw, Edit2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
-;
 import AvatarSelector from './AvatarSelector';
 import { useSocketStore } from '@/store/useSocketStore';
 import { useToastStore } from '@/store/useToastStore';
@@ -146,7 +145,7 @@ const EnterNicknameSection = () => {
         ) : selectedAvatar ? (
           <div 
             onClick={() => setIsAvatarModalOpen(true)}
-            className="relative mb-6 w-40 h-40 border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl bg-white flex items-center justify-center cursor-pointer group hover:-translate-y-1 hover:shadow-[6px_10px_0px_0px_rgba(0,0,0,1)] transition-all"
+            className="relative mb-6 w-40 h-40 border-[4px] border-zk-black rounded-xl bg-white flex items-center justify-center cursor-pointer group hover:-translate-y-1 transition-transform"
           >
             <img
               src={selectedAvatar.image_url}
@@ -154,7 +153,7 @@ const EnterNicknameSection = () => {
               className="w-full h-full object-cover rounded-lg"
             />
             {/* Edit Badge */}
-            <div className="absolute -top-3 -right-3 bg-white text-zk-black p-2 rounded-full border-[3px] border-zk-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] group-hover:scale-110 group-hover:bg-gray-100 transition-all z-20">
+            <div className="absolute -top-3 -right-3 bg-white text-zk-black p-2 rounded-full border-[3px] border-zk-black group-hover:scale-110 group-hover:bg-gray-100 transition-all z-20">
               <Edit2 size={18} strokeWidth={2.5} />
             </div>
           </div>
@@ -194,7 +193,7 @@ const EnterNicknameSection = () => {
             whileTap={{ scale: 0.95, y: 4 }}
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-base uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6 rounded-xl"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-base uppercase tracking-wider mb-6 rounded-xl transition-colors"
           >
             Enter <Rocket size={20} />
           </motion.button>
@@ -210,13 +209,13 @@ const EnterNicknameSection = () => {
           <div className="w-full grid grid-cols-2 gap-4">
             <button
               onClick={() => setIsAvatarModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <VenetianMask size={18} /> Change Avatar
             </button>
             <button
               onClick={() => router.push('/join')}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-xl"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <RefreshCw size={18} /> New PIN
             </button>
