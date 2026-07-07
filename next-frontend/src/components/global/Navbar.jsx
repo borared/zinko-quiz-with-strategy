@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 import { useShopStore } from '@/store/useShopStore';
+import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { useAuthStore, getNavAuthCache, setNavAuthCache, clearNavAuthCache } from '@/store/useAuthStore';
 
 const Navbar = () => {
@@ -21,12 +22,17 @@ const Navbar = () => {
 
   const { unreadCount, fetchNotifications } = useNotificationStore();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
+  const cartAlertCount = useLibraryCartStore((s) => s.cartAlertCount);
+  const cartAlertPending = useLibraryCartStore((s) => s.cartAlertPending);
+  const showLibraryCartAlert = cartAlertPending && cartAlertCount > 0;
+  const hydrateCart = useLibraryCartStore((s) => s.hydrateCart);
 
   const [cachedAuth, setCachedAuth] = useState(null);
 
   useEffect(() => {
     setCachedAuth(getNavAuthCache());
-  }, []);
+    hydrateCart();
+  }, [hydrateCart]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -244,6 +250,19 @@ const Navbar = () => {
           >
             SHOP
           </a>
+          <span className="relative inline-block">
+            <a
+              onClick={() => router.push('/library')}
+              className={getLinkClass('/library')}
+            >
+              LIBRARY
+            </a>
+            {showLibraryCartAlert && (
+              <span className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-black !shadow-none flex items-center justify-center pointer-events-none">
+                {cartAlertCount > 99 ? '99+' : cartAlertCount}
+              </span>
+            )}
+          </span>
           <a
             onClick={() => router.push('/dashboard')}
             className={getLinkClass('/dashboard')}
