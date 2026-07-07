@@ -101,7 +101,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/create-game')}
-            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0_0_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black px-6 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
           >
             Create New Game
           </button>
@@ -110,7 +110,7 @@ const Navbar = () => {
           <div className="relative" ref={dropdownRef}>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
-              className="relative w-12 h-12 border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] overflow-hidden bg-white cursor-pointer rounded-xl"
+              className="relative w-12 h-12 border-[3px] border-zk-black overflow-hidden bg-white cursor-pointer rounded-xl transition-opacity hover:opacity-90"
             >
               <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
             </div>
@@ -213,7 +213,7 @@ const Navbar = () => {
       <div className="flex items-center gap-8">
         <Link
           href="/"
-          className="bg-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-4 py-1 flex items-center justify-center transform transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg"
+          className="bg-zk-white border-[3px] border-zk-black px-4 py-1 flex items-center justify-center transform transition-colors rounded-lg hover:bg-zk-white/90"
         >
           <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
         </Link>
