@@ -3,7 +3,7 @@ import React from 'react';
 import { Search } from 'lucide-react';
 
 const DiscoverySearchIdle = ({ query }) => (
-  <div className="zk-panel border-dashed min-h-[320px] flex flex-col items-center justify-center gap-4 p-10 text-center">
+  <div className="zk-panel !shadow-none border-dashed min-h-[320px] flex flex-col items-center justify-center gap-4 p-10 text-center">
     <p className="permanent-marker-regular text-6xl md:text-7xl text-zk-purple tracking-tight">
       Zinko
     </p>
