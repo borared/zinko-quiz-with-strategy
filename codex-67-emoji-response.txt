@@ -1,0 +1,68 @@
+**1. Best Concept**
+Use the **lightning-bolt mascot as a smug “6-7 referee” taunt**.
+
+Visual:
+- Lightning-bolt mascot leaning forward, one eyebrow raised, huge side-smirk.
+- One hand points at the enemy, the other holds up a chunky **“67” scorecard**.
+- The `6` and `7` should be oversized, crooked, and outlined in black, almost like comic impact text.
+- Add small mockery accents: tiny spark marks, motion lines, maybe a small speech pop reading `?` or `LOL`, but keep text minimal so it reads at `w-9 h-9`.
+- Color: yellow bolt body `#FFCD29`, blue scorecard `#3B68FF`, purple shadow/accent `#5D3FD3`, black stroke `3-4px`.
+- Transparent SVG only. No white square, no full background.
+
+Avoid making it just “67 text.” It should be a character taunt first, meme reference second.
+
+**2. Asset Format**
+Use a **React SVG component**, not PNG and not an emoji library.
+
+Best fit:
+- Existing [`LobbySticker.jsx`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\components\Play\LobbySticker.jsx) already supports component-backed stickers.
+- Existing [`ZinkoLaughSticker.jsx`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\components\Play\stickers\ZinkoLaughSticker.jsx) is the exact pattern to copy.
+- SVG stays crisp in avatar bursts, quick buttons, and chat.
+- Component SVG is easier to tune for stroke width, colors, accessibility, and future animation.
+
+PNG only makes sense if you want a highly rendered generated illustration. Emoji library is the worst option here because the whole point is brand-specific trash talk.
+
+**3. Implementation Plan**
+Add:
+- `next-frontend/src/components/Play/stickers/Zinko67TauntSticker.jsx`
+
+Change:
+- [`next-frontend/src/components/Play/LobbySticker.jsx`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\components\Play\LobbySticker.jsx)
+  - Import `Zinko67TauntSticker`.
+  - Add it to `STICKER_COMPONENTS` as something like `'zinko-67-taunt': Zinko67TauntSticker`.
+
+- [`next-frontend/src/lib/lobbyStickers.js`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\lib\lobbyStickers.js)
+  - Map it to a quick emoji token.
+  - Recommended token: `🤡`
+  - Example metadata:
+    - `type: 'zinko-67-taunt'`
+    - `alt: 'Lightning mascot mocking with a 67 taunt'`
+    - `label: '67 Taunt'`
+
+- [`next-frontend/src/components/Play/PlayerLobbyChat.jsx`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\components\Play\PlayerLobbyChat.jsx)
+  - Keep `🤡` in `QUICK_EMOJIS`, or move it closer to the front if this should be a primary taunt.
+  - Do not use raw `"67"` as the reaction token unless you also change `isEmojiHeavy`, because numbers currently prevent avatar reactions.
+
+Optional:
+- [`next-frontend/src/lib/lobbySounds.js`](C:\Users\ASUS TUF 15\OneDrive\Desktop\Zinko\zinko-quiz-with-strategy\next-frontend\src\lib\lobbySounds.js)
+  - Reuse existing clown sound for `🤡`, or add a short “boing / buzzer / laugh” clip for stronger identity.
+
+One small bug/opportunity: the open chat message list currently renders `{msg.message}` directly, so custom stickers appear in avatar bursts and quick buttons, but not as custom art inside the chat history. If you want consistency, use `ChatMessageBody` there too.
+
+**4. Rough SVG Direction**
+Structure:
+- `viewBox="0 0 120 120"`
+- Bolt mascot body as main yellow polygon/blob.
+- Big eyes: one narrowed, one wide.
+- Smirk mouth with black stroke.
+- Arm/hand pointing outward.
+- Scorecard tilted behind or beside the face.
+- Text `67` as SVG `<text>` with `fontWeight="900"`, black stroke, yellow/white fill, rotated slightly.
+
+Asset-generation prompt if you want to create a reference first:
+
+```text
+Transparent SVG-style sticker for a neobrutalist quiz game. A yellow lightning-bolt mascot with thick black outlines, flat colors, mischievous smirk, one eyebrow raised, pointing mockingly at the viewer while holding a crooked blue scorecard that says “67”. Use Zinko colors: #FFCD29 yellow, #3B68FF blue, #5D3FD3 purple, black outlines. No white background box, no gradients, no realistic shading, readable at small emoji size, playful trash-talk energy.
+```
+
+My recommended final mapping: **clicking `🤡` sends the 67 taunt sticker**. It preserves the current emoji-only reaction pipeline while turning a generic clown reaction into a branded Zinko meme taunt.
