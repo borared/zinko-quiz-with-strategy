@@ -41,7 +41,7 @@ export function getPlayLayerColor(color, index = 0) {
 }
 
 export const MIN_DRAG_LAYERS = 2;
-export const MAX_DRAG_LAYERS = 10;
+export const MAX_DRAG_LAYERS = 20;
 
 export function normalizeLayerIndex(value) {
   const parsed = Number(value);
