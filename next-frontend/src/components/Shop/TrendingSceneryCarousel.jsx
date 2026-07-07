@@ -142,7 +142,7 @@ export default function TrendingSceneryCarousel({
   };
 
   return (
-    <section className="relative zk-panel overflow-hidden min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px]">
+    <section className="relative zk-panel !shadow-none overflow-hidden min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px]">
       <div className="absolute inset-0 overflow-hidden bg-zk-black">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
@@ -188,7 +188,7 @@ export default function TrendingSceneryCarousel({
                 type="button"
                 onClick={goPrev}
                 aria-label="Previous scenery"
-                className="flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-white/80 bg-zk-black/35 text-white backdrop-blur-sm transition-colors hover:bg-zk-black/55"
+                className="flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-white/80 bg-zk-black/35 text-white backdrop-blur-sm !shadow-none transition-colors hover:bg-zk-black/55"
               >
                 <ChevronLeft size={18} strokeWidth={3} />
               </button>
@@ -196,7 +196,7 @@ export default function TrendingSceneryCarousel({
                 type="button"
                 onClick={goNext}
                 aria-label="Next scenery"
-                className="flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-white/80 bg-zk-black/35 text-white backdrop-blur-sm transition-colors hover:bg-zk-black/55"
+                className="flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-white/80 bg-zk-black/35 text-white backdrop-blur-sm !shadow-none transition-colors hover:bg-zk-black/55"
               >
                 <ChevronRight size={18} strokeWidth={3} />
               </button>
@@ -219,7 +219,7 @@ export default function TrendingSceneryCarousel({
 
           <div className="absolute bottom-0 right-0 flex items-center gap-2">
             <div className="inline-flex h-10 items-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-3">
-              <span className="font-black text-lg leading-none text-zk-black">{priceLabel}</span>
+              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-black">{priceLabel}</span>
             </div>
 
             {item.owned ? (
@@ -232,7 +232,7 @@ export default function TrendingSceneryCarousel({
                 type="button"
                 onClick={handlePurchase}
                 disabled={isCheckingOut}
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isCheckingOut ? (
                   <Loader2 size={16} className="animate-spin" />
