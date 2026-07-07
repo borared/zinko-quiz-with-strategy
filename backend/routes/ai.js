@@ -24,7 +24,27 @@ const upload = multer({
   },
 });
 
+/**
+ * @swagger
+ * /api/ai/test:
+ *   get:
+ *     summary: GET /test
+ *     tags: [Ai]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 router.get('/test', devOnly, aiController.testAI);
+/**
+ * @swagger
+ * /api/ai/generate-quiz:
+ *   post:
+ *     summary: POST /generate-quiz
+ *     tags: [Ai]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 router.post(
   '/generate-quiz',
   requireCustomAuth,
