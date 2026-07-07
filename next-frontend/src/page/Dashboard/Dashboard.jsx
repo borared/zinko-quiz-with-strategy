@@ -207,7 +207,7 @@ const Dashboard = () => {
   }, [fetchMoreQuizzes, loading, hasNextPage, quizzes.length]);
 
   return (
-    <WorkspaceShell sidebar={<Sidebar />}>
+    <WorkspaceShell sidebar={<Sidebar />} contentClassName="dashboard-shell">
       <WelcomeBanner />
 
       <QuizGrid
@@ -221,7 +221,7 @@ const Dashboard = () => {
       />
 
       {fetchError && (
-        <div className="zk-panel bg-red-50 text-red-700 font-bold p-4">
+        <div className="zk-panel !shadow-none bg-red-50 text-red-700 font-bold p-4">
           Unable to load your quizzes: {fetchError}
         </div>
       )}
@@ -234,7 +234,7 @@ const Dashboard = () => {
         type="button"
         onClick={() => router.push('/create-game')}
         aria-label="Create new game"
-        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border-[3px] border-zk-black bg-zk-purple text-white shadow-[2px_2px_0_0_#000] transition-colors hover:bg-zk-blue"
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border-[3px] border-zk-black bg-zk-purple text-white !shadow-none transition-colors hover:bg-zk-blue"
       >
         <Plus size={32} strokeWidth={4} />
       </button>
