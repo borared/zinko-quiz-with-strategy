@@ -11,7 +11,7 @@ function SkeletonBlock({ className = '' }) {
 export function ShopItemCardSkeleton({ variant = 'grid', isScenery = true }) {
   if (variant === 'hero') {
     return (
-      <section className="relative zk-panel overflow-hidden min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px] !shadow-[2px_2px_0_0_#000]">
+      <section className="relative zk-panel !shadow-none overflow-hidden min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px]">
         <SkeletonBlock className="absolute inset-0 rounded-none border-0" />
 
         <div className="relative z-10 flex h-full min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px] flex-col justify-between p-6 md:p-8">
@@ -53,7 +53,7 @@ export function ShopItemCardSkeleton({ variant = 'grid', isScenery = true }) {
   }
 
   return (
-    <article className="relative zk-panel flex flex-col overflow-hidden !shadow-[2px_2px_0_0_#000]">
+    <article className="relative zk-panel !shadow-none flex flex-col overflow-hidden">
       <SkeletonBlock className="absolute left-4 top-4 z-20 h-6 w-14 rounded" />
 
       <div

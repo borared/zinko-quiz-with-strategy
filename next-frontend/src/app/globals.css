@@ -117,10 +117,34 @@
     box-shadow: none;
   }
 
+  .shop-shell .zk-panel,
+  .shop-shell .zk-panel-glass,
+  .shop-shell button,
+  .shop-shell [role="button"],
+  .dashboard-shell .zk-panel,
+  .dashboard-shell .zk-panel-glass,
+  .dashboard-shell button,
+  .dashboard-shell [role="button"],
+  .discovery-shell .zk-panel,
+  .discovery-shell .zk-panel-glass,
+  .discovery-shell button,
+  .discovery-shell [role="button"] {
+    box-shadow: none !important;
+  }
+
   .creator-shell .zk-btn-press,
   .creator-shell .zk-btn-press:hover,
-  .creator-shell .zk-btn-press:active {
-    box-shadow: none;
+  .creator-shell .zk-btn-press:active,
+  .shop-shell .zk-btn-press,
+  .shop-shell .zk-btn-press:hover,
+  .shop-shell .zk-btn-press:active,
+  .dashboard-shell .zk-btn-press,
+  .dashboard-shell .zk-btn-press:hover,
+  .dashboard-shell .zk-btn-press:active,
+  .discovery-shell .zk-btn-press,
+  .discovery-shell .zk-btn-press:hover,
+  .discovery-shell .zk-btn-press:active {
+    box-shadow: none !important;
     transform: none;
   }
 

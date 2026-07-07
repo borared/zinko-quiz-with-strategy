@@ -4,9 +4,24 @@ export const SCENERY_LEVEL_CLASSES = {
   Epic: 'bg-zk-pink text-white',
   Rare: 'bg-zk-blue text-white',
   Elite: 'bg-white text-zk-black',
+  Starter: 'bg-zk-yellow text-zk-black',
 };
 
 export const SCENERY_DETAILS = {
+  city: {
+    slug: 'city',
+    level: 'Starter',
+    tagline: 'Your default skyline lobby backdrop',
+    description:
+      'The classic City scenery every host starts with — a bright urban skyline that keeps your lobby clean, familiar, and ready for any quiz session.',
+    perks: [
+      'Included free with every account',
+      'Default lobby background for new hosts',
+      'Works in host lobby and live games',
+      'Always available in your collection',
+    ],
+    hasAudio: false,
+  },
   halloween: {
     slug: 'halloween',
     level: 'Epic',

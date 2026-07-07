@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, CreditCard, Headphones, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Check, CreditCard, Headphones, Loader2, ShoppingCart, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { formatPrice } from '@/lib/formatPrice';
 import { getSceneryDetails } from '@/lib/sceneryDetails';
 import {
@@ -20,7 +20,11 @@ export default function SceneryDetailModal({
   onClose,
   isCheckingOut = false,
   onPurchase,
+  onAddToCart,
+  inCart = false,
+  variant = 'shop',
 }) {
+  const isCollectionView = variant === 'collection';
   const details = item ? getSceneryDetails(item.slug) : null;
   const imageSrc = item?.image || item?.image_url;
   const priceLabel = formatPrice(item?.price_cents, item?.currency);
@@ -109,7 +113,7 @@ export default function SceneryDetailModal({
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.28, ease: [0.45, 0, 0.2, 1] }}
             onClick={(event) => event.stopPropagation()}
-            className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-xl border-[4px] border-zk-black bg-zk-white"
+            className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-xl border-[4px] border-zk-black bg-zk-white !shadow-none"
             style={{ maxHeight: `calc(100vh - ${NAVBAR_HEIGHT_PX}px - 2rem)` }}
           >
             <div className="relative h-40 shrink-0 overflow-hidden border-b-[3px] border-zk-black bg-zk-black sm:h-44">
@@ -132,9 +136,10 @@ export default function SceneryDetailModal({
                   {item.name}
                 </h3>
 
+                {!isCollectionView && (
                 <div className="mt-2 flex items-center gap-3 sm:mt-3">
                   <div className="inline-flex h-10 items-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-3">
-                    <span className="font-black text-lg leading-none text-zk-black">{priceLabel}</span>
+                    <span className="font-['Outfit'] text-lg font-black leading-none text-zk-black">{priceLabel}</span>
                   </div>
 
                   {item.owned ? (
@@ -143,21 +148,35 @@ export default function SceneryDetailModal({
                       Owned
                     </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={handlePurchase}
-                      disabled={isCheckingOut}
-                      className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isCheckingOut ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <CreditCard size={16} strokeWidth={3} />
+                    <div className="flex items-center gap-2">
+                      {onAddToCart && (
+                        <button
+                          type="button"
+                          onClick={() => onAddToCart(item)}
+                          disabled={inCart}
+                          className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-3 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black !shadow-none transition-colors hover:bg-zk-yellow disabled:opacity-60"
+                        >
+                          <ShoppingCart size={16} strokeWidth={3} />
+                          {inCart ? 'In cart' : 'Add'}
+                        </button>
                       )}
-                      {isCheckingOut ? 'Loading...' : 'Buy now'}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={handlePurchase}
+                        disabled={isCheckingOut}
+                        className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isCheckingOut ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <CreditCard size={16} strokeWidth={3} />
+                        )}
+                        {isCheckingOut ? 'Loading...' : 'Buy now'}
+                      </button>
+                    </div>
                   )}
                 </div>
+                )}
 
                 <p className="mt-2 text-sm font-bold text-zk-black/60">{details.tagline}</p>
                 <p className="mt-1.5 line-clamp-2 text-sm font-bold leading-snug text-zk-black/80">
@@ -197,7 +216,9 @@ export default function SceneryDetailModal({
                           {details.audioLabel}
                         </p>
                         <p className="text-xs font-bold text-zk-black/60">
-                          Test the loop before you buy — same sound in your host lobby.
+                          {isCollectionView
+                            ? 'Preview the ambience — same sound in your host lobby when equipped.'
+                            : 'Test the loop before you buy — same sound in your host lobby.'}
                         </p>
                       </div>
                     </div>
@@ -205,7 +226,7 @@ export default function SceneryDetailModal({
                     <button
                       type="button"
                       onClick={handleTogglePreview}
-                      className="inline-flex items-center gap-2 rounded-lg border-[2px] border-zk-black bg-white px-4 py-2 font-['Amatic_SC'] text-xl font-bold text-zk-black transition-colors hover:bg-zk-yellow"
+                      className="inline-flex items-center gap-2 rounded-lg border-[2px] border-zk-black bg-white px-4 py-2 font-['Amatic_SC'] text-xl font-bold text-zk-black !shadow-none transition-colors hover:bg-zk-yellow"
                     >
                       {isPreviewPlaying ? (
                         <Volume2 size={18} strokeWidth={3} />

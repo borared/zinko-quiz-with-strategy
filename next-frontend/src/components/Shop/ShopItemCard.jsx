@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, CreditCard, Info, Loader2 } from 'lucide-react';
+import { Check, CreditCard, Info, Loader2, ShoppingCart } from 'lucide-react';
 import { formatPrice } from '@/lib/formatPrice';
 import { getSceneryDetails, SCENERY_LEVEL_CLASSES } from '@/lib/sceneryDetails';
 import SceneryDetailModal from '@/components/Shop/SceneryDetailModal';
@@ -11,6 +11,8 @@ export default function ShopItemCard({
   item,
   isCheckingOut = false,
   onPurchase,
+  onAddToCart,
+  inCart = false,
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const isScenery = item.item_type === 'scenery';
@@ -23,11 +25,16 @@ export default function ShopItemCard({
     onPurchase?.(item);
   };
 
+  const handleAddToCart = () => {
+    if (item.owned || inCart) return;
+    onAddToCart?.(item);
+  };
+
   return (
     <>
       <motion.article
         whileHover={{ y: -4 }}
-        className="relative zk-panel flex flex-col overflow-hidden !shadow-[2px_2px_0_0_#000]"
+        className="relative zk-panel !shadow-none flex flex-col overflow-hidden"
       >
         {isScenery && sceneryDetails?.level && (
           <span
@@ -61,12 +68,22 @@ export default function ShopItemCard({
               No preview
             </div>
           )}
-          {item.owned && (
+          {item.owned ? (
             <span className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-[#2ea84a] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded border-[2px] border-zk-black">
               <Check size={12} strokeWidth={3} />
               Owned
             </span>
-          )}
+          ) : onAddToCart ? (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={inCart}
+              className="absolute top-4 right-4 z-20 inline-flex items-center gap-1 bg-white text-zk-black text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded border-[2px] border-zk-black !shadow-none transition-colors hover:bg-zk-yellow disabled:opacity-60"
+            >
+              <ShoppingCart size={14} strokeWidth={3} />
+              {inCart ? 'In cart' : 'Add'}
+            </button>
+          ) : null}
         </div>
 
         <div className="flex flex-1 flex-col gap-3 p-4">
@@ -87,7 +104,7 @@ export default function ShopItemCard({
 
           <div className="mt-auto flex items-center justify-between gap-3">
             <div className="inline-flex h-10 shrink-0 items-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-3">
-              <span className="font-black text-lg leading-none text-zk-black">{priceLabel}</span>
+              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-black">{priceLabel}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -95,7 +112,7 @@ export default function ShopItemCard({
                 <button
                   type="button"
                   onClick={() => setShowDetails(true)}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black transition-colors hover:bg-zk-yellow"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black !shadow-none transition-colors hover:bg-zk-yellow"
                 >
                   <Info size={16} strokeWidth={3} />
                   Details
@@ -107,7 +124,7 @@ export default function ShopItemCard({
                   type="button"
                   onClick={handlePurchase}
                   disabled={isCheckingOut}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isCheckingOut ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -128,6 +145,8 @@ export default function ShopItemCard({
         isCheckingOut={isCheckingOut}
         onClose={() => setShowDetails(false)}
         onPurchase={onPurchase}
+        onAddToCart={onAddToCart}
+        inCart={inCart}
       />
     </>
   );

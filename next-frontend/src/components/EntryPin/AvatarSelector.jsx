@@ -17,7 +17,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border-[4px] border-zk-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-2xl w-full max-w-[450px] max-h-[80vh] flex flex-col overflow-hidden"
+        className="bg-white border-[4px] border-zk-black rounded-2xl w-full max-w-[450px] max-h-[80vh] flex flex-col overflow-hidden"
       >
         
         {/* Header */}
@@ -47,7 +47,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                    whileTap={{ scale: 0.95 }}
                    className={`relative cursor-pointer aspect-square rounded-xl border-[3px] flex items-center justify-center overflow-hidden transition-colors ${
                      isSelected 
-                       ? 'border-zk-black bg-[#FFCD29] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' 
+                       ? 'border-zk-black bg-[#FFCD29]'
                        : 'border-zk-black/10 bg-white hover:border-zk-black/30'
                    }`}
                  >
@@ -55,7 +55,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                      src={avatar.image_url} 
                      alt="Avatar option" 
                      loading="eager"
-                     className="w-[90%] h-[90%] object-cover drop-shadow-md rounded-lg"
+                     className="w-[90%] h-[90%] object-cover rounded-lg"
                    />
                   
                   {isSelected && (

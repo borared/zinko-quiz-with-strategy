@@ -1,5 +1,14 @@
 const prisma = require('../lib/prisma');
 
+function normalizeAvatarRow(avatar) {
+  if (!avatar) return avatar;
+  return {
+    ...avatar,
+    price_cents: Number.isInteger(avatar.price_cents) ? avatar.price_cents : 0,
+    price_coins: Number.isInteger(avatar.price_coins) ? avatar.price_coins : 0,
+  };
+}
+
 const AvatarRepository = {
   getAllAvatars: async () => {
     return prisma.avatars.findMany({
@@ -28,12 +37,13 @@ const AvatarRepository = {
       if (avatar) merged.set(avatar.id, avatar);
     });
 
-    const playable = Array.from(merged.values());
+    const playable = Array.from(merged.values()).map(normalizeAvatarRow);
     if (playable.length > 0) return playable;
 
-    return prisma.avatars.findMany({
+    const fallback = await prisma.avatars.findMany({
       orderBy: { created_at: 'asc' },
     });
+    return fallback.map(normalizeAvatarRow);
   },
 };
 

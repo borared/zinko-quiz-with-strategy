@@ -1,10 +1,9 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useTransitionStore } from '@/store/useTransitionStore';
 import { useSocketStore } from '@/store/useSocketStore';
 import { useRouter, useParams } from 'next/navigation';
-;
 import { useToastStore } from '@/store/useToastStore';
 import TeamHeader from './TeamHeader';
 import TeamCard from './TeamCard';
@@ -34,22 +33,34 @@ function getOrCreatePlayerId() {
   return id;
 }
 
+function countPlayersByTeam(players = []) {
+  return players.reduce(
+    (counts, player) => {
+      if (player.team === 'A') counts.a += 1;
+      if (player.team === 'B') counts.b += 1;
+      return counts;
+    },
+    { a: 0, b: 0 }
+  );
+}
+
 const ChooseTeamSection = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [joining, setJoining] = useState(false);
+  const [countA, setCountA] = useState(0);
+  const [countB, setCountB] = useState(0);
+  const joinedRef = useRef(false);
   const { blinkTo } = useTransitionStore();
-  const { getSocket } = useSocketStore();
+  const { getSocket, isConnected } = useSocketStore();
   const router = useRouter();
   const { pin } = useParams();
   const { showToast } = useToastStore();
 
-  // Redirect if accessed directly without a pin
-  if (!pin) {
-    if (typeof window !== 'undefined') {
-      router.push('/join');
+  useEffect(() => {
+    if (!pin) {
+      router.replace('/join');
     }
-    return null; // Return null so it doesn't render until redirect
-  }
+  }, [pin, router]);
 
   // Explicitly leave team when returning to this screen
   useEffect(() => {
@@ -61,9 +72,35 @@ const ChooseTeamSection = () => {
     }
   }, [getSocket, pin]);
 
+  const syncTeamCounts = useCallback((players = []) => {
+    const { a, b } = countPlayersByTeam(players);
+    setCountA(a);
+    setCountB(b);
+  }, []);
 
-  const countA = 12;
-  const countB = 14;
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !isConnected || !pin) return;
+
+    const requestPlayers = () => {
+      socket.emit('lobby:request-players', { pin });
+    };
+
+    const onPlayersUpdate = (data) => {
+      syncTeamCounts(data?.players || []);
+    };
+
+    requestPlayers();
+    socket.on('lobby:players-update', onPlayersUpdate);
+
+    return () => {
+      socket.off('lobby:players-update', onPlayersUpdate);
+    };
+  }, [getSocket, isConnected, pin, syncTeamCounts]);
+
+  if (!pin) {
+    return null;
+  }
 
   const handleJoin = (team) => {
     if (joining) return;
@@ -82,6 +119,7 @@ const ChooseTeamSection = () => {
 
     if (pin) {
       const socket = getSocket();
+      joinedRef.current = true;
 
       // Emit join event so the backend adds us to the room
       socket.emit('player:join', { pin, playerId, nickname, avatar, team });
@@ -101,6 +139,7 @@ const ChooseTeamSection = () => {
         showToast(message, 'error');
         socket.off('player:joined', onJoined);
         socket.off('error', onError);
+        joinedRef.current = false;
         setJoining(false);
       };
 

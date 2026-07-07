@@ -20,6 +20,7 @@ const GAME_FLOW_PATHS = [
   "/dashboard",
   "/discovery",
   "/shop",
+  "/library",
   "/host",
   "/play",
 ];

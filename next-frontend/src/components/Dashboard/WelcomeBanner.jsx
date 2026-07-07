@@ -8,7 +8,7 @@ const WelcomeBanner = () => {
 
   return (
     <div
-      className="relative zk-panel overflow-hidden w-full min-h-[220px] md:min-h-[280px]"
+      className="relative zk-panel !shadow-none overflow-hidden w-full min-h-[220px] md:min-h-[280px]"
       style={{
         backgroundImage:
           'url("https://res.cloudinary.com/dicrvjstp/image/upload/v1779612934/bg_welcome_1_xv1lps.png")',

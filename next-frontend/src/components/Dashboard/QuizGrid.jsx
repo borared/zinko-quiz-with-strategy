@@ -26,7 +26,7 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
   return (
     <div className="flex flex-col gap-6">
       {!isDiscoveryMode && (
-        <div className="zk-panel-glass px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 !shadow-[3px_3px_0_0_#000]">
+        <div className="zk-panel-glass !shadow-none px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="font-['Outfit'] text-3xl font-black text-zk-black tracking-tight uppercase">
               {quizzes.length > 0 ? 'Your Quizzes' : 'No Quizzes Yet'}
@@ -51,7 +51,7 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
       {quizzes.length === 0 && !isDiscoveryMode ? (
         <div
           onClick={() => router.push('/create-game')}
-          className="zk-panel border-dashed p-12 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white transition-colors min-h-[280px] text-center"
+          className="zk-panel !shadow-none border-dashed p-12 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white transition-colors min-h-[280px] text-center"
         >
           <div className="w-16 h-16 rounded-full border-[3px] border-zk-black bg-zk-yellow flex items-center justify-center">
             <Plus size={32} strokeWidth={3} />
@@ -73,7 +73,7 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && router.push('/create-game')}
-              className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/70 cursor-pointer hover:bg-white hover:-translate-y-0.5 transition-all h-[320px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl group"
+              className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/70 cursor-pointer hover:bg-white hover:-translate-y-0.5 transition-all h-[320px] !shadow-none rounded-xl group"
             >
               <div className="w-14 h-14 rounded-full border-[3px] border-zk-black flex items-center justify-center bg-zk-purple text-white group-hover:scale-105 transition-transform">
                 <Plus size={28} strokeWidth={3} />

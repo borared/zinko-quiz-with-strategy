@@ -213,6 +213,9 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       socket.emit('error', { message: 'Game not found' });
       return;
     }
+    if (game.phase === 'LOBBY') {
+      socket.join(pin);
+    }
     if (getPlayerBySocket(game, socket.id)) {
       socket.join(getPlayerLobbyRoom(pin));
     }

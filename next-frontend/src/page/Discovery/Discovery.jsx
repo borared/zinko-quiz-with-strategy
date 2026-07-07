@@ -401,8 +401,8 @@ const Discovery = () => {
     || (loading && quizzes.length === 0 && !(browseCached || hasPersistedBrowse));
 
   return (
-    <WorkspaceShell sidebar={<Sidebar />}>
-      <div className="relative zk-panel overflow-hidden min-h-[180px] md:min-h-[200px]">
+    <WorkspaceShell sidebar={<Sidebar />} contentClassName="discovery-shell">
+      <div className="relative zk-panel !shadow-none overflow-hidden min-h-[180px] md:min-h-[200px]">
         <div
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-in-out"
           style={{
@@ -442,7 +442,7 @@ const Discovery = () => {
       </div>
 
       <div ref={searchWrapRef} className="relative z-20">
-        <div className="zk-panel-glass px-4 py-3 flex items-center gap-3 !shadow-[3px_3px_0_0_#000]">
+        <div className="zk-panel-glass !shadow-none px-4 py-3 flex items-center gap-3">
           <Search size={22} strokeWidth={2.5} className="text-zk-black shrink-0" />
           <input
             type="text"
@@ -481,7 +481,7 @@ const Discovery = () => {
 
         {isDrafting && showSuggestions && (
           <ul
-            className="absolute top-full left-0 right-0 mt-2 zk-panel overflow-hidden z-30 !shadow-[3px_3px_0_0_#000]"
+            className="absolute top-full left-0 right-0 mt-2 zk-panel !shadow-none overflow-hidden z-30"
             role="listbox"
           >
             {suggestionsLoading && (
@@ -525,7 +525,7 @@ const Discovery = () => {
           />
 
           {fetchError && (
-            <div className="zk-panel bg-red-50 text-red-700 font-bold p-4">
+            <div className="zk-panel !shadow-none bg-red-50 text-red-700 font-bold p-4">
               Unable to load quizzes: {fetchError}
             </div>
           )}
