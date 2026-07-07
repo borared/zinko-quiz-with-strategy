@@ -32,7 +32,7 @@ export default function QuestionPrompt({
         className={`flex items-center justify-center gap-3 px-8 py-3 rounded-full font-black uppercase border-[4px] border-zk-black transition-all mx-auto ${
           isInactive
             ? 'bg-gray-700 text-white/50 cursor-not-allowed'
-            : `${config.buttonColor} text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:brightness-110`
+            : `${config.buttonColor} text-white hover:brightness-110 active:brightness-95`
         }`}
         style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.2rem', letterSpacing: '2px' }}
       >
