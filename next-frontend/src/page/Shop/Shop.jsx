@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useShopStore } from '@/store/useShopStore';
 import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useToastStore } from '@/store/useToastStore';
+import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { markSceneryAsNew } from '@/lib/newSceneryNotice';
 
 const TABS = [
@@ -51,13 +52,19 @@ export default function Shop() {
   const fetchOwnedScenery = useOwnedSceneryStore((s) => s.fetchOwnedScenery);
   const markStoreSceneryAsNew = useOwnedSceneryStore((s) => s.markSceneryAsNew);
 
+  const hydrateCart = useLibraryCartStore((s) => s.hydrateCart);
+  const addToCart = useLibraryCartStore((s) => s.addItem);
+  const hasCartItem = useLibraryCartStore((s) => s.hasItem);
+
+
   const shopCached = Boolean(user?.id && isCachedForUser(user.id));
   const hasPersistedData = hasPersistedCatalog();
 
   useEffect(() => {
     useShopStore.getState().hydrateFromSession();
+    hydrateCart();
     setClientReady(true);
-  }, []);
+  }, [hydrateCart]);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -140,6 +147,19 @@ export default function Shop() {
     router,
   ]);
 
+  const handleAddToCart = (item) => {
+    const added = addToCart(item);
+    if (added) {
+      const cartCount = useLibraryCartStore.getState().items.length;
+      showToast(
+        `${item.name} added to cart${cartCount > 1 ? ` · ${cartCount} items in Library` : ''}.`,
+        'success'
+      );
+      return;
+    }
+    showToast('This item is already in your cart.', 'info');
+  };
+
   const handlePurchase = async (item) => {
     try {
       const result = await startCheckout(item.item_type, item.slug);
@@ -172,7 +192,7 @@ export default function Shop() {
   }
 
   return (
-    <WorkspaceShell sidebar={<Sidebar />}>
+    <WorkspaceShell sidebar={<Sidebar />} contentClassName="shop-shell">
       <section className="flex flex-col gap-6 md:gap-8">
         {showSkeleton ? (
           <TrendingSceneryCarouselSkeleton />
@@ -193,7 +213,7 @@ export default function Shop() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors shadow-[2px_2px_0_0_#000] ${
+                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none ${
                   isActive
                     ? 'bg-[#5D3FD3] text-white'
                     : 'bg-white text-zk-black hover:bg-zk-yellow/30'
@@ -209,7 +229,7 @@ export default function Shop() {
         {showSkeleton ? (
           <ShopSkeleton count={skeletonCount} isScenery={activeTab === 'scenery'} />
         ) : activeItems.length === 0 ? (
-          <div className="zk-panel p-10 text-center">
+          <div className="zk-panel !shadow-none p-10 text-center">
             <p className="text-lg font-bold text-zk-black/70">
               No {activeTab === 'scenery' ? 'scenery' : 'avatars'} for sale right now. Check back soon!
             </p>
@@ -222,6 +242,8 @@ export default function Shop() {
                 item={item}
                 isCheckingOut={isCheckingOut}
                 onPurchase={handlePurchase}
+                onAddToCart={handleAddToCart}
+                inCart={hasCartItem(item.item_type, item.slug)}
               />
             ))}
           </div>
