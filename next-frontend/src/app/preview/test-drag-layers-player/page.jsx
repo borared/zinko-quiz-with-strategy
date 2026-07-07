@@ -21,7 +21,7 @@ const LAYER_COLORS = [
   'bg-[#F39C12]',
 ];
 
-// Ten steps, each label at least 15 characters
+// Thirteen steps, each label at least 15 characters
 const ORDER_STEPS = [
   'Gather project requirements from stakeholders',
   'Design system architecture and data models',
@@ -33,6 +33,9 @@ const ORDER_STEPS = [
   'Monitor application logs and error dashboards',
   'Collect user feedback and analytics metrics',
   'Plan next sprint improvements and bug fixes',
+  'Conduct post-release retrospective meetings',
+  'Update user documentation and internal wikis',
+  'Refactor legacy code for future scalability',
 ].map((text, index) => ({
   id: String(index + 1),
   text,
@@ -48,8 +51,8 @@ function buildMockQuestion(answers) {
     index: 0,
     round: 1,
     match: 1,
-    total: 10,
-    questionText: 'Put these ten software delivery steps in the correct order.',
+    total: 13,
+    questionText: 'Put these thirteen software delivery steps in the correct order.',
     questionType: QUESTION_TYPES.DRAG_LAYERS,
     layerCount: ORDER_STEPS.length,
     answers,
