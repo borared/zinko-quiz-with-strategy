@@ -103,7 +103,7 @@ const Navbar = () => {
             onClick={() => router.push('/create-game')}
             className="bg-[#5D3FD3] text-white border-[3px] border-zk-black px-6 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
           >
-            Create New Game
+            Create New Quiz
           </button>
 
           {/* Profile Avatar + Dropdown */}

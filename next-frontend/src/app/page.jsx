@@ -17,8 +17,8 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
-      <Engagement />
       <SkillsFeature />
+      <Engagement />
       <WhyZinko />
       <Ready />
     </>

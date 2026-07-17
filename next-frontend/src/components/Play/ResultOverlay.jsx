@@ -1,29 +1,28 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, Clock } from 'lucide-react';
 import FrogSteal from './Skills/FrogSteal';
 
 const RESULT_VARIANTS = {
   correct: {
     bgColor: 'bg-green-600',
-    Icon: Check,
+    imageSrc: '/images/model_answer/right.png',
     title: 'Correct!',
     titleClass: 'text-[5rem] md:text-[6rem]',
     showPoints: true,
   },
   incorrect: {
     bgColor: 'bg-red-500',
-    Icon: X,
+    imageSrc: '/images/model_answer/wrong.png',
     title: 'Incorrect',
     titleClass: 'text-[5rem] md:text-[6rem]',
     showPoints: false,
   },
   missed: {
     bgColor: 'bg-orange-500',
-    Icon: Clock,
+    imageSrc: '/images/model_answer/miss_answer.png',
     title: 'OOPS you missed',
-    titleClass: 'text-[3.5rem] md:text-[4.5rem]',
+    titleClass: 'text-[3.5rem] md:text-[4.5rem] whitespace-nowrap',
     showPoints: false,
   },
 };
@@ -39,7 +38,7 @@ export default function ResultOverlay({ resultData }) {
 
   const hasStolenPoints = resultData.stolenPoints !== 0 && resultData.stolenPoints !== undefined;
   const variant = RESULT_VARIANTS[getResultVariant(resultData)];
-  const { bgColor, Icon, title, titleClass, showPoints } = variant;
+  const { bgColor, imageSrc, title, titleClass, showPoints } = variant;
 
   return (
     <div className={`min-h-screen ${bgColor} flex flex-col items-center justify-center px-6 relative overflow-hidden font-sans`}>
@@ -52,7 +51,13 @@ export default function ResultOverlay({ resultData }) {
         className="text-center z-10 w-full max-w-sm flex flex-col items-center"
       >
         <div className="mb-2">
-          <Icon size={120} strokeWidth={4} className="text-white" />
+          <motion.img 
+            src={imageSrc} 
+            alt={title} 
+            className="h-56 md:h-72 object-contain" 
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          />
         </div>
         
         <h2 className={`${titleClass} leading-none gasoek-one-regular mb-6 text-white tracking-wider`}>
@@ -66,7 +71,7 @@ export default function ResultOverlay({ resultData }) {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="bg-white border-[4px] border-zk-black rounded-2xl px-8 py-3 shadow-[0_6px_0_0_rgba(0,0,0,1)]"
+              className="bg-white border-[4px] border-zk-black rounded-2xl px-8 py-3"
             >
               <p className="text-zk-black font-black text-5xl md:text-6xl tracking-widest gasoek-one-regular">
                 +{resultData.pointsEarned?.toLocaleString()}
@@ -74,10 +79,6 @@ export default function ResultOverlay({ resultData }) {
             </motion.div>
           </div>
         )}
-
-
-
-
 
         <div className="mt-10 flex items-center justify-center gap-3">
           <div className="w-3 h-3 rounded-full bg-white animate-pulse shadow-md" />
@@ -99,11 +100,10 @@ export default function ResultOverlay({ resultData }) {
           opacity: { duration: 0.5 },
           y: { repeat: Infinity, duration: 2.5, ease: "easeInOut" } 
         }}
-        className="absolute bottom-6 left-6 z-20 bg-white text-zk-black border-[4px] border-zk-black rounded-xl px-6 py-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-        style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+        className="absolute bottom-6 left-6 z-20 bg-white text-zk-black border-[4px] border-zk-black rounded-xl px-6 py-2 font-['Outfit'] tracking-wide"
       >
-        <p className="font-bold text-3xl uppercase">
-          TOTAL SCORE: <span className="text-zk-blue ml-2 font-black text-4xl">{resultData.totalScore?.toLocaleString()}</span>
+        <p className="font-bold text-xl md:text-2xl">
+          Total Score: <span className="text-zk-blue ml-2 font-black text-2xl md:text-3xl">{resultData.totalScore?.toLocaleString()}</span>
         </p>
       </motion.div>
 
@@ -119,10 +119,9 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.5, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.5 }
             }}
-            className="px-6 py-2 rounded-xl border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] font-bold text-3xl uppercase bg-zk-yellow text-zk-black"
-            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+            className="px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl bg-zk-yellow text-zk-black font-['Outfit'] tracking-wide"
           >
-            +20% POINTS!
+            +20% Points!
           </motion.div>
         )}
 
@@ -136,10 +135,9 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.4, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.4 }
             }}
-            className="px-6 py-2 rounded-xl border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] font-bold text-3xl uppercase bg-zk-yellow text-zk-black"
-            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+            className="px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl bg-zk-yellow text-zk-black font-['Outfit'] tracking-wide"
           >
-            RABBIT BONUS 2X!
+            Rabbit Bonus 2x!
           </motion.div>
         )}
 
@@ -153,17 +151,16 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.6, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.6 }
             }}
-            className={`px-6 py-2 rounded-xl border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] font-bold text-3xl uppercase ${
+            className={`px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl font-['Outfit'] tracking-wide ${
               resultData.stolenPoints > 0 
                 ? 'bg-zk-yellow text-zk-black'
                 : 'bg-black text-white border-white'
             }`}
-            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {resultData.stolenPoints > 0 ? (
-              <>STOLE +{resultData.stolenPoints.toLocaleString()} PTS!</>
+              <>Stole +{resultData.stolenPoints.toLocaleString()} pts!</>
             ) : (
-              <>STOLEN -{Math.abs(resultData.stolenPoints).toLocaleString()} PTS!</>
+              <>Stolen -{Math.abs(resultData.stolenPoints).toLocaleString()} pts!</>
             )}
           </motion.div>
         )}
