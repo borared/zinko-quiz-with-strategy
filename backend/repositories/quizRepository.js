@@ -243,10 +243,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             WHERE is_public = true
             ${DISCOVERY_CREATOR_EXISTS}
             ${cursorCondition}
-            AND (
-              title ILIKE ${`%${trimmedSearch}%`}
-              OR REGEXP_REPLACE(LOWER(title), '[^a-z0-9]', '', 'g') LIKE ${`%${normalized}%`}
-            )
+            AND to_tsvector('english', title) @@ plainto_tsquery('english', ${trimmedSearch})
             ORDER BY created_at DESC, id DESC
             LIMIT ${limit + 1}
           `
@@ -256,7 +253,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             WHERE is_public = true
             ${DISCOVERY_CREATOR_EXISTS}
             ${cursorCondition}
-            AND title ILIKE ${`%${trimmedSearch}%`}
+            AND to_tsvector('english', title) @@ plainto_tsquery('english', ${trimmedSearch})
             ORDER BY created_at DESC, id DESC
             LIMIT ${limit + 1}
           `;
