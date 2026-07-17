@@ -86,6 +86,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
                   className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
                 >
+                  <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
+                    #{i + 1}
+                  </div>
                   {player.avatar ? (
                     <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
                   ) : (
@@ -169,6 +172,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
                   className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
                 >
+                  <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
+                    #{i + 1}
+                  </div>
                   {player.avatar ? (
                     <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
                   ) : (
