@@ -4,7 +4,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { Server } = require('socket.io');
 const { clerkMiddleware } = require('@clerk/express');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { validateEnv } = require('./lib/envValidation');
 const { generalLimiter, devOnly } = require('./middleware/security');
@@ -116,7 +118,7 @@ app.use((err, req, res, next) => {
   console.error('Server Error:', err.stack || err.message || err);
   res.status(500).json({
     error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong.',
+    message: process.env.NODE_ENV !== 'production' ? err.message : 'Something went wrong.',
   });
 });
 
