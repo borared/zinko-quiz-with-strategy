@@ -83,8 +83,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   key={player.id}
                   initial={{ x: -40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
+                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full transition-shadow duration-200 cursor-default"
                 >
                   <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
                     #{i + 1}
@@ -169,8 +170,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   key={player.id}
                   initial={{ x: 40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
+                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full transition-shadow duration-200 cursor-default"
                 >
                   <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
                     #{i + 1}
