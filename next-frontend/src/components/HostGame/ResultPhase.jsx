@@ -86,6 +86,12 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
                   ) : (
                     <div className="font-black text-4xl text-zk-black/30">?</div>
                   )}
+                  {/* Team badge at top left edge */}
+                  {p.team && (
+                    <div className={`absolute -top-4 -left-4 w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10 text-white ${p.team === 'A' ? 'bg-[#27AE60]' : 'bg-[#E74C3C]'}`}>
+                      {p.team}
+                    </div>
+                  )}
                   {/* Rank badge at top right edge */}
                   <div className="absolute -top-4 -right-4 bg-[#5D3FD3] text-white w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10">
                     #{i + 1}
