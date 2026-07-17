@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Rocket, VenetianMask, RefreshCw, Edit2 } from 'lucide-react';
+import { Rocket, VenetianMask, RefreshCw, Edit2, Target, Puzzle, Crown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import AvatarSelector from './AvatarSelector';
@@ -127,17 +127,38 @@ const EnterNicknameSection = () => {
   return (
     <div className="flex-1 w-full flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow px-4 py-20 font-sans">
 
-      {/* Decorative Elements */}
+      {/* Decorative Elements - Strategy / Quiz Theme */}
       <motion.div
-        animate={{ y: [-10, 10, -10], x: [-5, 5, -5] }}
+        animate={{ y: [-10, 10, -10], rotate: [-15, 15, -15] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-16 left-16 md:top-24 md:left-32 w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#D4A322]/40 border-[3px] border-zk-black/10 pointer-events-none"
-      />
+        className="absolute top-16 left-16 md:top-24 md:left-32 text-black/10 pointer-events-none"
+      >
+        <Target size={90} strokeWidth={1.5} />
+      </motion.div>
+      
       <motion.div
-        animate={{ y: [15, -15, 15], rotate: [45, 60, 45] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 bg-[#FFB020]/60 border-[3px] border-zk-black/10 pointer-events-none rounded-xl"
-      />
+        animate={{ y: [15, -15, 15], rotate: [0, 360] }}
+        transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 25, repeat: Infinity, ease: "linear" } }}
+        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 text-black/10 pointer-events-none"
+      >
+        <Puzzle size={110} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.8, 0.4] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/4 right-16 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Crown size={80} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [-15, 15, -15], rotate: [-25, 25, -25] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-1/3 left-12 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Sparkles size={85} strokeWidth={1.5} />
+      </motion.div>
 
       <motion.div 
         initial={{ scale: 0.5, opacity: 0 }}

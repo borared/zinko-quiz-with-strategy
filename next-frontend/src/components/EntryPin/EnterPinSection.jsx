@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
+import { Brain, Swords, Shield, Zap } from 'lucide-react';
 import api from '../../services/api';
 
 const EnterPinSection = () => {
@@ -92,9 +93,38 @@ const EnterPinSection = () => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow w-full py-20 px-4 font-sans">
 
-      {/* Decorative Elements */}
-      <div className="absolute top-12 left-12 md:top-24 md:left-32 w-16 h-16 md:w-24 md:h-24 rounded-full border-[3px] border-black/10 bg-black/5 pointer-events-none" />
-      <div className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 border-[3px] border-black/10 bg-black/5 pointer-events-none" />
+      {/* Decorative Elements - Strategy / Quiz Theme */}
+      <motion.div
+        animate={{ y: [-15, 15, -15], rotate: [-10, 10, -10] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-12 left-12 md:top-24 md:left-32 text-black/10 pointer-events-none"
+      >
+        <Brain size={100} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [15, -15, 15], rotate: [0, 360] }}
+        transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
+        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 text-black/10 pointer-events-none"
+      >
+        <Swords size={120} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/2 right-12 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Shield size={80} strokeWidth={1.5} />
+      </motion.div>
+      
+      <motion.div
+        animate={{ y: [-10, 10, -10], rotate: [-20, 20, -20] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-1/4 left-16 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Zap size={90} strokeWidth={1.5} />
+      </motion.div>
 
       {/* Main Content */}
       <motion.div 
