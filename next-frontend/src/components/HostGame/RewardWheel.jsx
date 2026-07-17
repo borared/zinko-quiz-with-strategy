@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { useSocketStore } from '@/store/useSocketStore';
-import confetti from "canvas-confetti";
 import { SKILLS } from '@/config/skills';
 
 const REWARDS = [
@@ -151,12 +150,15 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
       setWonReward(reward);
 
       if (reward.id !== "NOTHING") {
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
-          zIndex: 100,
-          colors: ['#FFCD29', '#ffffff', '#22c55e', '#ef4444']
+        import("canvas-confetti").then((mod) => {
+          const confetti = mod.default || mod;
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+            zIndex: 100,
+            colors: ['#FFCD29', '#ffffff', '#22c55e', '#ef4444']
+          });
         });
       }
 

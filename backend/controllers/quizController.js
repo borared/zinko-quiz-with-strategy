@@ -4,6 +4,15 @@ const userRepository = require('../repositories/userRepository');
 const handleError = require('../lib/errorHandler');
 const { stripQuizCorrectAnswers } = require('../lib/quizSanitizer');
 const { ALLOWED_TIME_LIMITS } = require('../lib/questionTimeLimit');
+const cache = require('../lib/cache');
+
+const invalidatePublicQuizzesCache = () => {
+  const keys = cache.keys();
+  const keysToDelete = keys.filter(key => key.startsWith('public_quizzes_'));
+  if (keysToDelete.length > 0) {
+    cache.del(keysToDelete);
+  }
+};
 
 // ─── Zod Validation Schemas ──────────────────────────────────────────────────
 const answerSchema = z.object({
@@ -159,6 +168,9 @@ const createQuiz = async (req, res) => {
     });
 
     console.log(`✅ Quiz saved: ${quiz.title} by ${creator_id}`);
+    if (quiz.is_public) {
+      invalidatePublicQuizzesCache();
+    }
     res.status(201).json({ message: 'Quiz saved successfully', quiz });
   } catch (err) {
     handleServiceError(res, err, 'Failed to save quiz');
@@ -249,6 +261,7 @@ const updateQuiz = async (req, res) => {
     const { title, questions, cover_image } = parsed.data;
     await quizService.updateQuiz(id, { title, questions, cover_image }, req.user.userId);
 
+    invalidatePublicQuizzesCache();
     res.json({ message: 'Quiz updated successfully' });
   } catch (err) {
     handleServiceError(res, err, 'Failed to update quiz');
@@ -263,12 +276,24 @@ const getPublicQuizzes = async (req, res) => {
   try {
     const { cursor, limit, search } = req.query;
     const viewerId = req.user?.userId ?? null;
+
+    // Cache logic: don't cache requests with viewerId to prevent leaking state, or if we want to cache, we'd need viewerId in the key. 
+    // Wait, viewerId is only used to mark "owned" or something. Let's just use it in the key.
+    const cacheKey = `public_quizzes_${cursor || 'start'}_${limit || 10}_${search || 'all'}_${viewerId || 'anon'}`;
+    const cachedData = cache.get(cacheKey);
+    
+    if (cachedData) {
+      return res.json(cachedData);
+    }
+
     const data = await quizService.getPublicQuizzes(
       cursor,
       limit ? parseInt(limit, 10) : 10,
       search,
       viewerId
     );
+
+    cache.set(cacheKey, data);
     res.json(data);
   } catch (err) {
     handleServiceError(res, err, 'Failed to fetch public quizzes');
@@ -301,6 +326,7 @@ const updateVisibility = async (req, res) => {
       return res.status(400).json({ error: 'is_public boolean is required' });
     }
     await quizService.updateQuizVisibility(id, is_public, req.user.userId);
+    invalidatePublicQuizzesCache();
     res.json({ message: 'Quiz visibility updated successfully' });
   } catch (err) {
     handleServiceError(res, err, 'Failed to update visibility');
@@ -315,6 +341,7 @@ const deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;
     await quizService.deleteQuiz(id, req.user.userId);
+    invalidatePublicQuizzesCache();
     res.json({ message: 'Quiz deleted successfully' });
   } catch (err) {
     handleServiceError(res, err, 'Failed to delete quiz');
