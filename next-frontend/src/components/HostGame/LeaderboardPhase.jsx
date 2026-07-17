@@ -3,6 +3,43 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
 
+const PlayerRow = React.memo(({ player, index, highestScore, teamColor, avatarFallbackColor, slideDirection }) => {
+  return (
+    <motion.div
+      initial={{ x: slideDirection === "left" ? -40 : 40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      transition={{ delay: 0.2 + index * 0.08, type: "spring", stiffness: 200 }}
+      className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full transition-shadow duration-200 cursor-default"
+    >
+      <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
+        #{index + 1}
+      </div>
+      {player.avatar ? (
+        <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
+      ) : (
+        <div 
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]"
+          style={{ backgroundColor: avatarFallbackColor }}
+        >
+          <span className="text-white text-xl font-black">
+            {player.nickname.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )}
+      <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
+        {player.nickname}
+        {player.score === highestScore && highestScore > 0 && (
+          <span className="text-2xl" title="MVP">👑</span>
+        )}
+      </span>
+      <span className="font-black text-2xl" style={{ color: teamColor }}>
+        {player.score?.toLocaleString()}
+      </span>
+    </motion.div>
+  );
+});
+
 export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, handleNextQuestion, handleEndGame }) {
   const teamA = leaderboard.filter((p) => p.team === "A").sort((a, b) => (b.score || 0) - (a.score || 0));
   const teamB = leaderboard.filter((p) => p.team === "B").sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -107,36 +144,15 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             {/* Player list */}
             <div className="w-full space-y-3">
               {teamA.map((player, i) => (
-                <motion.div
+                <PlayerRow
                   key={player.id}
-                  initial={{ x: -40, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full transition-shadow duration-200 cursor-default"
-                >
-                  <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
-                    #{i + 1}
-                  </div>
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 bg-[#5D3FD3] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
-                      <span className="text-white text-xl font-black">
-                        {player.nickname.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
-                    {player.nickname}
-                    {player.score === highestScore && highestScore > 0 && (
-                      <span className="text-2xl" title="MVP">👑</span>
-                    )}
-                  </span>
-                  <span className="font-black text-[#27AE60] text-2xl">
-                    {player.score?.toLocaleString()}
-                  </span>
-                </motion.div>
+                  player={player}
+                  index={i}
+                  highestScore={highestScore}
+                  teamColor="#27AE60"
+                  avatarFallbackColor="#5D3FD3"
+                  slideDirection="left"
+                />
               ))}
             </div>
 
@@ -197,36 +213,15 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             {/* Player list */}
             <div className="w-full space-y-3">
               {teamB.map((player, i) => (
-                <motion.div
+                <PlayerRow
                   key={player.id}
-                  initial={{ x: 40, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full transition-shadow duration-200 cursor-default"
-                >
-                  <div className="font-black text-2xl text-zk-black/40 w-8 text-center flex-shrink-0">
-                    #{i + 1}
-                  </div>
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 bg-[#E74C3C] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
-                      <span className="text-white text-xl font-black">
-                        {player.nickname.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
-                    {player.nickname}
-                    {player.score === highestScore && highestScore > 0 && (
-                      <span className="text-2xl" title="MVP">👑</span>
-                    )}
-                  </span>
-                  <span className="font-black text-[#E74C3C] text-2xl">
-                    {player.score?.toLocaleString()}
-                  </span>
-                </motion.div>
+                  player={player}
+                  index={i}
+                  highestScore={highestScore}
+                  teamColor="#E74C3C"
+                  avatarFallbackColor="#E74C3C"
+                  slideDirection="right"
+                />
               ))}
             </div>
 
