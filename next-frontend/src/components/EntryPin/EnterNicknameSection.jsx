@@ -83,6 +83,8 @@ const EnterNicknameSection = () => {
   const [isJoining, setIsJoining] = useState(false);
 
   const handleEnter = () => {
+    if (isJoining || loadingAvatars) return;
+
     const trimmedNickname = nickname.trim();
     if (trimmedNickname.length === 0) {
       setError('Please enter a nickname!');
