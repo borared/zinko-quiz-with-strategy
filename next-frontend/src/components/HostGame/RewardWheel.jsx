@@ -9,6 +9,9 @@ const REWARDS = [
   { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
   { id: "SKILL_CHARGE",  label: "Skill Charge!", sublabel: "+1 Charge", color: "#22c55e", textColor: "#ffffff" },
   { id: "NOTHING",       label: "Nothing!", sublabel: "Better luck next time", color: "#EF4444", textColor: "#ffffff" },
+  { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
+  { id: "SKILL_CHARGE",  label: "Skill Charge!", sublabel: "+1 Charge", color: "#22c55e", textColor: "#ffffff" },
+  { id: "NOTHING",       label: "Nothing!", sublabel: "Better luck next time", color: "#EF4444", textColor: "#ffffff" },
 ];
 
 const SEGMENT_COUNT = REWARDS.length;
