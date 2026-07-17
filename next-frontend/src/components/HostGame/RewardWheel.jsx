@@ -9,9 +9,6 @@ const REWARDS = [
   { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
   { id: "SKILL_CHARGE",  label: "Skill Charge!", sublabel: "+1 Charge", color: "#22c55e", textColor: "#ffffff" },
   { id: "NOTHING",       label: "Nothing!", sublabel: "Better luck next time", color: "#EF4444", textColor: "#ffffff" },
-  { id: "BONUS_POINTS_20", label: "+20% Points!", sublabel: "Next Round", color: "#FFCD29", textColor: "#000000" },
-  { id: "SKILL_CHARGE",  label: "Skill Charge!", sublabel: "+1 Charge", color: "#22c55e", textColor: "#ffffff" },
-  { id: "NOTHING",       label: "Nothing!", sublabel: "Better luck next time", color: "#EF4444", textColor: "#ffffff" },
 ];
 
 const SEGMENT_COUNT = REWARDS.length;
@@ -27,7 +24,7 @@ function describeArc(cx, cy, r, startAngle, endAngle) {
   return `M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`;
 }
 
-function WheelSVG({ rotation }) {
+const WheelSVG = React.memo(function WheelSVG({ rotation }) {
   const cx = 200, cy = 200, r = 185;
 
   return (
@@ -95,7 +92,7 @@ function WheelSVG({ rotation }) {
       <circle cx={cx} cy={cy} r={18} fill="#fff" stroke="#000" strokeWidth="3" />
     </svg>
   );
-}
+});
 
 export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, preSelectedRewardId, externalSpinTrigger, onRewardClaimed, playerId, isHost }) {
   const [isSpinning, setIsSpinning] = useState(false);
