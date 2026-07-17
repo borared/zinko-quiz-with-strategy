@@ -255,7 +255,11 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
         {isSpinner && !isSpinning && !wonReward && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: [0, -10, 0] }}
+            transition={{ 
+              opacity: { duration: 0.3 }, 
+              y: { repeat: Infinity, duration: 1.5, ease: "easeInOut" } 
+            }}
             className="mt-8 font-bold text-4xl text-white uppercase tracking-widest drop-shadow-md"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
