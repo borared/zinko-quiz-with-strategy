@@ -8,7 +8,14 @@ const userService = require('../services/userService');
  */
 const generateToken = async (req, res) => {
   try {
-    const { userId } = getAuth(req);
+    let userId = null;
+    try {
+      const auth = getAuth(req);
+      userId = auth?.userId;
+    } catch (e) {
+      userId = req.auth?.userId || null;
+    }
+    
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized. Clerk session invalid.' });
     }
@@ -38,7 +45,13 @@ const generateToken = async (req, res) => {
  * Public — returns the current user's Clerk userId if signed in, or null.
  */
 const getMe = (req, res) => {
-  const { userId } = getAuth(req);
+  let userId = null;
+  try {
+    const auth = getAuth(req);
+    userId = auth?.userId;
+  } catch (e) {
+    userId = req.auth?.userId || null;
+  }
   res.json({ userId: userId || null });
 };
 
