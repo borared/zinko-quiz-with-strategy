@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
 
 export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, handleNextQuestion, handleEndGame }) {
-  const teamA = leaderboard.filter((p) => p.team === "A");
-  const teamB = leaderboard.filter((p) => p.team === "B");
+  const teamA = leaderboard.filter((p) => p.team === "A").sort((a, b) => (b.score || 0) - (a.score || 0));
+  const teamB = leaderboard.filter((p) => p.team === "B").sort((a, b) => (b.score || 0) - (a.score || 0));
   const teamAScore = teamA.reduce((sum, p) => sum + (p.score || 0), 0);
   const teamBScore = teamB.reduce((sum, p) => sum + (p.score || 0), 0);
 
