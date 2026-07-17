@@ -241,6 +241,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
         <motion.div
           className="w-[340px] h-[340px] md:w-[420px] md:h-[420px] rounded-full border-[10px] border-black cursor-pointer relative"
           animate={{ rotate: rotation }}
+          whileHover={{ scale: isSpinner && !isSpinning && !wonReward ? 1.03 : 1 }}
           transition={{ duration: 5.5, ease: [0.05, 0.95, 0.2, 1.0] }}
           onClick={handleSpinClick}
           style={{ userSelect: "none" }}
