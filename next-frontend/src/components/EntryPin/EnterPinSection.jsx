@@ -31,7 +31,8 @@ const EnterPinSection = () => {
   };
 
   const handleEnter = async () => {
-    if (pin.length < 6) {
+    const trimmedPin = pin.trim();
+    if (trimmedPin.length < 6) {
       setError('Please enter a full 6-digit PIN.');
       triggerShake();
       return;
@@ -40,11 +41,12 @@ const EnterPinSection = () => {
     try {
       setLoading(true);
       setError('');
+      
       // Validate PIN with backend
-      const data = await api.get(`/api/game/${pin}`);
+      const { data } = await api.get(`/api/game/${trimmedPin}`);
 
-      if (!data.valid) {
-        setError(data.message || 'Invalid PIN. Please try again.');
+      if (!data?.valid) {
+        setError(data?.message || 'Invalid PIN. Please try again.');
         triggerShake();
         return;
       }
@@ -62,19 +64,25 @@ const EnterPinSection = () => {
       }
 
       // Store PIN for use in the next steps
-      sessionStorage.setItem('game_pin', pin);
+      sessionStorage.setItem('game_pin', trimmedPin);
 
       // Players stay muted — no background music on join flow
       if (typeof window !== 'undefined' && window.gameAudio) {
-        window.gameAudio.pause();
-        window.gameAudio.currentTime = 0;
-        window.gameAudio = null;
+        try {
+          window.gameAudio.pause();
+          window.gameAudio.currentTime = 0;
+        } catch (e) {
+          console.error('Failed to pause game audio:', e);
+        } finally {
+          window.gameAudio = null;
+        }
       }
 
-      router.push(`/play/${pin}/join-nickname`);
+      router.push(`/play/${trimmedPin}/join-nickname`);
 
     } catch (err) {
-      setError('Game not found. Check your PIN and try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Game not found. Check your PIN and try again.';
+      setError(errorMessage);
       triggerShake();
     } finally {
       setLoading(false);
