@@ -58,7 +58,7 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <button
               onClick={() => router.back()}
-              className="flex items-center justify-center gap-2 bg-white text-zk-black border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase transition-transform hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+              className="flex items-center justify-center gap-2 bg-white text-zk-black border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase transition-transform hover:scale-105 active:scale-95"
               style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.5rem', fontWeight: 'bold', letterSpacing: '2px' }}
             >
               <ArrowLeft size={32} strokeWidth={3} className="mt-1" />
@@ -66,7 +66,7 @@ export default function NotFound() {
             </button>
             <button
               onClick={() => router.push('/')}
-              className="flex items-center justify-center gap-2 bg-[#00C853] text-white border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase transition-transform hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+              className="flex items-center justify-center gap-2 bg-[#00C853] text-white border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase transition-transform hover:scale-105 active:scale-95"
               style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.5rem', fontWeight: 'bold', letterSpacing: '2px' }}
             >
               <Home size={32} strokeWidth={3} className="mt-1" />

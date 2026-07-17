@@ -50,17 +50,19 @@ const EnterNicknameSection = () => {
 
         // PIN is valid, now load avatars
         const { data, success } = await api.get('/api/avatars');
-        if (success && Array.isArray(data) && data.length) {
-          setAvatars(data);
-          const random = data[Math.floor(Math.random() * data.length)];
-          setSelectedAvatar(random);
-          // Preload avatar images for instant display when modal opens
-          data.forEach(avatar => {
-            if (avatar.image_url) {
-              const img = new Image();
-              img.src = avatar.image_url;
-            }
-          });
+        if (success && Array.isArray(data)) {
+          if (data.length > 0) {
+            setAvatars(data);
+            const random = data[Math.floor(Math.random() * data.length)];
+            setSelectedAvatar(random);
+            // Preload avatar images for instant display when modal opens
+            data.forEach(avatar => {
+              if (avatar.image_url) {
+                const img = new Image();
+                img.src = avatar.image_url;
+              }
+            });
+          }
         } else {
           console.error('Failed to load avatars', data);
         }

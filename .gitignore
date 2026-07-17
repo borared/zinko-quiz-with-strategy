@@ -11,27 +11,9 @@ node_modules/
 !backend/.env.example
 !frontend/.env.example
 
-# Documentation files (local troubleshooting only)
-*_FIX*.md
-*_SETUP*.md
-*_STATUS*.md
-*_STEPS*.md
-*_CHECKLIST*.md
-SIMPLE_FIX.md
-READY_TO_TEST.md
-WEBHOOK_*.md
-GET_SIGNING_SECRET.md
-ADD_MISSING_USER_INSTRUCTIONS.md
-COMPLETE_FIX_SUMMARY.md
-FOLLOW_THESE_STEPS.md
-NEXT_STEPS.md
-TEST_NOW.md
-FINAL_STATUS.md
+# Markdown files
+*.md
+!README.md
 
 # Batch files
 START_WITH_WEBHOOK.bat
-
-# Keep important docs
-!README.md
-!DOCKER_SETUP.md
-!SETUP_GUIDE.md

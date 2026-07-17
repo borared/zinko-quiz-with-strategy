@@ -62,7 +62,7 @@ export default function PlayerPreviewPage() {
           phase="PLAYING"
           question={mockQuestion}
           selectedId={selectedId}
-          playerSkill="butterfly"
+          playerSkill="fox"
           isSkillLockedOut={false}
           skillLockoutMsg=""
           skillChargesLeft={2}
