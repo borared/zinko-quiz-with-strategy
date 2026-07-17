@@ -9,6 +9,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
   const teamAScore = teamA.reduce((sum, p) => sum + (p.score || 0), 0);
   const teamBScore = teamB.reduce((sum, p) => sum + (p.score || 0), 0);
 
+  const totalScore = teamAScore + teamBScore;
+  const teamAPercentage = totalScore > 0 ? (teamAScore / totalScore) * 100 : 50;
+
   return (
     <motion.div
       key="leaderboard"
@@ -48,8 +51,31 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
           {isFinalLeaderboard ? "Final Podium" : "Leaderboard"}
         </motion.h2>
 
+        {/* Tug of War Score Bar */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+          className="w-full max-w-4xl h-8 bg-zk-black rounded-full border-[3px] border-zk-black shadow-[4px_4px_0_#000] overflow-hidden flex relative mb-8"
+        >
+          <motion.div 
+            className="h-full bg-[#27AE60]" 
+            initial={{ width: "50%" }}
+            animate={{ width: `${teamAPercentage}%` }}
+            transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+          />
+          <motion.div 
+            className="h-full bg-[#E74C3C]" 
+            initial={{ width: "50%" }}
+            animate={{ width: `${100 - teamAPercentage}%` }}
+            transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+          />
+          {/* Center Indicator */}
+          <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-white -translate-x-1/2 z-10" />
+        </motion.div>
+
         {/* Team panels container */}
-        <div className="flex flex-1 w-full max-w-6xl gap-4 items-start relative mt-32">
+        <div className="flex flex-1 w-full max-w-6xl gap-4 items-start relative mt-8">
 
           {/* Team A */}
           <motion.div
