@@ -12,6 +12,8 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
   const totalScore = teamAScore + teamBScore;
   const teamAPercentage = totalScore > 0 ? (teamAScore / totalScore) * 100 : 50;
 
+  const highestScore = leaderboard.length > 0 ? Math.max(...leaderboard.map(p => p.score || 0)) : 0;
+
   return (
     <motion.div
       key="leaderboard"
@@ -125,8 +127,11 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                       </span>
                     </div>
                   )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left">
+                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
                     {player.nickname}
+                    {player.score === highestScore && highestScore > 0 && (
+                      <span className="text-2xl" title="MVP">👑</span>
+                    )}
                   </span>
                   <span className="font-black text-[#27AE60] text-2xl">
                     {player.score?.toLocaleString()}
@@ -212,8 +217,11 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                       </span>
                     </div>
                   )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left">
+                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
                     {player.nickname}
+                    {player.score === highestScore && highestScore > 0 && (
+                      <span className="text-2xl" title="MVP">👑</span>
+                    )}
                   </span>
                   <span className="font-black text-[#E74C3C] text-2xl">
                     {player.score?.toLocaleString()}
