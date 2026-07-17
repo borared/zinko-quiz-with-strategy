@@ -145,9 +145,6 @@ const Discovery = () => {
         pagination.hasNextPage = data.hasNextPage === true;
         setHasMoreQuizzes(pagination.hasNextPage);
 
-        if (pagination.hasNextPage) {
-          queueMicrotask(() => fetchMoreQuizzes(search));
-        }
       } catch (error) {
         console.error('Error fetching more quizzes:', error);
       } finally {
@@ -165,10 +162,6 @@ const Discovery = () => {
       const trimmed = search.trim();
 
       if (!silent && useCache && isCached(trimmed) && applyCache(trimmed)) {
-        const cache = getCache(trimmed);
-        if (cache?.hasNextPage) {
-          fetchMoreQuizzes(trimmed);
-        }
         return;
       }
 
@@ -198,10 +191,7 @@ const Discovery = () => {
 
         if (paginationRef.current.activeSearch !== trimmed) return;
 
-        const hasMore = applySearchPage(trimmed, data);
-        if (hasMore) {
-          fetchMoreQuizzes(trimmed);
-        }
+        applySearchPage(trimmed, data);
       } catch (error) {
         console.error('Error fetching public quizzes:', error);
         if (!silent) {
@@ -229,19 +219,12 @@ const Discovery = () => {
       setShowSuggestions(false);
 
       if (isCached(trimmed) && applyCache(trimmed)) {
-        const cache = getCache(trimmed);
-        if (cache?.hasNextPage) {
-          fetchMoreQuizzes(trimmed);
-        }
         return;
       }
 
       const prefetched = searchPrefetchRef.current[trimmed];
       if (prefetched?.status === 'ready') {
-        const hasMore = applySearchPage(trimmed, prefetched);
-        if (hasMore) {
-          fetchMoreQuizzes(trimmed);
-        }
+        applySearchPage(trimmed, prefetched);
         return;
       }
 
@@ -411,11 +394,10 @@ const Discovery = () => {
           aria-hidden="true"
         />
         <div
-          className={`absolute inset-0 transition-colors duration-700 ${
-            isDay
+          className={`absolute inset-0 transition-colors duration-700 ${isDay
               ? 'bg-gradient-to-r from-zk-black/75 via-zk-black/45 to-zk-black/20'
               : 'bg-gradient-to-r from-zk-black/85 via-zk-black/60 to-zk-black/35'
-          }`}
+            }`}
           aria-hidden="true"
         />
 
