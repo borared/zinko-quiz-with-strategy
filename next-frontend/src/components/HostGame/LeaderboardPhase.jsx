@@ -159,9 +159,9 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
           {/* VS Badge */}
           <motion.div
             initial={{ scale: 0, rotate: -45 }}
-            animate={{ scale: 1, rotate: [-6, 6, -6] }}
+            animate={{ scale: [1, 1.15, 1], rotate: [-6, 6, -6] }}
             transition={{
-              scale: { delay: 0.3, type: "spring" },
+              scale: { delay: 0.3, duration: 1.2, repeat: Infinity, ease: "easeInOut" },
               rotate: { delay: 0.5, duration: 2, repeat: Infinity, ease: "easeInOut" },
             }}
             className="self-center bg-zk-black border-[4px] border-[#FFCD29] w-16 h-16 flex items-center justify-center rounded-xl shadow-[4px_4px_0_rgba(0,0,0,0.3)] flex-shrink-0 z-20"
