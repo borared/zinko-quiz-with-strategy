@@ -3,9 +3,101 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
 
+const TeamColumn = ({ 
+  teamName, 
+  teamData, 
+  teamScore, 
+  isWinner, 
+  themeColor, 
+  initialX 
+}) => {
+  return (
+    <motion.div
+      initial={{ x: initialX, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+      className="flex-1 flex flex-col items-center relative"
+    >
+      {isWinner && (
+        <motion.div
+          initial={{ scale: 0, y: 20 }}
+          animate={{ scale: 1, y: [0, -12, 0] }}
+          transition={{
+            scale: { delay: 0.5, type: "spring" },
+            y: { delay: 0.8, duration: 3, repeat: Infinity, ease: "easeInOut" }
+          }}
+          className="absolute -top-32 z-20 pointer-events-none"
+        >
+          <img src="/crown.png" alt="Crown" className="w-32 h-32 drop-shadow-[0_8px_0_rgba(0,0,0,1)]" />
+        </motion.div>
+      )}
+
+      <div 
+        className="text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_#000] mb-4"
+        style={{ backgroundColor: themeColor }}
+      >
+        {teamName}
+      </div>
+
+      {/* Player list */}
+      <div className="w-full space-y-3">
+        {teamData.map((player, i) => (
+          <motion.div
+            key={player.id}
+            initial={{ x: initialX > 0 ? 40 : -40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
+            className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
+          >
+            {player.avatar ? (
+              <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
+            ) : (
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]"
+                style={{ backgroundColor: themeColor }}
+              >
+                <span className="text-white text-xl font-black">
+                  {player.nickname.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left">
+              {player.nickname}
+            </span>
+            <span className="font-black text-2xl" style={{ color: themeColor }}>
+              {player.score?.toLocaleString()}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Team total */}
+      <motion.p
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.6, type: "spring" }}
+        className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
+        style={{
+          color: "#FFFFFF",
+          WebkitTextStroke: "3px #000",
+          textShadow: "6px 6px 0px #000",
+        }}
+      >
+        {teamScore.toLocaleString()}
+      </motion.p>
+    </motion.div>
+  );
+};
+
 export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, handleNextQuestion, handleEndGame }) {
-  const teamA = leaderboard.filter((p) => p.team === "A");
-  const teamB = leaderboard.filter((p) => p.team === "B");
+  const teamA = leaderboard
+    .filter((p) => p.team === "A")
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
+    
+  const teamB = leaderboard
+    .filter((p) => p.team === "B")
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
+    
   const teamAScore = teamA.reduce((sum, p) => sum + (p.score || 0), 0);
   const teamBScore = teamB.reduce((sum, p) => sum + (p.score || 0), 0);
 
@@ -50,76 +142,15 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
 
         {/* Team panels container */}
         <div className="flex flex-1 w-full max-w-6xl gap-4 items-start relative mt-32">
-
-          {/* Team A */}
-          <motion.div
-            initial={{ x: -60, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="flex-1 flex flex-col items-center relative"
-          >
-            {teamAScore >= teamBScore && (
-              <motion.div
-                initial={{ scale: 0, y: 20 }}
-                animate={{ scale: 1, y: [0, -12, 0] }}
-                transition={{
-                  scale: { delay: 0.5, type: "spring" },
-                  y: { delay: 0.8, duration: 3, repeat: Infinity, ease: "easeInOut" }
-                }}
-                className="absolute -top-32 z-20 pointer-events-none"
-              >
-                <img src="/crown.png" alt="Crown" className="w-32 h-32 drop-shadow-[0_8px_0_rgba(0,0,0,1)]" />
-              </motion.div>
-            )}
-
-            <div className="bg-[#27AE60] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_#000] mb-4">
-              Team A
-            </div>
-
-            {/* Player list */}
-            <div className="w-full space-y-3">
-              {teamA.map((player, i) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ x: -40, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
-                >
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 bg-[#5D3FD3] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
-                      <span className="text-white text-xl font-black">
-                        {player.nickname.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left">
-                    {player.nickname}
-                  </span>
-                  <span className="font-black text-[#27AE60] text-2xl">
-                    {player.score?.toLocaleString()}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Team total */}
-            <motion.p
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.6, type: "spring" }}
-              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
-              style={{
-                color: "#FFFFFF",
-                WebkitTextStroke: "3px #000",
-                textShadow: "6px 6px 0px #000",
-              }}
-            >
-              {teamAScore.toLocaleString()}
-            </motion.p>
-          </motion.div>
+          
+          <TeamColumn 
+            teamName="Team A"
+            teamData={teamA}
+            teamScore={teamAScore}
+            isWinner={teamAScore >= teamBScore}
+            themeColor="#27AE60"
+            initialX={-60}
+          />
 
           {/* VS Badge */}
           <motion.div
@@ -134,75 +165,15 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <span className="font-black text-[#FFCD29] text-2xl">VS</span>
           </motion.div>
 
-          {/* Team B */}
-          <motion.div
-            initial={{ x: 60, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="flex-1 flex flex-col items-center relative"
-          >
-            {teamBScore > teamAScore && (
-              <motion.div
-                initial={{ scale: 0, y: 20 }}
-                animate={{ scale: 1, y: [0, -12, 0] }}
-                transition={{
-                  scale: { delay: 0.5, type: "spring" },
-                  y: { delay: 0.8, duration: 3, repeat: Infinity, ease: "easeInOut" }
-                }}
-                className="absolute -top-32 z-20 pointer-events-none"
-              >
-                <img src="/crown.png" alt="Crown" className="w-32 h-32 drop-shadow-[0_8px_0_rgba(0,0,0,1)]" />
-              </motion.div>
-            )}
+          <TeamColumn 
+            teamName="Team B"
+            teamData={teamB}
+            teamScore={teamBScore}
+            isWinner={teamBScore > teamAScore}
+            themeColor="#E74C3C"
+            initialX={60}
+          />
 
-            <div className="bg-[#E74C3C] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_#000] mb-4">
-              Team B
-            </div>
-
-            {/* Player list */}
-            <div className="w-full space-y-3">
-              {teamB.map((player, i) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ x: 40, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
-                >
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 bg-[#E74C3C] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
-                      <span className="text-white text-xl font-black">
-                        {player.nickname.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left">
-                    {player.nickname}
-                  </span>
-                  <span className="font-black text-[#E74C3C] text-2xl">
-                    {player.score?.toLocaleString()}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Team total */}
-            <motion.p
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.6, type: "spring" }}
-              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
-              style={{
-                color: "#FFFFFF",
-                WebkitTextStroke: "3px #000",
-                textShadow: "6px 6px 0px #000",
-              }}
-            >
-              {teamBScore.toLocaleString()}
-            </motion.p>
-          </motion.div>
         </div>
 
         {/* Bottom buttons */}
