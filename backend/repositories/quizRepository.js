@@ -163,18 +163,22 @@ const getQuestionsByQuizId = async (quizId) => {
 const getQuizzesByUserId = async (userId, cursor = null, limit = 10) => {
   const where = {
     creator_id: userId,
-    ...(cursor ? { created_at: { lt: new Date(cursor) } } : {}),
   };
-
+  
   const queries = [
     prisma.quizzes.findMany({
       where,
+      cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
       include: {
         questions: {
           orderBy: { order_index: 'asc' },
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: [
+        { created_at: 'desc' },
+        { id: 'desc' }
+      ],
       take: limit + 1,
     }),
   ];
@@ -187,7 +191,7 @@ const getQuizzesByUserId = async (userId, cursor = null, limit = 10) => {
 
   const hasNextPage = data.length > limit;
   const quizzes = data.slice(0, limit);
-  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].created_at?.toISOString() : null;
+  const nextCursor = hasNextPage ? quizzes[quizzes.length - 1].id : null;
 
   return {
     quizzes,
@@ -219,9 +223,17 @@ const getAllQuizzesDebug = async () => {
 const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) => {
   const trimmedSearch = searchQuery?.trim();
 
+  const cursorCondition = cursor 
+    ? Prisma.sql`
+        AND (
+          created_at < (SELECT created_at FROM quizzes WHERE id = ${cursor}::uuid)
+          OR (created_at = (SELECT created_at FROM quizzes WHERE id = ${cursor}::uuid) AND id < ${cursor}::uuid)
+        )
+      `
+    : Prisma.empty;
+
   if (trimmedSearch) {
     const normalized = normalizeSearchTerm(trimmedSearch);
-    const cursorDate = cursor ? new Date(cursor) : null;
 
     const rows =
       normalized.length > 0
@@ -230,12 +242,12 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             FROM quizzes
             WHERE is_public = true
             ${DISCOVERY_CREATOR_EXISTS}
-            ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+            ${cursorCondition}
             AND (
               title ILIKE ${`%${trimmedSearch}%`}
               OR REGEXP_REPLACE(LOWER(title), '[^a-z0-9]', '', 'g') LIKE ${`%${normalized}%`}
             )
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, id DESC
             LIMIT ${limit + 1}
           `
         : await prisma.$queryRaw`
@@ -243,9 +255,9 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             FROM quizzes
             WHERE is_public = true
             ${DISCOVERY_CREATOR_EXISTS}
-            ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
+            ${cursorCondition}
             AND title ILIKE ${`%${trimmedSearch}%`}
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, id DESC
             LIMIT ${limit + 1}
           `;
 
@@ -265,32 +277,18 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
     const orderMap = new Map(pageRows.map((row, index) => [row.id, index]));
     quizzes.sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id));
 
-    const nextCursor = hasNextPage
-      ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
-      new Date(pageRows[pageRows.length - 1].created_at).toISOString()
-      : null;
+    const nextCursor = hasNextPage ? pageRows[pageRows.length - 1].id : null;
 
     return { quizzes, nextCursor, hasNextPage };
   }
 
-  const cursorDate = cursor ? new Date(cursor) : null;
-  console.log(JSON.stringify(DISCOVERY_CREATOR_EXISTS));
-  console.log(JSON.stringify(`query: 
-    SELECT id, created_at
-    FROM quizzes
-    WHERE is_public = true
-    ${DISCOVERY_CREATOR_EXISTS}
-    ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
-    ORDER BY created_at DESC
-    LIMIT ${limit + 1}
-  `));
   const rows = await prisma.$queryRaw`
     SELECT id, created_at
     FROM quizzes
     WHERE is_public = true
     ${DISCOVERY_CREATOR_EXISTS}
-    ${cursorDate ? Prisma.sql`AND created_at < ${cursorDate}` : Prisma.empty}
-    ORDER BY created_at DESC
+    ${cursorCondition}
+    ORDER BY created_at DESC, id DESC
     LIMIT ${limit + 1}
   `;
 
@@ -298,8 +296,6 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
   const pageRows = rows.slice(0, limit);
   const ids = pageRows.map((row) => row.id);
 
-  console.log("rows", rows);
-  console.log("pageRows", pageRows);
   if (!ids.length) {
     return { quizzes: [], nextCursor: null, hasNextPage: false };
   }
@@ -312,10 +308,7 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
   const orderMap = new Map(pageRows.map((row, index) => [row.id, index]));
   quizzes.sort((a, b) => orderMap.get(a.id) - orderMap.get(b.id));
 
-  const nextCursor = hasNextPage
-    ? pageRows[pageRows.length - 1].created_at?.toISOString?.() ??
-    new Date(pageRows[pageRows.length - 1].created_at).toISOString()
-    : null;
+  const nextCursor = hasNextPage ? pageRows[pageRows.length - 1].id : null;
 
   return { quizzes, nextCursor, hasNextPage };
 };
