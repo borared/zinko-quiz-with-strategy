@@ -31,8 +31,8 @@ const EnterNicknameSection = () => {
     const validatePinAndLoadAvatars = async () => {
       try {
         // First validate the PIN
-        const gameRes = await api.get(`/api/game/${pin}`);
-        if (!gameRes || !gameRes.valid) {
+        const { data: gameRes } = await api.get(`/api/game/${pin}`);
+        if (!gameRes?.valid) {
           showToast(gameRes?.message || 'Invalid PIN. Please try again.', 'error');
           router.replace('/join');
           return;
@@ -49,7 +49,10 @@ const EnterNicknameSection = () => {
         }
 
         // PIN is valid, now load avatars
-        const { data, success } = await api.get('/api/avatars');
+        const avatarRes = await api.get('/api/avatars');
+        const data = avatarRes?.data || avatarRes; // Handle unwrapped api responses
+        const success = avatarRes?.success !== false;
+
         if (success && Array.isArray(data)) {
           if (data.length > 0) {
             setAvatars(data);
@@ -57,8 +60,8 @@ const EnterNicknameSection = () => {
             setSelectedAvatar(random);
             // Preload avatar images for instant display when modal opens
             data.forEach(avatar => {
-              if (avatar.image_url) {
-                const img = new Image();
+              if (avatar.image_url && typeof window !== 'undefined') {
+                const img = new window.Image();
                 img.src = avatar.image_url;
               }
             });
@@ -67,7 +70,8 @@ const EnterNicknameSection = () => {
           console.error('Failed to load avatars', data);
         }
       } catch (e) {
-        showToast('Game not found. Check your PIN.', 'error');
+        const errorMessage = e.response?.data?.message || e.message || 'Game not found. Check your PIN.';
+        showToast(errorMessage, 'error');
         router.replace('/join');
       } finally {
         setLoadingAvatars(false);
@@ -76,12 +80,20 @@ const EnterNicknameSection = () => {
     validatePinAndLoadAvatars();
   }, [pin, router, showToast]);
 
+  const [isJoining, setIsJoining] = useState(false);
+
   const handleEnter = () => {
-    if (nickname.trim().length === 0) {
+    const trimmedNickname = nickname.trim();
+    if (trimmedNickname.length === 0) {
       setError('Please enter a nickname!');
       return;
     }
+    if (trimmedNickname.length > 15) {
+      setError('Nickname must be 15 characters or less.');
+      return;
+    }
     setError('');
+    setIsJoining(true);
 
     // Ensure session storage holds the correct pin in case they jumped straight here
     sessionStorage.setItem('game_pin', pin);
@@ -89,18 +101,19 @@ const EnterNicknameSection = () => {
     if (pin) {
       const socket = getSocket();
       if (socket && socket.connected) {
-        socket.emit('lobby:check-nickname', { pin, nickname: nickname.trim() }, (response) => {
-          if (response && response.available) {
-            sessionStorage.setItem('player_nickname', nickname.trim());
+        socket.emit('lobby:check-nickname', { pin, nickname: trimmedNickname }, (response) => {
+          if (response?.available) {
+            sessionStorage.setItem('player_nickname', trimmedNickname);
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
             router.push(`/play/${pin}/choose-team`);
           } else {
             setError(response?.message || 'Nickname already taken');
             showToast(response?.message || 'Nickname already taken', 'error');
+            setIsJoining(false);
           }
         });
       } else {
-        sessionStorage.setItem('player_nickname', nickname.trim());
+        sessionStorage.setItem('player_nickname', trimmedNickname);
         sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
         router.push(`/play/${pin}/choose-team`);
       }
