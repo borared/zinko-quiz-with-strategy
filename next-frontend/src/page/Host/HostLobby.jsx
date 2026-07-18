@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
-;
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
@@ -255,7 +254,7 @@ export default function HostLobby() {
       socket.off('lobby:background-update', onBackgroundUpdate);
       socket.off('error', onError);
     };
-  }, [getSocket, isConnected, pin, location.state, router]);
+  }, [getSocket, isConnected, pin, router]);
 
   const handleSceneryChange = useCallback((image) => {
     setBgImage(image);

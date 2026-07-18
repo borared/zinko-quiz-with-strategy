@@ -4,7 +4,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { Server } = require('socket.io');
 const { clerkMiddleware } = require('@clerk/express');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { validateEnv } = require('./lib/envValidation');
 const { generalLimiter, devOnly } = require('./middleware/security');
@@ -68,7 +70,17 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // ─── Clerk Middleware ───────────────────────────────────────────────────────────
-app.use(clerkMiddleware());
+// Conditionally apply clerk middleware to prevent crashing if keys are missing
+if (process.env.CLERK_SECRET_KEY) {
+  app.use(clerkMiddleware());
+} else {
+  console.warn('⚠️ CLERK_SECRET_KEY is missing. Running in Auth-Bypass mode.');
+  app.use((req, res, next) => {
+    // Mock the clerk auth object to prevent getAuth() from throwing if used
+    req.auth = { userId: null, sessionId: null };
+    next();
+  });
+}
 
 // ─── Swagger API Documentation ────────────────────────────────────────────────
 const swaggerUi = require('swagger-ui-express');
@@ -116,7 +128,7 @@ app.use((err, req, res, next) => {
   console.error('Server Error:', err.stack || err.message || err);
   res.status(500).json({
     error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong.',
+    message: process.env.NODE_ENV !== 'production' ? err.message : 'Something went wrong.',
   });
 });
 
