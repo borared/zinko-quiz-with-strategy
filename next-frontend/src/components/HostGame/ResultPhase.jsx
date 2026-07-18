@@ -6,6 +6,9 @@ import AnswerBarChart from './AnswerBarChart';
 
 
 export default function ResultPhase({ question, stats, leaderboard, handleShowLeaderboard, handleNextQuestion }) {
+  const teamAScore = leaderboard.filter(p => p.team === 'A').reduce((sum, p) => sum + (p.score || 0), 0);
+  const teamBScore = leaderboard.filter(p => p.team === 'B').reduce((sum, p) => sum + (p.score || 0), 0);
+
   return (
     <motion.div
       key="result"
@@ -54,6 +57,19 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
         <h2 className="text-center text-4xl md:text-5xl font-black mb-1 text-zk-black uppercase permanent-marker-regular">
           Results
         </h2>
+        
+        {/* Team Scores Display */}
+        <div className="flex justify-center items-center gap-8 my-4">
+          <div className="bg-[#27AE60] text-white px-6 py-2 rounded-xl border-[3px] border-zk-black shadow-[4px_4px_0_#000] flex flex-col items-center">
+            <span className="text-sm font-black uppercase">Team A</span>
+            <span className="text-3xl font-black">{teamAScore.toLocaleString()}</span>
+          </div>
+          <div className="text-2xl font-black text-zk-black/50">VS</div>
+          <div className="bg-[#E74C3C] text-white px-6 py-2 rounded-xl border-[3px] border-zk-black shadow-[4px_4px_0_#000] flex flex-col items-center">
+            <span className="text-sm font-black uppercase">Team B</span>
+            <span className="text-3xl font-black">{teamBScore.toLocaleString()}</span>
+          </div>
+        </div>
         {question && (
           <p className="text-center text-zk-black font-black text-xl mb-1">
             {question.questionText}
@@ -85,6 +101,12 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
                     <img src={p.avatar} alt={p.nickname} className="w-full h-full object-cover rounded-[20px]" />
                   ) : (
                     <div className="font-black text-4xl text-zk-black/30">?</div>
+                  )}
+                  {/* Team badge at top left edge */}
+                  {p.team && (
+                    <div className={`absolute -top-4 -left-4 w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10 text-white ${p.team === 'A' ? 'bg-[#27AE60]' : 'bg-[#E74C3C]'}`}>
+                      {p.team}
+                    </div>
                   )}
                   {/* Rank badge at top right edge */}
                   <div className="absolute -top-4 -right-4 bg-[#5D3FD3] text-white w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10">

@@ -37,14 +37,12 @@ export default function LobbySceneryPicker({
   }, [currentImage, disabled, onSelect, onAcknowledgeNew, newScenerySlugs]);
 
   const handleToggle = useCallback(() => {
-    setOpen((prev) => {
-      const next = !prev;
-      if (next && hasNewScenery) {
-        newScenerySlugs.forEach((slug) => onAcknowledgeNew?.(slug));
-      }
-      return next;
-    });
-  }, [hasNewScenery, newScenerySlugs, onAcknowledgeNew]);
+    const next = !open;
+    setOpen(next);
+    if (next && hasNewScenery) {
+      newScenerySlugs.forEach((slug) => onAcknowledgeNew?.(slug));
+    }
+  }, [open, hasNewScenery, newScenerySlugs, onAcknowledgeNew]);
 
   useEffect(() => {
     if (!open) return;

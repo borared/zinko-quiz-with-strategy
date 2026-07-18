@@ -1,4 +1,5 @@
 const { execSync } = require('child_process');
+require('dotenv').config();
 
 const PORT = String(process.env.PORT || 5000);
 
