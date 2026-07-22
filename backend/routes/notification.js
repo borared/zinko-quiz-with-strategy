@@ -75,4 +75,22 @@ router.put('/user/:userId/read-all', requireSelf('userId'), writeLimiter, notifi
  */
 router.delete('/user/:userId/clear-all', requireSelf('userId'), writeLimiter, notificationController.clearAllNotifications);
 
+/**
+ * @swagger
+ * /api/notifications/{id}:
+ *   delete:
+ *     summary: DELETE /:id
+ *     tags: [Notification]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+router.delete('/:id', writeLimiter, notificationController.deleteNotification);
+
 module.exports = router;
