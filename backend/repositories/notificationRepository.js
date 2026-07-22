@@ -73,6 +73,13 @@ const clearAllNotifications = async (userId) => {
   });
 };
 
+const deleteNotification = async (id, userId) => {
+  const result = await prisma.notifications.deleteMany({
+    where: { id, user_id: userId },
+  });
+  return result.count > 0;
+};
+
 module.exports = {
   createNotification,
   getNotificationsByUserId,
@@ -82,4 +89,5 @@ module.exports = {
   markAsRead,
   markAllAsRead,
   clearAllNotifications,
+  deleteNotification,
 };
