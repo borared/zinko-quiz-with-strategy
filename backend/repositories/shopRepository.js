@@ -3,11 +3,13 @@ const sceneryRepository = require('./sceneryRepository');
 const { SCENERY_PRICES_CENTS, SHOP_CURRENCY } = require('../lib/shopConstants');
 
 const getOwnedScenerySlugs = async (userId) => {
+  if (!userId) return new Set();
   const owned = await sceneryRepository.getOwnedSceneriesForUser(userId);
   return new Set(owned.map((scenery) => scenery.slug));
 };
 
 const getOwnedAvatarSlugs = async (userId) => {
+  if (!userId) return new Set();
   const rows = await prisma.user_avatars.findMany({
     where: { user_id: userId },
     include: { avatar: { select: { slug: true } } },
