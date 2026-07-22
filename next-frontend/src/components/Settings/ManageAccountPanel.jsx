@@ -81,7 +81,7 @@ export default function ManageAccountPanel({ onClose, onToast }) {
   return (
     <div className="rounded-xl border-[3px] border-zk-black bg-[#FDF9F1] p-4 sm:p-5 flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-black uppercase tracking-tight text-zk-black">Manage account</h3>
+        <h3 className="text-lg font-black tracking-tight text-zk-black">Manage account</h3>
         <button
           type="button"
           onClick={onClose}
