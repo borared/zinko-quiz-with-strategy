@@ -145,4 +145,19 @@ export const useNotificationStore = create((set, get) => ({
       console.error('Failed to clear notifications:', error);
     }
   },
+
+  deleteNotification: async (id) => {
+    try {
+      await api.delete(`/api/notifications/${id}`);
+      set((state) => {
+        const updated = state.notifications.filter((n) => n.id !== id);
+        return {
+          notifications: updated,
+          unreadCount: countUnread(updated),
+        };
+      });
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    }
+  },
 }));
