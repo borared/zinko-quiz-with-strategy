@@ -208,7 +208,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
 
       {/* Header */}
       <div className="z-10 mb-6 text-center px-8 flex flex-col items-center">
-        <h2 className="gasoek-one-regular text-white drop-shadow-md uppercase tracking-wide flex items-center gap-3 justify-center" style={{ fontSize: "3rem", lineHeight: 1 }}>
+        <h2 className="gasoek-one-regular text-white drop-shadow-md tracking-wide flex items-center gap-3 justify-center" style={{ fontSize: "3rem", lineHeight: 1 }}>
           <Trophy size={40} strokeWidth={3} className="text-zk-yellow drop-shadow-sm" />
           Team {winnerTeam} Wins!
         </h2>
@@ -275,13 +275,13 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
               opacity: { duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut" }
             }}
-            className="absolute bottom-6 right-6 z-20 px-8 py-4 rounded-3xl border-[5px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center"
+            className="absolute bottom-6 right-6 z-20 px-6 py-3 rounded-2xl border-[3px] border-black text-center"
             style={{ background: wonReward.color }}
           >
-            <p className="gasoek-one-regular uppercase tracking-wider text-4xl" style={{ color: wonReward.textColor }}>
+            <p className="gasoek-one-regular tracking-wider text-2xl" style={{ color: wonReward.textColor }}>
               {wonReward.label}
             </p>
-            <p className="font-bold mt-1 text-3xl opacity-90" style={{ color: wonReward.textColor, fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+            <p className="font-bold mt-1 text-2xl opacity-90" style={{ color: wonReward.textColor, fontFamily: 'var(--font-amatic-sc)', letterSpacing: '1px' }}>
               {wonReward.sublabel}
             </p>
           </motion.div>
@@ -295,7 +295,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
             >
               <button
                 onClick={onRewardClaimed}
-                className="px-10 py-3 bg-[#1e3a8a] text-white text-4xl font-bold rounded-2xl border-[4px] border-black shadow-[0_6px_0_0_#000] hover:-translate-y-1 active:translate-y-[6px] active:shadow-none transition-all tracking-widest drop-shadow-sm"
+                className="px-10 py-3 bg-[#1e3a8a] text-white text-4xl font-bold rounded-2xl border-[4px] border-black transition-opacity hover:opacity-90 tracking-widest drop-shadow-sm"
                 style={{ fontFamily: 'var(--font-amatic-sc)' }}
               >
                 Continue Game →
@@ -311,7 +311,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-zk-blue border-[4px] border-black shadow-[8px_8px_0_0_#000] rounded-3xl p-6 md:p-8 flex flex-col items-center w-full max-w-2xl"
+            className="bg-zk-blue border-[4px] border-black rounded-3xl p-6 md:p-8 flex flex-col items-center w-full max-w-2xl"
           >
             <h3 className="gasoek-one-regular text-white text-3xl md:text-5xl uppercase mb-6 text-center" style={{ textShadow: "2px 2px 0 #000" }}>
               Choose a Skill to Charge!
@@ -331,10 +331,10 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
                     className={`cursor-pointer rounded-2xl p-4 flex flex-col items-center text-center border-[4px] transition-all duration-200 ${
                       isSelected 
                         ? 'border-white bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
-                        : 'border-black bg-black/40 hover:bg-black/20 shadow-[4px_4px_0_0_#000]'
+                        : 'border-black bg-black/40 hover:bg-black/20'
                     }`}
                   >
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center border-[3px] border-black mb-3 shadow-[2px_2px_0_0_#000]" style={{ backgroundColor: skill.color }}>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center border-[3px] border-black mb-3" style={{ backgroundColor: skill.color }}>
                       <Icon size={32} className="text-white" />
                     </div>
                     <span className="font-bold text-white text-lg tracking-wider" style={{ fontFamily: 'var(--font-amatic-sc)' }}>
@@ -348,10 +348,10 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
             <button
               onClick={handleClaimSkill}
               disabled={!selectedSkillId}
-              className={`px-10 py-3 text-white text-4xl font-bold rounded-2xl border-[4px] border-black transition-all tracking-widest ${
+              className={`px-10 py-3 text-white text-4xl font-bold rounded-2xl border-[4px] border-black transition-opacity tracking-widest ${
                 selectedSkillId 
-                  ? 'bg-[#22c55e] shadow-[0_6px_0_0_#000] hover:-translate-y-1 active:translate-y-[6px] active:shadow-none cursor-pointer' 
-                  : 'bg-gray-500 opacity-50 cursor-not-allowed shadow-[0_6px_0_0_#000]'
+                  ? 'bg-[#22c55e] hover:opacity-90 cursor-pointer' 
+                  : 'bg-gray-500 opacity-50 cursor-not-allowed'
               }`}
               style={{ fontFamily: 'var(--font-amatic-sc)' }}
             >
