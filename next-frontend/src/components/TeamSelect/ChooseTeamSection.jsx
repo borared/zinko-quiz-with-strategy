@@ -173,6 +173,21 @@ const ChooseTeamSection = () => {
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute top-1/3 left-6 w-8 h-8 rounded-full bg-[#5D3FD3]/20 border-[2px] border-zk-black/10 pointer-events-none"
       />
+      <motion.div
+        animate={{ y: [15, -15, 15], x: [10, -10, 10], rotate: [0, 90, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-20 right-20 w-10 h-10 md:w-14 md:h-14 bg-[#4ADE80]/30 border-[3px] border-zk-black/10 pointer-events-none"
+      />
+      <motion.div
+        animate={{ y: [-20, 20, -20], x: [15, -15, 15] }}
+        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-32 left-16 w-14 h-14 md:w-20 md:h-20 rounded-full bg-[#F87171]/40 border-[3px] border-zk-black/10 pointer-events-none"
+      />
+      <motion.div
+        animate={{ y: [5, -5, 5], rotate: [0, -45, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute top-1/2 right-8 w-6 h-6 md:w-10 md:h-10 bg-zk-white/50 border-[2px] border-zk-black/10 pointer-events-none rounded-sm"
+      />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-2xl">
