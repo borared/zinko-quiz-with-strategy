@@ -5,7 +5,6 @@ const isProtectedRoute = createRouteMatcher([
   '/create-game(.*)',
   '/host(.*)',
   '/settings(.*)',
-  '/shop(.*)',
   '/library(.*)',
 ]);
 
