@@ -98,9 +98,8 @@ export const useShopStore = create((set, get) => ({
   },
 
   fetchCatalog: async ({ silent = false, userId } = {}) => {
-    if (!localStorage.getItem('zinko_jwt')) {
-      get().invalidate();
-      return null;
+    if (userId && !localStorage.getItem('zinko_jwt')) {
+      userId = null;
     }
 
     if (get().isLoading) return get();
