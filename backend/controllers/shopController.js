@@ -12,7 +12,7 @@ const handleError = (res, message, err, status = 500) => {
 
 const getCatalog = async (req, res) => {
   try {
-    const catalog = await shopService.getCatalog(req.user.userId);
+    const catalog = await shopService.getCatalog(req.user?.userId);
     res.json(catalog);
   } catch (err) {
     handleError(res, 'Failed to fetch shop catalog', err);
