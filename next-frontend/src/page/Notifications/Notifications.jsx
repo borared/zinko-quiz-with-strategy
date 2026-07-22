@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { BellRing, CheckCheck, Loader2, Gift } from 'lucide-react';
+import { BellRing, CheckCheck, Loader2, Gift, Trash2 } from 'lucide-react';
 import Navbar from '@/components/global/Navbar';
 import { motion } from 'framer-motion';
 import { ZINKO_SENDER_AVATAR, ZINKO_SENDER_NAME } from '@/lib/lobbyScenery';
@@ -15,6 +15,7 @@ function NotificationCard({
   onMarkRead,
   onCollectScenery,
   collectingId,
+  onDelete,
 }) {
   const isSceneryGift = notif.type === 'SCENERY_GIFT';
   const metadata = notif.metadata || {};
@@ -41,16 +42,29 @@ function NotificationCard({
           : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 cursor-pointer'
       }`}
     >
-      {!notif.is_read && !canCollect && (
-        <div className="absolute top-4 right-4 sm:top-auto sm:right-6 w-3 h-3 bg-red-500 border-[2px] border-black rounded-full" />
-      )}
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onDelete(notif.id);
+        }}
+        className="absolute top-4 right-4 text-zk-black/30 hover:text-red-500 transition-colors"
+        aria-label="Delete notification"
+      >
+        <Trash2 size={20} />
+      </button>
 
-      <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
-        <img
-          src={senderAvatar}
-          alt={senderName}
-          className={isSceneryGift ? 'w-full h-full object-contain' : 'w-full h-full object-cover'}
-        />
+      <div className="relative flex-shrink-0">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
+          <img
+            src={senderAvatar}
+            alt={senderName}
+            className={isSceneryGift ? 'w-full h-full object-contain' : 'w-full h-full object-cover'}
+          />
+        </div>
+        {!notif.is_read && !canCollect && (
+          <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 border-[2px] border-black rounded-full" />
+        )}
       </div>
 
       <div className="flex-1 min-w-0 pr-6">
@@ -128,6 +142,7 @@ export default function Notifications() {
     markAsRead,
     markAllAsRead,
     clearAllNotifications,
+    deleteNotification,
     collectSceneryGift,
     isCachedForUser,
   } = useNotificationStore();
@@ -250,6 +265,7 @@ export default function Notifications() {
                 onMarkRead={markAsRead}
                 onCollectScenery={handleCollectScenery}
                 collectingId={collectingId}
+                onDelete={deleteNotification}
               />
             ))
           )}
