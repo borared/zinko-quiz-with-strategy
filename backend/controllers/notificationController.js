@@ -44,9 +44,23 @@ const clearAllNotifications = async (req, res) => {
   }
 };
 
+const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await notificationService.deleteNotification(id, req.user.userId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, 'Failed to delete notification', err);
+  }
+};
+
 module.exports = {
   getNotificationsByUserId,
   markAsRead,
   markAllAsRead,
   clearAllNotifications,
+  deleteNotification,
 };
