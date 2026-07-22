@@ -82,7 +82,7 @@ function SettingSection({ icon: Icon, title, description, children, className = 
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-black uppercase tracking-tight text-zk-black">{title}</h2>
+            <h2 className="text-xl font-black tracking-tight text-zk-black">{title}</h2>
           </div>
           {description && (
             <p className="text-sm font-bold text-zk-black/55 mt-1">{description}</p>
@@ -381,7 +381,7 @@ export default function SettingsPanel() {
             <Settings size={26} />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-zk-black uppercase tracking-tight">Settings</h1>
+            <h1 className="text-3xl font-black text-zk-black tracking-tight">Settings</h1>
             <p className="text-sm font-bold text-zk-black/55">Manage your account and game preferences.</p>
           </div>
         </div>
