@@ -192,15 +192,15 @@ const Navbar = () => {
       <>
         <button
           onClick={() => router.push('/join')}
-          className="bg-zk-blue text-zk-white border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+          className="bg-zk-blue text-zk-white border-[3px] border-zk-black px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
         >
-          JOIN
+          Join
         </button>
         <button
           onClick={() => router.push('/signup')}
-          className="bg-zk-white text-zk-black border-[3px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-2 transition-transform hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none rounded-lg"
+          className="bg-zk-white text-zk-black border-[3px] border-zk-black px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
         >
-          SIGN UP
+          Sign up
         </button>
       </>
     );
