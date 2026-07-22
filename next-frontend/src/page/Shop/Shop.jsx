@@ -66,11 +66,7 @@ export default function Shop() {
     setClientReady(true);
   }, [hydrateCart]);
 
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace('/signin');
-    }
-  }, [isLoaded, isSignedIn, router]);
+  // Removed the sign-in redirect so the shop is public
 
   useEffect(() => {
     if (!user?.id) return;
@@ -83,7 +79,18 @@ export default function Shop() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!clientReady || !isLoaded || !isJwtReady || !isSignedIn || !user?.id) return;
+    if (!clientReady || !isLoaded) return;
+
+    if (!isSignedIn) {
+      if (initializedForUserRef.current === 'public') return;
+      initializedForUserRef.current = 'public';
+      fetchCatalog({ userId: null }).catch(() => {
+        showToast('Could not load the shop. Try again later.', 'error');
+      });
+      return;
+    }
+
+    if (!isJwtReady || !user?.id) return;
     if (initializedForUserRef.current === user.id) return;
     initializedForUserRef.current = user.id;
 
@@ -148,6 +155,11 @@ export default function Shop() {
   ]);
 
   const handleAddToCart = (item) => {
+    if (!isSignedIn) {
+      showToast('Please sign in to add items to your library!', 'info');
+      router.push('/signin');
+      return;
+    }
     const added = addToCart(item);
     if (added) {
       const cartCount = useLibraryCartStore.getState().items.length;
@@ -161,6 +173,11 @@ export default function Shop() {
   };
 
   const handlePurchase = async (item) => {
+    if (!isSignedIn) {
+      showToast('Please sign in to unlock this item!', 'info');
+      router.push('/signin');
+      return;
+    }
     try {
       const result = await startCheckout(item.item_type, item.slug);
       if (result?.checkoutUrl) {
@@ -178,12 +195,14 @@ export default function Shop() {
     activeTab === 'scenery'
       ? (sceneries.length || DEFAULT_SCENERY_SKELETON_COUNT)
       : (avatars.length || DEFAULT_AVATAR_SKELETON_COUNT);
+  const isAuthReady = isSignedIn ? isJwtReady : true;
+
   const showSkeleton =
     !clientReady
-    || (((!isLoaded || !isJwtReady) && !hasPersistedData)
+    || (((!isLoaded || !isAuthReady) && !hasPersistedData)
     || (isLoading && !shopCached && sceneries.length === 0 && avatars.length === 0));
 
-  if (!isLoaded || !isSignedIn) {
+  if (!isLoaded) {
     return (
       <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
         <Loader2 className="animate-spin text-zk-black" size={32} />
