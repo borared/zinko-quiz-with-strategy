@@ -27,10 +27,15 @@ const clearAllNotifications = async (userId) => {
   await notificationRepository.clearAllNotifications(userId);
 };
 
+const deleteNotification = async (id, userId) => {
+  return await notificationRepository.deleteNotification(id, userId);
+};
+
 module.exports = {
   createNotification,
   getNotificationsByUserId,
   markAsRead,
   markAllAsRead,
-  clearAllNotifications
+  clearAllNotifications,
+  deleteNotification
 };
