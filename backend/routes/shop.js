@@ -1,11 +1,9 @@
 const express = require('express');
 const shopController = require('../controllers/shopController');
-const { requireCustomAuth } = require('../middleware/auth');
+const { requireCustomAuth, optionalCustomAuth } = require('../middleware/auth');
 const { writeLimiter } = require('../middleware/security');
 
 const router = express.Router();
-
-router.use(requireCustomAuth);
 
 /**
  * @swagger
@@ -17,7 +15,7 @@ router.use(requireCustomAuth);
  *       200:
  *         description: Successful response
  */
-router.get('/catalog', shopController.getCatalog);
+router.get('/catalog', optionalCustomAuth, shopController.getCatalog);
 /**
  * @swagger
  * /api/shop/checkout:
@@ -28,6 +26,6 @@ router.get('/catalog', shopController.getCatalog);
  *       200:
  *         description: Successful response
  */
-router.post('/checkout', writeLimiter, shopController.createCheckout);
+router.post('/checkout', requireCustomAuth, writeLimiter, shopController.createCheckout);
 
 module.exports = router;
