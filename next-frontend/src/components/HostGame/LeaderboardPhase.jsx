@@ -185,14 +185,15 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <span className="font-black text-[#FFCD29] text-2xl">VS</span>
           </motion.div>
 
-          <TeamColumn 
-            teamName="Team B"
-            teamData={teamB}
-            teamScore={teamBScore}
-            isWinner={teamBScore > teamAScore}
-            themeColor="#E74C3C"
-            initialX={60}
-          />
+          {/* Team B */}
+          <motion.div
+            initial={{ x: 60, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className={`flex-1 flex flex-col items-center bg-white border-[4px] border-zk-black rounded-2xl p-6 ${
+              teamBScore > teamAScore ? "ring-4 ring-[#FFCD29] scale-[1.02] z-10" : "scale-[0.98]"
+            }`}
+          >
 
             <div className="bg-[#E74C3C] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black mb-4">
               Team B

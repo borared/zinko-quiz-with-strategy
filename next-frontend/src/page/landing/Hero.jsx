@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import HeroSection from '../../components/LandingSection/HeroSection';
+import HeroSection from '../../components/landingSection/HeroSection';
 const Hero = () => {
   return (
     <HeroSection />
