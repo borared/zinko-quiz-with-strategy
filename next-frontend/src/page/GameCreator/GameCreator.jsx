@@ -248,7 +248,7 @@ const GameCreatorContent = () => {
                     (q) => Number(q.round) === round.id
                   ).length;
                   const isActive = activeRound === round.id;
-                  const isComplete = count >= 6;
+                  const isComplete = count >= 5;
 
                   return (
                     <button
@@ -283,7 +283,7 @@ const GameCreatorContent = () => {
                                 : 'bg-zk-black/5 text-zk-black/40'
                           }`}
                         >
-                          {count}/8
+                          {count}/5
                         </div>
                       </div>
                     </button>
@@ -359,14 +359,16 @@ const GameCreatorContent = () => {
 
       <AiSidebar isOpen={isAiSidebarOpen} onClose={() => setIsAiSidebarOpen(false)} />
 
-      {/* Cover image modal */}
       <AnimatePresence>
         {isImageModalOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+          <motion.div 
+            key="cover-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-6"
+          >
+            <div
               onClick={() => setIsImageModalOpen(false)}
               className="absolute inset-0 bg-zk-black/60 backdrop-blur-sm"
             />
@@ -384,8 +386,8 @@ const GameCreatorContent = () => {
                 <X size={20} />
               </button>
 
-              <h2 className="font-['Outfit'] text-4xl font-black text-zk-black tracking-tight uppercase mb-1">Quiz Cover</h2>
-              <p className="text-zk-black/60 font-bold text-sm mb-6 uppercase tracking-wide">
+              <h2 className="font-['Outfit'] text-4xl font-black text-zk-black tracking-tight mb-1">Quiz Cover</h2>
+              <p className="text-zk-black/60 font-bold text-sm mb-6 tracking-wide">
                 Choose a visual for your game
               </p>
 
@@ -447,14 +449,17 @@ const GameCreatorContent = () => {
 
                 <button
                   type="button"
-                  onClick={() => setIsImageModalOpen(false)}
+                  onClick={() => {
+                    setIsImageModalOpen(false);
+                    if (coverImage) showToast('Cover uploaded successfully!', 'success');
+                  }}
                   className="w-full border-[3px] border-zk-black bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl transition-colors hover:bg-zk-black/90"
                 >
                   Done
                 </button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
