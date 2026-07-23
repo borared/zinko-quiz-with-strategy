@@ -16,7 +16,7 @@ export default function PlayerPreviewPage() {
     round: 1,
     match: 3,
     total: 10,
-    questionText: "WHICH PLANET IS KNOWN AS THE 'RED PLANET'?",
+    questionText: "Which planet is known as the 'Red Planet'?",
     answers: [
       { id: "A", text: "Earth", color: "RED" },
       { id: "B", text: "Mars", color: "BLUE" },
