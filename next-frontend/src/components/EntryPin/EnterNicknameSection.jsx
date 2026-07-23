@@ -77,8 +77,13 @@ const EnterNicknameSection = () => {
   }, [pin, router, showToast]);
 
   const handleEnter = () => {
-    if (nickname.trim().length === 0) {
+    const trimmed = nickname.trim();
+    if (trimmed.length === 0) {
       setError('Please enter a nickname!');
+      return;
+    }
+    if (trimmed.length > 15) {
+      setError('Nickname is too long! (Max 15 chars)');
       return;
     }
     setError('');
@@ -89,9 +94,9 @@ const EnterNicknameSection = () => {
     if (pin) {
       const socket = getSocket();
       if (socket && socket.connected) {
-        socket.emit('lobby:check-nickname', { pin, nickname: nickname.trim() }, (response) => {
+        socket.emit('lobby:check-nickname', { pin, nickname: trimmed }, (response) => {
           if (response && response.available) {
-            sessionStorage.setItem('player_nickname', nickname.trim());
+            sessionStorage.setItem('player_nickname', trimmed);
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
             router.push(`/play/${pin}/choose-team`);
           } else {
@@ -100,9 +105,10 @@ const EnterNicknameSection = () => {
           }
         });
       } else {
-        sessionStorage.setItem('player_nickname', nickname.trim());
-        sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-        router.push(`/play/${pin}/choose-team`);
+        setError('Connecting to game server... Please try again in a moment.');
+        if (socket && !socket.connected) {
+          socket.connect();
+        }
       }
     } else {
       router.push('/join');
@@ -173,6 +179,7 @@ const EnterNicknameSection = () => {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
+              maxLength={15}
               placeholder="TYPE SOMETHING COOL..."
               className="w-full border-[3px] border-zk-black p-4 text-center text-sm md:text-base font-bold text-zk-black placeholder-black focus:outline-none focus:ring-zk-blue/30 transition-all rounded-xl"
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
