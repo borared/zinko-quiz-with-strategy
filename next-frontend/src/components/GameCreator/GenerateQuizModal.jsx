@@ -9,8 +9,20 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
   const [error, setError] = useState('');
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      // Basic validation
+      const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+      if (!validTypes.includes(selectedFile.type) && !selectedFile.name.match(/\.(pdf|docx|pptx)$/i)) {
+        setError('Unsupported file type. Please upload a PDF, DOCX, or PPTX file.');
+        setFile(null);
+        return;
+      }
+      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
+        setError('File is too large. Maximum size is 10MB.');
+        setFile(null);
+        return;
+      }
       setFile(selectedFile);
       setError('');
     }
@@ -19,7 +31,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
-      setError('Please upload a file first.');
+      setError('Please upload a valid file first.');
       return;
     }
     
@@ -27,10 +39,14 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
     setError('');
     
     try {
-      await onGenerate(file, numQuestions);
+      const parsedNum = parseInt(numQuestions, 10);
+      if (isNaN(parsedNum) || parsedNum < 1 || parsedNum > 20) {
+        throw new Error('Please enter a valid number of questions between 1 and 20.');
+      }
+      await onGenerate(file, parsedNum);
       onClose();
     } catch (err) {
-      setError('Failed to generate quiz. Please try again.');
+      setError(err.message || 'Failed to generate quiz. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);

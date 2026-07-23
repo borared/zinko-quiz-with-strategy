@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 
 const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
   return (
@@ -36,27 +36,27 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
         {/* Scrollable Grid */}
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-50">
           <div className="grid grid-cols-3 gap-4 w-full">
-{avatars.map((avatar) => {
-               const isSelected = selectedAvatar && selectedAvatar.id === avatar.id;
+            {avatars?.map((avatar) => {
+              const isSelected = selectedAvatar?.id === avatar.id;
                
-               return (
-                 <motion.div
-                   key={avatar.id}
-                   onClick={() => onSelect(avatar)}
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
-                   className={`relative cursor-pointer aspect-square rounded-xl border-[3px] flex items-center justify-center overflow-hidden transition-colors ${
-                     isSelected 
-                       ? 'border-zk-black bg-[#FFCD29]'
-                       : 'border-zk-black/10 bg-white hover:border-zk-black/30'
-                   }`}
-                 >
-                   <img 
-                     src={avatar.image_url} 
-                     alt="Avatar option" 
-                     loading="eager"
-                     className="w-[90%] h-[90%] object-cover rounded-lg"
-                   />
+              return (
+                <motion.div
+                  key={avatar.id}
+                  onClick={() => onSelect(avatar)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative cursor-pointer aspect-square rounded-xl border-[3px] flex items-center justify-center overflow-hidden transition-colors ${
+                    isSelected 
+                      ? 'border-zk-black bg-[#FFCD29]'
+                      : 'border-zk-black/10 bg-white hover:border-zk-black/30'
+                  }`}
+                >
+                  <img 
+                    src={avatar.image_url} 
+                    alt="Avatar option" 
+                    loading="eager"
+                    className="w-[90%] h-[90%] object-cover rounded-lg"
+                  />
                   
                   {isSelected && (
                     <motion.div 
@@ -64,9 +64,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                       animate={{ opacity: 1, scale: 1 }}
                       className="absolute top-2 right-2 bg-white rounded-full p-0.5 border-[2px] border-zk-black shadow-sm"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
+                      <Check size={14} strokeWidth={4} />
                     </motion.div>
                   )}
                 </motion.div>

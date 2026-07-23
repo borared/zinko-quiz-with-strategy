@@ -1,12 +1,37 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
 
 module.exports = function registerMinigameHandlers(io, socket, games) {
+  // ── Helper functions ──────────────────────────────────────────────────────
+  const triggerMinigameReward = (game, team, pin) => {
+    game.phase = 'MINIGAME_REWARD';
+    
+    const winningPlayers = game.players.filter(p => p.team === team);
+    let spinnerId = null;
+    let spinnerName = "Host";
+    if (winningPlayers.length > 0) {
+      const chosen = winningPlayers[Math.floor(Math.random() * winningPlayers.length)];
+      spinnerId = chosen.id;
+      spinnerName = chosen.nickname;
+    }
+    
+    game.minigameSpinnerId = spinnerId;
+    const rewardsList = ['SKILL_CHARGE', 'BONUS_POINTS_20', 'NOTHING'];
+    game.preSelectedRewardId = rewardsList[Math.floor(Math.random() * rewardsList.length)];
+
+    io.to(pin).emit('game:minigame-finished', { 
+      winnerTeam: team, 
+      spinnerId, 
+      spinnerName,
+      preSelectedRewardId: game.preSelectedRewardId
+    });
+  };
+
   // ── host:start-minigame ───────────────────────────────────────────────────
   socket.on('host:start-minigame', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
-    game.phase = 'MINIGAME_RACING'; // keeping same phase name to minimize frontend routing changes, but acts as vault cracking
+    game.phase = 'MINIGAME_RACING';
     
     const colors = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
     const generateVaultCode = () => {
@@ -19,29 +44,16 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       const numPlayers = teamPlayers.length;
       if (numPlayers === 0) return assignments;
       
-      if (numPlayers === 1) {
-        // 1 player: gets all 4 colors
-        assignments[teamPlayers[0].id] = [...colors];
-      } else if (numPlayers === 2) {
-        // 2 players: 2 colors each (all 4 colors distributed)
-        const shuffled = [...colors].sort(() => 0.5 - Math.random());
-        assignments[teamPlayers[0].id] = [shuffled[0], shuffled[1]];
-        assignments[teamPlayers[1].id] = [shuffled[2], shuffled[3]];
-      } else if (numPlayers === 3) {
-        // 3 players: 2 colors each
-        // First 2 players cover all 4 colors
-        const shuffled = [...colors].sort(() => 0.5 - Math.random());
-        assignments[teamPlayers[0].id] = [shuffled[0], shuffled[1]];
-        assignments[teamPlayers[1].id] = [shuffled[2], shuffled[3]];
-        // 3rd player gets 2 random colors
-        const shuffled2 = [...colors].sort(() => 0.5 - Math.random());
-        assignments[teamPlayers[2].id] = [shuffled2[0], shuffled2[1]];
-      } else {
-        // 4+ players: 1 color each
-        const shuffled = [...colors].sort(() => 0.5 - Math.random());
-        for (let i = 0; i < numPlayers; i++) {
-          assignments[teamPlayers[i].id] = [shuffled[i % 4]];
+      const shuffled = [...colors].sort(() => 0.5 - Math.random());
+      const numColorsPerPlayer = Math.max(1, Math.ceil(4 / numPlayers));
+      
+      // Dynamically distribute colors cyclically to guarantee all 4 colors are covered
+      for (let i = 0; i < numPlayers; i++) {
+        const playerColors = [];
+        for (let c = 0; c < numColorsPerPlayer; c++) {
+          playerColors.push(shuffled[(i * numColorsPerPlayer + c) % 4]);
         }
+        assignments[teamPlayers[i].id] = playerColors;
       }
       return assignments;
     };
@@ -65,7 +77,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       B: new Set()
     };
 
-    // To map playerId -> team quickly in hold events
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
@@ -96,38 +107,15 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const vault = game.teamVaults[team];
     const held = game.heldColors[team];
     
-    // Check if all required colors are currently held
     const isCracked = vault.required.every(color => held.has(color));
     
     if (isCracked) {
       vault.cracked += 1;
-      game.heldColors[team].clear(); // Reset held colors to prevent instant double-crack
+      game.heldColors[team].clear(); 
       
       if (vault.cracked >= game.vaultsToWin) {
-        game.phase = 'MINIGAME_REWARD';
-        
-        // Pick random player from winning team
-        const winningPlayers = game.players.filter(p => p.team === team);
-        let spinnerId = null;
-        let spinnerName = "Host";
-        if (winningPlayers.length > 0) {
-          const chosen = winningPlayers[Math.floor(Math.random() * winningPlayers.length)];
-          spinnerId = chosen.id;
-          spinnerName = chosen.nickname;
-        }
-        
-        game.minigameSpinnerId = spinnerId;
-        const rewardsList = ['SKILL_CHARGE', 'BONUS_POINTS_20', 'NOTHING'];
-        game.preSelectedRewardId = rewardsList[Math.floor(Math.random() * rewardsList.length)];
-
-        io.to(pin).emit('game:minigame-finished', { 
-          winnerTeam: team, 
-          spinnerId, 
-          spinnerName,
-          preSelectedRewardId: game.preSelectedRewardId
-        });
+        triggerMinigameReward(game, team, pin);
       } else {
-        // Generate new code for next vault
         const colors = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
         const shuffled = [...colors].sort(() => 0.5 - Math.random());
         vault.required = shuffled.slice(0, 3);
@@ -138,7 +126,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         });
       }
     } else {
-      // Broadcast progress (Throttled)
       requestProgressUpdate(game, pin);
     }
   };
@@ -184,7 +171,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
      if (!isHostSocket(socket, game)) return;
      
      if (rewardType === 'SKILL_CHARGE') {
-       // Only used as a fallback if needed
        const teamSkillsObj = game.teamSkills[team] || {};
        const activeSkillIds = Object.keys(teamSkillsObj);
        
@@ -196,7 +182,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
          randomSkill = skills[Math.floor(Math.random() * skills.length)];
        }
        
-       game.skillCharges[team][randomSkill] += 1;
+       if (!game.skillCharges[team]) {
+         game.skillCharges[team] = { rabbit: 0, fox: 0, butterfly: 0, frog: 0 };
+       }
+       game.skillCharges[team][randomSkill] = (game.skillCharges[team][randomSkill] || 0) + 1;
        io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'SKILL_CHARGE', detail: randomSkill });
      } else if (rewardType === 'BONUS_POINTS_20') {
        game.activeMultiplier = { team, multiplier: 1.2, durationRounds: 1 };
@@ -212,7 +201,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     if (!game || game.phase !== 'MINIGAME_REWARD') return;
     if (!requirePlayerSocket(game, socket, playerId)) return;
 
-    // Only the spinner is allowed to claim the reward
     if (game.minigameSpinnerId !== playerId) return;
     
     const team = game.playerTeamMap[playerId];
@@ -236,7 +224,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     game.phase = 'MINIGAME_HIGHER_LOWER_PICK';
     game.secretCodes = { A: null, B: null };
     
-    // To map playerId -> team quickly in guess events
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
@@ -264,7 +251,6 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         io.to(pin).emit('game:minigame-higher-lower-countdown-started', {});
 
         setTimeout(() => {
-          // If the game is still active
           if (games.has(pin) && game.phase === 'MINIGAME_HIGHER_LOWER_COUNTDOWN') {
             game.phase = 'MINIGAME_HIGHER_LOWER_GUESS';
             game.currentTurn = Math.random() < 0.5 ? 'A' : 'B';
@@ -293,27 +279,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const enemySecret = game.secretCodes[enemyTeam];
 
     if (numericGuess === enemySecret) {
-      game.phase = 'MINIGAME_REWARD';
-      
-      const winningPlayers = game.players.filter(p => p.team === team);
-      let spinnerId = null;
-      let spinnerName = "Host";
-      if (winningPlayers.length > 0) {
-        const chosen = winningPlayers[Math.floor(Math.random() * winningPlayers.length)];
-        spinnerId = chosen.id;
-        spinnerName = chosen.nickname;
-      }
-      
-      game.minigameSpinnerId = spinnerId;
-      const rewardsList = ['SKILL_CHARGE', 'BONUS_POINTS_20', 'NOTHING'];
-      game.preSelectedRewardId = rewardsList[Math.floor(Math.random() * rewardsList.length)];
-
-      io.to(pin).emit('game:minigame-finished', { 
-        winnerTeam: team, 
-        spinnerId, 
-        spinnerName,
-        preSelectedRewardId: game.preSelectedRewardId
-      });
+      triggerMinigameReward(game, team, pin);
     } else {
       game.currentTurn = enemyTeam;
       const status = numericGuess > enemySecret ? 'LOWER' : 'HIGHER';

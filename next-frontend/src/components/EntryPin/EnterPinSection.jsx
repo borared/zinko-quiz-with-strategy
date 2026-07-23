@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
+import { Brain, Swords, Shield, Zap } from 'lucide-react';
 import api from '../../services/api';
 
 const EnterPinSection = () => {
@@ -32,7 +33,8 @@ const EnterPinSection = () => {
   };
 
   const handleEnter = async () => {
-    if (pin.length < 6) {
+    const trimmedPin = pin.trim();
+    if (trimmedPin.length < 6) {
       setError('Please enter a full 6-digit PIN.');
       triggerShake();
       return;
@@ -41,11 +43,12 @@ const EnterPinSection = () => {
     try {
       setLoading(true);
       setError('');
+      
       // Validate PIN with backend
-      const data = await api.get(`/api/game/${pin}`);
+      const { data } = await api.get(`/api/game/${trimmedPin}`);
 
-      if (!data.valid) {
-        setError(data.message || 'Invalid PIN. Please try again.');
+      if (!data?.valid) {
+        setError(data?.message || 'Invalid PIN. Please try again.');
         triggerShake();
         return;
       }
@@ -63,19 +66,25 @@ const EnterPinSection = () => {
       }
 
       // Store PIN for use in the next steps
-      sessionStorage.setItem('game_pin', pin);
+      sessionStorage.setItem('game_pin', trimmedPin);
 
       // Players stay muted — no background music on join flow
       if (typeof window !== 'undefined' && window.gameAudio) {
-        window.gameAudio.pause();
-        window.gameAudio.currentTime = 0;
-        window.gameAudio = null;
+        try {
+          window.gameAudio.pause();
+          window.gameAudio.currentTime = 0;
+        } catch (e) {
+          console.error('Failed to pause game audio:', e);
+        } finally {
+          window.gameAudio = null;
+        }
       }
 
-      router.push(`/play/${pin}/join-nickname`);
+      router.push(`/play/${trimmedPin}/join-nickname`);
 
     } catch (err) {
-      setError('Game not found. Check your PIN and try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Game not found. Check your PIN and try again.';
+      setError(errorMessage);
       triggerShake();
     } finally {
       setLoading(false);
@@ -85,9 +94,38 @@ const EnterPinSection = () => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow w-full py-20 px-4 font-sans">
 
-      {/* Decorative Elements */}
-      <div className="absolute top-12 left-12 md:top-24 md:left-32 w-16 h-16 md:w-24 md:h-24 rounded-full border-[3px] border-black/10 bg-black/5 pointer-events-none" />
-      <div className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 border-[3px] border-black/10 bg-black/5 pointer-events-none" />
+      {/* Decorative Elements - Strategy / Quiz Theme */}
+      <motion.div
+        animate={{ y: [-15, 15, -15], rotate: [-10, 10, -10] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-12 left-12 md:top-24 md:left-32 text-black/10 pointer-events-none"
+      >
+        <Brain size={100} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [15, -15, 15], rotate: [0, 360] }}
+        transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
+        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 text-black/10 pointer-events-none"
+      >
+        <Swords size={120} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/2 right-12 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Shield size={80} strokeWidth={1.5} />
+      </motion.div>
+      
+      <motion.div
+        animate={{ y: [-10, 10, -10], rotate: [-20, 20, -20] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-1/4 left-16 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Zap size={90} strokeWidth={1.5} />
+      </motion.div>
 
       {/* Main Content */}
       <motion.div 

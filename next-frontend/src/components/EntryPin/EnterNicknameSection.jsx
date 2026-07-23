@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Rocket, VenetianMask, RefreshCw, Edit2 } from 'lucide-react';
+import { Rocket, VenetianMask, RefreshCw, Edit2, Target, Puzzle, Crown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import AvatarSelector from './AvatarSelector';
@@ -31,8 +31,8 @@ const EnterNicknameSection = () => {
     const validatePinAndLoadAvatars = async () => {
       try {
         // First validate the PIN
-        const gameRes = await api.get(`/api/game/${pin}`);
-        if (!gameRes || !gameRes.valid) {
+        const { data: gameRes } = await api.get(`/api/game/${pin}`);
+        if (!gameRes?.valid) {
           showToast(gameRes?.message || 'Invalid PIN. Please try again.', 'error');
           router.replace('/join');
           return;
@@ -49,7 +49,10 @@ const EnterNicknameSection = () => {
         }
 
         // PIN is valid, now load avatars
-        const { data, success } = await api.get('/api/avatars');
+        const avatarRes = await api.get('/api/avatars');
+        const data = avatarRes?.data || avatarRes; // Handle unwrapped api responses
+        const success = avatarRes?.success !== false;
+
         if (success && Array.isArray(data)) {
           if (data.length > 0) {
             setAvatars(data);
@@ -57,8 +60,8 @@ const EnterNicknameSection = () => {
             setSelectedAvatar(random);
             // Preload avatar images for instant display when modal opens
             data.forEach(avatar => {
-              if (avatar.image_url) {
-                const img = new Image();
+              if (avatar.image_url && typeof window !== 'undefined') {
+                const img = new window.Image();
                 img.src = avatar.image_url;
               }
             });
@@ -67,7 +70,8 @@ const EnterNicknameSection = () => {
           console.error('Failed to load avatars', data);
         }
       } catch (e) {
-        showToast('Game not found. Check your PIN.', 'error');
+        const errorMessage = e.response?.data?.message || e.message || 'Game not found. Check your PIN.';
+        showToast(errorMessage, 'error');
         router.replace('/join');
       } finally {
         setLoadingAvatars(false);
@@ -76,17 +80,22 @@ const EnterNicknameSection = () => {
     validatePinAndLoadAvatars();
   }, [pin, router, showToast]);
 
+  const [isJoining, setIsJoining] = useState(false);
+
   const handleEnter = () => {
-    const trimmed = nickname.trim();
-    if (trimmed.length === 0) {
+    if (isJoining || loadingAvatars) return;
+
+    const trimmedNickname = nickname.trim();
+    if (trimmedNickname.length === 0) {
       setError('Please enter a nickname!');
       return;
     }
-    if (trimmed.length > 15) {
-      setError('Nickname is too long! (Max 15 chars)');
+    if (trimmedNickname.length > 15) {
+      setError('Nickname must be 15 characters or less.');
       return;
     }
     setError('');
+    setIsJoining(true);
 
     // Ensure session storage holds the correct pin in case they jumped straight here
     sessionStorage.setItem('game_pin', pin);
@@ -94,21 +103,21 @@ const EnterNicknameSection = () => {
     if (pin) {
       const socket = getSocket();
       if (socket && socket.connected) {
-        socket.emit('lobby:check-nickname', { pin, nickname: trimmed }, (response) => {
-          if (response && response.available) {
-            sessionStorage.setItem('player_nickname', trimmed);
+        socket.emit('lobby:check-nickname', { pin, nickname: trimmedNickname }, (response) => {
+          if (response?.available) {
+            sessionStorage.setItem('player_nickname', trimmedNickname);
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
             router.push(`/play/${pin}/choose-team`);
           } else {
             setError(response?.message || 'Nickname already taken');
             showToast(response?.message || 'Nickname already taken', 'error');
+            setIsJoining(false);
           }
         });
       } else {
-        setError('Connecting to game server... Please try again in a moment.');
-        if (socket && !socket.connected) {
-          socket.connect();
-        }
+        sessionStorage.setItem('player_nickname', trimmedNickname);
+        sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
+        router.push(`/play/${pin}/choose-team`);
       }
     } else {
       router.push('/join');
@@ -118,17 +127,38 @@ const EnterNicknameSection = () => {
   return (
     <div className="flex-1 w-full flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow px-4 py-20 font-sans">
 
-      {/* Decorative Elements */}
+      {/* Decorative Elements - Strategy / Quiz Theme */}
       <motion.div
-        animate={{ y: [-10, 10, -10], x: [-5, 5, -5] }}
+        animate={{ y: [-10, 10, -10], rotate: [-15, 15, -15] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-16 left-16 md:top-24 md:left-32 w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#D4A322]/40 border-[3px] border-zk-black/10 pointer-events-none"
-      />
+        className="absolute top-16 left-16 md:top-24 md:left-32 text-black/10 pointer-events-none"
+      >
+        <Target size={90} strokeWidth={1.5} />
+      </motion.div>
+      
       <motion.div
-        animate={{ y: [15, -15, 15], rotate: [45, 60, 45] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 w-20 h-20 md:w-32 md:h-32 rotate-45 bg-[#FFB020]/60 border-[3px] border-zk-black/10 pointer-events-none rounded-xl"
-      />
+        animate={{ y: [15, -15, 15], rotate: [0, 360] }}
+        transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 25, repeat: Infinity, ease: "linear" } }}
+        className="absolute bottom-24 right-12 md:bottom-32 md:right-32 text-black/10 pointer-events-none"
+      >
+        <Puzzle size={110} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.8, 0.4] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/4 right-16 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Crown size={80} strokeWidth={1.5} />
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [-15, 15, -15], rotate: [-25, 25, -25] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-1/3 left-12 text-black/10 pointer-events-none hidden md:block"
+      >
+        <Sparkles size={85} strokeWidth={1.5} />
+      </motion.div>
 
       <motion.div 
         initial={{ scale: 0.5, opacity: 0 }}

@@ -24,7 +24,7 @@ function describeArc(cx, cy, r, startAngle, endAngle) {
   return `M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`;
 }
 
-function WheelSVG({ rotation }) {
+const WheelSVG = React.memo(function WheelSVG({ rotation }) {
   const cx = 200, cy = 200, r = 185;
 
   return (
@@ -92,7 +92,7 @@ function WheelSVG({ rotation }) {
       <circle cx={cx} cy={cy} r={18} fill="#fff" stroke="#000" strokeWidth="3" />
     </svg>
   );
-}
+});
 
 export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, preSelectedRewardId, externalSpinTrigger, onRewardClaimed, playerId, isHost }) {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -240,8 +240,15 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
         {/* The wheel */}
         <motion.div
           className="w-[340px] h-[340px] md:w-[420px] md:h-[420px] rounded-full border-[10px] border-black cursor-pointer relative"
-          animate={{ rotate: rotation }}
-          transition={{ duration: 5.5, ease: [0.05, 0.95, 0.2, 1.0] }}
+          animate={{ 
+            rotate: rotation,
+            boxShadow: (!isSpinning && !wonReward) ? ["0 0 10px rgba(255,205,41,0.2)", "0 0 60px rgba(255,205,41,0.8)", "0 0 10px rgba(255,205,41,0.2)"] : "0 0 20px rgba(0,0,0,0.5)"
+          }}
+          whileHover={{ scale: isSpinner && !isSpinning && !wonReward ? 1.03 : 1 }}
+          transition={{ 
+            rotate: { duration: 5.5, ease: [0.05, 0.95, 0.2, 1.0] },
+            boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+          }}
           onClick={handleSpinClick}
           style={{ userSelect: "none" }}
         >
@@ -254,7 +261,11 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
         {isSpinner && !isSpinning && !wonReward && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: [0, -10, 0] }}
+            transition={{ 
+              opacity: { duration: 0.3 }, 
+              y: { repeat: Infinity, duration: 1.5, ease: "easeInOut" } 
+            }}
             className="mt-8 font-bold text-4xl text-white uppercase tracking-widest drop-shadow-md"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >

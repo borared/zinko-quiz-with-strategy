@@ -53,7 +53,14 @@ export default function AuthSync() {
               console.log('[AuthSync] Token synced successfully');
             }
           } else {
-            console.error('[AuthSync] Failed to sync token:', response.statusText);
+            let errorMessage = response.statusText;
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorData.error || response.statusText;
+            } catch (e) {
+              // Not JSON
+            }
+            console.error('[AuthSync] Failed to sync token:', errorMessage);
             if (hasExistingToken) {
               setJwtReady(true);
             } else {

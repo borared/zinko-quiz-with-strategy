@@ -5,7 +5,13 @@ const jwt = require('jsonwebtoken');
  * requireClerkAuth — valid Clerk session required (used for token exchange).
  */
 const requireClerkAuth = (req, res, next) => {
-  const { userId } = getAuth(req);
+  let userId = null;
+  try {
+    const auth = getAuth(req);
+    userId = auth?.userId;
+  } catch (e) {
+    userId = req.auth?.userId || null;
+  }
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized. Clerk session invalid.' });
   }
