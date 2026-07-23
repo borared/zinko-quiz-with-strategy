@@ -116,7 +116,7 @@ const Navbar = () => {
             </div>
             {/* Unread Badge on Avatar */}
             {unreadCount > 0 && (
-              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-10">
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-black z-10">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </div>
             )}
@@ -129,7 +129,7 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-50 rounded-xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black z-50 rounded-xl overflow-hidden"
                 >
                   {/* Default Profile Menu */}
                   <>
@@ -160,7 +160,7 @@ const Navbar = () => {
                         <Bell size={16} /> Notification
                       </div>
                       {unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-[1px] border-black shadow-[1px_1px_0_0_rgba(0,0,0,1)]">
+                        <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-[1px] border-black">
                           {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                       )}
