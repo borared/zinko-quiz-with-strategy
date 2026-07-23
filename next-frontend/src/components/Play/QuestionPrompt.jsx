@@ -54,12 +54,12 @@ export default function QuestionPrompt({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`w-full mx-auto flex flex-col h-auto max-h-[calc(100dvh-11rem)] sm:max-h-[calc(100dvh-10rem)] bg-white rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-zk-black shadow-[4px_4px_0_#000] sm:shadow-[6px_6px_0_#000] overflow-hidden ${
+          className={`w-full mx-auto flex flex-col h-auto max-h-[calc(100dvh-11rem)] sm:max-h-[calc(100dvh-10rem)] bg-white rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-zk-black overflow-hidden ${
             isDragLayers ? 'max-w-6xl lg:max-w-7xl' : 'max-w-5xl lg:max-w-6xl'
           }`}
         >
           <div className="flex flex-col h-auto w-full gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto">
-            <p className="text-zk-black font-black text-lg sm:text-xl lg:text-2xl leading-tight uppercase text-center shrink-0">
+            <p className="text-zk-black font-black text-lg sm:text-xl lg:text-2xl leading-tight text-center shrink-0">
               {question.questionText}
             </p>
 
@@ -84,9 +84,9 @@ export default function QuestionPrompt({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-white rounded-2xl p-5 border-[4px] border-zk-black shadow-[6px_6px_0_#000] text-center"
+          className="w-full bg-white rounded-2xl p-5 border-[4px] border-zk-black text-center"
         >
-          <p className="text-zk-black font-black text-xl lg:text-2xl leading-tight uppercase">
+          <p className="text-zk-black font-black text-xl lg:text-2xl leading-tight">
             {question.questionText}
           </p>
         </motion.div>
@@ -117,7 +117,7 @@ export default function QuestionPrompt({
             exit={{ opacity: 0 }}
             className="flex flex-col items-center justify-center mt-4"
           >
-            <div className="bg-zk-black border-[4px] border-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] rounded-3xl px-12 py-8 flex flex-col items-center text-center">
+            <div className="bg-zk-black border-[4px] border-black rounded-3xl px-12 py-8 flex flex-col items-center text-center">
               <motion.div
                 initial={{ rotate: -10 }}
                 animate={{ rotate: 10 }}

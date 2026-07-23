@@ -62,17 +62,17 @@ export default function AnswerGrid({
               relative rounded-3xl px-4 py-6 flex flex-col items-center justify-center gap-3
               border-[4px] border-zk-black transition-all duration-150 min-h-[140px] w-full
               ${isSelected
-                ? `${style.activeBg} shadow-none translate-y-[6px] translate-x-[6px] opacity-100`
+                ? `${style.activeBg} opacity-100`
                 : isDisabled
                   ? `${style.bg} opacity-20 cursor-not-allowed filter grayscale`
-                  : `${style.bg} shadow-[6px_6px_0_0_rgba(0,0,0,1)] active:translate-y-[4px] active:translate-x-[4px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:brightness-110`
+                  : `${style.bg} hover:brightness-110`
               }
             `}
           >
             {!isTrueFalse && (
               <span className="text-white text-3xl font-black opacity-80">{style.shape}</span>
             )}
-            <span className={`font-black text-center leading-tight uppercase ${isTrueFalse ? 'text-white text-2xl md:text-3xl' : 'text-zk-black text-xl md:text-2xl'}`}>
+            <span className={`font-black text-center leading-tight ${isTrueFalse ? 'text-white text-2xl md:text-3xl' : 'text-zk-black text-xl md:text-2xl'}`}>
               {label}
             </span>
             {isSelected && (
