@@ -253,7 +253,6 @@ const getPublicQuizzes = async (cursor = null, limit = 10, searchQuery = null) =
             WHERE is_public = true
             ${DISCOVERY_CREATOR_EXISTS}
             ${cursorCondition}
-            AND to_tsvector('english', title) @@ plainto_tsquery('english', ${trimmedSearch})
             ORDER BY created_at DESC, id DESC
             LIMIT ${limit + 1}
           `;
