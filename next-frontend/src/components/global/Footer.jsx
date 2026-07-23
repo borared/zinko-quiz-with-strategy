@@ -37,7 +37,7 @@ const Footer = () => {
           <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Help Center</a>
           <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Contact Us</a>
           <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Privacy Policy</Link>
-          <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Terms of Service</a>
+          <Link href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Terms of Service</Link>
         </div>
 
         {/* Column 4: Follow Us */}
