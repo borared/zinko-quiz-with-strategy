@@ -29,7 +29,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 10, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl pointer-events-none"
+        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-black rounded-xl pointer-events-none"
       />
       <motion.div
         animate={{ y: [15, -15, 15], rotate: -360 }}
@@ -37,17 +37,17 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 12, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl pointer-events-none"
+        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-black rounded-xl pointer-events-none"
       />
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full pointer-events-none"
+        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-black rounded-full pointer-events-none"
       />
       <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl pointer-events-none"
+        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-black rounded-xl pointer-events-none"
       />
 
       <div className="relative z-10 flex flex-col flex-1 p-4 md:p-6 justify-center">
@@ -80,18 +80,18 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 mt-6">
             {leaderboard.slice(0, 5).map((p, i) => (
               <div key={p.id} className="flex flex-col items-center">
-                <div className="relative w-32 h-32 rounded-3xl border-[4px] border-zk-black shadow-[6px_6px_0_#000] bg-white flex items-center justify-center flex-shrink-0">
+                <div className="relative w-32 h-32 rounded-3xl border-[4px] border-zk-black bg-white flex items-center justify-center flex-shrink-0">
                   {p.avatar ? (
                     <img src={p.avatar} alt={p.nickname} className="w-full h-full object-cover rounded-[20px]" />
                   ) : (
                     <div className="font-black text-4xl text-zk-black/30">?</div>
                   )}
                   {/* Rank badge at top right edge */}
-                  <div className="absolute -top-4 -right-4 bg-[#5D3FD3] text-white w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10">
+                  <div className="absolute -top-4 -right-4 bg-[#5D3FD3] text-white w-10 h-10 rounded-full border-[3px] border-zk-black flex items-center justify-center font-black text-lg z-10">
                     #{i + 1}
                   </div>
                   {/* Name badge at bottom right edge */}
-                  <div className="absolute -bottom-4 -right-8 bg-white border-[3px] border-zk-black shadow-[4px_4px_0_#000] rounded-xl px-4 py-2 z-10 min-w-[80px]">
+                  <div className="absolute -bottom-4 -right-8 bg-white border-[3px] border-zk-black rounded-xl px-4 py-2 z-10 min-w-[80px]">
                     <span className="font-black text-zk-black text-lg truncate max-w-[120px] block text-center leading-none">
                       {p.nickname}
                     </span>
@@ -111,7 +111,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           <button
             onClick={handleShowLeaderboard}
             style={{ fontFamily: 'var(--font-amatic-sc)' }}
-            className="min-w-[240px] px-8 py-4 bg-white border-[3px] border-zk-black shadow-[4px_4px_0_#000] rounded-xl text-zk-black font-black text-3xl tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_#000] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all flex items-center justify-center gap-2"
+            className="min-w-[240px] px-8 py-4 bg-white border-[3px] border-zk-black rounded-xl text-zk-black font-black text-3xl tracking-widest hover:brightness-95 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <Trophy size={24} /> Leaderboard
           </button>
@@ -119,7 +119,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
             id="next-question-btn"
             onClick={handleNextQuestion}
             style={{ fontFamily: 'var(--font-amatic-sc)' }}
-            className="min-w-[240px] px-8 py-4 bg-[#5D3FD3] border-[3px] border-zk-black shadow-[4px_4px_0_#000] rounded-xl text-white font-black text-3xl tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0_#000] active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all flex items-center justify-center gap-2"
+            className="min-w-[240px] px-8 py-4 bg-[#5D3FD3] border-[3px] border-zk-black rounded-xl text-white font-black text-3xl tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             Next Question <ChevronRight size={24} />
           </button>
