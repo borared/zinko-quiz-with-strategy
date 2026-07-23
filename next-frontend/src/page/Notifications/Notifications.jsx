@@ -226,7 +226,7 @@ export default function Notifications() {
               <BellRing className="text-zk-black" size={24} />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-zk-black uppercase tracking-tight">Notifications</h1>
+              <h1 className="text-3xl font-black text-zk-black tracking-tight">Notifications</h1>
               <p className="text-zk-black/60 font-bold">Collect scenery gifts and stay up to date.</p>
             </div>
           </div>

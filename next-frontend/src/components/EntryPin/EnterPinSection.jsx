@@ -10,6 +10,7 @@ const EnterPinSection = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
   const { disconnectSocket } = useSocketStore();
 
@@ -110,21 +111,48 @@ const EnterPinSection = () => {
         <motion.div
           animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
-          className="w-full bg-white border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 flex flex-col gap-4 rounded-xl"
+          className="w-full bg-white border-[4px] border-zk-black p-6 md:p-10 flex flex-col gap-4 rounded-xl"
         >
 
           {/* Input Box */}
-          <div className="w-full">
+          <div className="w-full relative">
             <input
               id="pin-input"
               type="text"
               value={pin}
               onChange={handleInputChange}
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
-              placeholder="0 0 0 0 0 0"
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               disabled={loading}
-              className="w-full border-[3px] border-zk-black p-4 text-center text-4xl md:text-5xl gasoek-one-regular tracking-widest leading-none text-zk-black placeholder:text-gray-200 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl disabled:opacity-60"
+              maxLength={6}
+              autoComplete="off"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
             />
+            {/* Visual Slots */}
+            <div className="w-full border-[3px] border-zk-black p-3 md:p-4 rounded-xl flex items-center justify-between gap-2 md:gap-3 bg-white focus-within:ring-4 focus-within:ring-zk-blue/30 transition-all">
+              {[...Array(6)].map((_, i) => {
+                const char = pin[i];
+                const isFilled = char !== undefined;
+                const isActive = isFocused && i === pin.length;
+                return (
+                  <div
+                    key={i}
+                    className={`relative flex-1 aspect-[3/4] max-h-16 md:max-h-20 flex items-center justify-center rounded-2xl md:rounded-[24px] transition-all ${
+                      isFilled ? 'bg-zk-black' : 'bg-gray-200'
+                    } ${isActive ? 'ring-4 ring-[#5D3FD3] scale-[1.05] shadow-lg' : ''}`}
+                  >
+                    <span
+                      className={`text-3xl md:text-5xl gasoek-one-regular leading-none ${
+                        isFilled ? 'text-white' : 'text-white drop-shadow-sm'
+                      }`}
+                    >
+                      {isFilled ? char : '0'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Error Message */}
@@ -142,7 +170,7 @@ const EnterPinSection = () => {
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
             disabled={loading || pin.length < 6}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider transition-colors rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {loading ? (
