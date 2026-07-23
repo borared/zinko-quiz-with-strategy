@@ -177,6 +177,7 @@ export default function HostLobby() {
   const [startCountdown, setStartCountdown] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isQRExpanded, setIsQRExpanded] = useState(false);
 
   const copyPin = useCallback(() => {
     if (pin) {
@@ -359,8 +360,8 @@ export default function HostLobby() {
 
         {/* QR Code */}
         <div
-          className="bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44"
-          style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
+          onClick={() => setIsQRExpanded(true)}
+          className="bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44 cursor-pointer hover:scale-105 transition-transform"
         >
           <div className="w-full flex justify-center aspect-square">
             <QRCode value={gameUrl} style={{ width: '100%', height: '100%' }} level="H" />
@@ -459,7 +460,36 @@ export default function HostLobby() {
           )}
         </button>
       </motion.div>
+
+      {/* Expanded QR Modal */}
+      {isQRExpanded && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center cursor-pointer p-6"
+          onClick={() => setIsQRExpanded(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white border-[8px] border-[#000000] rounded-3xl p-8 flex flex-col items-center justify-center max-w-sm md:max-w-md w-full cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full aspect-square mb-6">
+              <QRCode value={gameUrl} style={{ width: '100%', height: '100%' }} level="H" />
+            </div>
+            <span
+              className="text-3xl font-black uppercase text-center tracking-widest"
+              style={{ color: '#000000' }}
+            >
+              Scan to Join
+            </span>
+            <p className="mt-4 text-2xl gasoek-one-regular tracking-widest text-[#5D3FD3]">
+              PIN: {pin}
+            </p>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
-
