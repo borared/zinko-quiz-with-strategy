@@ -13,7 +13,7 @@ import { getCorrectLayerOrder } from '@/lib/dragLayersUtils';
 import { DEFAULT_TIME_LIMIT, normalizeTimeLimit } from '@/lib/timeLimit';
 import { formatQuestionForSave, validateQuizForSave } from '@/lib/validateQuizSave';
 
-export const QUIZ_TITLE_MAX_LENGTH = 15;
+export const QUIZ_TITLE_MAX_LENGTH = 20;
 
 function normalizeRound(round) {
   const parsed = Number(round);
@@ -314,7 +314,7 @@ export const useQuizStore = create((set, get) => ({
     const formData = new FormData();
     if (file) formData.append('file', file);
     formData.append('prompt', enhancedPrompt);
-    formData.append('numQuestions', numQuestions || 8);
+    formData.append('numQuestions', numQuestions || 5);
     formData.append('context', JSON.stringify(existingQuestionsInRound));
 
     try {
