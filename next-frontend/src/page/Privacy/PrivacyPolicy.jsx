@@ -137,10 +137,10 @@ const sections = [
       <p>
         Questions about this policy or your data? Email us at{' '}
         <a
-          href="mailto:privacy@zinko.app"
+          href="mailto:zinkoquiz@gmail.com"
           className="text-zk-blue underline underline-offset-2 hover:text-zk-purple"
         >
-          privacy@zinko.app
+          zinkoquiz@gmail.com
         </a>
         .
       </p>
@@ -153,7 +153,7 @@ export default function PrivacyPolicy() {
     <div className="flex-1 w-full bg-zk-yellow relative overflow-hidden pt-12 pb-16 font-sans min-h-[80vh]">
       <PrivacyFloatingDecor />
       <div className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white border-[3px] border-zk-black rounded-2xl shadow-[6px_6px_0_0_#000] p-8 sm:p-12">
+        <div className="p-8 sm:p-12">
           <p className="text-sm font-bold uppercase tracking-wider text-zk-purple mb-3">Legal</p>
           <h1
             className="text-4xl sm:text-5xl font-bold text-zk-black mb-2"
