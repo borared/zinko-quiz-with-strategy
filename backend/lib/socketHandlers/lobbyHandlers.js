@@ -44,9 +44,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     try {
       const data = await quizRepository.getQuestionsByQuizId(quizId);
 
-      // Randomize questions and cap at 15 for 3 rounds of 5 matches
-      const shuffled = [...data].sort(() => 0.5 - Math.random());
-      game.questions = shuffled.slice(0, 15);
+      // Respect the creator's order and cap at 15 for 3 rounds of 5 matches
+      game.questions = data.slice(0, 15);
 
       console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
       socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
