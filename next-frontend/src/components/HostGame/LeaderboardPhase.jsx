@@ -72,7 +72,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
               </motion.div>
             )}
 
-            <div className="bg-[#27AE60] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_#000] mb-4">
+            <div className="bg-[#27AE60] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black mb-4">
               Team A
             </div>
 
@@ -84,12 +84,12 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   initial={{ x: -40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
+                  className="bg-white border-[4px] border-zk-black rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
                 >
                   {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
+                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black flex-shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 bg-[#5D3FD3] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
+                    <div className="w-12 h-12 bg-[#5D3FD3] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black">
                       <span className="text-white text-xl font-black">
                         {player.nickname.charAt(0).toUpperCase()}
                       </span>
@@ -129,7 +129,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
               scale: { delay: 0.3, type: "spring" },
               rotate: { delay: 0.5, duration: 2, repeat: Infinity, ease: "easeInOut" },
             }}
-            className="self-center bg-zk-black border-[4px] border-[#FFCD29] w-16 h-16 flex items-center justify-center rounded-xl shadow-[4px_4px_0_rgba(0,0,0,0.3)] flex-shrink-0 z-20"
+            className="self-center bg-zk-black border-[4px] border-[#FFCD29] w-16 h-16 flex items-center justify-center rounded-xl flex-shrink-0 z-20"
           >
             <span className="font-black text-[#FFCD29] text-2xl">VS</span>
           </motion.div>
@@ -155,7 +155,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
               </motion.div>
             )}
 
-            <div className="bg-[#E74C3C] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black shadow-[3px_3px_0_#000] mb-4">
+            <div className="bg-[#E74C3C] text-white font-black text-sm uppercase tracking-widest px-5 py-1.5 rounded-full border-[3px] border-zk-black mb-4">
               Team B
             </div>
 
@@ -167,12 +167,12 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                   initial={{ x: 40, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 200 }}
-                  className="bg-white border-[4px] border-zk-black shadow-[4px_4px_0_#000] rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
+                  className="bg-white border-[4px] border-zk-black rounded-2xl px-5 py-4 flex items-center gap-4 w-full"
                 >
                   {player.avatar ? (
-                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
+                    <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black flex-shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 bg-[#E74C3C] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]">
+                    <div className="w-12 h-12 bg-[#E74C3C] rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black">
                       <span className="text-white text-xl font-black">
                         {player.nickname.charAt(0).toUpperCase()}
                       </span>
@@ -211,7 +211,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="next-after-leaderboard-btn"
               onClick={handleNextQuestion}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-black shadow-[6px_6px_0_#000] rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[4px_4px_0_#000] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none transition-all flex items-center gap-3"
+              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               Next Question <ChevronRight size={22} />
             </button>
@@ -219,7 +219,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="end-game-btn"
               onClick={handleEndGame}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-black shadow-[6px_6px_0_#000] rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[4px_4px_0_#000] active:translate-y-[6px] active:translate-x-[6px] active:shadow-none transition-all flex items-center gap-3"
+              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               <Home size={26} /> Home
             </button>
