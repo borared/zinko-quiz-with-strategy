@@ -65,11 +65,11 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
   const r1Count = questions.filter(q => q.round === 1 || q.round === "1").length;
   const r2Count = questions.filter(q => q.round === 2 || q.round === "2").length;
   const r3Count = questions.filter(q => q.round === 3 || q.round === "3").length;
-  const isReady = r1Count >= 6 && r2Count >= 6 && r3Count >= 6;
+  const isReady = r1Count >= 5 && r2Count >= 5 && r3Count >= 5;
 
   const handleHostClick = async () => {
     if (!isReady) {
-      setErrorMessage("Please add at least 6 questions per round!");
+      setErrorMessage("Please add at least 5 questions per round!");
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
       return;
