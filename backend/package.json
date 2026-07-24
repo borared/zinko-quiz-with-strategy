@@ -1,0 +1,50 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "free-port": "node scripts/free-port.js",
+    "dev": "node scripts/free-port.js && prisma generate && nodemon",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:baseline": "prisma migrate resolve --applied 20250626120000_baseline",
+    "test": "node --test tests/repositories.test.js tests/security.test.js",
+    "test:repositories": "node --test tests/repositories.test.js",
+    "test:security": "node --test tests/security.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@clerk/backend": "^3.4.11",
+    "@clerk/express": "^2.1.15",
+    "@prisma/client": "5.22.0",
+    "@zinko/shared": "*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "groq-sdk": "^1.2.0",
+    "helmet": "^8.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "node-cache": "^5.1.2",
+    "officeparser": "^6.1.1",
+    "pdf-parse": "^2.4.5",
+    "socket.io": "^4.8.3",
+    "stripe": "^22.3.0",
+    "svix": "^1.93.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "5.22.0"
+  }
+}

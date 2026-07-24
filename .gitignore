@@ -1,0 +1,19 @@
+# Environment files (with real secrets)
+.env
+backend/.env
+frontend/.env
+
+# Dependencies
+node_modules/
+
+# Keep example files (safe templates)
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Markdown files
+*.md
+!README.md
+
+# Batch files
+START_WITH_WEBHOOK.bat

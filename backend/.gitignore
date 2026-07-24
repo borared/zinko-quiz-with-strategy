@@ -1,0 +1,9 @@
+node_modules
+.env
+
+# Test and debug scripts
+tests/
+
+# Documentation files (local only)
+*.md
+!README.md

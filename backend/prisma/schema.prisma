@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model avatars {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String         @unique
+  label          String
+  image_url      String
+  price_coins    Int            @default(0)
+  price_cents    Int            @default(0)
+  is_purchasable Boolean        @default(true)
+  is_free        Boolean        @default(false)
+  created_at     DateTime?      @default(now()) @db.Timestamptz(6)
+  user_avatars   user_avatars[]
+}
+
+model questions {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quiz_id       String?   @db.Uuid
+  question_text String
+  image_url     String?
+  question_type String    @default("multiple_choice")
+  time_limit    Int       @default(20)
+  answers       Json
+  order_index   Int
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  round         Int?      @default(1)
+  quiz          quizzes?  @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([quiz_id])
+}
+
+model quizzes {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String      @default("Untitled Quiz")
+  creator_id  String
+  is_public   Boolean?    @default(false)
+  is_cloned       Boolean?    @default(false)
+  cloned_from_id  String?     @db.Uuid
+  created_at      DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  cover_image String?
+  creator     users       @relation(fields: [creator_id], references: [clerk_id], onDelete: NoAction, onUpdate: NoAction)
+  questions   questions[]
+
+  @@index([creator_id])
+  @@index([creator_id, cloned_from_id])
+}
+
+model users {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_id      String          @unique
+  email         String?
+  first_name    String?
+  last_name     String?
+  username      String?         @unique
+  avatar_url    String?
+  settings       Json?           @default("{}")
+  created_at     DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at     DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  quizzes        quizzes[]
+  notifications  notifications[]
+  user_sceneries user_sceneries[]
+  user_avatars   user_avatars[]
+  shop_orders    shop_orders[]
+}
+
+model sceneries {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String           @unique
+  name           String
+  image_url      String
+  price_coins    Int?
+  price_cents    Int?
+  is_purchasable Boolean          @default(false)
+  is_default     Boolean          @default(false)
+  created_at     DateTime         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user_sceneries user_sceneries[]
+}
+
+model user_avatars {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String
+  avatar_id   String   @db.Uuid
+  obtained_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user        users    @relation(fields: [user_id], references: [clerk_id], onDelete: Cascade, onUpdate: NoAction)
+  avatar      avatars  @relation(fields: [avatar_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, avatar_id])
+  @@index([user_id])
+}
+
+model user_sceneries {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String
+  scenery_id  String    @db.Uuid
+  obtained_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user        users     @relation(fields: [user_id], references: [clerk_id], onDelete: Cascade, onUpdate: NoAction)
+  scenery     sceneries @relation(fields: [scenery_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, scenery_id])
+  @@index([user_id])
+}
+
+model shop_orders {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id               String
+  item_type             String
+  item_slug             String
+  amount_cents          Int
+  currency              String    @default("usd")
+  stripe_session_id     String?   @unique
+  stripe_payment_intent String?
+  status                String    @default("pending")
+  created_at            DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  completed_at          DateTime? @db.Timestamptz(6)
+  user                  users     @relation(fields: [user_id], references: [clerk_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
+  @@index([status])
+}
+
+model notifications {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String
+  type       String   @default("QUIZ_CLONED")
+  message    String
+  metadata   Json?
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  user       users    @relation(fields: [user_id], references: [clerk_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
+}

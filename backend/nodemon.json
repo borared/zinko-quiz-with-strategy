@@ -1,0 +1,8 @@
+{
+  "watch": ["."],
+  "ext": "js,json",
+  "ignore": ["node_modules/**", "prisma/migrations/**", "tests/**", "scripts/**"],
+  "delay": 800,
+  "signal": "SIGTERM",
+  "exec": "node index.js"
+}

@@ -1,0 +1,66 @@
+const notificationService = require('../services/notificationService');
+const handleError = require('../lib/errorHandler');
+
+const getNotificationsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const notifications = await notificationService.getNotificationsByUserId(userId);
+    res.json(notifications);
+  } catch (err) {
+    handleError(res, 'Failed to fetch notifications', err);
+  }
+};
+
+const markAsRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await notificationService.markAsRead(id, req.user.userId);
+    if (!updated) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, 'Failed to mark notification as read', err);
+  }
+};
+
+const markAllAsRead = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await notificationService.markAllAsRead(userId);
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, 'Failed to mark all notifications as read', err);
+  }
+};
+
+const clearAllNotifications = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await notificationService.clearAllNotifications(userId);
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, 'Failed to clear notifications', err);
+  }
+};
+
+const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await notificationService.deleteNotification(id, req.user.userId);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, 'Failed to delete notification', err);
+  }
+};
+
+module.exports = {
+  getNotificationsByUserId,
+  markAsRead,
+  markAllAsRead,
+  clearAllNotifications,
+  deleteNotification,
+};
