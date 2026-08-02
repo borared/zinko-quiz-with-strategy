@@ -39,6 +39,8 @@ function createGame({ pin, quizId, hostUserId }) {
     createdAt: Date.now(),
     background: DEFAULT_LOBBY_SCENERY,
     lobbyChat: [],
+    teams: ['A', 'B'],
+    teamNames: {},
   });
   return gamePin;
 }
