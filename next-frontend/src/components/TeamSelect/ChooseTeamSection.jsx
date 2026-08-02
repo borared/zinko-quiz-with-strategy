@@ -7,7 +7,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { useToastStore } from '@/store/useToastStore';
 import TeamHeader from './TeamHeader';
 import TeamCard from './TeamCard';
-import PlayerCount from './PlayerCount';
 import WaitingBar from './WaitingBar';
 
 // Reusable spring bounce variant
@@ -33,22 +32,33 @@ function getOrCreatePlayerId() {
   return id;
 }
 
-function countPlayersByTeam(players = []) {
-  return players.reduce(
-    (counts, player) => {
-      if (player.team === 'A') counts.a += 1;
-      if (player.team === 'B') counts.b += 1;
-      return counts;
-    },
-    { a: 0, b: 0 }
-  );
+const TEAM_THEMES = {
+  A: { badge: 'POWER', icon: '⚡', bgColor: '#4ADE80' },
+  B: { badge: 'SPEED', icon: '🚀', bgColor: '#F87171' },
+  C: { badge: 'MIND', icon: '🧠', bgColor: '#60A5FA' },
+  D: { badge: 'LIGHT', icon: '🌟', bgColor: '#FBBF24' },
+  E: { badge: 'SHADOW', icon: '🌑', bgColor: '#A78BFA' },
+  F: { badge: 'FLAME', icon: '🔥', bgColor: '#FB923C' },
+  G: { badge: 'HEART', icon: '💖', bgColor: '#F472B6' },
+  H: { badge: 'NATURE', icon: '🌿', bgColor: '#34D399' },
+  I: { badge: 'MYSTIC', icon: '🔮', bgColor: '#818CF8' },
+};
+
+function getTeamCounts(players = []) {
+  return players.reduce((counts, player) => {
+    if (player.team) {
+      counts[player.team] = (counts[player.team] || 0) + 1;
+    }
+    return counts;
+  }, {});
 }
 
 const ChooseTeamSection = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [joining, setJoining] = useState(false);
-  const [countA, setCountA] = useState(0);
-  const [countB, setCountB] = useState(0);
+  const [teamCounts, setTeamCounts] = useState({});
+  const [teams, setTeams] = useState(['A', 'B']);
+  const [teamNames, setTeamNames] = useState({});
   const joinedRef = useRef(false);
   const { blinkTo } = useTransitionStore();
   const { getSocket, isConnected } = useSocketStore();
@@ -73,9 +83,7 @@ const ChooseTeamSection = () => {
   }, [getSocket, pin]);
 
   const syncTeamCounts = useCallback((players = []) => {
-    const { a, b } = countPlayersByTeam(players);
-    setCountA(a);
-    setCountB(b);
+    setTeamCounts(getTeamCounts(players));
   }, []);
 
   useEffect(() => {
@@ -88,6 +96,8 @@ const ChooseTeamSection = () => {
 
     const onPlayersUpdate = (data) => {
       syncTeamCounts(data?.players || []);
+      if (data?.teams) setTeams(data.teams);
+      if (data?.teamNames) setTeamNames(data.teamNames);
     };
 
     requestPlayers();
@@ -190,7 +200,7 @@ const ChooseTeamSection = () => {
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-2xl">
+      <div className="relative z-10 flex flex-col items-center w-full max-w-full px-4 md:px-8">
 
         {/* Header bounces in first */}
         <motion.div {...bounceIn(0)} className="w-full flex justify-center">
@@ -198,31 +208,25 @@ const ChooseTeamSection = () => {
         </motion.div>
 
         {/* Cards Row — each card bounces in with a slight delay */}
-        <div className="flex flex-row items-start justify-center gap-6 w-full">
-          <motion.div {...bounceIn(0.1)} className="flex-1 flex justify-center">
-            <TeamCard
-              team="A"
-              badge="POWER"
-              icon="⚡"
-              bgColor="#4ADE80"
-              onJoin={() => handleJoin('A')}
-            />
-          </motion.div>
-          <motion.div {...bounceIn(0.22)} className="flex-1 flex justify-center">
-            <TeamCard
-              team="B"
-              badge="SPEED"
-              icon="🚀"
-              bgColor="#F87171"
-              onJoin={() => handleJoin('B')}
-            />
-          </motion.div>
+        <div className="flex flex-row flex-wrap items-start justify-center gap-4 md:gap-6 w-full mt-4">
+          {teams.map((teamId, index) => {
+            const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
+            return (
+              <motion.div key={teamId} {...bounceIn(0.1 + index * 0.1)} className="w-[140px] md:w-[200px] flex justify-center">
+                <TeamCard
+                  team={teamId}
+                  teamName={teamNames[teamId] || `Team ${teamId}`}
+                  badge={theme.badge}
+                  icon={theme.icon}
+                  bgColor={theme.bgColor}
+                  onJoin={() => handleJoin(teamId)}
+                />
+              </motion.div>
+            );
+          })}
         </div>
 
-        {/* Player count bounces in last */}
-        <motion.div {...bounceIn(0.35)} className="w-full flex justify-center">
-          <PlayerCount countA={countA} countB={countB} />
-        </motion.div>
+
 
         {/* Joining overlay */}
         {joining && (
