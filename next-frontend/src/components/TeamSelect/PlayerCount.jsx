@@ -1,27 +1,33 @@
 "use client";
-const PlayerCount = ({ countA, countB }) => {
+
+const TEAM_COLORS = {
+  A: '#4ADE80',
+  B: '#F87171',
+  C: '#60A5FA',
+  D: '#FBBF24',
+  E: '#A78BFA',
+  F: '#FB923C',
+};
+
+const PlayerCount = ({ teams = ['A', 'B'], teamCounts = {} }) => {
   return (
-    <div className="flex items-center gap-0 border-[3px] border-zk-black bg-white px-6 py-3 mt-6 rounded-xl">
-      
-      {/* Team A */}
-      <div className="flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-[#4ADE80] border-[2px] border-zk-black inline-block" />
-        <span className="font-black text-xs uppercase tracking-widest text-zk-black">
-          Team A: {countA} Players
-        </span>
-      </div>
-
-      {/* Divider */}
-      <div className="w-[2px] h-5 bg-gray-300 mx-6" />
-
-      {/* Team B */}
-      <div className="flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-[#F87171] border-[2px] border-zk-black inline-block" />
-        <span className="font-black text-xs uppercase tracking-widest text-zk-black">
-          Team B: {countB} Players
-        </span>
-      </div>
-
+    <div className="flex flex-wrap items-center justify-center gap-4 border-[3px] border-zk-black bg-white px-6 py-3 mt-6 rounded-xl max-w-4xl mx-auto">
+      {teams.map((teamId, index) => (
+        <div key={teamId} className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span 
+              className="w-3 h-3 rounded-full border-[2px] border-zk-black inline-block" 
+              style={{ backgroundColor: TEAM_COLORS[teamId] || '#ccc' }}
+            />
+            <span className="font-black text-xs uppercase tracking-widest text-zk-black whitespace-nowrap">
+              Team {teamId}: {teamCounts[teamId] || 0} Players
+            </span>
+          </div>
+          {index < teams.length - 1 && (
+            <div className="w-[2px] h-5 bg-gray-300 hidden md:block" />
+          )}
+        </div>
+      ))}
     </div>
   );
 };
