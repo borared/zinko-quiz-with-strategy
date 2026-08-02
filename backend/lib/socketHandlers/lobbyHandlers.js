@@ -148,7 +148,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
-    if (!['A', 'B'].includes(team)) {
+    if (!game.teams.includes(team)) {
       socket.emit('error', { message: 'Invalid team selection.' });
       return;
     }
@@ -200,6 +200,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
       count: game.players.length,
       background: game.background,
+      teams: game.teams,
+      teamNames: game.teamNames || {},
     });
 
     socket.emit('player:joined', { success: true, nickname: trimmedNickname, avatar, team });
@@ -222,6 +224,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
       count: game.players.length,
       background: game.background,
+      teams: game.teams,
+      teamNames: game.teamNames || {},
     });
   });
 
@@ -261,6 +265,102 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
 
     game.background = background;
     io.to(pin).emit('lobby:background-update', { background });
+  });
+
+  // ── lobby:add-team (host only) ────────────────────────────────────────────
+  socket.on('lobby:add-team', ({ pin }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (!isHostSocket(socket, game)) return;
+    
+    const possibleTeams = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+    const nextTeam = possibleTeams.find(t => !game.teams.includes(t));
+    
+    if (nextTeam) {
+      game.teams.push(nextTeam);
+      
+      // Initialize properties for the new team
+      game.teamSkills[nextTeam] = {};
+      game.skillCharges[nextTeam] = { rabbit: 2, fox: 2, butterfly: 2, frog: 2 };
+      game.activeSkillThisRound[nextTeam] = null;
+      game.rabbitActive[nextTeam] = null;
+      game.foxActive[nextTeam] = null;
+      game.frogActive[nextTeam] = null;
+      game.minigameTaps[nextTeam] = 0;
+      game.minigameTarget[nextTeam] = 100;
+      
+      io.to(pin).emit('lobby:players-update', {
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        count: game.players.length,
+        background: game.background,
+        teams: game.teams,
+      teamNames: game.teamNames || {},
+      });
+    }
+  });
+
+  // ── lobby:remove-team (host only) ─────────────────────────────────────────
+  socket.on('lobby:remove-team', ({ pin }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (!isHostSocket(socket, game)) return;
+    
+    if (game.teams.length > 2) {
+      const lastTeam = game.teams[game.teams.length - 1];
+      
+      // Reassign any players in this team to Team A just in case
+      game.players.forEach(p => {
+        if (p.team === lastTeam) p.team = 'A';
+      });
+      
+      game.teams.pop();
+      
+      delete game.teamSkills[lastTeam];
+      delete game.skillCharges[lastTeam];
+      delete game.activeSkillThisRound[lastTeam];
+      delete game.rabbitActive[lastTeam];
+      delete game.foxActive[lastTeam];
+      delete game.frogActive[lastTeam];
+      delete game.minigameTaps[lastTeam];
+      delete game.minigameTarget[lastTeam];
+
+      io.to(pin).emit('lobby:players-update', {
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        count: game.players.length,
+        background: game.background,
+        teams: game.teams,
+      teamNames: game.teamNames || {},
+      });
+    }
+  });
+
+  // ── lobby:move-player (host only) ─────────────────────────────────────────
+  socket.on('lobby:move-player', ({ pin, playerId, newTeam }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (!isHostSocket(socket, game)) return;
+    
+    if (!game.teams.includes(newTeam)) return;
+
+    const player = game.players.find(p => p.id === playerId);
+    if (!player) return;
+    
+    // Validate target team isn't full (max 4)
+    const teamCount = game.players.filter(p => p.team === newTeam && p.id !== playerId).length;
+    if (teamCount >= 4) {
+      socket.emit('error', { message: `Team ${newTeam} is full (max 4 players).` });
+      return;
+    }
+
+    player.team = newTeam;
+
+    io.to(pin).emit('lobby:players-update', {
+      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      count: game.players.length,
+      background: game.background,
+      teams: game.teams,
+      teamNames: game.teamNames || {},
+    });
   });
 
   // ── lobby:start-countdown ─────────────────────────────────────────────────
@@ -316,6 +416,35 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     socket.emit('lobby:chat-history', { messages: game.lobbyChat || [] });
   });
 
+  // ── lobby:rename-team ─────────────────────────────────────────────────────
+  socket.on('lobby:rename-team', ({ pin, playerId, teamId, newName }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    
+    // Ensure player is connected and actually on that team
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player || player.team !== teamId) {
+      socket.emit('error', { message: 'You can only rename your own team.' });
+      return;
+    }
+
+    const trimmedName = String(newName || '').trim();
+    if (!trimmedName || trimmedName.length > 15) {
+      socket.emit('error', { message: 'Team name must be 1-15 characters.' });
+      return;
+    }
+
+    game.teamNames[teamId] = trimmedName;
+
+    io.to(pin).emit('lobby:players-update', {
+      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      count: game.players.length,
+      background: game.background,
+      teams: game.teams,
+      teamNames: game.teamNames || {},
+    });
+  });
+
   // ── player:leave-team ─────────────────────────────────────────────────────
   socket.on('player:leave-team', ({ pin, playerId }) => {
     const game = games.get(pin);
@@ -333,6 +462,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
           players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
           count: game.players.length,
           background: game.background,
+          teams: game.teams,
+      teamNames: game.teamNames || {},
         });
       }
     }
