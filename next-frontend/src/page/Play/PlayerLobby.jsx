@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 ;
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
-import { Users, Zap, ArrowLeft } from 'lucide-react';
+import { Users, Zap, ArrowLeft, Pencil } from 'lucide-react';
 import { useTransitionStore } from '@/store/useTransitionStore';
 import PlayerLobbyChat from '@/components/Play/PlayerLobbyChat';
 import AvatarEmojiBurst from '@/components/Play/AvatarEmojiBurst';
@@ -58,8 +58,22 @@ function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
 }
 
 /* ─── PlayerSlot ─────────────────────────────────────────────────────────── */
-function PlayerSlot({ player, isFirst, color, isMe, floatingEmojis = [] }) {
-  const darkColor = color === 'green' ? '#1a7a2e' : '#8b1a1a';
+const TEAM_THEMES = {
+  A: { bg: '#2ea84a', shadow: '#1a6b2e', dark: '#1a7a2e', icon: Users },
+  B: { bg: '#c0392b', shadow: '#7b1515', dark: '#8b1a1a', icon: Zap },
+  C: { bg: '#3498db', shadow: '#21618c', dark: '#2874a6', icon: Users },
+  D: { bg: '#f1c40f', shadow: '#b7950b', dark: '#d4ac0d', icon: Zap },
+  E: { bg: '#9b59b6', shadow: '#633974', dark: '#76448a', icon: Users },
+  F: { bg: '#e67e22', shadow: '#a04000', dark: '#ba4a00', icon: Zap },
+  G: { bg: '#e84393', shadow: '#b33939', dark: '#b71540', icon: Users },
+  H: { bg: '#00b894', shadow: '#006266', dark: '#009432', icon: Zap },
+  I: { bg: '#341f97', shadow: '#1e272e', dark: '#5f27cd', icon: Users },
+};
+
+function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
+  const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
+  const darkColor = theme.dark;
+  const Icon = theme.icon;
   const myHighlight = isMe ? 'border-[#FFCD29] border-[4px]' : 'border-white border-[2px]';
 
   if (!player) {
@@ -69,9 +83,7 @@ function PlayerSlot({ player, isFirst, color, isMe, floatingEmojis = [] }) {
         style={{ borderColor: darkColor, backgroundColor: darkColor }}
       >
         {isFirst && (
-          color === 'green'
-            ? <Users size={28} color="white" opacity={0.9} />
-            : <Zap size={28} color="white" opacity={0.9} />
+          <Icon size={28} color="white" opacity={0.9} />
         )}
         {!isFirst && (
           <span className="text-white text-[10px] font-black uppercase tracking-widest opacity-50">
@@ -104,7 +116,7 @@ function PlayerSlot({ player, isFirst, color, isMe, floatingEmojis = [] }) {
         />
 
         <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
-          <span className="text-[#000000] font-black text-[10px] md:text-xs uppercase tracking-wider relative block">
+          <span className="text-[#000000] font-black text-[10px] md:text-xs tracking-wider relative block">
             {player.nickname}
           </span>
         </div>
@@ -128,10 +140,30 @@ function PlayerSlot({ player, isFirst, color, isMe, floatingEmojis = [] }) {
 }
 
 /* ─── TeamPanel ──────────────────────────────────────────────────────────── */
-function TeamPanel({ teamName, color, players, myNickname, avatarReactions }) {
-  const bgColor = color === 'green' ? '#2ea84a' : '#c0392b';
-  const shadowColor = color === 'green' ? '#1a6b2e' : '#7b1515';
+function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
+  const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
+  const bgColor = theme.bg;
+  const shadowColor = theme.shadow;
   const slots = [...players, ...Array(Math.max(0, 4 - players.length)).fill(null)];
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(teamName);
+  const { getSocket, isConnected } = useSocketStore();
+  const { pin } = useParams();
+  const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
+
+  const handleSave = () => {
+    const socket = getSocket();
+    if (socket && isConnected && pin && playerId) {
+      socket.emit('lobby:rename-team', {
+        pin,
+        playerId,
+        teamId,
+        newName: editName
+      });
+    }
+    setIsEditing(false);
+  };
 
   return (
     <div
@@ -140,11 +172,34 @@ function TeamPanel({ teamName, color, players, myNickname, avatarReactions }) {
     >
       {/* Panel header */}
       <div className="flex items-center justify-between">
-        <span className="font-black text-xl text-white uppercase tracking-wider">
-          {teamName}
-        </span>
-        <div className="bg-white border-[2px] border-[#000000] px-2 py-0.5 rounded-xl">
-          <span className="font-black text-[10px] text-[#000000] uppercase tracking-wider">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              maxLength={15}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              onBlur={handleSave}
+              autoFocus
+              className="font-black text-xl text-black px-2 py-1 rounded w-32 border-[2px] border-black outline-none"
+            />
+          </div>
+        ) : (
+          <span 
+            className="font-black text-xl text-white tracking-wider flex items-center gap-2 cursor-pointer"
+            onClick={() => myNickname && players.some(p => p.nickname === myNickname) && setIsEditing(true)}
+          >
+            {teamName}
+            {myNickname && players.some(p => p.nickname === myNickname) && (
+              <div className="bg-white text-black p-1.5 rounded-full ml-1 hover:bg-gray-100 transition-colors border-[2px] border-black cursor-pointer">
+                <Pencil size={14} strokeWidth={3} />
+              </div>
+            )}
+          </span>
+        )}
+        <div className="bg-white border-[2px] border-[#000000] px-2 py-[2px] rounded-xl flex items-center justify-center">
+          <span className="font-black text-[10px] text-[#000000] tracking-wider leading-none mt-[2px]">
             Player Count: {players.length}
           </span>
         </div>
@@ -157,7 +212,7 @@ function TeamPanel({ teamName, color, players, myNickname, avatarReactions }) {
             key={player?.id || `empty-${i}`}
             player={player}
             isFirst={i === 0 && !player}
-            color={color}
+            teamId={teamId}
             isMe={player && player.nickname === myNickname}
             floatingEmojis={player ? avatarReactions[player.id] || [] : []}
           />
@@ -193,6 +248,8 @@ export default function PlayerLobby() {
 
   const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState(['A', 'B']);
+  const [teamNames, setTeamNames] = useState({});
   const [startCountdown, setStartCountdown] = useState(null);
   const [avatarReactions, setAvatarReactions] = useState({});
   const reactionTimers = useRef(new Map());
@@ -251,6 +308,8 @@ export default function PlayerLobby() {
 
     const onPlayersUpdate = (data) => {
       setPlayers(data.players || []);
+      if (data.teams) setTeams(data.teams);
+      if (data.teamNames) setTeamNames(data.teamNames);
       if (data.background) setBgImage(data.background);
     };
 
@@ -291,8 +350,6 @@ export default function PlayerLobby() {
     };
   }, [getSocket, isConnected, pin, router, nickname, team, playerId]);
 
-  const teamAPlayers = players.filter((p) => p.team === 'A');
-  const teamBPlayers = players.filter((p) => p.team === 'B');
 
   const handleGoBack = () => {
     if (startCountdown !== null) return;
@@ -340,6 +397,21 @@ export default function PlayerLobby() {
         </div>
       )}
 
+      {/* Fixed Go Back Button */}
+      <motion.button
+        {...bounceIn(0.18)}
+        type="button"
+        onClick={handleGoBack}
+        disabled={startCountdown !== null}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.95, y: 4 }}
+        className="fixed bottom-2 left-1/2 -translate-x-1/2 md:bottom-4 z-50 flex items-center justify-center gap-2 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-black px-6 py-2 md:px-8 md:py-3 rounded-xl uppercase font-black shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '1.5rem', letterSpacing: '1px' }}
+      >
+        <ArrowLeft size={24} strokeWidth={3} />
+        <span>Go Back</span>
+      </motion.button>
+
       {/* ── Content Container ──────────────────────────────────────────── */}
       <div className="relative z-10 flex flex-col h-full w-full max-w-6xl mx-auto pt-4">
         
@@ -354,7 +426,7 @@ export default function PlayerLobby() {
             </h1>
             <div
               className="inline-flex mt-2 text-white font-black text-[10px] md:text-xs uppercase tracking-[0.2em] px-4 py-1.5 items-center gap-2"
-              style={{ backgroundColor: '#000000' }}
+              style={{ backgroundColor: '#5D3FD3' }}
             >
               <motion.div
                 animate={{ opacity: [1, 0, 1] }}
@@ -367,34 +439,30 @@ export default function PlayerLobby() {
         </motion.div>
 
         {/* Team Panels + Go Back */}
-        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-5xl mx-auto min-h-0">
-          <div className="flex flex-row items-center justify-center gap-2 md:gap-6 w-full">
-            <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
-              <TeamPanel teamName="Team A" color="green" players={teamAPlayers} myNickname={nickname} avatarReactions={avatarReactions} />
-            </motion.div>
-
-            <motion.div {...bounceIn(0.2)}>
-              <VsCard />
-            </motion.div>
-
-            <motion.div {...bounceIn(0.12)} className="flex-1 w-full max-w-[380px]">
-              <TeamPanel teamName="Team B" color="red" players={teamBPlayers} myNickname={nickname} avatarReactions={avatarReactions} />
-            </motion.div>
+        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-6xl mx-auto min-h-0 overflow-y-auto pt-4 pb-8">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-4 w-full">
+            {teams.map((teamId, index) => {
+              const teamPlayers = players.filter((p) => p.team === teamId);
+              return (
+                <div key={teamId} className="flex items-center justify-center gap-4">
+                  {teams.length === 2 && index === 1 && (
+                    <motion.div {...bounceIn(0.2)} className="hidden md:flex">
+                      <VsCard />
+                    </motion.div>
+                  )}
+                  <motion.div {...bounceIn(0.12 + index * 0.05)} className="w-[300px] md:w-[350px]">
+                    <TeamPanel 
+                      teamName={teamNames[teamId] || `Team ${teamId}`} 
+                      teamId={teamId} 
+                      players={teamPlayers} 
+                      myNickname={nickname} 
+                      avatarReactions={avatarReactions} 
+                    />
+                  </motion.div>
+                </div>
+              );
+            })}
           </div>
-
-          <motion.button
-            {...bounceIn(0.18)}
-            type="button"
-            onClick={handleGoBack}
-            disabled={startCountdown !== null}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95, y: 4 }}
-            className="mt-6 flex items-center justify-center gap-2 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-black px-8 py-3 rounded-xl uppercase font-black shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2rem', letterSpacing: '2px' }}
-          >
-            <ArrowLeft size={28} strokeWidth={3} />
-            Go Back
-          </motion.button>
         </div>
 
       </div>
