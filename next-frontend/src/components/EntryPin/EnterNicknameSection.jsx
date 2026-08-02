@@ -31,7 +31,7 @@ const EnterNicknameSection = () => {
     const validatePinAndLoadAvatars = async () => {
       try {
         // First validate the PIN
-        const { data: gameRes } = await api.get(`/api/game/${pin}`);
+        const gameRes = await api.get(`/api/game/${pin}`);
         if (!gameRes?.valid) {
           showToast(gameRes?.message || 'Invalid PIN. Please try again.', 'error');
           router.replace('/join');
