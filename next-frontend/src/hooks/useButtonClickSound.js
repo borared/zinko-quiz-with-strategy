@@ -16,6 +16,8 @@ function isPlayerRoute(pathname) {
 function isInteractiveTarget(target) {
   if (!(target instanceof Element)) return false;
 
+  if (target.closest('.no-click-sound')) return false;
+
   return !!(
     target.closest('button, a, [role="button"]') ||
     target.closest('[data-click-sound]') ||
