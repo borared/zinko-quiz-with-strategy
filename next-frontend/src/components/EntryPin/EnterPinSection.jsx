@@ -45,7 +45,7 @@ const EnterPinSection = () => {
       setError('');
       
       // Validate PIN with backend
-      const { data } = await api.get(`/api/game/${trimmedPin}`);
+      const data = await api.get(`/api/game/${trimmedPin}`);
 
       if (!data?.valid) {
         setError(data?.message || 'Invalid PIN. Please try again.');
