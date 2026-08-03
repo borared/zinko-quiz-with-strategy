@@ -95,7 +95,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-          className="w-full max-w-4xl h-8 bg-zk-black rounded-full border-[3px] border-zk-black shadow-[4px_4px_0_#000] overflow-hidden flex relative mb-8"
+          className="w-full max-w-4xl h-8 bg-zk-black rounded-full border-[3px] border-zk-black overflow-hidden flex relative mb-8"
         >
           <motion.div 
             className="h-full bg-[#27AE60]" 
