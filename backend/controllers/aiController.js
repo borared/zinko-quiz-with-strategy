@@ -112,7 +112,18 @@ const generateQuiz = async (req, res) => {
 
   } catch (error) {
     console.error('Error in generate-quiz:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    
+    // Handle Groq SDK specific errors (like invalid API key, rate limits)
+    if (error.status === 401) {
+      return res.status(401).json({ error: 'The Groq API Key is invalid or expired. Please check your .env file.' });
+    } else if (error.status === 429) {
+      return res.status(429).json({ error: 'AI rate limit exceeded. Please try again later.' });
+    } else if (error.error?.error?.message) {
+      // Pass through specific API error messages if available
+      return res.status(500).json({ error: `AI API Error: ${error.error.error.message}` });
+    }
+
+    res.status(500).json({ error: 'Internal server error while communicating with AI.' });
   }
 };
 
