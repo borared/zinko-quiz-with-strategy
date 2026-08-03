@@ -16,10 +16,10 @@ const PlayerRow = React.memo(({ player, index, highestScore, teamColor, avatarFa
         #{index + 1}
       </div>
       {player.avatar ? (
-        <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black shadow-[2px_2px_0_#000] flex-shrink-0" />
+        <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black flex-shrink-0" />
       ) : (
         <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black shadow-[2px_2px_0_#000]"
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black"
           style={{ backgroundColor: avatarFallbackColor }}
         >
           <span className="text-white text-xl font-black">
