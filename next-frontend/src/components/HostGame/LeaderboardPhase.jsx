@@ -141,7 +141,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
         </motion.h2>
 
         {/* Unified Leaderboard Container */}
-        <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-yellow border-[4px] border-zk-black rounded-3xl shadow-[8px_8px_0_#000] overflow-hidden">
+        <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-yellow border-[4px] border-zk-black rounded-3xl overflow-hidden">
           
           {/* Header Row */}
           <div className="flex items-center px-4 py-3 bg-[#FFCD29] border-b-[4px] border-zk-black">
