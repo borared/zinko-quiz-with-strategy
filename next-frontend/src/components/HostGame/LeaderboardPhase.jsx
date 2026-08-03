@@ -115,8 +115,8 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col relative overflow-hidden"
     >
-      {/* Background styling - unified solid color */}
-      <div className="absolute inset-0 bg-[#5D3FD3]" />
+      {/* Transparent background to let HostGameUI scenery show through */}
+      <div className="absolute inset-0 bg-black/20 pointer-events-none z-0" />
 
       {/* Floating decorations */}
       <motion.div
