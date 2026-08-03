@@ -19,6 +19,14 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     currentTurn: null
   });
 
+  const [hangmanData, setHangmanData] = useState({
+    word: "",
+    wordLength: 0,
+    hint: "",
+    category: "",
+    state: {}
+  });
+
   const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
@@ -79,6 +87,27 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       setIsWheelSpinning(true);
     };
 
+    const onMinigameHangmanCategoryPick = () => {
+      setPhase('MINIGAME_HANGMAN_CATEGORY_PICK');
+      setQuestion(null);
+    };
+
+    const onMinigameHangmanStarted = ({ word, wordLength, hint, category, state }) => {
+      setHangmanData({ word, wordLength, hint, category, state });
+      setPhase('MINIGAME_HANGMAN');
+      setQuestion(null);
+    };
+
+    const onHangmanProgress = ({ team, lives, guessedLetters, isEliminated }) => {
+      setHangmanData(prev => ({
+        ...prev,
+        state: {
+          ...prev.state,
+          [team]: { lives, guessedLetters, isEliminated }
+        }
+      }));
+    };
+
     const onSyncStateResponse = (data) => {
       if (data.minigameData) {
         setMinigameData(prev => ({ ...prev, ...data.minigameData }));
@@ -93,7 +122,10 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
     socket.on('game:higher-lower-feedback', onHigherLowerFeedback);
     socket.on('game:minigame-finished', onMinigameFinished);
-    socket.on('game:wheel-spinning', onWheelSpinning);
+    socket.on("game:wheel-spinning", onWheelSpinning);
+    socket.on("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
+    socket.on("game:minigame-hangman-started", onMinigameHangmanStarted);
+    socket.on('game:hangman-progress', onHangmanProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
@@ -105,7 +137,10 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off('game:minigame-higher-lower-guessing-started', onMinigameHigherLowerGuessingStarted);
       socket.off('game:higher-lower-feedback', onHigherLowerFeedback);
       socket.off('game:minigame-finished', onMinigameFinished);
-      socket.off('game:wheel-spinning', onWheelSpinning);
+      socket.off("game:wheel-spinning", onWheelSpinning);
+      socket.off("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
+      socket.off("game:minigame-hangman-started", onMinigameHangmanStarted);
+      socket.off('game:hangman-progress', onHangmanProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
     };
   }, [getSocket, setPhase, setQuestion, playerId]);
@@ -136,14 +171,21 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     if (socket) socket.emit('player:release-button', { pin, playerId, color });
   }, [pin, playerId, getSocket]);
 
+  const handleHangmanGuess = useCallback((letter) => {
+    const socket = getSocket();
+    if (socket) socket.emit('player:hangman-guess', { pin, playerId, letter });
+  }, [pin, playerId, getSocket]);
+
   return {
     minigameData,
     higherLowerData,
+    hangmanData,
     minigameSpinner,
     isWheelSpinning,
     handleHigherLowerGuess,
     handleHigherLowerSetSecret,
     handleHoldButton,
-    handleReleaseButton
+    handleReleaseButton,
+    handleHangmanGuess
   };
 }
