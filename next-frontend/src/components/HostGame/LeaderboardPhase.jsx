@@ -133,7 +133,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
                 }}
                 className="absolute -top-32 z-20 pointer-events-none"
               >
-                <img src="/crown.png" alt="Crown" className="w-32 h-32 drop-shadow-[0_8px_0_rgba(0,0,0,1)]" />
+                <img src="/crown.png" alt="Crown" className="w-32 h-32" />
               </motion.div>
             )}
 
