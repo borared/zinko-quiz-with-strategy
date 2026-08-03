@@ -144,12 +144,16 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
         <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-yellow border-[4px] border-zk-black rounded-3xl overflow-hidden">
           
           {/* Header Row */}
-          <div className="flex items-center px-4 py-3 bg-[#FFCD29] border-b-[4px] border-zk-black">
+          <div className="flex items-stretch bg-[#FFCD29] border-b-[4px] border-zk-black">
             <div className="w-4 flex-shrink-0" /> {/* Spacer for accent bar */}
-            <div className="w-10 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Rank</div>
-            <div className="flex-1 font-black text-zk-black/60 uppercase tracking-widest text-sm ml-4 pl-4">Team</div>
-            <div className="w-32 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Players</div>
-            <div className="w-40 text-right font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0 pr-4">Total Score</div>
+            <div className="flex-1 px-4 py-3 flex items-center gap-4">
+              <div className="w-10 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Rank</div>
+              <div className="flex-1 flex items-center ml-4">
+                <div className="font-black text-zk-black/60 uppercase tracking-widest text-sm">Team</div>
+              </div>
+              <div className="w-32 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Players</div>
+              <div className="w-40 text-right font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0 pr-4">Total Score</div>
+            </div>
           </div>
 
           {/* Team List (Scrollable) */}
