@@ -161,11 +161,10 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.6, type: "spring" }}
-              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
+              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular"
               style={{
                 color: "#FFFFFF",
                 WebkitTextStroke: "3px #000",
-                textShadow: "6px 6px 0px #000",
               }}
             >
               {teamAScore.toLocaleString()}
@@ -216,11 +215,10 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.6, type: "spring" }}
-              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
+              className="text-5xl md:text-7xl font-black mt-6 gasoek-one-regular"
               style={{
                 color: "#FFFFFF",
                 WebkitTextStroke: "3px #000",
-                textShadow: "6px 6px 0px #000",
               }}
             >
               {teamBScore.toLocaleString()}
