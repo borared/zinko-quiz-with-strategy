@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
 
@@ -19,17 +19,17 @@ const RANK_COLORS = {
   3: "#CD7F32", // Bronze
 };
 
-const PlayerRow = React.memo(({ player, index, highestScore }) => {
+const TeamRow = React.memo(({ teamData, index, highestScore }) => {
   const rank = index + 1;
   const isTop3 = rank <= 3;
   const rankColor = RANK_COLORS[rank] || "#95A5A6"; // Default gray for >3
-  const teamColor = getTeamColor(player.team);
+  const teamColor = getTeamColor(teamData.team);
 
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      whileHover={{ scale: 1.01, y: -1 }}
+      whileHover={{ scale: 1.01, y: -2 }}
       transition={{ delay: 0.1 + index * 0.05, type: "spring", stiffness: 200 }}
       className="bg-white border-[4px] border-zk-black rounded-xl flex items-stretch w-full cursor-default overflow-hidden relative"
     >
@@ -49,46 +49,32 @@ const PlayerRow = React.memo(({ player, index, highestScore }) => {
           {rank}
         </div>
 
-        {/* Avatar */}
-        {player.avatar ? (
-          <img src={player.avatar} alt={player.nickname} className="w-12 h-12 rounded-xl object-cover border-[3px] border-zk-black flex-shrink-0" />
-        ) : (
+        {/* Team Badge & Crown */}
+        <div className="flex-1 flex items-center gap-4 ml-4">
           <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-[3px] border-zk-black"
+            className="text-white font-black text-xl uppercase tracking-widest px-6 py-2 rounded-xl border-[4px] border-zk-black shadow-[4px_4px_0_#000]"
             style={{ backgroundColor: teamColor }}
           >
-            <span className="text-white text-xl font-black">
-              {player.nickname.charAt(0).toUpperCase()}
-            </span>
+            TEAM {teamData.team}
           </div>
-        )}
-
-        {/* Nickname */}
-        <div className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
-          {player.nickname}
-          {player.score === highestScore && highestScore > 0 && (
+          {teamData.score === highestScore && highestScore > 0 && (
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <img src="/crown.png" alt="MVP Crown" className="w-16 h-16 object-contain -mt-3 ml-1" title="MVP" />
+              <img src="/crown.png" alt="MVP Crown" className="w-16 h-16 object-contain -mt-3 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]" title="Winning Team" />
             </motion.div>
           )}
         </div>
 
-        {/* Team Badge */}
-        <div className="w-32 flex-shrink-0 flex justify-center">
-          <div 
-            className="text-white font-black text-xs uppercase tracking-widest px-3 py-1 rounded-full border-[3px] border-zk-black"
-            style={{ backgroundColor: teamColor }}
-          >
-            TEAM {player.team}
-          </div>
+        {/* Players Count */}
+        <div className="w-32 text-center font-black text-zk-black/40 text-lg flex-shrink-0">
+          {teamData.players} {teamData.players === 1 ? 'Player' : 'Players'}
         </div>
 
-        {/* Score */}
-        <div className="font-black text-2xl w-32 text-right" style={{ color: teamColor }}>
-          {player.score?.toLocaleString()}
+        {/* Total Score */}
+        <div className="font-black text-4xl w-40 text-right pr-4 tracking-wider" style={{ color: teamColor, WebkitTextStroke: "1.5px #000", textShadow: "2px 2px 0px #000" }}>
+          {teamData.score?.toLocaleString()}
         </div>
       </div>
     </motion.div>
@@ -96,9 +82,21 @@ const PlayerRow = React.memo(({ player, index, highestScore }) => {
 });
 
 export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, handleNextQuestion, handleEndGame }) {
-  // Sort all players descending by score
-  const sortedPlayers = [...leaderboard].sort((a, b) => (b.score || 0) - (a.score || 0));
-  const highestScore = sortedPlayers.length > 0 ? sortedPlayers[0].score : 0;
+  // Aggregate players by team
+  const sortedTeams = useMemo(() => {
+    const teamScores = leaderboard.reduce((acc, player) => {
+      const teamName = player.team || "Unknown";
+      if (!acc[teamName]) {
+        acc[teamName] = { team: teamName, score: 0, players: 0 };
+      }
+      acc[teamName].score += (player.score || 0);
+      acc[teamName].players += 1;
+      return acc;
+    }, {});
+    return Object.values(teamScores).sort((a, b) => (b.score || 0) - (a.score || 0));
+  }, [leaderboard]);
+
+  const highestScore = sortedTeams.length > 0 ? sortedTeams[0].score : 0;
 
   return (
     <motion.div
@@ -108,7 +106,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col relative overflow-hidden"
     >
-      {/* Background styling - unified solid color since tug-of-war is gone */}
+      {/* Background styling - unified solid color */}
       <div className="absolute inset-0 bg-[#5D3FD3]" />
 
       {/* Floating decorations */}
@@ -139,42 +137,41 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             textShadow: "4px 4px 0 #000",
           }}
         >
-          {isFinalLeaderboard ? "Final Rankings" : "Leaderboard"}
+          {isFinalLeaderboard ? "Final Team Rankings" : "Team Leaderboard"}
         </motion.h2>
 
         {/* Unified Leaderboard Container */}
-        <div className="flex-1 w-full max-w-4xl flex flex-col bg-zk-yellow border-[4px] border-zk-black rounded-3xl shadow-[8px_8px_0_#000] overflow-hidden">
+        <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-yellow border-[4px] border-zk-black rounded-3xl shadow-[8px_8px_0_#000] overflow-hidden">
           
           {/* Header Row */}
           <div className="flex items-center px-4 py-3 bg-[#FFCD29] border-b-[4px] border-zk-black">
             <div className="w-4 flex-shrink-0" /> {/* Spacer for accent bar */}
             <div className="w-10 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Rank</div>
-            <div className="w-12 flex-shrink-0 ml-4" /> {/* Spacer for avatar */}
-            <div className="flex-1 font-black text-zk-black/60 uppercase tracking-widest text-sm ml-4">Player</div>
-            <div className="w-32 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Team</div>
-            <div className="w-32 text-right font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0 pr-4">Score</div>
+            <div className="flex-1 font-black text-zk-black/60 uppercase tracking-widest text-sm ml-4 pl-4">Team</div>
+            <div className="w-32 text-center font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0">Players</div>
+            <div className="w-40 text-right font-black text-zk-black/60 uppercase tracking-widest text-sm flex-shrink-0 pr-4">Total Score</div>
           </div>
 
-          {/* Player List (Scrollable) */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-            {sortedPlayers.map((player, i) => (
-              <PlayerRow
-                key={player.id || i}
-                player={player}
+          {/* Team List (Scrollable) */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            {sortedTeams.map((teamData, i) => (
+              <TeamRow
+                key={teamData.team || i}
+                teamData={teamData}
                 index={i}
                 highestScore={highestScore}
               />
             ))}
-            {sortedPlayers.length === 0 && (
+            {sortedTeams.length === 0 && (
               <div className="text-center font-black text-zk-black/50 py-10 uppercase">
-                No players found.
+                No teams found.
               </div>
             )}
           </div>
         </div>
 
         {/* Bottom buttons */}
-        <div className="flex justify-center mt-6 flex-shrink-0">
+        <div className="flex justify-center mt-8 flex-shrink-0">
           {!isFinalLeaderboard ? (
             <button
               id="next-after-leaderboard-btn"
