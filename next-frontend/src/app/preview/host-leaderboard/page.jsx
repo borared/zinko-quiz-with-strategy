@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import LeaderboardPhase from '@/components/HostGame/LeaderboardPhase';
+import { battleBackgroundStyle, DEFAULT_LOBBY_SCENERY } from '@/lib/lobbyScenery';
 
 export default function PreviewHostLeaderboard() {
   const mockLeaderboard = [
@@ -13,7 +14,7 @@ export default function PreviewHostLeaderboard() {
   ];
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full min-h-screen relative" style={battleBackgroundStyle(DEFAULT_LOBBY_SCENERY)}>
       <LeaderboardPhase 
         leaderboard={mockLeaderboard}
         isFinalLeaderboard={false}
