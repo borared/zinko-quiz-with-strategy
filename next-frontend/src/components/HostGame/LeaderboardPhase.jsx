@@ -189,7 +189,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="next-after-leaderboard-btn"
               onClick={handleNextQuestion}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue shadow-[4px_4px_0_#000]"
+              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               Next Question <ChevronRight size={22} />
             </button>
@@ -197,7 +197,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="end-game-btn"
               onClick={handleEndGame}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue shadow-[4px_4px_0_#000]"
+              className="bg-[#3B68FF] text-white border-[4px] border-zk-black rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               <Home size={26} /> Home
             </button>
