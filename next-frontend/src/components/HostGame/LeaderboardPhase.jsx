@@ -73,7 +73,7 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
         </div>
 
         {/* Total Score */}
-        <div className="font-black text-4xl w-40 text-right pr-4 tracking-wider" style={{ color: teamColor, WebkitTextStroke: "1.5px #000", textShadow: "2px 2px 0px #000" }}>
+        <div className="text-4xl w-40 text-right pr-4 tracking-wider gasoek-one-regular" style={{ color: teamColor, WebkitTextStroke: "1.5px #000", textShadow: "2px 2px 0px #000" }}>
           {teamData.score?.toLocaleString()}
         </div>
       </div>
