@@ -67,7 +67,7 @@ const PlayerRow = React.memo(({ player, index, highestScore }) => {
         <div className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
           {player.nickname}
           {player.score === highestScore && highestScore > 0 && (
-            <span className="text-2xl" title="MVP">👑</span>
+            <img src="/crown.png" alt="MVP Crown" className="w-8 h-8 object-contain" title="MVP" />
           )}
         </div>
 
