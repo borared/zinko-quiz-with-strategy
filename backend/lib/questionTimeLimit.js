@@ -1,5 +1,4 @@
-const { QUESTION_TIME_SECONDS } = require('./socketUtils');
-
+const QUESTION_TIME_SECONDS = 20;
 const ALLOWED_TIME_LIMITS = [20, 30, 60, 100, 120];
 
 function getQuestionTimeLimit(question) {
@@ -10,5 +9,6 @@ function getQuestionTimeLimit(question) {
 
 module.exports = {
   ALLOWED_TIME_LIMITS,
+  QUESTION_TIME_SECONDS,
   getQuestionTimeLimit,
 };
