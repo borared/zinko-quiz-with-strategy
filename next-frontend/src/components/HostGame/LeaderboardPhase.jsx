@@ -1,7 +1,11 @@
 "use client";
 import React, { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { ChevronRight, Home } from 'lucide-react';
+import profileLottieData from '@/lib/settings-profile-lottie.json';
+
+const Lottie = dynamic(() => import('lottie-react').then((mod) => mod.default), { ssr: false });
 
 const TEAM_COLORS = {
   "A": "#27AE60", // Green
@@ -61,8 +65,13 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="-mt-3 ml-1"
             >
-              <img src="/crown.png" alt="MVP Crown" className="w-16 h-16 object-contain -mt-3 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]" title="Winning Team" />
+              <Lottie 
+                animationData={profileLottieData}
+                className="w-16 h-16 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+                title="Winning Team"
+              />
             </motion.div>
           )}
         </div>
