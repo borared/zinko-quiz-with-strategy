@@ -1,5 +1,8 @@
 # Backend Dockerfile
-FROM node:20-alpine
+FROM node:20-slim
+
+# Install OpenSSL (needed by Prisma)
+RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 
