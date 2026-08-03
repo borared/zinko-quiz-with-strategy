@@ -1,6 +1,5 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
-
-module.exports = function registerMinigameHandlers(io, socket, games) {
+const { getRandomHangmanWord } = require('../hangmanWords');module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── Helper functions ──────────────────────────────────────────────────────
   const triggerMinigameReward = (game, team, pin) => {
     game.phase = 'MINIGAME_REWARD';
@@ -213,6 +212,115 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.skillCharges[team][detail] = (game.skillCharges[team][detail] || 0) + 1;
       
       io.to(pin).emit('game:minigame-reward-claimed', { team, rewardType: 'SKILL_CHARGE', detail });
+    }
+  });
+
+  // ── host:start-minigame-hangman-intro ────────────────────────────────────────
+  socket.on('host:start-minigame-hangman-intro', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_HANGMAN_CATEGORY_PICK';
+    io.to(pin).emit('game:minigame-hangman-category-pick');
+  });
+
+  // ── host:start-minigame-hangman ──────────────────────────────────────────────
+  socket.on('host:start-minigame-hangman', ({ pin, category }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_HANGMAN';
+    const secretObj = getRandomHangmanWord(category);
+    game.hangmanSecret = secretObj.word;
+    game.hangmanHint = secretObj.hint;
+    game.hangmanCategory = category;
+    
+    // Calculate lives
+    const baseLives = Math.max(5, secretObj.word.length + 2);
+    
+    game.hangmanState = {
+      A: { lives: baseLives, guessedLetters: [], isEliminated: false },
+      B: { lives: baseLives, guessedLetters: [], isEliminated: false }
+    };
+    
+    game.playerTeamMap = {};
+    game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
+
+    io.to(pin).emit('game:minigame-hangman-started', { 
+      word: secretObj.word,
+      wordLength: secretObj.word.length,
+      hint: secretObj.hint,
+      category: category,
+      state: game.hangmanState
+    });
+  });
+
+  // ── player:hangman-guess ───────────────────────────────────────────────────
+  socket.on('player:hangman-guess', ({ pin, playerId, letter }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_HANGMAN') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    const teamState = game.hangmanState[team];
+    if (teamState.isEliminated) return;
+
+    const upperLetter = letter.toUpperCase();
+    if (teamState.guessedLetters.includes(upperLetter)) return;
+
+    teamState.guessedLetters.push(upperLetter);
+    const secretWord = game.hangmanSecret;
+
+    let isCorrect = secretWord.includes(upperLetter);
+    if (!isCorrect) {
+      teamState.lives -= 1;
+      if (teamState.lives <= 0) {
+        teamState.isEliminated = true;
+      }
+    }
+
+    const secretLetters = new Set(secretWord.split(''));
+    let hasWon = true;
+    for (const char of secretLetters) {
+      if (!teamState.guessedLetters.includes(char)) {
+        hasWon = false;
+        break;
+      }
+    }
+
+    if (hasWon) {
+      triggerMinigameReward(game, team, pin);
+    } else {
+      if (game.hangmanState.A.isEliminated && game.hangmanState.B.isEliminated) {
+        io.to(pin).emit('game:hangman-progress', {
+          team,
+          lives: teamState.lives,
+          guessedLetters: teamState.guessedLetters,
+          isEliminated: teamState.isEliminated
+        });
+
+        // After a delay to let players see they lost, finish the minigame with no winner
+        setTimeout(() => {
+          if (games.has(pin) && game.phase === 'MINIGAME_HANGMAN') {
+            game.phase = 'MINIGAME_FINISHED_NO_WINNER'; // Keep state clean
+            io.to(pin).emit('game:minigame-finished', { 
+              winnerTeam: null, 
+              spinnerId: null, 
+              spinnerName: "No one",
+              preSelectedRewardId: 'NOTHING'
+            });
+          }
+        }, 3000);
+      } else {
+        io.to(pin).emit('game:hangman-progress', {
+          team,
+          lives: teamState.lives,
+          guessedLetters: teamState.guessedLetters,
+          isEliminated: teamState.isEliminated
+        });
+      }
     }
   });
 
