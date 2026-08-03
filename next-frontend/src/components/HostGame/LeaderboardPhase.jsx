@@ -67,7 +67,12 @@ const PlayerRow = React.memo(({ player, index, highestScore }) => {
         <div className="font-black text-zk-black flex-1 uppercase text-lg truncate text-left flex items-center gap-2">
           {player.nickname}
           {player.score === highestScore && highestScore > 0 && (
-            <img src="/crown.png" alt="MVP Crown" className="w-16 h-16 object-contain -mt-3 ml-1" title="MVP" />
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <img src="/crown.png" alt="MVP Crown" className="w-16 h-16 object-contain -mt-3 ml-1" title="MVP" />
+            </motion.div>
           )}
         </div>
 
