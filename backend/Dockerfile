@@ -12,6 +12,9 @@ COPY backend/package.json backend/package-lock.json* ./backend/
 # Copy shared package
 COPY packages/shared ./packages/shared
 
+# Copy prisma schema for prisma generate
+COPY backend/prisma ./backend/prisma
+
 # Install dependencies
 RUN npm install --workspace=backend
 
