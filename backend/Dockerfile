@@ -23,4 +23,4 @@ COPY backend ./backend
 
 EXPOSE 5000
 
-CMD ["npm", "run", "dev", "--workspace=backend"]
+CMD ["npm", "run", "start", "--workspace=backend"]
