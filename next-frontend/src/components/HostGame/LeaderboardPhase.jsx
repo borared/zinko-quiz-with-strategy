@@ -65,11 +65,11 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="-mt-3 ml-1"
+              className="-mt-4 ml-1"
             >
               <Lottie 
                 animationData={profileLottieData}
-                className="w-16 h-16"
+                className="w-20 h-20"
                 title="Winning Team"
               />
             </motion.div>
