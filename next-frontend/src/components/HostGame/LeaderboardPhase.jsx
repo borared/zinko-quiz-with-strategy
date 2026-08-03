@@ -52,7 +52,7 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
         {/* Team Badge & Crown */}
         <div className="flex-1 flex items-center gap-4 ml-4">
           <div 
-            className="text-white font-black text-xl uppercase tracking-widest px-6 py-2 rounded-xl border-[4px] border-zk-black shadow-[4px_4px_0_#000]"
+            className="text-white font-black text-xl uppercase tracking-widest px-6 py-2 rounded-xl border-[4px] border-zk-black"
             style={{ backgroundColor: teamColor }}
           >
             TEAM {teamData.team}
