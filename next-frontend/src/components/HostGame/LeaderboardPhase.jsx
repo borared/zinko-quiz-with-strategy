@@ -69,7 +69,7 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
             >
               <Lottie 
                 animationData={profileLottieData}
-                className="w-16 h-16 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+                className="w-16 h-16"
                 title="Winning Team"
               />
             </motion.div>
