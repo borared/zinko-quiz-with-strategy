@@ -88,7 +88,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
       <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-3xl mx-auto">
       {/* Hint */}
       {hint && (
-        <div className="bg-zk-blue px-6 py-4 rounded-3xl border-[4px] border-black mb-6 max-w-2xl text-center shadow-[6px_6px_0_#000]">
+        <div className="bg-zk-blue px-6 py-4 rounded-3xl border-[4px] border-black mb-6 max-w-2xl text-center">
           {category && <p className="text-zk-yellow font-bold uppercase tracking-widest text-lg mb-1" style={{ fontFamily: 'var(--font-amatic-sc)' }}>Category: {category}</p>}
           <p className="text-white font-bold text-xl">{hint}</p>
         </div>
