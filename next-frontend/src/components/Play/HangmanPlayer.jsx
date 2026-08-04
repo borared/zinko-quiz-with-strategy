@@ -107,7 +107,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
       {/* Hint */}
       {hint && (
         <div className="bg-zk-blue px-6 py-4 rounded-3xl border-[4px] border-black mb-6 max-w-2xl text-center">
-          {category && <p className="text-zk-yellow font-black text-sm mb-2">Category: {category}</p>}
+          {category && <p className="text-zk-yellow font-black text-2xl mb-2 font-sans">Category: {category}</p>}
           <p className="text-white font-bold text-xl">{hint}</p>
         </div>
       )}
