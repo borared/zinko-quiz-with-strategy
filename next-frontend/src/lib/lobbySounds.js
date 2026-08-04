@@ -1,5 +1,13 @@
 const REACTIONS_BASE = '/audio/reactions';
 
+// Pre-load voices for TTS so high-quality ones are ready when needed
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
+}
+
 /** Unique taunt SFX per quick-reaction emoji (Mixkit, free license). */
 export const EMOJI_SOUND_MAP = {
   '😂': `${REACTIONS_BASE}/laugh.mp3`,
@@ -59,9 +67,24 @@ export function playTextToSpeech(text) {
 
   try {
     const utterance = new SpeechSynthesisUtterance(text);
-    // We can tweak pitch or rate slightly if needed, but defaults are usually fine
-    utterance.rate = 1.05; 
-    utterance.pitch = 1.1; // Slightly higher pitch for a fun "game" vibe
+    
+    // Attempt to grab the most "human-sounding" voice available in the user's browser
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Browsers like Edge/Chrome have high-quality neural/cloud voices that sound very real.
+    // We prioritize those over the default robotic OS voices.
+    const bestVoice = 
+      voices.find(v => v.name.includes('Natural') || v.name.includes('Online')) ||
+      voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+      voices.find(v => v.name.includes('Premium') || v.name.includes('Enhanced')) ||
+      voices.find(v => v.lang === 'en-US');
+
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+    }
+
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.0; 
     window.speechSynthesis.speak(utterance);
   } catch {
     // Fail silently
