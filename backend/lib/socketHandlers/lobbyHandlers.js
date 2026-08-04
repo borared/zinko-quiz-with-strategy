@@ -236,8 +236,9 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       callback({ available: false, message: 'Game not found' });
       return;
     }
-    if (game.players.length >= 8) {
-      callback({ available: false, message: 'Game room is already full (max 8 players)' });
+    const maxPlayers = (game.teams?.length || 2) * 4;
+    if (game.players.length >= maxPlayers) {
+      callback({ available: false, message: `Game room is already full (max ${maxPlayers} players)` });
       return;
     }
     const exists = game.players.some(p => p.nickname.toLowerCase() === nickname.trim().toLowerCase());
