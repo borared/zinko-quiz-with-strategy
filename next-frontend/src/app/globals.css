@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&family=Kantumruy+Pro:wght@100..700&display=swap');
 @import "tailwindcss";
 
 
@@ -19,8 +19,8 @@
 }
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-sans: 'Inter', 'Kantumruy Pro', system-ui, sans-serif;
+  --font-heading: 'Outfit', 'Kantumruy Pro', system-ui, sans-serif;
   
   --color-zk-yellow: var(--zk-yellow);
   --color-zk-blue: var(--zk-blue);
