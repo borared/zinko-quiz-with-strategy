@@ -13,8 +13,7 @@ const {
   buildLineMatchingStats,
 } = require('./lineMatchingUtils');
 
-// Game timer length (seconds)
-const QUESTION_TIME_SECONDS = 20;
+const { getQuestionTimeLimit, QUESTION_TIME_SECONDS } = require('./questionTimeLimit');
 
 // Generate a unique 6-digit PIN for a new game
 function generatePin(games) {
@@ -83,7 +82,7 @@ function buildAnswerStats(game) {
   }));
 }
 
-const { getQuestionTimeLimit } = require('./questionTimeLimit');
+// Imported above
 
 // Start the per-question countdown timer and emit ticks
 function startTimer(io, pin, games) {

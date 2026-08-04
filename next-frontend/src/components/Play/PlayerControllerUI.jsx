@@ -11,6 +11,7 @@ import RabbitRush from './Skills/RabbitRush';
 import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
+import HangmanPlayer from './HangmanPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 import { useGameBackground } from '@/hooks/useGameBackground';
@@ -74,6 +75,34 @@ export default function PlayerControllerUI() {
     );
   }
 
+  if (phase === 'MINIGAME_HANGMAN') {
+    return (
+      <HangmanPlayer 
+        hangmanData={gameState.hangmanData}
+        team={team}
+        onGuess={gameState.handleHangmanGuess}
+        background={background}
+      />
+    );
+  }
+
+  if (phase === 'MINIGAME_HANGMAN_CATEGORY_PICK') {
+    return (
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center p-6 text-center z-20 text-white"
+        style={battleBackgroundStyle(background)}
+      >
+        <div className="absolute inset-0 bg-black/60 z-0" />
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-16 h-16 border-[6px] border-zk-yellow border-t-transparent rounded-full animate-spin mb-6" />
+          <h2 className="text-4xl font-black uppercase tracking-widest mb-4">Host is Choosing</h2>
+          <p className="text-xl font-bold opacity-80">The Host is selecting a Word Category.</p>
+          <p className="text-lg opacity-60 mt-2">Get ready to discuss with your team!</p>
+        </div>
+      </div>
+    );
+  }
+
   if (phase === 'MINIGAME_HIGHER_LOWER') {
     return (
       <HigherLowerPlayer 
@@ -91,6 +120,23 @@ export default function PlayerControllerUI() {
   if (phase === 'MINIGAME_REWARD') {
     const isMe = minigameSpinner.id === playerId;
     
+    if (minigameData.winner && minigameData.winner !== team) {
+      return (
+        <div 
+          className="min-h-screen flex flex-col items-center justify-center p-6 text-center z-20 text-white"
+          style={battleBackgroundStyle(background)}
+        >
+          <div className="absolute inset-0 bg-black/60 z-0" />
+          <div className="relative z-10 flex flex-col items-center">
+            <img src="/images/model_answer/wrong.png" alt="Defeat" className="w-56 h-56 mb-6 drop-shadow-[0_10px_0_rgba(0,0,0,0.5)] animate-bounce" />
+            <h2 className="gasoek-one-regular text-6xl text-zk-red uppercase tracking-widest mb-2 drop-shadow-[0_4px_0_#000]" style={{ WebkitTextStroke: '2px black' }}>DEFEAT</h2>
+            <p className="text-4xl text-white font-bold" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>Team {minigameData.winner} Won!</p>
+            <p className="text-2xl text-white/80 font-bold mt-2" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '1px' }}>Waiting for them to spin...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <RewardWheel 
         pin={pin}
