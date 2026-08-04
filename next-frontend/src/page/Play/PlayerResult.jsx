@@ -20,10 +20,12 @@ export default function PlayerResult() {
   }, []);
 
   return (
-    <LeaderboardPhase 
-      leaderboard={leaderboard} 
-      isFinalLeaderboard={true} 
-      handleEndGame={() => router.push('/')} 
-    />
+    <div className="min-h-screen w-full bg-zk-blue font-sans">
+      <LeaderboardPhase 
+        leaderboard={leaderboard} 
+        isFinalLeaderboard={true} 
+        handleEndGame={() => router.push('/')} 
+      />
+    </div>
   );
 }
