@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useCallback } from 'react';
-import { Heart, HeartCrack, Keyboard } from 'lucide-react';
+import { Heart, HeartCrack, HelpCircle, Skull } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const QWERTY = [
@@ -45,7 +45,47 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 z-20 relative text-white pt-12">
+    <div className="flex-1 flex flex-col items-center p-4 z-20 relative text-white pt-12 bg-zk-blue min-h-[100dvh] overflow-hidden w-full">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-30">
+        {[...Array(15)].map((_, i) => {
+          const isIcon = i % 2 === 0;
+          const letters = ['A', 'E', '?', '!'];
+          const randomLetter = letters[i % letters.length];
+          const size = Math.random() * 40 + 30;
+          return (
+            <motion.div
+              key={i}
+              className="absolute text-white/40 font-black flex items-center justify-center"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                fontSize: `${size}px`,
+                fontFamily: 'var(--font-amatic-sc)'
+              }}
+              animate={{
+                y: [0, -40, 0],
+                rotate: [0, 15, -15, 0],
+                x: [0, 20, -20, 0]
+              }}
+              transition={{
+                duration: Math.random() * 5 + 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: Math.random() * 5
+              }}
+            >
+              {isIcon ? (
+                i % 4 === 0 ? <Skull width={size} height={size} /> : <HelpCircle width={size} height={size} />
+              ) : (
+                randomLetter
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-3xl mx-auto">
       {/* Hint */}
       {hint && (
         <div className="bg-zk-blue px-6 py-4 rounded-3xl border-[4px] border-black mb-6 max-w-2xl text-center shadow-[6px_6px_0_#000]">
@@ -104,6 +144,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
               })}
             </div>
           ))}
+        </div>
         </div>
       </div>
     </div>
