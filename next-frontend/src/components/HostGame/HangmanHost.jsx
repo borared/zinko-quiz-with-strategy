@@ -65,14 +65,14 @@ export default function HangmanHost({ hangmanData }) {
         </h1>
         <div className="mt-4 flex flex-row flex-wrap justify-center items-center gap-4">
           {category && (
-            <div className="text-4xl font-bold text-white uppercase tracking-widest drop-shadow-[0_4px_0_#000] bg-black/70 px-8 h-[54px] inline-flex items-center justify-center rounded-full border-2 border-white" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '4px' }}>
+            <div className="text-4xl font-bold text-white uppercase tracking-widest bg-black/70 px-8 h-[54px] inline-flex items-center justify-center rounded-full border-2 border-white" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '4px' }}>
               {category}
             </div>
           )}
           {hint && (
-            <div className="bg-zk-blue inline-flex flex-row items-center justify-center gap-4 px-8 h-[54px] rounded-full border-[3px] border-black shadow-xl">
+            <div className="bg-zk-blue inline-flex flex-row items-center justify-center gap-4 px-8 h-[54px] rounded-full border-[3px] border-black">
               <span className="bg-black/20 text-white font-black uppercase tracking-widest text-xs px-3 py-1 rounded-full">Hint</span>
-              <span className="text-2xl text-white font-black drop-shadow-sm">{hint}</span>
+              <span className="text-2xl text-white font-black">{hint}</span>
             </div>
           )}
         </div>
