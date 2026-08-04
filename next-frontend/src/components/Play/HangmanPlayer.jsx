@@ -95,7 +95,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
       )}
 
       {/* Lives counter */}
-      <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-4 rounded-full border-[4px] border-black mb-8 shadow-[4px_4px_0_#000]">
+      <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-4 rounded-full border-[4px] border-black mb-8">
         <Heart className="w-8 h-8 text-zk-red fill-zk-red animate-pulse" />
         <span className="font-black text-4xl text-white">{lives}</span>
         <span className="text-white/80 font-bold uppercase tracking-widest" style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '24px' }}>Lives</span>
