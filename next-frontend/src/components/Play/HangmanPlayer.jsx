@@ -47,7 +47,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
   return (
     <div className="flex-1 flex flex-col items-center p-4 z-20 relative text-white pt-12 bg-zk-blue min-h-[100dvh] overflow-hidden w-full">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-30">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {[...Array(15)].map((_, i) => {
           const isIcon = i % 2 === 0;
           const letters = ['A', 'E', '?', '!'];
