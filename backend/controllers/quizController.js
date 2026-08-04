@@ -157,7 +157,7 @@ const createQuiz = async (req, res) => {
     const creator_id = req.user.userId;
 
     const user = await userRepository.getUserSettings(creator_id);
-    const defaultVisibility = user?.settings?.privacy?.defaultQuizVisibility === 'public';
+    const defaultVisibility = user?.settings?.privacy?.defaultQuizVisibility !== 'private';
 
     const quiz = await quizService.createQuiz({
       title,
