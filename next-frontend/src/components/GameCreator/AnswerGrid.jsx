@@ -70,6 +70,8 @@ const AnswerGrid = memo(() => {
               <button onClick={() => document.execCommand('superscript')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">X²</button>
               
               <div className="border-l border-zk-black h-5 rounded-xl"></div>
+              <button onClick={() => insertText('<')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm font-bold rounded">&lt;</button>
+              <button onClick={() => insertText('>')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm font-bold rounded">&gt;</button>
               <button onClick={() => insertText('Ω')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">Ω</button>
               <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">f(x)</button>
             </div>

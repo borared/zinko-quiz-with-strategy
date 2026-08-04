@@ -30,10 +30,16 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
 
   if (isEliminated) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center z-20">
-        <img src="/images/model_answer/miss_answer.png" alt="Eliminated" className="w-48 h-48 mb-6 animate-pulse drop-shadow-[0_10px_0_rgba(0,0,0,0.5)]" />
-        <h2 className="gasoek-one-regular text-6xl text-zk-red uppercase tracking-widest mb-2 drop-shadow-[0_4px_0_#000]" style={{ WebkitTextStroke: '2px black' }}>Eliminated!</h2>
-        <p className="text-3xl text-white font-bold" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>Your team ran out of lives.</p>
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50 bg-zk-black/80 backdrop-blur-sm">
+        <motion.img 
+          src="/images/model_answer/wrong.png" 
+          alt="Eliminated" 
+          className="w-80 h-80 sm:w-96 sm:h-96 mb-8 drop-shadow-[0_20px_0_rgba(0,0,0,0.8)]" 
+          animate={{ y: [0, -20, 0] }}
+          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        />
+        <h2 className="gasoek-one-regular text-7xl text-zk-red uppercase tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '3px black' }}>Eliminated!</h2>
+        <p className="text-4xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '3px' }}>Your team ran out of lives.</p>
       </div>
     );
   }
