@@ -9,8 +9,11 @@ export default function TestHangmanHostPage() {
     category: "Technology",
     state: {
       A: { lives: 6, isEliminated: false },
-      B: { lives: 6, isEliminated: false }
-    }
+      B: { lives: 6, isEliminated: false },
+      C: { lives: 6, isEliminated: false },
+      D: { lives: 6, isEliminated: false }
+    },
+    teams: ['A', 'B', 'C', 'D']
   });
 
   useEffect(() => {

@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import { Heart, Skull } from 'lucide-react';
 
 const TEAM_STYLES = {
-  A: { text: 'text-zk-red', border: 'border-zk-red', bg: 'bg-zk-red/10', fill: 'fill-zk-red' },
-  B: { text: 'text-[#4B9FFF]', border: 'border-[#4B9FFF]/30', bg: 'bg-[#4B9FFF]/10', fill: 'fill-[#4B9FFF]' },
-  C: { text: 'text-zk-green', border: 'border-zk-green/30', bg: 'bg-zk-green/10', fill: 'fill-zk-green' },
-  D: { text: 'text-zk-yellow', border: 'border-zk-yellow/30', bg: 'bg-zk-yellow/10', fill: 'fill-zk-yellow' },
+  A: { text: 'text-zk-red', border: 'border-zk-red', bg: 'bg-black', fill: 'fill-zk-red' },
+  B: { text: 'text-[#4B9FFF]', border: 'border-[#4B9FFF]', bg: 'bg-black', fill: 'fill-[#4B9FFF]' },
+  C: { text: 'text-zk-green', border: 'border-zk-green', bg: 'bg-black', fill: 'fill-zk-green' },
+  D: { text: 'text-zk-yellow', border: 'border-zk-yellow', bg: 'bg-black', fill: 'fill-zk-yellow' },
 };
-const FALLBACK_STYLE = { text: 'text-white', border: 'border-white/30', bg: 'bg-white/10', fill: 'fill-white' };
+const FALLBACK_STYLE = { text: 'text-white', border: 'border-white', bg: 'bg-black', fill: 'fill-white' };
 
 export default function HangmanHost({ hangmanData }) {
   const { wordLength, hint, category, state, teams = ['A', 'B'] } = hangmanData;
