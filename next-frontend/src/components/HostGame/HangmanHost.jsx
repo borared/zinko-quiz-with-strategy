@@ -2,15 +2,22 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Skull } from 'lucide-react';
 
-export default function HangmanHost({ hangmanData }) {
-  const { wordLength, hint, category, state } = hangmanData;
-  const teamA = state?.A || { lives: 0, isEliminated: false };
-  const teamB = state?.B || { lives: 0, isEliminated: false };
+const TEAM_STYLES = {
+  A: { text: 'text-zk-red', border: 'border-zk-red', bg: 'bg-zk-red/10', fill: 'fill-zk-red' },
+  B: { text: 'text-[#4B9FFF]', border: 'border-[#4B9FFF]/30', bg: 'bg-[#4B9FFF]/10', fill: 'fill-[#4B9FFF]' },
+  C: { text: 'text-zk-green', border: 'border-zk-green/30', bg: 'bg-zk-green/10', fill: 'fill-zk-green' },
+  D: { text: 'text-zk-yellow', border: 'border-zk-yellow/30', bg: 'bg-zk-yellow/10', fill: 'fill-zk-yellow' },
+};
+const FALLBACK_STYLE = { text: 'text-white', border: 'border-white/30', bg: 'bg-white/10', fill: 'fill-white' };
 
-  const renderTeam = (teamName, teamData, colorClass, borderClass, bgClass) => {
+export default function HangmanHost({ hangmanData }) {
+  const { wordLength, hint, category, state, teams = ['A', 'B'] } = hangmanData;
+
+  const renderTeam = (teamName, teamData) => {
+    const style = TEAM_STYLES[teamName] || FALLBACK_STYLE;
     return (
-      <div className={`flex-1 flex flex-col items-center justify-center p-8 border-4 ${borderClass} ${bgClass} rounded-2xl relative overflow-hidden shadow-2xl`}>
-        <h2 className={`text-4xl font-black mb-8 ${colorClass} uppercase tracking-widest`}>
+      <div key={teamName} className={`flex-1 min-w-[300px] flex flex-col items-center justify-center p-8 border-4 ${style.border} ${style.bg} rounded-2xl relative overflow-hidden shadow-2xl`}>
+        <h2 className={`text-4xl font-black mb-8 ${style.text} uppercase tracking-widest`}>
           Team {teamName}
         </h2>
         
@@ -20,14 +27,14 @@ export default function HangmanHost({ hangmanData }) {
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col items-center justify-center flex-1"
           >
-            <Skull className={`w-32 h-32 ${colorClass} mb-4 animate-pulse`} />
+            <Skull className={`w-32 h-32 ${style.text} mb-4 animate-pulse`} />
             <h2 className="gasoek-one-regular text-5xl text-white mb-6 text-center drop-shadow-[0_4px_0_#000]">Eliminated</h2>
           </motion.div>
         ) : (
           <>
             <div className="flex items-center justify-center gap-3 mb-8">
               <div className="flex items-center gap-3 bg-white/20 px-6 py-4 rounded-full border-[4px] border-black shadow-[4px_4px_0_#000]">
-                <Heart className={`w-10 h-10 ${teamName === 'A' ? 'text-zk-red fill-zk-red' : 'text-zk-blue fill-zk-blue'} animate-pulse`} />
+                <Heart className={`w-10 h-10 ${style.text} ${style.fill} animate-pulse`} />
                 <span className="text-4xl font-black text-white">{teamData.lives}</span>
                 <span className="text-xl text-white/50 uppercase tracking-widest font-bold">Lives</span>
               </div>
@@ -70,16 +77,19 @@ export default function HangmanHost({ hangmanData }) {
         )}
       </div>
 
-      <div className="flex-1 flex gap-12 max-w-[1400px] w-full mx-auto relative z-10">
-        {renderTeam('A', teamA, 'text-zk-red', 'border-zk-red', 'bg-zk-red/10')}
-        
-        <div className="flex flex-col justify-center items-center px-4">
-          <div className="w-1 h-32 bg-white/20 rounded-full mb-4" />
-          <span className="text-4xl font-black text-white/40 italic">VS</span>
-          <div className="w-1 h-32 bg-white/20 rounded-full mt-4" />
-        </div>
-
-        {renderTeam('B', teamB, 'text-[#4B9FFF]', 'border-[#4B9FFF]/30', 'bg-[#4B9FFF]/10')}
+      <div className="flex-1 flex flex-wrap gap-12 max-w-[1600px] w-full mx-auto justify-center relative z-10 overflow-y-auto pb-8">
+        {teams.map((teamName, index) => (
+          <React.Fragment key={teamName}>
+            {renderTeam(teamName, state?.[teamName] || { lives: 0, isEliminated: false })}
+            {index < teams.length - 1 && teams.length === 2 && (
+              <div className="hidden md:flex flex-col justify-center items-center px-4">
+                <div className="w-1 h-32 bg-white/20 rounded-full mb-4" />
+                <span className="text-4xl font-black text-white/40 italic">VS</span>
+                <div className="w-1 h-32 bg-white/20 rounded-full mt-4" />
+              </div>
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );

@@ -57,24 +57,17 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       return assignments;
     };
 
-    const teamAPlayers = game.players.filter(p => p.team === 'A');
-    const teamBPlayers = game.players.filter(p => p.team === 'B');
-
     game.vaultsToWin = 3;
-    game.teamVaults = {
-      A: { required: generateVaultCode(), cracked: 0 },
-      B: { required: generateVaultCode(), cracked: 0 }
-    };
-    
-    game.playerButtons = {
-      ...assignButtons(teamAPlayers),
-      ...assignButtons(teamBPlayers)
-    };
+    game.teamVaults = {};
+    game.heldColors = {};
+    game.playerButtons = {};
 
-    game.heldColors = {
-      A: new Set(),
-      B: new Set()
-    };
+    game.teams.forEach(team => {
+      game.teamVaults[team] = { required: generateVaultCode(), cracked: 0 };
+      game.heldColors[team] = new Set();
+      const teamPlayers = game.players.filter(p => p.team === team);
+      Object.assign(game.playerButtons, assignButtons(teamPlayers));
+    });
 
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
@@ -94,10 +87,9 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       game.progressUpdatePending = false;
       io.to(pin).emit('game:minigame-progress', {
          teamVaults: game.teamVaults,
-         heldColors: {
-           A: Array.from(game.heldColors.A),
-           B: Array.from(game.heldColors.B)
-         }
+         heldColors: Object.fromEntries(
+           game.teams.map(t => [t, Array.from(game.heldColors[t] || [])])
+         )
       });
     }, 100); // Throttle to 10 fps
   };
@@ -238,10 +230,10 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
     // Calculate lives
     const baseLives = Math.max(5, secretObj.word.length + 2);
     
-    game.hangmanState = {
-      A: { lives: baseLives, guessedLetters: [], isEliminated: false },
-      B: { lives: baseLives, guessedLetters: [], isEliminated: false }
-    };
+    game.hangmanState = {};
+    game.teams.forEach(team => {
+      game.hangmanState[team] = { lives: baseLives, guessedLetters: [], isEliminated: false };
+    });
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
@@ -251,7 +243,8 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       wordLength: secretObj.word.length,
       hint: secretObj.hint,
       category: category,
-      state: game.hangmanState
+      state: game.hangmanState,
+      teams: game.teams
     });
   });
 
@@ -293,7 +286,8 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
     if (hasWon) {
       triggerMinigameReward(game, team, pin);
     } else {
-      if (game.hangmanState.A.isEliminated && game.hangmanState.B.isEliminated) {
+      const allEliminated = game.teams.every(t => game.hangmanState[t]?.isEliminated);
+      if (allEliminated) {
         io.to(pin).emit('game:hangman-progress', {
           team,
           lives: teamState.lives,
@@ -330,7 +324,10 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
     if (!isHostSocket(socket, game)) return;
     
     game.phase = 'MINIGAME_HIGHER_LOWER_PICK';
-    game.secretCodes = { A: null, B: null };
+    game.secretCodes = {};
+    game.teams.forEach(team => {
+      game.secretCodes[team] = null;
+    });
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
@@ -354,14 +351,15 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       game.secretCodes[team] = numericSecret;
       io.to(pin).emit('game:higher-lower-locked-in', { team });
 
-      if (game.secretCodes.A !== null && game.secretCodes.B !== null) {
+      const allLockedIn = game.teams.every(t => game.secretCodes[t] !== null);
+      if (allLockedIn) {
         game.phase = 'MINIGAME_HIGHER_LOWER_COUNTDOWN';
         io.to(pin).emit('game:minigame-higher-lower-countdown-started', {});
 
         setTimeout(() => {
           if (games.has(pin) && game.phase === 'MINIGAME_HIGHER_LOWER_COUNTDOWN') {
             game.phase = 'MINIGAME_HIGHER_LOWER_GUESS';
-            game.currentTurn = Math.random() < 0.5 ? 'A' : 'B';
+            game.currentTurn = game.teams[Math.floor(Math.random() * game.teams.length)];
             io.to(pin).emit('game:minigame-higher-lower-guessing-started', { startingTeam: game.currentTurn });
           }
         }, 3000);
@@ -383,7 +381,9 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
 
     if (game.currentTurn !== team) return;
 
-    const enemyTeam = team === 'A' ? 'B' : 'A';
+    const currentIndex = game.teams.indexOf(team);
+    const nextIndex = (currentIndex + 1) % game.teams.length;
+    const enemyTeam = game.teams[nextIndex];
     const enemySecret = game.secretCodes[enemyTeam];
 
     if (numericGuess === enemySecret) {
