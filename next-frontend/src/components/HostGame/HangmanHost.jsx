@@ -58,7 +58,6 @@ export default function HangmanHost({ hangmanData }) {
 
   return (
     <div className="absolute inset-0 flex flex-col p-8 z-20 overflow-hidden">
-      <img src="/images/model_answer/right.png" alt="Mascot" className="absolute top-0 right-0 w-64 h-64 z-0 opacity-80" />
       
       <div className="text-center mb-6 relative z-10">
         <h1 className="gasoek-one-regular text-7xl text-zk-yellow uppercase tracking-widest drop-shadow-[0_6px_0_#000] stroke-black stroke-2" style={{ WebkitTextStroke: '3px black' }}>

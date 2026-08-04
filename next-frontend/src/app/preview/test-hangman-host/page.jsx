@@ -40,7 +40,10 @@ export default function TestHangmanHostPage() {
   }, []);
 
   return (
-    <div className="w-full h-screen font-sans bg-zk-black">
+    <div 
+      className="w-full h-screen font-sans bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: 'url("https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/city.jpg")' }}
+    >
       <HangmanHost hangmanData={hangmanData} />
     </div>
   );
