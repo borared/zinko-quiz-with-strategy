@@ -16,7 +16,6 @@ export const EMOJI_SOUND_MAP = {
   '👑': `${REACTIONS_BASE}/royal.mp3`,
 };
 
-const DEFAULT_EMOJI_SOUND = EMOJI_SOUND_MAP['😂'];
 
 /** Per-emoji volume tweaks (voiced laughs need a little more punch). */
 const EMOJI_VOLUME_MAP = {
@@ -34,7 +33,7 @@ export function getEmojiReactionSound(message) {
   if (primary && EMOJI_SOUND_MAP[primary]) {
     return EMOJI_SOUND_MAP[primary];
   }
-  return DEFAULT_EMOJI_SOUND;
+  return null;
 }
 
 /** Play the matching mock/taunt sound when an emoji appears on an avatar. */
@@ -43,6 +42,8 @@ export function playEmojiReactionSound(message) {
 
   try {
     const src = getEmojiReactionSound(message);
+    if (!src) return;
+    
     const primary = getPrimaryEmoji(message);
     const clip = new Audio(src);
     clip.volume = EMOJI_VOLUME_MAP[primary] ?? 0.65;
