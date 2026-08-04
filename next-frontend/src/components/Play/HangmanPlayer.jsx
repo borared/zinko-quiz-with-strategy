@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { Heart, HeartCrack, HelpCircle, Skull } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,6 +13,30 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
   const { word, wordLength, hint, category, state } = hangmanData;
   const myState = state[team] || { lives: 0, guessedLetters: [], isEliminated: false };
   const { lives, guessedLetters, isEliminated } = myState;
+  const [mounted, setMounted] = useState(false);
+  const [bgElements, setBgElements] = useState([]);
+
+  useEffect(() => {
+    setMounted(true);
+    const elements = [...Array(15)].map((_, i) => {
+      const isIcon = i % 2 === 0;
+      const letters = ['A', 'E', '?', '!'];
+      const randomLetter = letters[i % letters.length];
+      const size = Math.random() * 40 + 30;
+      return {
+        id: i,
+        isIcon,
+        isSkull: i % 4 === 0,
+        letter: randomLetter,
+        size,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        duration: Math.random() * 5 + 6,
+        delay: Math.random() * 5,
+      };
+    });
+    setBgElements(elements);
+  }, []);
 
   const handleKeyPress = useCallback((key) => {
     if (isEliminated) return;
@@ -48,41 +72,35 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
     <div className="flex-1 flex flex-col items-center p-4 z-20 relative text-white pt-12 bg-zk-blue min-h-[100dvh] overflow-hidden w-full">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {[...Array(15)].map((_, i) => {
-          const isIcon = i % 2 === 0;
-          const letters = ['A', 'E', '?', '!'];
-          const randomLetter = letters[i % letters.length];
-          const size = Math.random() * 40 + 30;
-          return (
-            <motion.div
-              key={i}
-              className="absolute text-white/40 font-black flex items-center justify-center"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                fontSize: `${size}px`,
-                fontFamily: 'var(--font-amatic-sc)'
-              }}
-              animate={{
-                y: [0, -40, 0],
-                rotate: [0, 15, -15, 0],
-                x: [0, 20, -20, 0]
-              }}
-              transition={{
-                duration: Math.random() * 5 + 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: Math.random() * 5
-              }}
-            >
-              {isIcon ? (
-                i % 4 === 0 ? <Skull width={size} height={size} /> : <HelpCircle width={size} height={size} />
-              ) : (
-                randomLetter
-              )}
-            </motion.div>
-          );
-        })}
+        {mounted && bgElements.map((el) => (
+          <motion.div
+            key={el.id}
+            className="absolute text-white/40 font-black flex items-center justify-center"
+            style={{
+              left: el.left,
+              top: el.top,
+              fontSize: `${el.size}px`,
+              fontFamily: 'var(--font-amatic-sc)'
+            }}
+            animate={{
+              y: [0, -40, 0],
+              rotate: [0, 15, -15, 0],
+              x: [0, 20, -20, 0]
+            }}
+            transition={{
+              duration: el.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: el.delay
+            }}
+          >
+            {el.isIcon ? (
+              el.isSkull ? <Skull width={el.size} height={el.size} /> : <HelpCircle width={el.size} height={el.size} />
+            ) : (
+              el.letter
+            )}
+          </motion.div>
+        ))}
       </div>
 
       <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-3xl mx-auto">
