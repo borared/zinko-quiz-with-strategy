@@ -13,7 +13,8 @@ export default function TestHangmanHostPage() {
       C: { lives: 6, isEliminated: false },
       D: { lives: 6, isEliminated: false }
     },
-    teams: ['A', 'B', 'C', 'D']
+    teams: ['A', 'B', 'C', 'D'],
+    teamNames: { A: 'Alpha Squad', B: 'Beta Force' }
   });
 
   useEffect(() => {

@@ -75,7 +75,8 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
     io.to(pin).emit('game:minigame-started', { 
       vaultsToWin: game.vaultsToWin,
       teamVaults: game.teamVaults,
-      playerButtons: game.playerButtons
+      playerButtons: game.playerButtons,
+      teamNames: game.teamNames || {}
     });
   });
 
@@ -244,7 +245,8 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       hint: secretObj.hint,
       category: category,
       state: game.hangmanState,
-      teams: game.teams
+      teams: game.teams,
+      teamNames: game.teamNames || {}
     });
   });
 
@@ -332,7 +334,7 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
-    io.to(pin).emit('game:minigame-higher-lower-started', {});
+    io.to(pin).emit('game:minigame-higher-lower-started', { teamNames: game.teamNames || {} });
   });
 
   // ── player:higher-lower-set-secret ─────────────────────────────────────────

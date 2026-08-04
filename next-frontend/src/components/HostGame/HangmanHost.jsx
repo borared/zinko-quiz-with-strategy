@@ -11,14 +11,14 @@ const TEAM_STYLES = {
 const FALLBACK_STYLE = { text: 'text-white', border: 'border-white', bg: 'bg-black', fill: 'fill-white' };
 
 export default function HangmanHost({ hangmanData }) {
-  const { wordLength, hint, category, state, teams = ['A', 'B'] } = hangmanData;
+  const { wordLength, hint, category, state, teams = ['A', 'B'], teamNames = {} } = hangmanData;
 
   const renderTeam = (teamName, teamData) => {
     const style = TEAM_STYLES[teamName] || FALLBACK_STYLE;
     return (
       <div key={teamName} className={`flex-1 min-w-[300px] flex flex-col items-center justify-center p-8 border-4 ${style.border} ${style.bg} rounded-2xl relative overflow-hidden shadow-2xl`}>
-        <h2 className={`text-4xl font-black mb-8 ${style.text} uppercase tracking-widest`}>
-          Team {teamName}
+        <h2 className={`text-4xl font-black mb-8 ${style.text} tracking-widest`}>
+          {teamNames[teamName] || `Team ${teamName}`}
         </h2>
         
         {teamData.isEliminated ? (
