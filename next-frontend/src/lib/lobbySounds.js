@@ -52,3 +52,18 @@ export function playEmojiReactionSound(message) {
     // Autoplay policies or missing file — fail silently
   }
 }
+
+/** Play text-to-speech for text messages in lobby chat */
+export function playTextToSpeech(text) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+  try {
+    const utterance = new SpeechSynthesisUtterance(text);
+    // We can tweak pitch or rate slightly if needed, but defaults are usually fine
+    utterance.rate = 1.05; 
+    utterance.pitch = 1.1; // Slightly higher pitch for a fun "game" vibe
+    window.speechSynthesis.speak(utterance);
+  } catch {
+    // Fail silently
+  }
+}

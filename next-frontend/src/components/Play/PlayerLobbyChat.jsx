@@ -7,6 +7,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { useSocketStore } from '@/store/useSocketStore';
 import { isEmojiHeavy } from '@/lib/lobbyChatUtils';
 import { getLobbySticker } from '@/lib/lobbyStickers';
+import { playTextToSpeech } from '@/lib/lobbySounds';
 import LobbySticker from '@/components/Play/LobbySticker';
 
 const MESSAGE_MAX = 200;
@@ -103,6 +104,7 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
       if (!isOpenRef.current) {
         setUnread((n) => n + 1);
       }
+      playTextToSpeech(msg.message);
     }
   };
 
