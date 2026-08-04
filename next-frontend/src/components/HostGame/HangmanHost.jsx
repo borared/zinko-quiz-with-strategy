@@ -64,12 +64,12 @@ export default function HangmanHost({ hangmanData }) {
           HANGMAN BATTLE
         </h1>
         {category && (
-          <div className="mt-2 text-4xl font-bold text-white uppercase tracking-widest drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '4px' }}>
+          <div className="mt-2 text-4xl font-bold text-white uppercase tracking-widest drop-shadow-[0_4px_0_#000] bg-black/70 px-8 py-2 rounded-full inline-block border-2 border-white/30" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '4px' }}>
             {category}
           </div>
         )}
         {hint && (
-          <div className="mt-4 bg-zk-blue inline-block px-12 py-4 rounded-full border-[6px] border-black shadow-[8px_8px_0_#000] rotate-1 transform">
+          <div className="mt-4 bg-zk-blue inline-block px-12 py-4 rounded-full border-[6px] border-black shadow-xl rotate-1 transform">
             <p className="text-white/80 font-bold uppercase tracking-widest text-sm mb-1" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>Hint</p>
             <p className="text-3xl text-white font-bold">{hint}</p>
           </div>
