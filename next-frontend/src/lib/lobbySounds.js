@@ -71,16 +71,34 @@ export function playTextToSpeech(text) {
     // Attempt to grab the most "human-sounding" voice available in the user's browser
     const voices = window.speechSynthesis.getVoices();
     
-    // Browsers like Edge/Chrome have high-quality neural/cloud voices that sound very real.
-    // We prioritize those over the default robotic OS voices.
-    const bestVoice = 
-      voices.find(v => v.name.includes('Natural') || v.name.includes('Online')) ||
-      voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
-      voices.find(v => v.name.includes('Premium') || v.name.includes('Enhanced')) ||
-      voices.find(v => v.lang === 'en-US');
+    // Detect if the message contains Khmer text
+    const isKhmer = /[\u1780-\u17FF]/.test(text);
+    
+    let bestVoice = null;
+
+    if (isKhmer) {
+      // Prioritize any available Khmer voice
+      bestVoice = voices.find(v => v.lang.startsWith('km'));
+    }
+
+    if (!bestVoice) {
+      // Browsers like Edge/Chrome have high-quality neural/cloud voices that sound very real.
+      // We prioritize those over the default robotic OS voices for English/General text.
+      bestVoice = 
+        voices.find(v => (v.name.includes('Natural') || v.name.includes('Online')) && v.lang.startsWith('en')) ||
+        voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+        voices.find(v => v.name.includes('Premium') || v.name.includes('Enhanced')) ||
+        voices.find(v => v.lang === 'en-US');
+    }
 
     if (bestVoice) {
       utterance.voice = bestVoice;
+      // If we found a specific voice, set the utterance language to match it
+      utterance.lang = bestVoice.lang;
+    } else if (isKhmer) {
+      // Fallback language tag if no specific voice object was found, 
+      // sometimes helps the OS auto-switch to a downloaded language pack.
+      utterance.lang = 'km-KH';
     }
 
     utterance.rate = 1.0; 
