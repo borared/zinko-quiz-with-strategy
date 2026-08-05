@@ -1,5 +1,7 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
-const { getRandomHangmanWord } = require('../hangmanWords');module.exports = function registerMinigameHandlers(io, socket, games) {
+const { getRandomHangmanWord } = require('../hangmanWords');
+
+module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── Helper functions ──────────────────────────────────────────────────────
   const triggerMinigameReward = (game, team, pin) => {
     game.phase = 'MINIGAME_REWARD';
@@ -394,6 +396,180 @@ const { getRandomHangmanWord } = require('../hangmanWords');module.exports = fun
       game.currentTurn = enemyTeam;
       const status = numericGuess > enemySecret ? 'LOWER' : 'HIGHER';
       io.to(pin).emit('game:higher-lower-feedback', { team, guess: numericGuess, status, playerId, nextTurn: game.currentTurn });
+    }
+  });
+
+  // ── DRAW IT MINIGAME ───────────────────────────────────────────────────────
+  
+  const DRAW_IT_WORDS = [
+    'dog', 'cat', 'car', 'tree', 'house', 'sun', 'moon', 'star', 'fish', 'bird',
+    'apple', 'shoe', 'hat', 'chair', 'table', 'phone', 'book', 'key', 'door', 'window'
+  ];
+
+  socket.on('host:start-minigame-draw-it', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_DRAW_IT';
+    game.drawItRoundsRemaining = 2;
+    game.drawItWinners = new Set();
+    
+    game.playerTeamMap = {};
+    game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
+
+    const word = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
+    game.drawItWord = word;
+
+    io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+    // Host gets the word
+    socket.emit('game:draw-it-round-start', { word, roundsRemaining: game.drawItRoundsRemaining });
+  });
+
+  socket.on('host:draw-it-stroke', ({ pin, stroke }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!isHostSocket(socket, game)) return;
+    // Broadcast stroke to all players
+    socket.broadcast.to(pin).emit('game:draw-it-stroke', { stroke });
+  });
+
+  socket.on('host:draw-it-clear', ({ pin }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!isHostSocket(socket, game)) return;
+    socket.broadcast.to(pin).emit('game:draw-it-clear');
+  });
+
+  socket.on('host:send-secret-word', async ({ pin }) => {
+    try {
+      const game = games.get(pin);
+      if (!game) {
+        socket.emit('game:secret-word-email-failed', { message: 'Game not found.' });
+        return;
+      }
+      if (game.phase !== 'MINIGAME_DRAW_IT') {
+        socket.emit('game:secret-word-email-failed', { message: 'Not in Draw It phase.' });
+        return;
+      }
+      if (!isHostSocket(socket, game)) {
+        socket.emit('game:secret-word-email-failed', { message: 'Unauthorized.' });
+        return;
+      }
+
+      const prisma = require('../prisma');
+      const hostUser = await prisma.users.findUnique({ where: { clerk_id: game.hostUserId } });
+      const email = hostUser?.email;
+      
+      if (!email) {
+        socket.emit('game:secret-word-email-failed', { message: 'No email found for your account.' });
+        return;
+      }
+
+      const nodemailer = require('nodemailer');
+      
+      let transporter;
+      if (process.env.SMTP_HOST) {
+        transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT || 587,
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+      } else {
+        // Mock email if we are stuck on Ethereal creation
+        console.log('Sending mock email (configure SMTP to send real emails).');
+        console.log('Secret word is:', game.drawItWord);
+        socket.emit('game:secret-word-sent');
+        return;
+      }
+
+      const info = await transporter.sendMail({
+        from: '"Zinko Quiz" <noreply@zinko.com>',
+        to: email,
+        subject: 'Your Zinko Secret Word! 🤫',
+        html: `
+          <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+            <h2>Shhh... here is your word to draw:</h2>
+            <div style="font-size: 32px; font-weight: 900; color: #1d4ed8; background: #f3f4f6; padding: 20px; border-radius: 12px; display: inline-block;">
+              ${game.drawItWord}
+            </div>
+            <p style="margin-top: 20px; color: #666;">Don't let anyone else see this!</p>
+          </div>
+        `
+      });
+
+      console.log('Secret word email sent: %s', info.messageId);
+      socket.emit('game:secret-word-sent');
+    } catch (err) {
+      console.error('Failed to send secret word email:', err);
+      socket.emit('game:secret-word-email-failed', { message: 'Internal server error.' });
+    }
+  });
+
+  socket.on('player:draw-it-guess', ({ pin, playerId, guess }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    // Wait 3 seconds before next round/reward queue to show winner
+    if (game.drawItRoundEnding) return;
+
+    if (guess.trim().toLowerCase() === game.drawItWord) {
+      game.drawItRoundEnding = true;
+      game.drawItWinners.add(team);
+      
+      const playerNickname = game.players.find(p => p.id === playerId)?.nickname || 'Someone';
+
+      io.to(pin).emit('game:draw-it-round-winner', { team, nickname: playerNickname, word: game.drawItWord });
+
+      setTimeout(() => {
+        if (!games.has(pin) || game.phase !== 'MINIGAME_DRAW_IT') return;
+        game.drawItRoundEnding = false;
+        game.drawItRoundsRemaining -= 1;
+
+        if (game.drawItRoundsRemaining > 0) {
+          // Start next round
+          const newWord = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
+          game.drawItWord = newWord;
+          io.to(pin).emit('game:draw-it-clear');
+          
+          // Players don't get the word, but they get the signal that round started
+          io.to(pin).emit('game:draw-it-round-start-player'); 
+          
+          // Find host socket and send word
+          // We can just emit to room with word=null, and host receives a special event
+          io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+          // But it's easier to just broadcast to the room, then the host listens to a different event
+        } else {
+          // Both rounds over. Process rewards
+          game.rewardQueue = Array.from(game.drawItWinners);
+          if (game.rewardQueue.length > 0) {
+            const nextTeam = game.rewardQueue.shift();
+            triggerMinigameReward(game, nextTeam, pin);
+          } else {
+            // Nobody won? (Not possible with current unlimited time logic, but just in case)
+            io.to(pin).emit('game:reward-queue-empty');
+          }
+        }
+      }, 4000); // 4 seconds delay to celebrate round win
+    }
+  });
+
+  socket.on('host:process-reward-queue', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    if (game.rewardQueue && game.rewardQueue.length > 0) {
+      const nextTeam = game.rewardQueue.shift();
+      triggerMinigameReward(game, nextTeam, pin);
+    } else {
+      io.to(pin).emit('game:reward-queue-empty');
     }
   });
 };

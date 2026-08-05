@@ -11,6 +11,7 @@ import RabbitRush from './Skills/RabbitRush';
 import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
+import DrawItPlayer from './DrawItPlayer';
 import HangmanPlayer from './HangmanPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
@@ -37,6 +38,8 @@ export default function PlayerControllerUI() {
     
     minigameData,
     higherLowerData,
+    hangmanData,
+    drawItData,
     minigameSpinner,
     isWheelSpinning,
     
@@ -113,6 +116,19 @@ export default function PlayerControllerUI() {
         currentTurn={higherLowerData.currentTurn}
         team={team}
         background={background}
+      />
+    );
+  }
+
+  if (phase === 'MINIGAME_DRAW_IT') {
+    return (
+      <DrawItPlayer 
+        pin={pin}
+        playerId={playerId}
+        winnerTeam={drawItData.winnerTeam}
+        winnerNickname={drawItData.winnerNickname}
+        word={drawItData.word}
+        teamNames={drawItData.teamNames}
       />
     );
   }

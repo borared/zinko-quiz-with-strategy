@@ -30,6 +30,13 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
   const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
+  const [drawItData, setDrawItData] = useState({
+    winnerTeam: null,
+    winnerNickname: null,
+    word: null,
+    teamNames: {}
+  });
+
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -114,6 +121,35 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       }
     };
 
+    const onMinigameDrawItStarted = ({ teamNames }) => {
+      setDrawItData({
+        winnerTeam: null,
+        winnerNickname: null,
+        word: null,
+        teamNames: teamNames || {}
+      });
+      setPhase('MINIGAME_DRAW_IT');
+      setQuestion(null);
+    };
+
+    const onDrawItRoundWinner = ({ team, nickname, word }) => {
+      setDrawItData(prev => ({
+        ...prev,
+        winnerTeam: team,
+        winnerNickname: nickname,
+        word
+      }));
+    };
+
+    const onDrawItRoundStartPlayer = () => {
+      setDrawItData(prev => ({
+        ...prev,
+        winnerTeam: null,
+        winnerNickname: null,
+        word: null
+      }));
+    };
+
     socket.on('game:minigame-started', onMinigameStarted);
     socket.on('game:minigame-progress', onMinigameProgress);
     socket.on('game:minigame-vault-cracked', onMinigameVaultCracked);
@@ -124,9 +160,13 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on('game:minigame-finished', onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
     socket.on("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
-    socket.on("game:minigame-hangman-started", onMinigameHangmanStarted);
+    socket.on('game:minigame-hangman-started', onMinigameHangmanStarted);
     socket.on('game:hangman-progress', onHangmanProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
+    
+    socket.on('game:minigame-draw-it-started', onMinigameDrawItStarted);
+    socket.on('game:draw-it-round-winner', onDrawItRoundWinner);
+    socket.on('game:draw-it-round-start-player', onDrawItRoundStartPlayer);
 
     return () => {
       socket.off('game:minigame-started', onMinigameStarted);
@@ -142,6 +182,10 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off("game:minigame-hangman-started", onMinigameHangmanStarted);
       socket.off('game:hangman-progress', onHangmanProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
+      
+      socket.off('game:minigame-draw-it-started', onMinigameDrawItStarted);
+      socket.off('game:draw-it-round-winner', onDrawItRoundWinner);
+      socket.off('game:draw-it-round-start-player', onDrawItRoundStartPlayer);
     };
   }, [getSocket, setPhase, setQuestion, playerId]);
 
@@ -180,6 +224,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     minigameData,
     higherLowerData,
     hangmanData,
+    drawItData,
     minigameSpinner,
     isWheelSpinning,
     handleHigherLowerGuess,
