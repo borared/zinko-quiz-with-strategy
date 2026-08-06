@@ -454,15 +454,17 @@ const FLOOR_SVG = `
 
 const WALL_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Warm clay brick wall -->
-  <rect x="0" y="0" width="16" height="16" fill="#bb7e54"/>
-  <!-- Horizontal brick divider -->
-  <rect x="0" y="8" width="16" height="1" fill="#6b3f21"/>
-  <!-- Seamless brick highlights -->
-  <rect x="0" y="1" width="16" height="1" fill="#d4a37f" opacity="0.3"/>
-  <!-- Staggered vertical joints -->
-  <rect x="8" y="0" width="1" height="8" fill="#6b3f21"/>
-  <rect x="0" y="8" width="1" height="8" fill="#6b3f21"/>
+  <!-- Warm stone brick base matching reference image -->
+  <rect x="0" y="0" width="16" height="16" fill="#6d5f5a"/>
+  <!-- Mortar joints -->
+  <rect x="0" y="7" width="16" height="1" fill="#483c38"/>
+  <rect x="0" y="15" width="16" height="1" fill="#483c38"/>
+  <!-- Vertical joints (seamless offset) -->
+  <rect x="8" y="0" width="1" height="7" fill="#483c38"/>
+  <rect x="0" y="8" width="1" height="7" fill="#483c38"/>
+  <!-- Highlight edges -->
+  <rect x="0" y="0" width="8" height="1" fill="#8c7b74"/>
+  <rect x="8" y="8" width="8" height="1" fill="#8c7b74"/>
 </svg>
 `;
 
