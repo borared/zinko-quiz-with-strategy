@@ -287,13 +287,13 @@ export default function HubWorld({ onSwitchToClassic }) {
               );
             }
           } else if (item.type === 'player') {
-            // Draw transparent shadow beneath feet (shifted down and darker for visibility)
+            // Draw transparent shadow beneath feet (bigger shadow)
             ctx.beginPath();
             ctx.ellipse(
               p.x + TILE_SIZE / 2,
               p.y + TILE_SIZE - 1,
-              14, // width radius
-              5,  // height radius
+              18, // width radius (larger)
+              6,  // height radius (larger)
               0,
               0,
               2 * Math.PI
