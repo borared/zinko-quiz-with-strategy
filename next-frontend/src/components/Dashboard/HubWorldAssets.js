@@ -21,157 +21,249 @@ const OUTLINE_DEFS = `
   </defs>
 `;
 
-// --- AVATARS (Cute 16x16-style grid characters) ---
+// --- AVATARS (24x24 detailed pixel chibi character modeled on the pink-haired CodeDex character) ---
 
 // South (Down) - Frame 1
 const CHAR_S_1 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <!-- Hair (Brown) -->
-    <rect x="4" y="1" width="8" height="5" fill="#4a3728"/>
-    <rect x="3" y="2" width="10" height="3" fill="#4a3728"/>
-    <!-- Face/Skin -->
-    <rect x="4" y="4" width="8" height="4" fill="#ffd1a9"/>
-    <!-- Eyes -->
-    <rect x="5" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="9" y="5" width="2" height="1" fill="#000000"/>
-    <!-- Cheeks (Blush) -->
-    <rect x="4" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="11" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <!-- Shirt (Zinko Purple) -->
-    <rect x="3" y="8" width="10" height="5" fill="#5D3FD3"/>
-    <rect x="4" y="8" width="8" height="1" fill="#ffd1a9"/>
-    <!-- Pants (Blue) -->
-    <rect x="4" y="13" width="8" height="2" fill="#2d5a88"/>
-    <!-- Shoes -->
-    <rect x="4" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="10" y="15" width="2" height="1" fill="#1b120c"/>
+    <!-- Hair (Purple) -->
+    <rect x="6" y="2" width="12" height="7" fill="#805b80"/>
+    <rect x="5" y="3" width="14" height="5" fill="#805b80"/>
+    <rect x="7" y="1" width="10" height="1" fill="#805b80"/>
+    <rect x="4" y="6" width="3" height="4" fill="#694a69"/> <!-- Hair shading -->
+    <rect x="17" y="6" width="3" height="4" fill="#694a69"/>
+    
+    <!-- Hairband (Green/Teal) -->
+    <rect x="6" y="3" width="12" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="14" height="1" fill="#3b9c7d"/>
+
+    <!-- Head/Skin -->
+    <rect x="7" y="7" width="10" height="7" fill="#ffd1a9"/>
+    <rect x="6" y="9" width="1" height="3" fill="#ffd1a9"/> <!-- Ears -->
+    <rect x="17" y="9" width="1" height="3" fill="#ffd1a9"/>
+
+    <!-- Eyes (Cute big anime eyes) -->
+    <rect x="8" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="13" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="8" y="9" width="1" height="1" fill="#ffffff"/> <!-- Sparkles -->
+    <rect x="13" y="9" width="1" height="1" fill="#ffffff"/>
+    
+    <!-- Blush -->
+    <rect x="7" y="12" width="2" height="1" fill="#ff9999"/>
+    <rect x="15" y="12" width="2" height="1" fill="#ff9999"/>
+
+    <!-- Mouth -->
+    <rect x="11" y="12" width="2" height="1" fill="#c0392b"/>
+
+    <!-- Jacket/Shirt (Red) -->
+    <rect x="5" y="14" width="14" height="6" fill="#c93838"/>
+    <rect x="6" y="14" width="12" height="1" fill="#ffffff"/> <!-- White undershirt colar -->
+    <rect x="9" y="15" width="6" height="5" fill="#a62424"/> <!-- Shadow/pocket details -->
+
+    <!-- Pants (Grey) -->
+    <rect x="7" y="20" width="10" height="3" fill="#374151"/>
+
+    <!-- Shoes (Green/Teal matching headband) -->
+    <rect x="6" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="14" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="6" y="24" width="4" height="1" fill="#111827"/>
+    <rect x="14" y="24" width="4" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
-// South (Down) - Frame 2 (Walking/Leg swap)
+// South (Down) - Frame 2
 const CHAR_S_2 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="4" y="1" width="8" height="5" fill="#4a3728"/>
-    <rect x="3" y="2" width="10" height="3" fill="#4a3728"/>
-    <rect x="4" y="4" width="8" height="4" fill="#ffd1a9"/>
-    <rect x="5" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="9" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="4" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="11" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="3" y="8" width="10" height="5" fill="#5D3FD3"/>
-    <rect x="4" y="8" width="8" height="1" fill="#ffd1a9"/>
-    <rect x="4" y="13" width="8" height="2" fill="#2d5a88"/>
-    <!-- Walking leg offset -->
-    <rect x="5" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="9" y="15" width="2" height="1" fill="#1b120c"/>
+    <rect x="6" y="2" width="12" height="7" fill="#805b80"/>
+    <rect x="5" y="3" width="14" height="5" fill="#805b80"/>
+    <rect x="7" y="1" width="10" height="1" fill="#805b80"/>
+    <rect x="4" y="6" width="3" height="4" fill="#694a69"/>
+    <rect x="17" y="6" width="3" height="4" fill="#694a69"/>
+    <rect x="6" y="3" width="12" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="14" height="1" fill="#3b9c7d"/>
+    <rect x="7" y="7" width="10" height="7" fill="#ffd1a9"/>
+    <rect x="6" y="9" width="1" height="3" fill="#ffd1a9"/>
+    <rect x="17" y="9" width="1" height="3" fill="#ffd1a9"/>
+    <rect x="8" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="13" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="8" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="13" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="7" y="12" width="2" height="1" fill="#ff9999"/>
+    <rect x="15" y="12" width="2" height="1" fill="#ff9999"/>
+    <rect x="11" y="12" width="2" height="1" fill="#c0392b"/>
+    <rect x="5" y="14" width="14" height="6" fill="#c93838"/>
+    <rect x="6" y="14" width="12" height="1" fill="#ffffff"/>
+    <rect x="9" y="15" width="6" height="5" fill="#a62424"/>
+    <rect x="7" y="20" width="10" height="3" fill="#374151"/>
+    <!-- Feet walking swap -->
+    <rect x="7" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="13" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="7" y="24" width="3" height="1" fill="#111827"/>
+    <rect x="13" y="24" width="3" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // North (Up) - Frame 1
 const CHAR_N_1 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="3" y="1" width="10" height="7" fill="#4a3728"/>
-    <rect x="4" y="2" width="8" height="6" fill="#4a3728"/>
-    <!-- Back of shirt -->
-    <rect x="3" y="8" width="10" height="5" fill="#5D3FD3"/>
-    <rect x="4" y="13" width="8" height="2" fill="#2d5a88"/>
-    <rect x="4" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="10" y="15" width="2" height="1" fill="#1b120c"/>
+    <!-- Back of Hair (Purple) -->
+    <rect x="6" y="2" width="12" height="12" fill="#805b80"/>
+    <rect x="5" y="3" width="14" height="10" fill="#805b80"/>
+    <rect x="7" y="1" width="10" height="1" fill="#805b80"/>
+    <rect x="4" y="6" width="3" height="7" fill="#694a69"/>
+    <rect x="17" y="6" width="3" height="7" fill="#694a69"/>
+    <rect x="6" y="3" width="12" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="14" height="1" fill="#3b9c7d"/>
+    
+    <!-- Back of Jacket (Red) -->
+    <rect x="5" y="14" width="14" height="6" fill="#c93838"/>
+    <rect x="8" y="14" width="8" height="6" fill="#a62424"/>
+    <rect x="7" y="20" width="10" height="3" fill="#374151"/>
+    <rect x="6" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="14" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="6" y="24" width="4" height="1" fill="#111827"/>
+    <rect x="14" y="24" width="4" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // North (Up) - Frame 2
 const CHAR_N_2 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="3" y="1" width="10" height="7" fill="#4a3728"/>
-    <rect x="4" y="2" width="8" height="6" fill="#4a3728"/>
-    <rect x="3" y="8" width="10" height="5" fill="#5D3FD3"/>
-    <rect x="4" y="13" width="8" height="2" fill="#2d5a88"/>
-    <rect x="5" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="9" y="15" width="2" height="1" fill="#1b120c"/>
+    <rect x="6" y="2" width="12" height="12" fill="#805b80"/>
+    <rect x="5" y="3" width="14" height="10" fill="#805b80"/>
+    <rect x="7" y="1" width="10" height="1" fill="#805b80"/>
+    <rect x="4" y="6" width="3" height="7" fill="#694a69"/>
+    <rect x="17" y="6" width="3" height="7" fill="#694a69"/>
+    <rect x="6" y="3" width="12" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="14" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="14" width="14" height="6" fill="#c93838"/>
+    <rect x="8" y="14" width="8" height="6" fill="#a62424"/>
+    <rect x="7" y="20" width="10" height="3" fill="#374151"/>
+    <rect x="7" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="13" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="7" y="24" width="3" height="1" fill="#111827"/>
+    <rect x="13" y="24" width="3" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // East (Right) - Frame 1
 const CHAR_E_1 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="4" y="1" width="7" height="6" fill="#4a3728"/>
-    <rect x="5" y="2" width="7" height="4" fill="#4a3728"/>
-    <rect x="5" y="4" width="7" height="4" fill="#ffd1a9"/>
-    <rect x="9" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="10" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="4" y="8" width="8" height="5" fill="#5D3FD3"/>
-    <rect x="5" y="13" width="6" height="2" fill="#2d5a88"/>
-    <rect x="5" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="9" y="15" width="2" height="1" fill="#1b120c"/>
+    <!-- Hair side profile -->
+    <rect x="7" y="2" width="9" height="7" fill="#805b80"/>
+    <rect x="6" y="3" width="11" height="6" fill="#805b80"/>
+    <rect x="8" y="1" width="7" height="1" fill="#805b80"/>
+    <rect x="6" y="3" width="9" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="11" height="1" fill="#3b9c7d"/>
+    
+    <!-- Face side profile -->
+    <rect x="9" y="7" width="7" height="7" fill="#ffd1a9"/>
+    <rect x="14" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="14" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="15" y="12" width="2" height="1" fill="#ff9999"/>
+    
+    <!-- Body profile (Red jacket) -->
+    <rect x="6" y="14" width="10" height="6" fill="#c93838"/>
+    <rect x="8" y="14" width="7" height="6" fill="#a62424"/>
+    <rect x="7" y="20" width="8" height="3" fill="#374151"/>
+    <rect x="7" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="12" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="7" y="24" width="4" height="1" fill="#111827"/>
+    <rect x="12" y="24" width="4" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // East (Right) - Frame 2
 const CHAR_E_2 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="4" y="1" width="7" height="6" fill="#4a3728"/>
-    <rect x="5" y="2" width="7" height="4" fill="#4a3728"/>
-    <rect x="5" y="4" width="7" height="4" fill="#ffd1a9"/>
-    <rect x="9" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="10" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="4" y="8" width="8" height="5" fill="#5D3FD3"/>
-    <rect x="5" y="13" width="6" height="2" fill="#2d5a88"/>
-    <rect x="6" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="8" y="15" width="2" height="1" fill="#1b120c"/>
+    <rect x="7" y="2" width="9" height="7" fill="#805b80"/>
+    <rect x="6" y="3" width="11" height="6" fill="#805b80"/>
+    <rect x="8" y="1" width="7" height="1" fill="#805b80"/>
+    <rect x="6" y="3" width="9" height="1" fill="#3b9c7d"/>
+    <rect x="5" y="4" width="11" height="1" fill="#3b9c7d"/>
+    <rect x="9" y="7" width="7" height="7" fill="#ffd1a9"/>
+    <rect x="14" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="14" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="15" y="12" width="2" height="1" fill="#ff9999"/>
+    <rect x="6" y="14" width="10" height="6" fill="#c93838"/>
+    <rect x="8" y="14" width="7" height="6" fill="#a62424"/>
+    <rect x="7" y="20" width="8" height="3" fill="#374151"/>
+    <rect x="8" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="11" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="8" y="24" width="3" height="1" fill="#111827"/>
+    <rect x="11" y="24" width="3" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // West (Left) - Frame 1
 const CHAR_W_1 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="5" y="1" width="7" height="6" fill="#4a3728"/>
-    <rect x="4" y="2" width="7" height="4" fill="#4a3728"/>
-    <rect x="4" y="4" width="7" height="4" fill="#ffd1a9"/>
-    <rect x="5" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="5" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="4" y="8" width="8" height="5" fill="#5D3FD3"/>
-    <rect x="5" y="13" width="6" height="2" fill="#2d5a88"/>
-    <rect x="5" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="9" y="15" width="2" height="1" fill="#1b120c"/>
+    <!-- Hair side profile -->
+    <rect x="8" y="2" width="9" height="7" fill="#805b80"/>
+    <rect x="7" y="3" width="11" height="6" fill="#805b80"/>
+    <rect x="9" y="1" width="7" height="1" fill="#805b80"/>
+    <rect x="9" y="3" width="9" height="1" fill="#3b9c7d"/>
+    <rect x="8" y="4" width="11" height="1" fill="#3b9c7d"/>
+    
+    <!-- Face side profile -->
+    <rect x="8" y="7" width="7" height="7" fill="#ffd1a9"/>
+    <rect x="7" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="9" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="7" y="12" width="2" height="1" fill="#ff9999"/>
+    
+    <!-- Body profile (Red jacket) -->
+    <rect x="8" y="14" width="10" height="6" fill="#c93838"/>
+    <rect x="9" y="14" width="7" height="6" fill="#a62424"/>
+    <rect x="9" y="20" width="8" height="3" fill="#374151"/>
+    <rect x="8" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="13" y="23" width="4" height="1" fill="#3b9c7d"/>
+    <rect x="8" y="24" width="4" height="1" fill="#111827"/>
+    <rect x="13" y="24" width="4" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
 
 // West (Left) - Frame 2
 const CHAR_W_2 = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" shape-rendering="crispEdges">
   ${OUTLINE_DEFS}
   <g filter="url(#outline)">
-    <rect x="5" y="1" width="7" height="6" fill="#4a3728"/>
-    <rect x="4" y="2" width="7" height="4" fill="#4a3728"/>
-    <rect x="4" y="4" width="7" height="4" fill="#ffd1a9"/>
-    <rect x="5" y="5" width="2" height="1" fill="#000000"/>
-    <rect x="5" y="6" width="1" height="1" fill="#ff7f7f"/>
-    <rect x="4" y="8" width="8" height="5" fill="#5D3FD3"/>
-    <rect x="5" y="13" width="6" height="2" fill="#2d5a88"/>
-    <rect x="6" y="15" width="2" height="1" fill="#1b120c"/>
-    <rect x="8" y="15" width="2" height="1" fill="#1b120c"/>
+    <rect x="8" y="2" width="9" height="7" fill="#805b80"/>
+    <rect x="7" y="3" width="11" height="6" fill="#805b80"/>
+    <rect x="9" y="1" width="7" height="1" fill="#805b80"/>
+    <rect x="9" y="3" width="9" height="1" fill="#3b9c7d"/>
+    <rect x="8" y="4" width="11" height="1" fill="#3b9c7d"/>
+    <rect x="8" y="7" width="7" height="7" fill="#ffd1a9"/>
+    <rect x="7" y="9" width="3" height="3" fill="#000000"/>
+    <rect x="9" y="9" width="1" height="1" fill="#ffffff"/>
+    <rect x="7" y="12" width="2" height="1" fill="#ff9999"/>
+    <rect x="8" y="14" width="10" height="6" fill="#c93838"/>
+    <rect x="9" y="14" width="7" height="6" fill="#a62424"/>
+    <rect x="9" y="20" width="8" height="3" fill="#374151"/>
+    <rect x="10" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="13" y="23" width="3" height="1" fill="#3b9c7d"/>
+    <rect x="10" y="24" width="3" height="1" fill="#111827"/>
+    <rect x="13" y="24" width="3" height="1" fill="#111827"/>
   </g>
 </svg>
 `;
