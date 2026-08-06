@@ -287,6 +287,20 @@ export default function HubWorld({ onSwitchToClassic }) {
               );
             }
           } else if (item.type === 'player') {
+            // Draw transparent shadow beneath feet
+            ctx.beginPath();
+            ctx.ellipse(
+              p.x + TILE_SIZE / 2,
+              p.y + TILE_SIZE - 4,
+              12, // width radius
+              4,  // height radius
+              0,
+              0,
+              2 * Math.PI
+            );
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fill();
+
             const charKey = `${p.dir}${p.animFrame}`;
             const img = images.char[charKey];
             if (img) {
