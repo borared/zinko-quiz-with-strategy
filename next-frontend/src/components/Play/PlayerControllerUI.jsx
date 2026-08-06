@@ -122,14 +122,22 @@ export default function PlayerControllerUI() {
 
   if (phase === 'MINIGAME_DRAW_IT') {
     return (
-      <DrawItPlayer 
-        pin={pin}
-        playerId={playerId}
-        winnerTeam={drawItData.winnerTeam}
-        winnerNickname={drawItData.winnerNickname}
-        word={drawItData.word}
-        teamNames={drawItData.teamNames}
-      />
+      <div 
+        className="min-h-screen flex flex-col relative transition-colors duration-300 p-4"
+        style={battleBackgroundStyle(background)}
+      >
+        <div className="absolute inset-0 bg-black/50 pointer-events-none z-0" />
+        <div className="relative z-10 w-full h-full flex-1">
+          <DrawItPlayer 
+            pin={pin}
+            playerId={playerId}
+            winnerTeam={drawItData.winnerTeam}
+            winnerNickname={drawItData.winnerNickname}
+            word={drawItData.word}
+            teamNames={drawItData.teamNames}
+          />
+        </div>
+      </div>
     );
   }
 
