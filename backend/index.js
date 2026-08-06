@@ -109,6 +109,7 @@ app.use('/api/avatars', require('./routes/avatar'));
 app.use('/api/notifications', require('./routes/notification'));
 app.use('/api/sceneries', require('./routes/scenery'));
 app.use('/api/shop', require('./routes/shop'));
+app.use('/api/social', require('./routes/social'));
 app.use('/api/game', gameRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
