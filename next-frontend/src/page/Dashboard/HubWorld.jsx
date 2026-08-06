@@ -287,18 +287,18 @@ export default function HubWorld({ onSwitchToClassic }) {
               );
             }
           } else if (item.type === 'player') {
-            // Draw transparent shadow beneath feet
+            // Draw transparent shadow beneath feet (shifted down and darker for visibility)
             ctx.beginPath();
             ctx.ellipse(
               p.x + TILE_SIZE / 2,
-              p.y + TILE_SIZE - 4,
-              12, // width radius
-              4,  // height radius
+              p.y + TILE_SIZE - 1,
+              14, // width radius
+              5,  // height radius
               0,
               0,
               2 * Math.PI
             );
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             ctx.fill();
 
             const charKey = `${p.dir}${p.animFrame}`;
