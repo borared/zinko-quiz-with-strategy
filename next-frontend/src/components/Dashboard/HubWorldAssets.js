@@ -439,39 +439,30 @@ const MAILBOX_SVG = `
 
 const FLOOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Warm wood planks matching reference image -->
+  <!-- Warm wood planks -->
   <rect x="0" y="0" width="16" height="16" fill="#bb7f57"/>
-  <!-- Plank lines -->
-  <rect x="0" y="0" width="16" height="1" fill="#5f3922"/>
+  <!-- Seamless horizontal plank dividers -->
   <rect x="0" y="8" width="16" height="1" fill="#5f3922"/>
-  <!-- Vertical offset joints -->
-  <rect x="4" y="1" width="1" height="7" fill="#5f3922"/>
-  <rect x="12" y="9" width="1" height="7" fill="#5f3922"/>
-  <!-- Wood grain highlights -->
-  <rect x="0" y="2" width="6" height="1" fill="#d39e76"/>
-  <rect x="10" y="4" width="4" height="1" fill="#d39e76"/>
-  <rect x="6" y="10" width="8" height="1" fill="#d39e76"/>
-  <rect x="1" y="12" width="3" height="1" fill="#d39e76"/>
-  <!-- Darker knots -->
-  <rect x="14" y="3" width="1" height="1" fill="#8d5433"/>
-  <rect x="3" y="11" width="1" height="1" fill="#8d5433"/>
+  <!-- Seamless highlights -->
+  <rect x="0" y="2" width="16" height="1" fill="#d39e76" opacity="0.4"/>
+  <rect x="0" y="10" width="16" height="1" fill="#d39e76" opacity="0.4"/>
+  <!-- Offsets (staggered to hide grid) -->
+  <rect x="5" y="0" width="1" height="8" fill="#5f3922"/>
+  <rect x="13" y="8" width="1" height="8" fill="#5f3922"/>
 </svg>
 `;
 
 const WALL_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Warm clay brick wall matching reference image -->
+  <!-- Warm clay brick wall -->
   <rect x="0" y="0" width="16" height="16" fill="#bb7e54"/>
-  <!-- Brick mortar lines -->
-  <rect x="0" y="7" width="16" height="1" fill="#6b3f21"/>
-  <rect x="0" y="15" width="16" height="1" fill="#6b3f21"/>
-  <!-- Brick highlights -->
-  <rect x="0" y="0" width="8" height="1" fill="#d4a37f"/>
-  <rect x="8" y="8" width="8" height="1" fill="#d4a37f"/>
-  <!-- Vertical offset mortar lines -->
-  <rect x="8" y="0" width="1" height="7" fill="#6b3f21"/>
-  <rect x="0" y="8" width="1" height="7" fill="#6b3f21"/>
-  <rect x="15" y="8" width="1" height="7" fill="#6b3f21"/>
+  <!-- Horizontal brick divider -->
+  <rect x="0" y="8" width="16" height="1" fill="#6b3f21"/>
+  <!-- Seamless brick highlights -->
+  <rect x="0" y="1" width="16" height="1" fill="#d4a37f" opacity="0.3"/>
+  <!-- Staggered vertical joints -->
+  <rect x="8" y="0" width="1" height="8" fill="#6b3f21"/>
+  <rect x="0" y="8" width="1" height="8" fill="#6b3f21"/>
 </svg>
 `;
 
