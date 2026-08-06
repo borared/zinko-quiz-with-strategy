@@ -439,16 +439,13 @@ const MAILBOX_SVG = `
 
 const FLOOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Warm wood planks -->
+  <!-- Warm wood base -->
   <rect x="0" y="0" width="16" height="16" fill="#bb7f57"/>
-  <!-- Seamless horizontal plank dividers -->
-  <rect x="0" y="8" width="16" height="1" fill="#5f3922"/>
-  <!-- Seamless highlights -->
-  <rect x="0" y="2" width="16" height="1" fill="#d39e76" opacity="0.4"/>
-  <rect x="0" y="10" width="16" height="1" fill="#d39e76" opacity="0.4"/>
-  <!-- Offsets (staggered to hide grid) -->
-  <rect x="5" y="0" width="1" height="8" fill="#5f3922"/>
-  <rect x="13" y="8" width="1" height="8" fill="#5f3922"/>
+  <!-- Soft, blended horizontal wood grain dividers (no harsh dark lines) -->
+  <rect x="0" y="8" width="16" height="1" fill="#a46d46"/>
+  <!-- Soft seamless highlights -->
+  <rect x="0" y="2" width="16" height="1" fill="#d39e76" opacity="0.25"/>
+  <rect x="0" y="10" width="16" height="1" fill="#d39e76" opacity="0.25"/>
 </svg>
 `;
 
