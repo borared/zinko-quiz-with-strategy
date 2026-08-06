@@ -66,7 +66,8 @@ export default function HostGameUI() {
     word: null,
     roundsRemaining: 2,
     winner: null,
-    winnerNickname: null
+    winnerNickname: null,
+    teamNames: {}
   });
 
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
@@ -262,7 +263,8 @@ export default function HostGameUI() {
         word: null,
         roundsRemaining: 2,
         winner: null,
-        winnerNickname: null
+        winnerNickname: null,
+        teamNames: word?.teamNames || arguments[0]?.teamNames || {}
       });
       setIsWheelSpinning(false);
       setPhase("MINIGAME_DRAW_IT");
@@ -560,7 +562,7 @@ export default function HostGameUI() {
             roundsRemaining={drawItData.roundsRemaining}
             winnerTeam={drawItData.winner}
             winnerNickname={drawItData.winnerNickname}
-            teamNames={teams}
+            teamNames={drawItData.teamNames}
             background={background}
           />
         )}
