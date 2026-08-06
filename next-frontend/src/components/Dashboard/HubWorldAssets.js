@@ -437,20 +437,24 @@ const MAILBOX_SVG = `
 </svg>
 `;
 
-// --- FLOOR & WALL TILES ---
 const FLOOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
   <!-- Warm wood planks matching reference image -->
-  <rect x="0" y="0" width="16" height="16" fill="#a0663f"/>
-  <rect x="0" y="7" width="16" height="1" fill="#5f361c"/>
-  <rect x="0" y="15" width="16" height="1" fill="#5f361c"/>
-  <!-- Highlights/grains -->
-  <rect x="0" y="0" width="16" height="1" fill="#c48d62"/>
-  <rect x="0" y="8" width="16" height="1" fill="#c48d62"/>
-  <!-- Plank offsets -->
-  <rect x="8" y="1" width="1" height="6" fill="#5f361c"/>
-  <rect x="4" y="9" width="1" height="6" fill="#5f361c"/>
-  <rect x="12" y="9" width="1" height="6" fill="#5f361c"/>
+  <rect x="0" y="0" width="16" height="16" fill="#bb7f57"/>
+  <!-- Plank lines -->
+  <rect x="0" y="0" width="16" height="1" fill="#5f3922"/>
+  <rect x="0" y="8" width="16" height="1" fill="#5f3922"/>
+  <!-- Vertical offset joints -->
+  <rect x="4" y="1" width="1" height="7" fill="#5f3922"/>
+  <rect x="12" y="9" width="1" height="7" fill="#5f3922"/>
+  <!-- Wood grain highlights -->
+  <rect x="0" y="2" width="6" height="1" fill="#d39e76"/>
+  <rect x="10" y="4" width="4" height="1" fill="#d39e76"/>
+  <rect x="6" y="10" width="8" height="1" fill="#d39e76"/>
+  <rect x="1" y="12" width="3" height="1" fill="#d39e76"/>
+  <!-- Darker knots -->
+  <rect x="14" y="3" width="1" height="1" fill="#8d5433"/>
+  <rect x="3" y="11" width="1" height="1" fill="#8d5433"/>
 </svg>
 `;
 
