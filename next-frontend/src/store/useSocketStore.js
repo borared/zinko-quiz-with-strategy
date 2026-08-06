@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { io } from 'socket.io-client';
 import { clearSceneryAudioOnHostExit } from '@/lib/sceneryAudio';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 export const useSocketStore = create((set, get) => ({
   socket: null,

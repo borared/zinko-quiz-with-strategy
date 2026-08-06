@@ -13,6 +13,15 @@ import { DEFAULT_TIME_LIMIT, normalizeTimeLimit } from '@/lib/timeLimit';
 
 const MC_COLORS = ['bg-[#5D3FD3]', 'bg-[#FF6B4A]', 'bg-[#FF4B4B]', 'bg-[#2D3436]'];
 
+function escapeHtml(unsafe) {
+  return String(unsafe || '')
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function withTimeLimit(question, q) {
   const raw = q.time_limit ?? q.timeLimit ?? q.timeSeconds;
   return {
@@ -65,8 +74,8 @@ function parseAiPairs(q) {
       return { left: '', right: '' };
     })
     .map((pair) => ({
-      left: String(pair.left || '').trim(),
-      right: String(pair.right || '').trim(),
+      left: escapeHtml(String(pair.left || '').trim()),
+      right: escapeHtml(String(pair.right || '').trim()),
     }))
     .filter((pair) => pair.left || pair.right);
 }
@@ -79,14 +88,14 @@ function formatMultipleChoice(q, id, activeRound) {
 
   const filledAnswers = Array.from({ length: 4 }).map((_, i) => ({
     id: String.fromCharCode(65 + i),
-    text: aiChoices[i] || '',
+    text: escapeHtml(aiChoices[i] || ''),
     color: MC_COLORS[i],
     checked: i === correctIndex,
   }));
 
   return withTimeLimit({
     id,
-    text: q.question || q.question_text || '',
+    text: escapeHtml(q.question || q.question_text || ''),
     questionType: QUESTION_TYPES.MULTIPLE_CHOICE,
     answers: filledAnswers,
     image: null,
@@ -100,7 +109,7 @@ function formatTrueFalse(q, id, activeRound) {
 
   return withTimeLimit({
     id,
-    text: q.question || q.question_text || '',
+    text: escapeHtml(q.question || q.question_text || ''),
     questionType: QUESTION_TYPES.TRUE_FALSE,
     answers: createTrueFalseAnswers(correctIsTrue),
     image: null,
@@ -127,7 +136,7 @@ function formatLineMatching(q, id, activeRound) {
 
   return withTimeLimit({
     id,
-    text: q.question || q.question_text || '',
+    text: escapeHtml(q.question || q.question_text || ''),
     questionType: QUESTION_TYPES.LINE_MATCHING,
     answers: pairsToAnswers(pairs),
     image: null,
@@ -138,7 +147,7 @@ function formatLineMatching(q, id, activeRound) {
 function formatDragLayers(q, id, activeRound) {
   const rawSteps = q.steps || q.layers || q.orderedSteps || [];
   const steps = Array.isArray(rawSteps)
-    ? rawSteps.map((step) => String(step).trim()).filter(Boolean)
+    ? rawSteps.map((step) => escapeHtml(String(step).trim())).filter(Boolean)
     : [];
 
   const finalSteps = steps.length >= MIN_DRAG_LAYERS
@@ -154,7 +163,7 @@ function formatDragLayers(q, id, activeRound) {
 
   return withTimeLimit({
     id,
-    text: q.question || q.question_text || '',
+    text: escapeHtml(q.question || q.question_text || ''),
     questionType: QUESTION_TYPES.DRAG_LAYERS,
     answers,
     image: null,

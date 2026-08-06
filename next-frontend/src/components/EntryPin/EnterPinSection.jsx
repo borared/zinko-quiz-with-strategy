@@ -24,6 +24,18 @@ const EnterPinSection = () => {
     setTimeout(() => setIsShaking(false), 500);
   };
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlPin = urlParams.get('pin');
+      if (urlPin && urlPin.length === 6) {
+        setPin(urlPin);
+        validateAndJoin(urlPin);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleInputChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // only allow numbers
     if (value.length <= 6) {
@@ -32,8 +44,12 @@ const EnterPinSection = () => {
     }
   };
 
-  const handleEnter = async () => {
-    const trimmedPin = pin.trim();
+  const handleEnter = () => {
+    validateAndJoin(pin);
+  };
+
+  const validateAndJoin = async (pinToJoin) => {
+    const trimmedPin = pinToJoin.trim();
     if (trimmedPin.length < 6) {
       setError('Please enter a full 6-digit PIN.');
       triggerShake();

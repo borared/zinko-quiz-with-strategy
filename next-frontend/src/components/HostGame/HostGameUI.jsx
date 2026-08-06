@@ -13,6 +13,9 @@ import ResultPhase from "./ResultPhase";
 import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
+import DrawItHost from "./DrawItHost";
+import HangmanHost from "./HangmanHost";
+import HangmanCategoryPicker from "./HangmanCategoryPicker";
 import RewardWheel from "./RewardWheel";
 import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
@@ -50,13 +53,21 @@ export default function HostGameUI() {
   });
 
   const [higherLowerData, setHigherLowerData] = useState({
-    subPhase: null, // 'PICK', 'COUNTDOWN', or 'GUESS'
+    subPhase: 'INTRO', // INTRO -> PICK -> COUNTDOWN -> GUESS
     teamA: { guess: null, status: null, lockedIn: false },
     teamB: { guess: null, status: null, lockedIn: false },
     winner: null,
     spinnerName: "",
     preSelectedRewardId: null,
     currentTurn: null
+  });
+
+  const [drawItData, setDrawItData] = useState({
+    word: null,
+    roundsRemaining: 2,
+    winner: null,
+    winnerNickname: null,
+    teamNames: {}
   });
 
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
@@ -185,10 +196,17 @@ export default function HostGameUI() {
       // Ensure the wheel doesn't auto-spin from a previous game
       setIsWheelSpinning(false);
 
-      // Delay transitioning to the Reward Wheel so the popup has time to display
-      setTimeout(() => {
-        setPhase("MINIGAME_REWARD");
-      }, 4000);
+      if (!winnerTeam) {
+        // Nobody won (both eliminated). Skip reward phase and proceed.
+        setTimeout(() => {
+          getSocket().emit("game:next-question", { pin });
+        }, 3000);
+      } else {
+        // Delay transitioning to the Reward Wheel so the popup has time to display
+        setTimeout(() => {
+          setPhase("MINIGAME_REWARD");
+        }, 4000);
+      }
     };
 
     const onMinigameHigherLowerStarted = () => {
@@ -236,6 +254,60 @@ export default function HostGameUI() {
       setIsWheelSpinning(true);
     };
 
+    const onMinigameHangmanCategoryPick = () => {
+      setPhase("MINIGAME_HANGMAN_CATEGORY_PICK");
+    };
+
+    const onMinigameDrawItStarted = ({ word }) => {
+      setDrawItData({
+        word: null,
+        roundsRemaining: 2,
+        winner: null,
+        winnerNickname: null,
+        teamNames: word?.teamNames || arguments[0]?.teamNames || {}
+      });
+      setIsWheelSpinning(false);
+      setPhase("MINIGAME_DRAW_IT");
+    };
+
+    const onDrawItRoundStart = ({ word, roundsRemaining }) => {
+      setDrawItData(prev => ({
+        ...prev,
+        word,
+        roundsRemaining,
+        winner: null,
+        winnerNickname: null
+      }));
+    };
+
+    const onDrawItRoundWinner = ({ team, nickname }) => {
+      setDrawItData(prev => ({
+        ...prev,
+        winner: team,
+        winnerNickname: nickname
+      }));
+    };
+
+    const onRewardQueueEmpty = () => {
+      getSocket().emit("game:next-question", { pin });
+    };
+
+    const onMinigameHangmanStarted = ({ word, wordLength, hint, category, state }) => {
+      setMinigameData(prev => ({ ...prev, word, wordLength, hint, category, state, winner: null }));
+      setIsWheelSpinning(false);
+      setPhase("MINIGAME_HANGMAN");
+    };
+
+    const onHangmanProgress = ({ team, lives, guessedLetters, isEliminated }) => {
+      setMinigameData(prev => ({
+        ...prev,
+        state: {
+          ...prev.state,
+          [team]: { lives, guessedLetters, isEliminated }
+        }
+      }));
+    };
+
     const onMinigameRewardClaimed = () => {
       // Wait 3 seconds so players can see the reward before moving on automatically
       setTimeout(() => {
@@ -277,8 +349,16 @@ export default function HostGameUI() {
     socket.on("game:minigame-higher-lower-countdown-started", onHigherLowerCountdownStarted);
     socket.on("game:minigame-higher-lower-guessing-started", onMinigameHigherLowerGuessingStarted);
     socket.on("game:higher-lower-feedback", onHigherLowerFeedback);
+    
+    socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
+    socket.on("game:draw-it-round-start", onDrawItRoundStart);
+    socket.on("game:draw-it-round-winner", onDrawItRoundWinner);
+    socket.on("game:reward-queue-empty", onRewardQueueEmpty);
     socket.on("game:minigame-finished", onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
+    socket.on("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
+    socket.on("game:minigame-hangman-started", onMinigameHangmanStarted);
+    socket.on("game:hangman-progress", onHangmanProgress);
     socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
@@ -297,8 +377,16 @@ export default function HostGameUI() {
       socket.off("game:minigame-higher-lower-countdown-started", onHigherLowerCountdownStarted);
       socket.off("game:minigame-higher-lower-guessing-started", onMinigameHigherLowerGuessingStarted);
       socket.off("game:higher-lower-feedback", onHigherLowerFeedback);
+      
+      socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
+      socket.off("game:draw-it-round-start", onDrawItRoundStart);
+      socket.off("game:draw-it-round-winner", onDrawItRoundWinner);
+      socket.off("game:reward-queue-empty", onRewardQueueEmpty);
       socket.off("game:minigame-finished", onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
+      socket.off("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
+      socket.off("game:minigame-hangman-started", onMinigameHangmanStarted);
+      socket.off("game:hangman-progress", onHangmanProgress);
       socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
   }, [getSocket, pin]);
@@ -315,11 +403,11 @@ export default function HostGameUI() {
 
     // If it's the end of Round 1 (assuming 5 questions per round, next index is 5)
     if (question?.index === 4) {
-      getSocket().emit("host:start-minigame", { pin });
+      getSocket().emit("host:start-minigame-hangman-intro", { pin });
     } 
     // If it's the end of Round 2 (next index is 10)
     else if (question?.index === 9) {
-      getSocket().emit("host:start-minigame-higher-lower", { pin });
+      getSocket().emit("host:start-minigame-draw-it", { pin });
     } else {
       getSocket().emit("game:next-question", { pin });
     }
@@ -435,6 +523,18 @@ export default function HostGameUI() {
           />
         )}
 
+        {phase === "MINIGAME_HANGMAN_CATEGORY_PICK" && (
+          <HangmanCategoryPicker 
+            onSelectCategory={(category) => {
+              getSocket().emit("host:start-minigame-hangman", { pin, category });
+            }}
+          />
+        )}
+
+        {phase === "MINIGAME_HANGMAN" && (
+          <HangmanHost hangmanData={minigameData} />
+        )}
+
         {phase === "MINIGAME_RACING" && minigameData.teamVaults && (
           <VaultBreakerHost
             teamVaults={minigameData.teamVaults}
@@ -455,8 +555,21 @@ export default function HostGameUI() {
           />
         )}
 
+        {phase === "MINIGAME_DRAW_IT" && (
+          <DrawItHost 
+            pin={pin}
+            word={drawItData.word}
+            roundsRemaining={drawItData.roundsRemaining}
+            winnerTeam={drawItData.winner}
+            winnerNickname={drawItData.winnerNickname}
+            teamNames={drawItData.teamNames}
+            background={background}
+          />
+        )}
+
         {phase === "MINIGAME_REWARD" && (
           <RewardWheel
+            key={minigameData.spinnerId || minigameData.winner}
             pin={pin}
             winnerTeam={minigameData.winner}
             spinnerName={minigameData.spinnerName}
@@ -464,7 +577,7 @@ export default function HostGameUI() {
             preSelectedRewardId={minigameData.preSelectedRewardId}
             externalSpinTrigger={isWheelSpinning}
             onRewardClaimed={() => {
-              getSocket().emit("game:next-question", { pin });
+              getSocket().emit("host:process-reward-queue", { pin });
             }}
             isHost={true}
           />

@@ -38,7 +38,6 @@ const AiSidebar = ({ isOpen, onClose }) => {
       onClose(); // Auto-close on success
     } catch (err) {
       setError(err.message || 'Failed to generate quiz. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }

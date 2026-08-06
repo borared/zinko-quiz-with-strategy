@@ -78,7 +78,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
   socket.on('game:next-question', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
-    if (game.phase !== 'LEADERBOARD' && game.phase !== 'RESULT' && game.phase !== 'MINIGAME_REWARD') return; // Must be on leaderboard/result to go to next question
+    if (game.phase !== 'LEADERBOARD' && game.phase !== 'RESULT' && game.phase !== 'MINIGAME_REWARD' && game.phase !== 'MINIGAME_FINISHED_NO_WINNER') return; // Must be on leaderboard/result/reward/no-winner to go to next question
 
     const nextIndex = game.currentQuestionIndex + 1;
 

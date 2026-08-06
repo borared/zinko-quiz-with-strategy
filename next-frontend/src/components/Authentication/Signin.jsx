@@ -34,7 +34,7 @@ const Signin = () => {
     await setActive({ session: createdSessionId });
     try {
       const clerkToken = await getToken();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
       const response = await fetch(`${API_URL}/api/auth/token`, {
         method: 'POST',
         headers: {

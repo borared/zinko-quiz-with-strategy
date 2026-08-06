@@ -1,4 +1,46 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
+const { getRandomHangmanWord } = require('../hangmanWords');
+const Groq = require('groq-sdk');
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+
+function getLevenshteinDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+}
+
+async function fetchRelatedWordsForDrawIt(word, game) {
+  if (!groq) return;
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `Give me a comma-separated list of 15 single words that are semantically related, categories, or very close synonyms to the word "${word}". Only output the words separated by commas, nothing else, all lowercase.`
+        }
+      ],
+      model: 'llama3-8b-8192',
+      temperature: 0.5,
+    });
+    const content = response.choices[0]?.message?.content || "";
+    game.drawItRelatedWords = content.split(',').map(w => w.trim().toLowerCase()).filter(w => w.length > 0 && w !== word.toLowerCase());
+  } catch (err) {
+    console.error("Failed to fetch related words from Groq", err);
+  }
+}
 
 module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── Helper functions ──────────────────────────────────────────────────────
@@ -58,24 +100,17 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       return assignments;
     };
 
-    const teamAPlayers = game.players.filter(p => p.team === 'A');
-    const teamBPlayers = game.players.filter(p => p.team === 'B');
-
     game.vaultsToWin = 3;
-    game.teamVaults = {
-      A: { required: generateVaultCode(), cracked: 0 },
-      B: { required: generateVaultCode(), cracked: 0 }
-    };
-    
-    game.playerButtons = {
-      ...assignButtons(teamAPlayers),
-      ...assignButtons(teamBPlayers)
-    };
+    game.teamVaults = {};
+    game.heldColors = {};
+    game.playerButtons = {};
 
-    game.heldColors = {
-      A: new Set(),
-      B: new Set()
-    };
+    game.teams.forEach(team => {
+      game.teamVaults[team] = { required: generateVaultCode(), cracked: 0 };
+      game.heldColors[team] = new Set();
+      const teamPlayers = game.players.filter(p => p.team === team);
+      Object.assign(game.playerButtons, assignButtons(teamPlayers));
+    });
 
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
@@ -83,7 +118,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     io.to(pin).emit('game:minigame-started', { 
       vaultsToWin: game.vaultsToWin,
       teamVaults: game.teamVaults,
-      playerButtons: game.playerButtons
+      playerButtons: game.playerButtons,
+      teamNames: game.teamNames || {}
     });
   });
 
@@ -95,10 +131,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.progressUpdatePending = false;
       io.to(pin).emit('game:minigame-progress', {
          teamVaults: game.teamVaults,
-         heldColors: {
-           A: Array.from(game.heldColors.A),
-           B: Array.from(game.heldColors.B)
-         }
+         heldColors: Object.fromEntries(
+           game.teams.map(t => [t, Array.from(game.heldColors[t] || [])])
+         )
       });
     }, 100); // Throttle to 10 fps
   };
@@ -216,18 +251,133 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     }
   });
 
+  // ── host:start-minigame-hangman-intro ────────────────────────────────────────
+  socket.on('host:start-minigame-hangman-intro', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_HANGMAN_CATEGORY_PICK';
+    io.to(pin).emit('game:minigame-hangman-category-pick');
+  });
+
+  // ── host:start-minigame-hangman ──────────────────────────────────────────────
+  socket.on('host:start-minigame-hangman', ({ pin, category }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_HANGMAN';
+    const secretObj = getRandomHangmanWord(category);
+    game.hangmanSecret = secretObj.word;
+    game.hangmanHint = secretObj.hint;
+    game.hangmanCategory = category;
+    
+    // Calculate lives
+    const baseLives = Math.max(5, secretObj.word.length + 2);
+    
+    game.hangmanState = {};
+    game.teams.forEach(team => {
+      game.hangmanState[team] = { lives: baseLives, guessedLetters: [], isEliminated: false };
+    });
+    
+    game.playerTeamMap = {};
+    game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
+
+    io.to(pin).emit('game:minigame-hangman-started', { 
+      word: secretObj.word,
+      wordLength: secretObj.word.length,
+      hint: secretObj.hint,
+      category: category,
+      state: game.hangmanState,
+      teams: game.teams,
+      teamNames: game.teamNames || {}
+    });
+  });
+
+  // ── player:hangman-guess ───────────────────────────────────────────────────
+  socket.on('player:hangman-guess', ({ pin, playerId, letter }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_HANGMAN') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    const teamState = game.hangmanState[team];
+    if (teamState.isEliminated) return;
+
+    const upperLetter = letter.toUpperCase();
+    if (teamState.guessedLetters.includes(upperLetter)) return;
+
+    teamState.guessedLetters.push(upperLetter);
+    const secretWord = game.hangmanSecret;
+
+    let isCorrect = secretWord.includes(upperLetter);
+    if (!isCorrect) {
+      teamState.lives -= 1;
+      if (teamState.lives <= 0) {
+        teamState.isEliminated = true;
+      }
+    }
+
+    const secretLetters = new Set(secretWord.split(''));
+    let hasWon = true;
+    for (const char of secretLetters) {
+      if (!teamState.guessedLetters.includes(char)) {
+        hasWon = false;
+        break;
+      }
+    }
+
+    if (hasWon) {
+      triggerMinigameReward(game, team, pin);
+    } else {
+      const allEliminated = game.teams.every(t => game.hangmanState[t]?.isEliminated);
+      if (allEliminated) {
+        io.to(pin).emit('game:hangman-progress', {
+          team,
+          lives: teamState.lives,
+          guessedLetters: teamState.guessedLetters,
+          isEliminated: teamState.isEliminated
+        });
+
+        // After a delay to let players see they lost, finish the minigame with no winner
+        setTimeout(() => {
+          if (games.has(pin) && game.phase === 'MINIGAME_HANGMAN') {
+            game.phase = 'MINIGAME_FINISHED_NO_WINNER'; // Keep state clean
+            io.to(pin).emit('game:minigame-finished', { 
+              winnerTeam: null, 
+              spinnerId: null, 
+              spinnerName: "No one",
+              preSelectedRewardId: 'NOTHING'
+            });
+          }
+        }, 3000);
+      } else {
+        io.to(pin).emit('game:hangman-progress', {
+          team,
+          lives: teamState.lives,
+          guessedLetters: teamState.guessedLetters,
+          isEliminated: teamState.isEliminated
+        });
+      }
+    }
+  });
+
   // ── host:start-minigame-higher-lower ─────────────────────────────────────────
   socket.on('host:start-minigame-higher-lower', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
     game.phase = 'MINIGAME_HIGHER_LOWER_PICK';
-    game.secretCodes = { A: null, B: null };
+    game.secretCodes = {};
+    game.teams.forEach(team => {
+      game.secretCodes[team] = null;
+    });
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
-    io.to(pin).emit('game:minigame-higher-lower-started', {});
+    io.to(pin).emit('game:minigame-higher-lower-started', { teamNames: game.teamNames || {} });
   });
 
   // ── player:higher-lower-set-secret ─────────────────────────────────────────
@@ -246,14 +396,15 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.secretCodes[team] = numericSecret;
       io.to(pin).emit('game:higher-lower-locked-in', { team });
 
-      if (game.secretCodes.A !== null && game.secretCodes.B !== null) {
+      const allLockedIn = game.teams.every(t => game.secretCodes[t] !== null);
+      if (allLockedIn) {
         game.phase = 'MINIGAME_HIGHER_LOWER_COUNTDOWN';
         io.to(pin).emit('game:minigame-higher-lower-countdown-started', {});
 
         setTimeout(() => {
           if (games.has(pin) && game.phase === 'MINIGAME_HIGHER_LOWER_COUNTDOWN') {
             game.phase = 'MINIGAME_HIGHER_LOWER_GUESS';
-            game.currentTurn = Math.random() < 0.5 ? 'A' : 'B';
+            game.currentTurn = game.teams[Math.floor(Math.random() * game.teams.length)];
             io.to(pin).emit('game:minigame-higher-lower-guessing-started', { startingTeam: game.currentTurn });
           }
         }, 3000);
@@ -275,7 +426,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     if (game.currentTurn !== team) return;
 
-    const enemyTeam = team === 'A' ? 'B' : 'A';
+    const currentIndex = game.teams.indexOf(team);
+    const nextIndex = (currentIndex + 1) % game.teams.length;
+    const enemyTeam = game.teams[nextIndex];
     const enemySecret = game.secretCodes[enemyTeam];
 
     if (numericGuess === enemySecret) {
@@ -284,6 +437,202 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.currentTurn = enemyTeam;
       const status = numericGuess > enemySecret ? 'LOWER' : 'HIGHER';
       io.to(pin).emit('game:higher-lower-feedback', { team, guess: numericGuess, status, playerId, nextTurn: game.currentTurn });
+    }
+  });
+
+  // ── DRAW IT MINIGAME ───────────────────────────────────────────────────────
+  
+  const DRAW_IT_WORDS = [
+    'dog', 'cat', 'car', 'tree', 'house', 'sun', 'moon', 'star', 'fish', 'bird',
+    'apple', 'shoe', 'hat', 'chair', 'table', 'phone', 'book', 'key', 'door', 'window'
+  ];
+
+  socket.on('host:start-minigame-draw-it', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    game.phase = 'MINIGAME_DRAW_IT';
+    game.drawItRoundsRemaining = 2;
+    game.drawItWinners = new Set();
+    
+    game.playerTeamMap = {};
+    game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
+
+    const word = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
+    game.drawItWord = word;
+    game.drawItRelatedWords = [];
+    
+    // Fetch semantic relations asynchronously
+    fetchRelatedWordsForDrawIt(word, game);
+
+    io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+    // Host gets the word
+    socket.emit('game:draw-it-round-start', { word, roundsRemaining: game.drawItRoundsRemaining });
+  });
+
+  socket.on('host:draw-it-stroke', ({ pin, stroke }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!isHostSocket(socket, game)) return;
+    // Broadcast stroke to all players
+    socket.broadcast.to(pin).emit('game:draw-it-stroke', { stroke });
+  });
+
+  socket.on('host:draw-it-clear', ({ pin }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!isHostSocket(socket, game)) return;
+    socket.broadcast.to(pin).emit('game:draw-it-clear');
+  });
+
+  socket.on('host:send-secret-word', async ({ pin }) => {
+    try {
+      const game = games.get(pin);
+      if (!game) {
+        socket.emit('game:secret-word-email-failed', { message: 'Game not found.' });
+        return;
+      }
+      if (game.phase !== 'MINIGAME_DRAW_IT') {
+        socket.emit('game:secret-word-email-failed', { message: 'Not in Draw It phase.' });
+        return;
+      }
+      if (!isHostSocket(socket, game)) {
+        socket.emit('game:secret-word-email-failed', { message: 'Unauthorized.' });
+        return;
+      }
+      if (!game.drawItWord) {
+        socket.emit('game:secret-word-email-failed', { message: 'Secret word is not ready yet.' });
+        return;
+      }
+      if (!game.hostUserId) {
+        socket.emit('game:secret-word-email-failed', { message: 'Host account not linked to this game.' });
+        return;
+      }
+
+      const prisma = require('../prisma');
+      const { sendSecretWordEmail } = require('../emailService');
+
+      const hostUser = await prisma.users.findUnique({
+        where: { clerk_id: game.hostUserId },
+        select: { email: true },
+      });
+      const email = hostUser?.email?.trim();
+
+      if (!email) {
+        socket.emit('game:secret-word-email-failed', {
+          message: 'No email found for your account. Update your profile email, or use Reveal Word.',
+          word: game.drawItWord,
+        });
+        return;
+      }
+
+      const info = await sendSecretWordEmail({ to: email, word: game.drawItWord });
+      if (info.mocked) {
+        console.log(`[draw-it] SMTP not configured — secret word for ${email}: ${game.drawItWord}`);
+      } else {
+        console.log('Secret word email sent: %s', info.messageId);
+      }
+      socket.emit('game:secret-word-sent', { email });
+    } catch (err) {
+      console.error('Failed to send secret word email:', err);
+      const game = games.get(pin);
+      // Include the word so the host UI can fall back to a private reveal.
+      // Only the host socket receives this event.
+      socket.emit('game:secret-word-email-failed', {
+        message: err?.message || 'Failed to send secret word email.',
+        word: game?.drawItWord || null,
+      });
+    }
+  });
+
+  socket.on('player:draw-it-guess', ({ pin, playerId, guess }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
+    if (!team) return;
+
+    // Wait 3 seconds before next round/reward queue to show winner
+    if (game.drawItRoundEnding) return;
+
+    const normalizedGuess = guess.trim().toLowerCase();
+    const correctWord = (game.drawItWord || "").toLowerCase();
+
+    if (normalizedGuess === correctWord) {
+      game.drawItRoundEnding = true;
+      game.drawItWinners.add(team);
+      
+      const playerNickname = game.players.find(p => p.id === playerId)?.nickname || 'Someone';
+
+      io.to(pin).emit('game:draw-it-round-winner', { team, nickname: playerNickname, word: game.drawItWord });
+
+      setTimeout(() => {
+        if (!games.has(pin) || game.phase !== 'MINIGAME_DRAW_IT') return;
+        game.drawItRoundEnding = false;
+        game.drawItRoundsRemaining -= 1;
+
+        if (game.drawItRoundsRemaining > 0) {
+          // Start next round
+          const newWord = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
+          game.drawItWord = newWord;
+          game.drawItRelatedWords = [];
+          
+          fetchRelatedWordsForDrawIt(newWord, game);
+          
+          io.to(pin).emit('game:draw-it-clear');
+          
+          // Players don't get the word, but they get the signal that round started
+          io.to(pin).emit('game:draw-it-round-start-player'); 
+          
+          // Find host socket and send word
+          // We can just emit to room with word=null, and host receives a special event
+          io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+          // But it's easier to just broadcast to the room, then the host listens to a different event
+        } else {
+          // Both rounds over. Process rewards
+          game.rewardQueue = Array.from(game.drawItWinners);
+          if (game.rewardQueue.length > 0) {
+            const nextTeam = game.rewardQueue.shift();
+            triggerMinigameReward(game, nextTeam, pin);
+          } else {
+            // Nobody won? (Not possible with current unlimited time logic, but just in case)
+            io.to(pin).emit('game:reward-queue-empty');
+          }
+        }
+      }, 4000); // 4 seconds delay to celebrate round win
+    } else {
+      let closenessScore = 0;
+      
+      // 1. Check spelling closeness (Levenshtein)
+      const distance = getLevenshteinDistance(normalizedGuess, correctWord);
+      if (distance === 1 && correctWord.length >= 4) {
+        closenessScore = 90; // Typo (hot)
+      } else if (distance === 2 && correctWord.length >= 6) {
+        closenessScore = 75; // Close typo (warm)
+      }
+      
+      // 2. Check semantic closeness if not already close by spelling
+      if (closenessScore === 0 && game.drawItRelatedWords?.includes(normalizedGuess)) {
+        closenessScore = 70; // Semantic relation (warm)
+      }
+
+      if (closenessScore > 0) {
+        // Send feedback to the specific player only
+        socket.emit('game:draw-it-guess-feedback', { score: closenessScore, guess: normalizedGuess });
+      }
+    }
+  });
+
+  socket.on('host:process-reward-queue', ({ pin }) => {
+    const game = games.get(pin);
+    if (!isHostSocket(socket, game)) return;
+    
+    if (game.rewardQueue && game.rewardQueue.length > 0) {
+      const nextTeam = game.rewardQueue.shift();
+      triggerMinigameReward(game, nextTeam, pin);
+    } else {
+      io.to(pin).emit('game:reward-queue-empty');
     }
   });
 };

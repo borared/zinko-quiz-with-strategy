@@ -59,6 +59,11 @@ export default function QuestionPrompt({
           }`}
         >
           <div className="flex flex-col h-auto w-full gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto">
+            {question.imageUrl && (
+              <div className="w-full max-w-sm mx-auto rounded-lg overflow-hidden border-[3px] border-zk-black bg-gray-100 shrink-0 mb-1">
+                <img src={question.imageUrl} alt="Question" className="w-full max-h-[15vh] object-contain" />
+              </div>
+            )}
             <p className="text-zk-black font-black text-lg sm:text-xl lg:text-2xl leading-tight text-center shrink-0">
               {question.questionText}
             </p>
@@ -86,6 +91,11 @@ export default function QuestionPrompt({
           animate={{ opacity: 1, y: 0 }}
           className="w-full bg-white rounded-2xl p-5 border-[4px] border-zk-black text-center"
         >
+          {question.imageUrl && (
+            <div className="w-full max-w-sm mx-auto rounded-xl overflow-hidden border-[3px] border-zk-black bg-gray-100 mb-3">
+              <img src={question.imageUrl} alt="Question" className="w-full max-h-[25vh] object-contain" />
+            </div>
+          )}
           <p className="text-zk-black font-black text-xl lg:text-2xl leading-tight">
             {question.questionText}
           </p>
