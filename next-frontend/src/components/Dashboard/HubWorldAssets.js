@@ -440,25 +440,34 @@ const MAILBOX_SVG = `
 // --- FLOOR & WALL TILES ---
 const FLOOR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Light Wood Planks -->
-  <rect x="0" y="0" width="16" height="16" fill="#dfc09f"/>
-  <rect x="0" y="7" width="16" height="1" fill="#bfa182"/>
-  <rect x="0" y="15" width="16" height="1" fill="#bfa182"/>
-  <rect x="8" y="0" width="1" height="7" fill="#bfa182"/>
-  <rect x="4" y="7" width="1" height="8" fill="#bfa182"/>
-  <rect x="12" y="7" width="1" height="8" fill="#bfa182"/>
+  <!-- Warm wood planks matching reference image -->
+  <rect x="0" y="0" width="16" height="16" fill="#a0663f"/>
+  <rect x="0" y="7" width="16" height="1" fill="#5f361c"/>
+  <rect x="0" y="15" width="16" height="1" fill="#5f361c"/>
+  <!-- Highlights/grains -->
+  <rect x="0" y="0" width="16" height="1" fill="#c48d62"/>
+  <rect x="0" y="8" width="16" height="1" fill="#c48d62"/>
+  <!-- Plank offsets -->
+  <rect x="8" y="1" width="1" height="6" fill="#5f361c"/>
+  <rect x="4" y="9" width="1" height="6" fill="#5f361c"/>
+  <rect x="12" y="9" width="1" height="6" fill="#5f361c"/>
 </svg>
 `;
 
 const WALL_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges">
-  <!-- Cozy Blue Bricks -->
-  <rect x="0" y="0" width="16" height="16" fill="#2d3748"/>
-  <rect x="0" y="7" width="16" height="2" fill="#1a202c"/>
-  <rect x="0" y="15" width="16" height="1" fill="#1a202c"/>
-  <rect x="8" y="0" width="2" height="7" fill="#1a202c"/>
-  <rect x="4" y="8" width="2" height="7" fill="#1a202c"/>
-  <rect x="12" y="8" width="2" height="7" fill="#1a202c"/>
+  <!-- Warm clay brick wall matching reference image -->
+  <rect x="0" y="0" width="16" height="16" fill="#bb7e54"/>
+  <!-- Brick mortar lines -->
+  <rect x="0" y="7" width="16" height="1" fill="#6b3f21"/>
+  <rect x="0" y="15" width="16" height="1" fill="#6b3f21"/>
+  <!-- Brick highlights -->
+  <rect x="0" y="0" width="8" height="1" fill="#d4a37f"/>
+  <rect x="8" y="8" width="8" height="1" fill="#d4a37f"/>
+  <!-- Vertical offset mortar lines -->
+  <rect x="8" y="0" width="1" height="7" fill="#6b3f21"/>
+  <rect x="0" y="8" width="1" height="7" fill="#6b3f21"/>
+  <rect x="15" y="8" width="1" height="7" fill="#6b3f21"/>
 </svg>
 `;
 
