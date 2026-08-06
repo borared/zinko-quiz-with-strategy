@@ -325,7 +325,7 @@ export default function HubWorld({ onSwitchToClassic }) {
       </div>
 
       {/* Main Canvas Frame */}
-      <div className="relative border-[4px] border-zk-black rounded-2xl overflow-hidden bg-[#2d3748] shadow-[8px_8px_0_0_#000]">
+      <div className="relative border-[4px] border-zk-black rounded-2xl overflow-hidden bg-[#2d3748] !shadow-none">
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -335,7 +335,7 @@ export default function HubWorld({ onSwitchToClassic }) {
 
         {/* Floating Interaction Prompt */}
         {nearInteraction && (
-          <div className="absolute left-1/2 bottom-8 -translate-x-1/2 bg-zk-yellow border-[3px] border-zk-black rounded-2xl px-4 py-2 font-['Outfit'] font-bold text-zk-black text-sm flex items-center gap-2 animate-bounce z-20 shadow-[4px_4px_0_0_#000]">
+          <div className="absolute left-1/2 bottom-8 -translate-x-1/2 bg-zk-yellow border-[3px] border-zk-black rounded-2xl px-4 py-2 font-['Outfit'] font-bold text-zk-black text-sm flex items-center gap-2 animate-bounce z-20 !shadow-none">
             <Keyboard size={16} />
             {nearInteraction.label}
           </div>
