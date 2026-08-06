@@ -1,5 +1,46 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
 const { getRandomHangmanWord } = require('../hangmanWords');
+const Groq = require('groq-sdk');
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+
+function getLevenshteinDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+}
+
+async function fetchRelatedWordsForDrawIt(word, game) {
+  if (!groq) return;
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `Give me a comma-separated list of 15 single words that are semantically related, categories, or very close synonyms to the word "${word}". Only output the words separated by commas, nothing else, all lowercase.`
+        }
+      ],
+      model: 'llama3-8b-8192',
+      temperature: 0.5,
+    });
+    const content = response.choices[0]?.message?.content || "";
+    game.drawItRelatedWords = content.split(',').map(w => w.trim().toLowerCase()).filter(w => w.length > 0 && w !== word.toLowerCase());
+  } catch (err) {
+    console.error("Failed to fetch related words from Groq", err);
+  }
+}
 
 module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── Helper functions ──────────────────────────────────────────────────────
@@ -419,6 +460,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     const word = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
     game.drawItWord = word;
+    game.drawItRelatedWords = [];
+    
+    // Fetch semantic relations asynchronously
+    fetchRelatedWordsForDrawIt(word, game);
 
     io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
     // Host gets the word
@@ -520,7 +565,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     // Wait 3 seconds before next round/reward queue to show winner
     if (game.drawItRoundEnding) return;
 
-    if (guess.trim().toLowerCase() === game.drawItWord) {
+    const normalizedGuess = guess.trim().toLowerCase();
+    const correctWord = (game.drawItWord || "").toLowerCase();
+
+    if (normalizedGuess === correctWord) {
       game.drawItRoundEnding = true;
       game.drawItWinners.add(team);
       
@@ -537,6 +585,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
           // Start next round
           const newWord = DRAW_IT_WORDS[Math.floor(Math.random() * DRAW_IT_WORDS.length)];
           game.drawItWord = newWord;
+          game.drawItRelatedWords = [];
+          
+          fetchRelatedWordsForDrawIt(newWord, game);
+          
           io.to(pin).emit('game:draw-it-clear');
           
           // Players don't get the word, but they get the signal that round started
@@ -558,6 +610,26 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
           }
         }
       }, 4000); // 4 seconds delay to celebrate round win
+    } else {
+      let closenessScore = 0;
+      
+      // 1. Check spelling closeness (Levenshtein)
+      const distance = getLevenshteinDistance(normalizedGuess, correctWord);
+      if (distance === 1 && correctWord.length >= 4) {
+        closenessScore = 90; // Typo (hot)
+      } else if (distance === 2 && correctWord.length >= 6) {
+        closenessScore = 75; // Close typo (warm)
+      }
+      
+      // 2. Check semantic closeness if not already close by spelling
+      if (closenessScore === 0 && game.drawItRelatedWords?.includes(normalizedGuess)) {
+        closenessScore = 70; // Semantic relation (warm)
+      }
+
+      if (closenessScore > 0) {
+        // Send feedback to the specific player only
+        socket.emit('game:draw-it-guess-feedback', { score: closenessScore, guess: normalizedGuess });
+      }
     }
   });
 

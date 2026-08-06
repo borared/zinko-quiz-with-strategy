@@ -2,14 +2,27 @@
 import DrawItPlayer from "@/components/Play/DrawItPlayer";
 import { useState } from "react";
 
+import { useSocketStore } from "@/store/useSocketStore";
+
 export default function TestDrawItPlayer() {
   const [winner, setWinner] = useState(null);
   
+  const triggerMockFeedback = (score, guess) => {
+    // This is a hacky but effective way to trigger the socket listener manually in the preview
+    const listeners = useSocketStore.getState().getSocket()?._callbacks?.['$game:draw-it-guess-feedback'];
+    if (listeners) {
+      listeners.forEach(cb => cb({ score, guess }));
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-zk-blue p-4 relative">
-      <div className="absolute top-4 right-4 z-[100] flex gap-2">
+      <div className="absolute top-4 right-4 z-[100] flex flex-col gap-2">
         <button onClick={() => setWinner("A")} className="bg-white p-2 rounded border-2 border-black font-bold">Team A Wins</button>
         <button onClick={() => setWinner(null)} className="bg-white p-2 rounded border-2 border-black font-bold">Reset Winner</button>
+        <div className="h-4"></div>
+        <button onClick={() => triggerMockFeedback(70, "animal")} className="bg-orange-400 p-2 rounded border-2 border-black font-bold text-white">Mock Warm (70%)</button>
+        <button onClick={() => triggerMockFeedback(90, "dig")} className="bg-red-500 p-2 rounded border-2 border-black font-bold text-white">Mock Hot (90%)</button>
       </div>
       <DrawItPlayer 
         pin="TEST_PIN" 

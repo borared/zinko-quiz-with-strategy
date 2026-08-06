@@ -8,6 +8,8 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
   const { getSocket, isConnected } = useSocketStore();
   const [guess, setGuess] = useState("");
   const [hasGuessedCorrectly, setHasGuessedCorrectly] = useState(false);
+  const [closenessScore, setClosenessScore] = useState(0);
+  const [lastGuess, setLastGuess] = useState("");
 
   // Handle resizing of canvas
   useEffect(() => {
@@ -55,16 +57,26 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
       onClear();
       setHasGuessedCorrectly(false);
       setGuess("");
+      setClosenessScore(0);
+      setLastGuess("");
+    };
+
+    const onGuessFeedback = ({ score, guess: evaluatedGuess }) => {
+      setClosenessScore(score);
+      setLastGuess(evaluatedGuess);
+      setTimeout(() => setClosenessScore(0), 4000);
     };
 
     socket.on('game:draw-it-stroke', onStroke);
     socket.on('game:draw-it-clear', onClear);
     socket.on('game:draw-it-round-start-player', onRoundStart);
+    socket.on('game:draw-it-guess-feedback', onGuessFeedback);
 
     return () => {
       socket.off('game:draw-it-stroke', onStroke);
       socket.off('game:draw-it-clear', onClear);
       socket.off('game:draw-it-round-start-player', onRoundStart);
+      socket.off('game:draw-it-guess-feedback', onGuessFeedback);
     };
   }, [getSocket, isConnected]);
 
@@ -80,7 +92,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
   };
 
   return (
-    <div className="relative w-full h-full min-h-[400px] flex flex-col pt-4">
+    <div className="relative w-full h-full min-h-[400px] flex flex-col p-4 sm:p-6">
       
       {/* Title */}
       <h2 
@@ -91,7 +103,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
       </h2>
 
       {/* Canvas Container */}
-      <div className="relative w-full flex-1 max-h-[500px] bg-white border-[4px] border-[#000000] rounded-xl shadow-[6px_6px_0_0_#000] overflow-hidden">
+      <div className="relative w-full flex-1 max-h-[500px] bg-white border-[4px] border-[#000000] rounded-xl overflow-hidden">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
@@ -142,6 +154,33 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
           </button>
         </form>
       </div>
+
+      {/* Closeness Progress Bar */}
+      <AnimatePresence>
+        {closenessScore > 0 && !winnerTeam && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: 10 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: 10 }}
+            className="mb-2 px-1"
+          >
+            <div className="flex justify-between items-end mb-1">
+              <span className="text-white font-bold text-sm uppercase tracking-wide drop-shadow-md">
+                "{lastGuess}" is {closenessScore >= 90 ? 'very close!' : 'getting warm...'}
+              </span>
+              <span className="text-white font-black text-sm drop-shadow-md">{closenessScore}%</span>
+            </div>
+            <div className="w-full bg-black/40 rounded-full h-3 border-2 border-[#000000] overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${closenessScore}%` }}
+                className={`h-full ${closenessScore >= 90 ? 'bg-[#ff3b3b]' : closenessScore >= 70 ? 'bg-[#ff9d00]' : 'bg-[#00c3ff]'}`}
+                transition={{ type: "spring", stiffness: 50 }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
