@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Eraser, Pen, Mail, Send, CheckCircle2, XCircle } from 'lucide-react';
+import { Trash2, Eraser, Pen, Mail, Send, CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react';
 import { useSocketStore } from '@/store/useSocketStore';
 
 export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, winnerNickname, teamNames, background }) {
@@ -15,6 +15,13 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, clickX: 0, clickY: 0 });
   const [activeToolbarSlider, setActiveToolbarSlider] = useState(null);
   const [emailStatus, setEmailStatus] = useState({ show: false, status: 'sending', message: 'Sending word to your email...' });
+  const [secretWord, setSecretWord] = useState(word || null);
+  const [showWordReveal, setShowWordReveal] = useState(false);
+
+  useEffect(() => {
+    setSecretWord(word || null);
+    setShowWordReveal(false);
+  }, [word]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -27,7 +34,14 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
     }
 
     const handleSent = () => setEmailStatus({ show: true, status: 'success', message: 'Secret word sent to your email! 🤫' });
-    const handleFailed = ({ message }) => setEmailStatus({ show: true, status: 'error', message: message || 'Failed to send email.' });
+    const handleFailed = ({ message, word: fallbackWord }) => {
+      if (fallbackWord) setSecretWord(fallbackWord);
+      setEmailStatus({
+        show: true,
+        status: 'error',
+        message: message || 'Failed to send email. Use Reveal Word instead.',
+      });
+    };
 
     socket.on('game:secret-word-sent', handleSent);
     socket.on('game:secret-word-email-failed', handleFailed);
@@ -37,7 +51,6 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
       socket.off('game:secret-word-email-failed', handleFailed);
     };
   }, [word, pin, getSocket, isConnected]);
-
   // Hide the toast after 5 seconds
   useEffect(() => {
     if (emailStatus.show && emailStatus.status !== 'sending') {
@@ -200,13 +213,15 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
           <h2 className="font-black text-2xl">Draw It - Round {currentRound}/2</h2>
         </div>
         
-        <div className="bg-zk-yellow border-[4px] border-[#000000] rounded-xl px-6 py-2 flex items-center gap-4">
+        <div className="bg-zk-yellow border-[4px] border-[#000000] rounded-xl px-4 sm:px-6 py-2 flex flex-wrap items-center gap-3">
           <Mail size={24} className="text-black" />
-          <span className="font-black text-xl">Word sent to your Email</span>
+          <span className="font-black text-lg sm:text-xl">
+            {emailStatus.status === 'error' ? 'Email failed — reveal word privately' : 'Word sent to your Email'}
+          </span>
           <button 
             onClick={() => {
               setEmailStatus({ show: true, status: 'sending', message: 'Sending word to your email...' });
-              getSocket().emit('host:send-secret-word', { pin });
+              getSocket()?.emit('host:send-secret-word', { pin });
             }}
             disabled={emailStatus.status === 'sending'}
             className="flex items-center gap-2 font-black text-sm bg-white px-4 py-2 rounded border-[3px] border-black cursor-pointer transition-all hover:bg-gray-100 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
@@ -214,8 +229,16 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
           >
             <Send size={16} /> RESEND
           </button>
-        </div>
-      </div>
+          <button
+            onClick={() => setShowWordReveal((prev) => !prev)}
+            disabled={!secretWord}
+            className="flex items-center gap-2 font-black text-sm bg-zk-blue text-white px-4 py-2 rounded border-[3px] border-black cursor-pointer transition-all hover:brightness-110 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
+            title="Privately reveal the secret word on this screen only"
+          >
+            {showWordReveal ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showWordReveal ? 'HIDE WORD' : 'REVEAL WORD'}
+          </button>
+        </div>      </div>
 
       {/* Canvas Area */}
       <div className="relative z-10 w-full flex-1 bg-white border-[6px] border-[#000000] rounded-2xl overflow-hidden flex flex-col">
@@ -402,6 +425,34 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
         )}
       </AnimatePresence>
 
+      {/* Private word reveal — host-only overlay (tap to hide quickly if audience is nearby) */}
+      <AnimatePresence>
+        {showWordReveal && secretWord && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="absolute inset-0 z-[180] flex items-center justify-center bg-black/90 p-6"
+            onClick={() => setShowWordReveal(false)}
+          >
+            <div
+              className="bg-white border-[6px] border-black rounded-2xl px-10 py-8 text-center shadow-[8px_8px_0px_#000] max-w-lg w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="font-black uppercase tracking-widest text-sm text-gray-500 mb-3">Secret word (host only)</p>
+              <p className="font-black text-5xl sm:text-6xl text-zk-blue break-words">{secretWord}</p>
+              <p className="mt-4 text-sm font-bold text-gray-500">Tap outside or press Hide Word so players cannot see it.</p>
+              <button
+                onClick={() => setShowWordReveal(false)}
+                className="mt-6 inline-flex items-center gap-2 font-black text-sm bg-zk-yellow px-5 py-2 rounded border-[3px] border-black hover:brightness-105 active:translate-y-1"
+              >
+                <EyeOff size={16} /> HIDE WORD
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Snackbar Toast for Email Status */}
       <AnimatePresence>
         {emailStatus.show && (
@@ -409,7 +460,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-[200] border-[3px] border-black rounded-xl px-6 py-3 flex items-center gap-3 shadow-[4px_4px_0px_#000] ${
+            className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-[200] border-[3px] border-black rounded-xl px-6 py-3 flex items-center gap-3 shadow-[4px_4px_0px_#000] max-w-[90vw] ${
               emailStatus.status === 'success' ? 'bg-green-400 text-black' :
               emailStatus.status === 'error' ? 'bg-red-500 text-white' :
               'bg-white text-black'
@@ -418,7 +469,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
             {emailStatus.status === 'sending' && <div className="w-5 h-5 border-4 border-zk-blue border-t-transparent rounded-full animate-spin" />}
             {emailStatus.status === 'success' && <CheckCircle2 size={24} />}
             {emailStatus.status === 'error' && <XCircle size={24} />}
-            <span className="font-black text-lg">{emailStatus.message}</span>
+            <span className="font-black text-base sm:text-lg">{emailStatus.message}</span>
           </motion.div>
         )}
       </AnimatePresence>

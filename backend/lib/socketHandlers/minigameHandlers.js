@@ -500,68 +500,48 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         socket.emit('game:secret-word-email-failed', { message: 'Unauthorized.' });
         return;
       }
+      if (!game.drawItWord) {
+        socket.emit('game:secret-word-email-failed', { message: 'Secret word is not ready yet.' });
+        return;
+      }
+      if (!game.hostUserId) {
+        socket.emit('game:secret-word-email-failed', { message: 'Host account not linked to this game.' });
+        return;
+      }
 
       const prisma = require('../prisma');
-      const hostUser = await prisma.users.findUnique({ where: { clerk_id: game.hostUserId } });
-      const email = hostUser?.email;
-      
-      if (!email) {
-        socket.emit('game:secret-word-email-failed', { message: 'No email found for your account.' });
-        return;
-      }
+      const { sendSecretWordEmail } = require('../emailService');
 
-      const nodemailer = require('nodemailer');
-      
-      let transporter;
-      if (process.env.SMTP_HOST) {
-        const isGmail = process.env.SMTP_HOST.toLowerCase().includes('gmail');
-        
-        transporter = nodemailer.createTransport(
-          isGmail ? {
-            service: 'gmail',
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          } : {
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: process.env.SMTP_SECURE === 'true',
-            connectionTimeout: 10000, // 10 seconds fail-fast
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS
-            }
-          }
-        );
-      } else {
-        // Mock email if we are stuck on Ethereal creation
-        console.log('Sending mock email (configure SMTP to send real emails).');
-        console.log('Secret word is:', game.drawItWord);
-        socket.emit('game:secret-word-sent');
-        return;
-      }
-
-      const info = await transporter.sendMail({
-        from: '"Zinko Quiz" <noreply@zinko.com>',
-        to: email,
-        subject: 'Your Zinko Secret Word! 🤫',
-        html: `
-          <div style="font-family: sans-serif; text-align: center; padding: 20px;">
-            <h2>Shhh... here is your word to draw:</h2>
-            <div style="font-size: 32px; font-weight: 900; color: #1d4ed8; background: #f3f4f6; padding: 20px; border-radius: 12px; display: inline-block;">
-              ${game.drawItWord}
-            </div>
-            <p style="margin-top: 20px; color: #666;">Don't let anyone else see this!</p>
-          </div>
-        `
+      const hostUser = await prisma.users.findUnique({
+        where: { clerk_id: game.hostUserId },
+        select: { email: true },
       });
+      const email = hostUser?.email?.trim();
 
-      console.log('Secret word email sent: %s', info.messageId);
-      socket.emit('game:secret-word-sent');
+      if (!email) {
+        socket.emit('game:secret-word-email-failed', {
+          message: 'No email found for your account. Update your profile email, or use Reveal Word.',
+          word: game.drawItWord,
+        });
+        return;
+      }
+
+      const info = await sendSecretWordEmail({ to: email, word: game.drawItWord });
+      if (info.mocked) {
+        console.log(`[draw-it] SMTP not configured — secret word for ${email}: ${game.drawItWord}`);
+      } else {
+        console.log('Secret word email sent: %s', info.messageId);
+      }
+      socket.emit('game:secret-word-sent', { email });
     } catch (err) {
       console.error('Failed to send secret word email:', err);
-      socket.emit('game:secret-word-email-failed', { message: 'Internal server error.' });
+      const game = games.get(pin);
+      // Include the word so the host UI can fall back to a private reveal.
+      // Only the host socket receives this event.
+      socket.emit('game:secret-word-email-failed', {
+        message: err?.message || 'Failed to send secret word email.',
+        word: game?.drawItWord || null,
+      });
     }
   });
 
