@@ -514,15 +514,26 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       
       let transporter;
       if (process.env.SMTP_HOST) {
-        transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT || 587,
-          secure: process.env.SMTP_SECURE === 'true',
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
+        const isGmail = process.env.SMTP_HOST.toLowerCase().includes('gmail');
+        
+        transporter = nodemailer.createTransport(
+          isGmail ? {
+            service: 'gmail',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
+          } : {
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            connectionTimeout: 10000, // 10 seconds fail-fast
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS
+            }
           }
-        });
+        );
       } else {
         // Mock email if we are stuck on Ethereal creation
         console.log('Sending mock email (configure SMTP to send real emails).');
