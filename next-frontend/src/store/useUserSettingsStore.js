@@ -10,6 +10,7 @@ const EMPTY_STATE = {
   settings: DEFAULT_USER_SETTINGS,
   usage: DEFAULT_USAGE,
   username: '',
+  coverUrl: '',
   isHydrated: false,
 };
 
@@ -23,6 +24,7 @@ function persistState(state) {
         settings: state.settings,
         usage: state.usage,
         username: state.username,
+        coverUrl: state.coverUrl,
         isHydrated: true,
       })
     );
@@ -48,6 +50,7 @@ function loadPersistedState() {
       settings: parsed.settings || DEFAULT_USER_SETTINGS,
       usage: parsed.usage || DEFAULT_USAGE,
       username: parsed.username || '',
+      coverUrl: parsed.coverUrl || '',
       isHydrated: true,
     };
   } catch {
@@ -76,12 +79,13 @@ export const useUserSettingsStore = create((set, get) => ({
 
   hasPersistedSettings: () => Boolean(get().isHydrated),
 
-  setCache: ({ userId, settings, usage, username }) => {
+  setCache: ({ userId, settings, usage, username, coverUrl }) => {
     set({
       userId,
       settings: settings || DEFAULT_USER_SETTINGS,
       usage: usage || DEFAULT_USAGE,
       username: username || '',
+      coverUrl: coverUrl || '',
       isHydrated: true,
     });
     persistState(get());
@@ -99,6 +103,11 @@ export const useUserSettingsStore = create((set, get) => ({
 
   updateUsername: (username) => {
     set({ username: username || '' });
+    persistState(get());
+  },
+
+  updateCoverUrl: (coverUrl) => {
+    set({ coverUrl: coverUrl || '' });
     persistState(get());
   },
 

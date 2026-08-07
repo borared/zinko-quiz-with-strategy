@@ -19,6 +19,10 @@ import {
   ExternalLink,
   Loader2,
   Trash2,
+  Upload,
+  X,
+  Image as ImageIcon,
+  Link as LinkIcon,
 } from 'lucide-react';
 import Navbar from '@/components/global/Navbar';
 import ManageAccountPanel from '@/components/Settings/ManageAccountPanel';
@@ -183,12 +187,18 @@ export default function SettingsPanel() {
   const setSettingsCache = useUserSettingsStore((s) => s.setCache);
   const updateSettingsCache = useUserSettingsStore((s) => s.updateSettings);
   const updateUsernameCache = useUserSettingsStore((s) => s.updateUsername);
+  const updateCoverUrlCache = useUserSettingsStore((s) => s.updateCoverUrl);
   const invalidateSettingsCache = useUserSettingsStore((s) => s.invalidate);
   const isSettingsCachedForUser = useUserSettingsStore((s) => s.isCachedForUser);
   const hasPersistedSettings = useUserSettingsStore((s) => s.hasPersistedSettings);
   const updateDiscoveryCreatorUsername = useDiscoveryQuizStore((s) => s.updateCreatorUsername);
 
   const [usernameDraft, setUsernameDraft] = useState('');
+  
+  const coverUrl = useUserSettingsStore((s) => s.coverUrl);
+  const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
+  const [coverDraft, setCoverDraft] = useState('');
+  const [coverSaving, setCoverSaving] = useState(false);
 
   const loadSettings = useCallback(async ({ silent = false, userId } = {}) => {
     if (!userId) return;
@@ -200,8 +210,10 @@ export default function SettingsPanel() {
         settings: data.settings,
         usage: data.usage,
         username: data.user?.username || '',
+        coverUrl: data.user?.coverUrl || '',
       });
       setUsernameDraft(data.user?.username || '');
+      setCoverDraft(data.user?.coverUrl || '');
     } catch (error) {
       console.error('Failed to load settings:', error);
       if (!silent) {
@@ -310,6 +322,22 @@ export default function SettingsPanel() {
     }
   };
 
+  const saveCover = async () => {
+    setCoverSaving(true);
+    try {
+      const data = await api.patch('/api/user/cover', { coverUrl: coverDraft });
+      const savedCover = data.user?.coverUrl || '';
+      updateCoverUrlCache(savedCover);
+      setCoverDraft(savedCover);
+      setIsCoverModalOpen(false);
+      showToast('Cover photo updated.', 'success');
+    } catch (error) {
+      showToast(error.message || 'Failed to save cover photo.', 'error');
+    } finally {
+      setCoverSaving(false);
+    }
+  };
+
   const openDeleteModal = () => {
     setDeleteStep('clarify');
     setDeleteOpen(true);
@@ -404,6 +432,7 @@ export default function SettingsPanel() {
                 <div className="flex flex-wrap gap-3">
                   <button type="button" onClick={saveProfileNames} disabled={saving} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest hover:translate-y-0.5 disabled:opacity-60">Save profile</button>
                   <button type="button" onClick={() => setManageAccountOpen((open) => !open)} className={`px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest inline-flex items-center gap-2 ${manageAccountOpen ? 'bg-zk-bg text-zk-text' : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'}`}>Manage account</button>
+                  <button type="button" onClick={() => setIsCoverModalOpen(true)} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20 inline-flex items-center gap-2"><ImageIcon size={16} /> Edit Cover</button>
                 </div>
               </div>
               <div className="hidden md:flex items-center justify-center h-full min-h-[200px] lg:min-h-0 mx-auto lg:mx-0 lg:-translate-y-12">
@@ -746,6 +775,135 @@ export default function SettingsPanel() {
           )}
         </AnimatePresence>
       </SettingsAlertModal>
+
+      <AnimatePresence>
+        {isCoverModalOpen && (
+          <motion.div 
+            key="cover-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+          >
+            <div
+              onClick={() => setIsCoverModalOpen(false)}
+              className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
+            />
+            <motion.div
+              initial={{ scale: 0.95, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 16 }}
+              className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl w-full max-w-md relative z-10 p-6 sm:p-8 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            >
+              <button
+                type="button"
+                onClick={() => setIsCoverModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-zk-black/5 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-2xl font-black uppercase text-zk-text mb-1">Profile Cover</h2>
+              <p className="text-sm font-bold text-zk-text/60 mb-6">
+                Choose a banner image for your public profile.
+              </p>
+
+              <div className="flex flex-col gap-5">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="aspect-[3/1] bg-zk-black/5 border-[3px] border-dashed border-zk-border rounded-xl overflow-hidden flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-zk-purple/5 transition-all group relative"
+                  onClick={() => document.getElementById('cover-upload')?.click()}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && document.getElementById('cover-upload')?.click()
+                  }
+                >
+                  {coverDraft ? (
+                    <img src={coverDraft} alt="Cover" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <Upload
+                        size={28}
+                        className="text-zk-text/30 group-hover:text-[#5D3FD3] transition-colors"
+                      />
+                      <span className="font-bold text-sm uppercase tracking-wider text-zk-text/40 group-hover:text-[#5D3FD3]">
+                        Upload image
+                      </span>
+                    </>
+                  )}
+                  {coverDraft && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="font-bold text-sm uppercase tracking-wider text-white">
+                        Change image
+                      </span>
+                    </div>
+                  )}
+                  <input
+                    id="cover-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          showToast('File must be smaller than 5MB', 'error');
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => setCoverDraft(reader.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <LinkIcon size={16} className="text-zk-text/40" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Paste image URL..."
+                    value={
+                      typeof coverDraft === 'string' && coverDraft.startsWith('http')
+                        ? coverDraft
+                        : ''
+                    }
+                    onChange={(e) => setCoverDraft(e.target.value)}
+                    className="w-full border-[3px] border-zk-border p-3 pl-11 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-[#5D3FD3]/20 rounded-xl bg-zk-bg text-zk-text"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCoverDraft('');
+                      updateCoverUrlCache('');
+                      api.patch('/api/user/cover', { coverUrl: '' })
+                         .then(() => showToast('Cover removed.', 'success'))
+                         .catch(() => showToast('Failed to remove.', 'error'));
+                      setIsCoverModalOpen(false);
+                    }}
+                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border font-black uppercase text-sm hover:bg-red-50 text-red-500 transition-colors"
+                  >
+                    Remove
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveCover}
+                    disabled={coverSaving}
+                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black uppercase text-sm transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                  >
+                    {coverSaving ? 'Saving...' : 'Save Cover'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

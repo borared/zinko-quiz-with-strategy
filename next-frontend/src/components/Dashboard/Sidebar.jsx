@@ -21,7 +21,7 @@ const Sidebar = () => {
       <nav className="flex-1 p-4 flex flex-col gap-2 mt-2">
         {WORKSPACE_MENU_ITEMS.map((item) => {
           const isActive =
-            pathname === item.path || pathname.startsWith(`${item.path}/`);
+            pathname === item.path || (item.path !== '/dashboard' && pathname.startsWith(`${item.path}/`));
           const Icon = item.icon;
 
           return (

@@ -15,7 +15,7 @@ const MobileWorkspaceNav = () => {
       <div className="flex items-center justify-around gap-1">
         {WORKSPACE_MENU_ITEMS.map((item) => {
           const isActive =
-            pathname === item.path || pathname.startsWith(`${item.path}/`);
+            pathname === item.path || (item.path !== '/dashboard' && pathname.startsWith(`${item.path}/`));
           const Icon = item.icon;
 
           return (

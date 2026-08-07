@@ -195,6 +195,80 @@ const updateUsername = async (clerkId, username) => {
   }
 };
 
+const getPublicProfileByIdentifier = async (identifier) => {
+  const normalized = String(identifier || '').trim().toLowerCase();
+  
+  const user = await prisma.users.findFirst({
+    where: { 
+      OR: [
+        { username: normalized },
+        { clerk_id: identifier }
+      ]
+    },
+    select: {
+      clerk_id: true,
+      username: true,
+      first_name: true,
+      last_name: true,
+      avatar_url: true,
+      cover_url: true,
+      created_at: true,
+      quizzes: {
+        where: {
+          is_public: true,
+          is_cloned: false // Optional: decide if cloned quizzes are shown. Let's just show original public quizzes
+        },
+        include: {
+          creator: {
+            select: {
+              username: true,
+              first_name: true,
+              last_name: true,
+              avatar_url: true,
+            }
+          },
+          questions: {
+            select: { id: true, round: true }
+          }
+        },
+        orderBy: {
+          created_at: 'desc'
+        }
+      }
+    }
+  });
+
+  if (!user) return null;
+
+  const friendships = await prisma.friendships.findMany({
+    where: {
+      OR: [
+        { user_id: user.clerk_id, status: 'ACCEPTED' },
+        { friend_id: user.clerk_id, status: 'ACCEPTED' },
+      ],
+    },
+    include: {
+      user: {
+        select: { clerk_id: true, username: true, first_name: true, last_name: true, avatar_url: true }
+      },
+      friend: {
+        select: { clerk_id: true, username: true, first_name: true, last_name: true, avatar_url: true }
+      }
+    }
+  });
+
+  const friendsList = friendships.map(f => f.user_id === user.clerk_id ? f.friend : f.user);
+
+  return { ...user, friendsCount: friendsList.length, friends: friendsList };
+};
+
+const updateUserCover = async (clerkId, coverUrl) => {
+  return await prisma.users.update({
+    where: { clerk_id: clerkId },
+    data: { cover_url: coverUrl }
+  });
+};
+
 module.exports = {
   upsertUser,
   deleteUser,
@@ -203,4 +277,6 @@ module.exports = {
   getUserSettings,
   updateUserSettings,
   updateUsername,
+  getPublicProfileByIdentifier,
+  updateUserCover,
 };

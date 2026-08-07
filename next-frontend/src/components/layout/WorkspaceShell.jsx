@@ -24,7 +24,7 @@ export default function WorkspaceShell({
       <div className="relative z-10 flex min-h-[calc(100vh-76px)]">
         {sidebar}
         <div
-          className={`flex-1 w-full min-w-0 p-5 md:p-8 md:ml-64 ${
+          className={`flex-1 w-full min-w-0 p-5 md:p-8 ${sidebar ? 'md:ml-64' : ''} ${
             showMobileNav ? 'pb-24 md:pb-8' : ''
           } ${contentClassName}`}
         >
