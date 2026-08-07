@@ -249,7 +249,7 @@ const Navbar = () => {
           >
             <div 
               className={
-                ['/dashboard', '/discovery', '/classpin'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
+                ['/dashboard', '/discovery', '/classpin', '/flashcard'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
                   ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
                   : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
               }
@@ -277,6 +277,15 @@ const Navbar = () => {
                     className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
                   >
                     Discovery
+                  </button>
+                  <button
+                    onClick={() => { setManageOpen(false); router.push('/flashcard'); }}
+                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Flash card
+                    <span className="bg-[#00C2FF] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
+                      New
+                    </span>
                   </button>
                   <button
                     onClick={() => { setManageOpen(false); router.push('/classpin'); }}

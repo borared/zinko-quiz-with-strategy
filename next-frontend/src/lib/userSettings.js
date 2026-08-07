@@ -25,7 +25,7 @@ export const PLAN_COPY = {
   },
   pro: {
     title: 'Pro',
-    price: '$12/mo',
+    price: '$6.99/mo',
     subtitle: 'Unlock the full power of play.',
   },
   school: {
