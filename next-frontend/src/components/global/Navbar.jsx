@@ -87,7 +87,7 @@ const Navbar = () => {
     if (isActive || isExact) {
       return "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
     }
-    return "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
+    return "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
   };
 
   const handleSignOut = () => {
@@ -110,7 +110,18 @@ const Navbar = () => {
             Join
           </button>
 
-          <ThemeToggle />
+          <button
+            onClick={() => router.push('/notifications')}
+            className="relative p-2 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text hover:opacity-90 transition-all h-12 w-12 flex items-center justify-center"
+            aria-label="Notifications"
+          >
+            <Bell size={22} />
+            {unreadCount > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-black z-10">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </div>
+            )}
+          </button>
 
           {/* Profile Avatar + Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -120,12 +131,6 @@ const Navbar = () => {
             >
               <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
             </div>
-            {/* Unread Badge on Avatar */}
-            {unreadCount > 0 && (
-              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-[2px] border-black z-10">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </div>
-            )}
 
             {/* Dropdown Menu */}
             <AnimatePresence>
@@ -165,26 +170,15 @@ const Navbar = () => {
                       <ShoppingBag size={16} /> Shop
                     </button>
 
-                    <button
-                      onClick={() => { setMenuOpen(false); router.push('/notifications'); }}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Bell size={16} /> Notification
-                      </div>
-                      {unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border-[1px] border-black">
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </span>
-                      )}
-                    </button>
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/settings'); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[2px] border-zk-border font-bold text-zk-text text-sm transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
                     >
                       <Settings size={16} /> Settings
                     </button>
+
+                    <ThemeToggle variant="menuItem" onClick={() => setMenuOpen(false)} />
 
                     <button
                       onClick={() => { setMenuOpen(false); handleSignOut(); }}
@@ -257,7 +251,7 @@ const Navbar = () => {
               className={
                 ['/dashboard', '/discovery', '/classpin'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
                   ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
-                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
+                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
               }
             >
               MANAGE & CREATE <ChevronDown size={20} className={`transition-transform ${manageOpen ? 'rotate-180' : ''}`} />
@@ -308,7 +302,7 @@ const Navbar = () => {
               className={
                 pathname?.startsWith('/dashboard/social')
                   ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
-                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
               }
             >
               Social <ChevronDown size={20} className={`transition-transform ${socialOpen ? 'rotate-180' : ''}`} />
@@ -355,7 +349,7 @@ const Navbar = () => {
               className={
                 pathname?.startsWith('/library')
                   ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
-                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
               }
             >
               Library 

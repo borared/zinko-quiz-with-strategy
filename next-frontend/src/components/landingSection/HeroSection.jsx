@@ -29,12 +29,12 @@ const HeroSection = () => {
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full"
+        className="absolute top-[70%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full"
       />
       <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+        className="absolute top-[65%] right-[10%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
 
       {/* Main Text */}
@@ -82,7 +82,7 @@ const HeroSection = () => {
             whileTap={{ scale: 0.9, y: 5 }}
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={() => router.push('/join')}
-            className="bg-zk-blue text-zk-white border-[4px] border-zk-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+            className="bg-zk-blue text-zk-white border-[4px] border-zk-border shadow-[4px_4px_0px_0px_#1e3a8a] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[6px_6px_0px_0px_#1e3a8a] rounded-xl"
           >
             <span className="font-bold text-4xl tracking-wide"
               style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>JOIN</span>
