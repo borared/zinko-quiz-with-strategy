@@ -7,7 +7,7 @@ import { displayAnswerText } from '@/lib/questionTypes';
 function ItemChip({ item }) {
   return (
     <div
-      className={`rounded-xl border-[3px] border-zk-black px-4 py-3 font-black text-white ${item.color}`}
+      className={`rounded-xl border-[3px] border-zk-border px-4 py-3 font-black text-white ${item.color}`}
     >
       {displayAnswerText(item.text) || '—'}
     </div>
@@ -59,19 +59,19 @@ export default function LineMatchingPhase({ question, timeLeft, totalTime, answe
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-white border-[4px] border-zk-black rounded-2xl overflow-hidden mb-6 p-8"
+          className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl overflow-hidden mb-6 p-8"
         >
-          <p className="text-2xl lg:text-4xl font-black text-zk-black text-center leading-tight uppercase">
+          <p className="text-2xl lg:text-4xl font-black text-zk-text text-center leading-tight uppercase">
             {question.questionText}
           </p>
-          <p className="text-center text-zk-black/50 font-bold text-sm mt-3 uppercase tracking-widest">
+          <p className="text-center text-zk-text/50 font-bold text-sm mt-3 uppercase tracking-widest">
             Players connect {question.pairCount || leftItems.length} matching pairs
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
-          <div className="rounded-xl border-[3px] border-zk-black bg-white/90 p-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/50 mb-3">Left prompts</p>
+          <div className="rounded-xl border-[3px] border-zk-border bg-zk-panel-bg/90 p-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/50 mb-3">Left prompts</p>
             <div className="flex flex-col gap-2">
               {leftItems.map((item) => (
                 <ItemChip key={item.id} item={item} />
@@ -79,8 +79,8 @@ export default function LineMatchingPhase({ question, timeLeft, totalTime, answe
             </div>
           </div>
 
-          <div className="rounded-xl border-[3px] border-zk-black bg-white/90 p-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/50 mb-3">Right matches (shuffled)</p>
+          <div className="rounded-xl border-[3px] border-zk-border bg-zk-panel-bg/90 p-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/50 mb-3">Right matches (shuffled)</p>
             <div className="flex flex-col gap-2">
               {rightItems.map((item) => (
                 <ItemChip key={item.id} item={item} />

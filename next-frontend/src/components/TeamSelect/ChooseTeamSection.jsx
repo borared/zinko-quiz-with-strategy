@@ -165,38 +165,38 @@ const ChooseTeamSection = () => {
   };
 
   return (
-    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-yellow flex flex-col items-center justify-center font-sans px-6 pb-14">
+    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-bg flex flex-col items-center justify-center font-sans px-6 pb-14">
 
       {/* Floating Decorative Elements */}
       <motion.div
         animate={{ y: [-12, 12, -12], x: [-6, 6, -6] }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-10 left-10 w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#D4A322]/50 border-[3px] border-zk-black/10 pointer-events-none"
+        className="absolute top-10 left-10 w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#D4A322]/50 border-[3px] border-zk-border/10 pointer-events-none"
       />
       <motion.div
         animate={{ y: [10, -10, 10], rotate: [45, 60, 45] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-24 right-12 w-16 h-16 md:w-24 md:h-24 rotate-45 bg-[#FFB020]/70 border-[3px] border-zk-black/10 pointer-events-none rounded-xl"
+        className="absolute bottom-24 right-12 w-16 h-16 md:w-24 md:h-24 rotate-45 bg-[#FFB020]/70 border-[3px] border-zk-border/10 pointer-events-none rounded-xl"
       />
       <motion.div
         animate={{ y: [-8, 8, -8] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/3 left-6 w-8 h-8 rounded-full bg-[#5D3FD3]/20 border-[2px] border-zk-black/10 pointer-events-none"
+        className="absolute top-1/3 left-6 w-8 h-8 rounded-full bg-[#5D3FD3]/20 border-[2px] border-zk-border/10 pointer-events-none"
       />
       <motion.div
         animate={{ y: [15, -15, 15], x: [10, -10, 10], rotate: [0, 90, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-20 right-20 w-10 h-10 md:w-14 md:h-14 bg-[#4ADE80]/30 border-[3px] border-zk-black/10 pointer-events-none"
+        className="absolute top-20 right-20 w-10 h-10 md:w-14 md:h-14 bg-[#4ADE80]/30 border-[3px] border-zk-border/10 pointer-events-none"
       />
       <motion.div
         animate={{ y: [-20, 20, -20], x: [15, -15, 15] }}
         transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-32 left-16 w-14 h-14 md:w-20 md:h-20 rounded-full bg-[#F87171]/40 border-[3px] border-zk-black/10 pointer-events-none"
+        className="absolute bottom-32 left-16 w-14 h-14 md:w-20 md:h-20 rounded-full bg-[#F87171]/40 border-[3px] border-zk-border/10 pointer-events-none"
       />
       <motion.div
         animate={{ y: [5, -5, 5], rotate: [0, -45, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-1/2 right-8 w-6 h-6 md:w-10 md:h-10 bg-zk-white/50 border-[2px] border-zk-black/10 pointer-events-none rounded-sm"
+        className="absolute top-1/2 right-8 w-6 h-6 md:w-10 md:h-10 bg-zk-panel-bg/50 border-[2px] border-zk-border/10 pointer-events-none rounded-sm"
       />
 
       {/* Content */}
@@ -233,11 +233,11 @@ const ChooseTeamSection = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-zk-yellow/80 flex items-center justify-center rounded-xl"
+            className="absolute inset-0 bg-zk-bg/80 flex items-center justify-center rounded-xl"
           >
             <div className="text-center">
-              <div className="w-10 h-10 border-4 border-zk-black border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="font-black uppercase tracking-widest text-zk-black text-sm">Joining game...</p>
+              <div className="w-10 h-10 border-4 border-zk-border border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="font-black uppercase tracking-widest text-zk-text text-sm">Joining game...</p>
             </div>
           </motion.div>
         )}

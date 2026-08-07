@@ -190,7 +190,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   setShowPublicModal(true);
                 }
               }}
-              className={`p-2 rounded-full border-[2px] border-zk-black shadow-none ${isPublicLocal ? 'bg-zk-green text-zk-black' : 'bg-white text-zk-black'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`p-2 rounded-full border-[2px] border-zk-border shadow-none ${isPublicLocal ? 'bg-zk-green text-zk-text' : 'bg-zk-panel-bg text-zk-text'} ${quiz.is_cloned ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isPublicLocal ? <Globe size={16} /> : <Lock size={16} />}
             </button>
@@ -198,24 +198,24 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
         )}
 
         {/* Image Area */}
-        <div className="h-32 border-b-[3px] border-zk-black bg-zk-yellow/30 overflow-hidden relative">
+        <div className="h-32 border-b-[3px] border-zk-border bg-zk-bg/30 overflow-hidden relative">
           {quiz.cover_image ? (
             <img src={quiz.cover_image} alt={quiz.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-zk-black/30">
-              <div className="w-10 h-10 border-[2px] border-dashed border-zk-black/20 rounded-lg flex items-center justify-center">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-zk-text/30">
+              <div className="w-10 h-10 border-[2px] border-dashed border-zk-border/20 rounded-lg flex items-center justify-center">
                 <Image size={18} className="opacity-40" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider">No cover</span>
             </div>
           )}
           {isDiscoveryMode && isOwnQuiz && (
-            <span className="absolute top-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-blue text-white px-2 py-0.5 border-[1.5px] border-zk-black rounded !shadow-none">
+            <span className="absolute top-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-blue text-white px-2 py-0.5 border-[1.5px] border-zk-border rounded !shadow-none">
               Yours
             </span>
           )}
           {!isDiscoveryMode && isReady && (
-            <span className="absolute bottom-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-green text-zk-black px-2 py-0.5 border-[1.5px] border-zk-black rounded !shadow-none">
+            <span className="absolute bottom-2 left-2 text-[9px] font-black uppercase tracking-wider bg-zk-green text-zk-text px-2 py-0.5 border-[1.5px] border-zk-border rounded !shadow-none">
               Ready to host
             </span>
           )}
@@ -226,16 +226,16 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
           <div className="flex flex-col gap-1">
             {/* Question Count Tags */}
             <div className="flex flex-wrap gap-1.5">
-              <div className="bg-zk-purple text-white text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded uppercase">
+              <div className="bg-zk-purple text-white text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-border rounded uppercase">
                 {questions.length} Qs
               </div>
-              <div className="bg-white text-zk-black text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-black rounded uppercase">
+              <div className="bg-zk-panel-bg text-zk-text text-[10px] font-bold px-2 py-0.5 border-[1.5px] border-zk-border rounded uppercase">
                 R1:{r1Count} R2:{r2Count} R3:{r3Count}
               </div>
             </div>
 
             {/* Title */}
-            <h3 className="font-black text-lg text-zk-black mt-1 leading-tight line-clamp-2">{quiz.title}</h3>
+            <h3 className="font-black text-lg text-zk-text mt-1 leading-tight line-clamp-2">{quiz.title}</h3>
 
             {/* Subtitle */}
             <p className="text-xs text-gray-500 font-bold">
@@ -256,10 +256,10 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   initial={{ opacity: 0, y: -10, scale: 0.9 }}
                   animate={{ opacity: 1, y: -55, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute left-0 right-0 bg-[#FF4B4B] text-white px-4 py-3 text-[10px] font-black rounded-xl !shadow-none border-[3px] border-zk-black z-[50] flex items-center justify-center text-center uppercase"
+                  className="absolute left-0 right-0 bg-[#FF4B4B] text-white px-4 py-3 text-[10px] font-black rounded-xl !shadow-none border-[3px] border-zk-border z-[50] flex items-center justify-center text-center uppercase"
                 >
                   {errorMessage}
-                  <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-black rotate-45" />
+                  <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FF4B4B] border-r-[3px] border-b-[3px] border-zk-border rotate-45" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -268,7 +268,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               <>
                 <button
                   onClick={() => setShowDetailsModal(true)}
-                  className="flex-1 bg-white text-zk-black border-[2px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-yellow/30 flex items-center justify-center gap-1.5 leading-none pt-2"
+                  className="flex-1 bg-zk-panel-bg text-zk-text border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-bg/30 flex items-center justify-center gap-1.5 leading-none pt-2"
                 >
                   <Eye size={14} /> View
                 </button>
@@ -277,7 +277,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                     <button
                       type="button"
                       onClick={showAlreadyClonedToast}
-                      className="flex-1 bg-zk-green/25 text-zk-black border-[2px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
+                      className="flex-1 bg-zk-green/25 text-zk-text border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
                     >
                       <CheckCheck size={14} /> Cloned
                     </button>
@@ -286,7 +286,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                       type="button"
                       onClick={handleCloneClick}
                       disabled={isCloning}
-                      className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                      className="flex-1 bg-[#5D3FD3] text-white border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
                     >
                       {isCloning ? (
                         <><Loader2 size={14} className="animate-spin" /> Cloning...</>
@@ -303,7 +303,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   id={`host-btn-${quiz.id}`}
                   onClick={handleHostClick}
                   disabled={isHosting}
-                  className="flex-1 bg-zk-purple text-white border-[2px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-purple-light flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
+                  className="flex-1 bg-zk-purple text-white border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-purple-light flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-wait leading-none pt-2"
                 >
                   {isHosting ? (
                     <><Loader2 size={16} className="animate-spin" /> Creating...</>
@@ -313,13 +313,13 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                 </button>
                 <button
                   onClick={() => router.push('/create-game/' + quiz.id)}
-                  className="bg-white text-zk-black border-[2px] border-zk-black !shadow-none p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-zk-yellow/30"
+                  className="bg-zk-panel-bg text-zk-text border-[2px] border-zk-border !shadow-none p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-zk-bg/30"
                 >
                   <Pencil size={16} />
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="bg-[#FF4B4B] text-white border-[2px] border-zk-black !shadow-none p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-[#e63e3e]"
+                  className="bg-[#FF4B4B] text-white border-[2px] border-zk-border !shadow-none p-2 font-bold text-sm flex items-center justify-center rounded-lg transition-colors hover:bg-[#e63e3e]"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -332,29 +332,29 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       {/* Modals */}
       {showDetailsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-zk-white border-[4px] border-zk-black !shadow-none p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden sm:mt-20">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-zk-panel-bg border-[4px] border-zk-border !shadow-none p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden sm:mt-20">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-3xl font-black text-zk-black uppercase leading-none">{quiz.title}</h3>
-                <p className="text-zk-black/70 font-bold mt-1 text-sm">
+                <h3 className="text-3xl font-black text-zk-text uppercase leading-none">{quiz.title}</h3>
+                <p className="text-zk-text/70 font-bold mt-1 text-sm">
                   By {formatDiscoveryCreatorName(quiz.creator)} • {questions.length} Questions
                 </p>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-black w-8 h-8 flex items-center justify-center font-black rounded-lg transition-colors hover:bg-[#e63e3e]">
+              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-border w-8 h-8 flex items-center justify-center font-black rounded-lg transition-colors hover:bg-[#e63e3e]">
                 X
               </button>
             </div>
             
             <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
               {questions.map((q, i) => (
-                <div key={q.id || i} className="bg-white border-[2px] border-zk-black rounded-lg p-3 !shadow-none">
+                <div key={q.id || i} className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg p-3 !shadow-none">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-black text-sm uppercase bg-zk-yellow px-2 py-0.5 border-[1.5px] border-zk-black rounded">Q{i + 1} (R{q.round})</span>
+                    <span className="font-black text-sm uppercase bg-zk-bg px-2 py-0.5 border-[1.5px] border-zk-border rounded">Q{i + 1} (R{q.round})</span>
                   </div>
-                  <p className="font-bold text-zk-black mb-2">{q.question_text}</p>
+                  <p className="font-bold text-zk-text mb-2">{q.question_text}</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {q.answers?.map((a, j) => (
-                      <div key={j} className={`border-[1.5px] border-zk-black rounded p-1.5 font-bold ${a.is_correct ? 'bg-green-400 text-zk-black' : 'bg-gray-100 text-gray-500'}`}>
+                      <div key={j} className={`border-[1.5px] border-zk-border rounded p-1.5 font-bold ${a.is_correct ? 'bg-green-400 text-zk-text' : 'bg-gray-100 text-gray-500'}`}>
                         {a.text}
                       </div>
                     ))}
@@ -362,17 +362,17 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                 </div>
               ))}
               {questions.length === 0 && (
-                <p className="text-center font-bold text-zk-black/50 py-8">No questions found.</p>
+                <p className="text-center font-bold text-zk-text/50 py-8">No questions found.</p>
               )}
             </div>
             
             {!isOwnQuiz && (
-              <div className="mt-4 pt-4 border-t-[3px] border-zk-black flex justify-end">
+              <div className="mt-4 pt-4 border-t-[3px] border-zk-border flex justify-end">
                 {alreadyCloned ? (
                   <button
                     type="button"
                     onClick={showAlreadyClonedToast}
-                    className="bg-zk-green/25 text-zk-black border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
+                    className="bg-zk-green/25 text-zk-text border-[2px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
                   >
                     <CheckCheck size={16} /> Cloned
                   </button>
@@ -381,7 +381,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                     type="button"
                     onClick={() => { setShowDetailsModal(false); handleCloneClick(); }}
                     disabled={isCloning}
-                    className="bg-[#5D3FD3] text-white border-[2px] border-zk-black px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 leading-none pt-2 disabled:opacity-60"
+                    className="bg-[#5D3FD3] text-white border-[2px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 leading-none pt-2 disabled:opacity-60"
                   >
                     {isCloning ? <><Loader2 size={16} className="animate-spin" /> Cloning...</> : <><Copy size={16} /> Clone Quiz</>}
                   </button>
@@ -394,16 +394,16 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
 
       {showPublicModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black !shadow-none p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
-            <h3 className="font-['Outfit'] text-xl font-black mb-2 text-zk-black uppercase text-center">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-panel-bg border-[4px] border-zk-border !shadow-none p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
+            <h3 className="font-['Outfit'] text-xl font-black mb-2 text-zk-text uppercase text-center">
               {isPublicLocal ? "Make Private?" : "Make Public?"}
             </h3>
-            <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">
+            <p className="text-zk-text/70 mb-6 text-center font-bold text-sm">
               {isPublicLocal ? "This quiz will no longer be visible in the Discovery section." : "This quiz will be visible to everyone in the Discovery section!"}
             </p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-zk-yellow/30 rounded-lg leading-none pt-2 disabled:opacity-60">NO</button>
-              <button onClick={handleTogglePublic} disabled={isUpdating} className="flex-1 bg-green-400 text-zk-black border-[3px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-green-300 rounded-lg flex justify-center items-center leading-none pt-2 disabled:opacity-60">
+              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-zk-bg/30 rounded-lg leading-none pt-2 disabled:opacity-60">NO</button>
+              <button onClick={handleTogglePublic} disabled={isUpdating} className="flex-1 bg-green-400 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-green-300 rounded-lg flex justify-center items-center leading-none pt-2 disabled:opacity-60">
                 {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "YES"}
               </button>
             </div>
@@ -413,12 +413,12 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-white border-[4px] border-zk-black !shadow-none p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
-            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-black text-center">Delete Quiz?</h3>
-            <p className="text-zk-black/70 mb-6 text-center font-bold text-sm">Are you sure you want to delete this quiz? This cannot be undone.</p>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-zk-panel-bg border-[4px] border-zk-border !shadow-none p-6 max-w-sm w-full flex flex-col items-center rounded-xl">
+            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-text text-center">Delete Quiz?</h3>
+            <p className="text-zk-text/70 mb-6 text-center font-bold text-sm">Are you sure you want to delete this quiz? This cannot be undone.</p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-black border-[3px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg leading-none pt-2 transition-colors hover:bg-zk-yellow/30 disabled:opacity-60">NO</button>
-              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-black !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg flex justify-center items-center leading-none pt-2 transition-colors hover:bg-[#e63e3e] disabled:opacity-60">
+              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg leading-none pt-2 transition-colors hover:bg-zk-bg/30 disabled:opacity-60">NO</button>
+              <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg flex justify-center items-center leading-none pt-2 transition-colors hover:bg-[#e63e3e] disabled:opacity-60">
                 {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "DELETE"}
               </button>
             </div>

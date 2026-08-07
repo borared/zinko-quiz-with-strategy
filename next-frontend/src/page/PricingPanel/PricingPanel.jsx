@@ -55,7 +55,7 @@ const PricingPanel = () => {
   ];
 
   return (
-    <div className="flex-1 w-full bg-zk-yellow relative overflow-hidden pt-16 pb-12 font-sans">
+    <div className="flex-1 w-full bg-zk-bg relative overflow-hidden pt-16 pb-12 font-sans">
       
       {/* Floating Background Objects */}
       <motion.div 
@@ -69,7 +69,7 @@ const PricingPanel = () => {
       <motion.div 
         animate={{ y: [20, -20, 20], rotate: 360 }}
         transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
-        className="absolute bottom-[20%] right-[5%] md:bottom-[30%] md:right-[10%] w-16 h-16 md:w-20 md:h-20 bg-[#FF6B4A] border-[4px] border-zk-black rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] pointer-events-none"
+        className="absolute bottom-[20%] right-[5%] md:bottom-[30%] md:right-[10%] w-16 h-16 md:w-20 md:h-20 bg-[#FF6B4A] border-[4px] border-zk-border rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] pointer-events-none"
       />
 
       {/* Main Container */}

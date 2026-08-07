@@ -63,7 +63,7 @@ function MatchItem({
               : '0 0 0 rgba(0,0,0,0)',
       }}
       transition={{ duration: 0.15 }}
-      className={`flex items-center gap-2 px-3 py-3 rounded-xl border-[3px] border-zk-black ${playColor} text-white w-full max-w-[12rem] sm:max-w-[14rem] min-w-0 min-h-[4.25rem] sm:min-h-[4.75rem] text-left select-none ${
+      className={`flex items-center gap-2 px-3 py-3 rounded-xl border-[3px] border-zk-border ${playColor} text-white w-full max-w-[12rem] sm:max-w-[14rem] min-w-0 min-h-[4.25rem] sm:min-h-[4.75rem] text-left select-none ${
         side === 'right' ? 'sm:max-w-[15rem]' : ''
       } ${
         disabled && !isRightConnected ? 'cursor-not-allowed' : side === 'left' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
@@ -355,7 +355,7 @@ function LineMatchingBoard({
       }`}
     >
       {!inPanel && (
-        <p className="text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/45 shrink-0">
+        <p className="text-center text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-text/45 shrink-0">
           Drag a line from left to right, or tap left then right
         </p>
       )}
@@ -401,7 +401,7 @@ function LineMatchingBoard({
 
         <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-0 sm:gap-x-20 md:gap-x-28">
           <div className="flex flex-col gap-3 min-w-0 items-center sm:items-end">
-            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/55 w-full max-w-[12rem] sm:max-w-[14rem] text-center sm:text-right">Left</p>
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-text/55 w-full max-w-[12rem] sm:max-w-[14rem] text-center sm:text-right">Left</p>
             {leftItems.map((item, index) => (
               <MatchItem
                 key={item.id}
@@ -419,7 +419,7 @@ function LineMatchingBoard({
           </div>
 
           <div className="flex flex-col gap-3 min-w-0 items-center sm:items-start">
-            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-black/55 w-full max-w-[12rem] sm:max-w-[15rem] text-center sm:text-left">Right</p>
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zk-text/55 w-full max-w-[12rem] sm:max-w-[15rem] text-center sm:text-left">Right</p>
             {rightItems.map((item, index) => (
               <MatchItem
                 key={item.id}
@@ -443,12 +443,12 @@ function LineMatchingBoard({
         whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
         onClick={handleSubmit}
         disabled={!isComplete || isDisabled}
-        className={`w-full sm:w-auto mx-auto shrink-0 ${inPanel ? 'mt-4 sm:mt-5 mb-2 sm:mb-3' : 'mt-4 sm:mt-5'} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
+        className={`w-full sm:w-auto mx-auto shrink-0 ${inPanel ? 'mt-4 sm:mt-5 mb-2 sm:mb-3' : 'mt-4 sm:mt-5'} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-border font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${
           isComplete && !isDisabled
             ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
             : inPanel
-              ? 'bg-zk-black/10 text-zk-black/35 cursor-not-allowed'
-              : 'bg-white/30 text-white/50 cursor-not-allowed'
+              ? 'bg-zk-black/10 text-zk-text/35 cursor-not-allowed'
+              : 'bg-zk-panel-bg/30 text-white/50 cursor-not-allowed'
         }`}
       >
         <Send size={16} />

@@ -83,7 +83,7 @@ export default function LobbySceneryPicker({
         aria-haspopup="listbox"
         aria-label={hasNewScenery ? 'New scenery available' : `Change scenery. Current: ${activeScenery.name}`}
         className={`relative flex items-center gap-2 border-[3px] border-[#000000] rounded-xl px-3 py-2 hover:scale-[1.02] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed ${
-          hasNewScenery ? 'bg-[#FFCD29]' : 'bg-white'
+          hasNewScenery ? 'bg-[#FFCD29]' : 'bg-zk-panel-bg'
         }`}
         style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
       >
@@ -124,7 +124,7 @@ export default function LobbySceneryPicker({
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
             role="listbox"
             aria-label="Owned scenery"
-            className="absolute bottom-full right-0 mb-3 w-64 bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col gap-2"
+            className="absolute bottom-full right-0 mb-3 w-64 bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl p-3 flex flex-col gap-2"
             style={{ boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
           >
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#000000] px-1">

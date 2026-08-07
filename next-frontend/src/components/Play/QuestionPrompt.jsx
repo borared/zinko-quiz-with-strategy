@@ -29,7 +29,7 @@ export default function QuestionPrompt({
       <button
         onClick={handleUseSkill}
         disabled={isInactive}
-        className={`flex items-center justify-center gap-3 px-8 py-3 rounded-full font-black uppercase border-[4px] border-zk-black transition-all mx-auto ${
+        className={`flex items-center justify-center gap-3 px-8 py-3 rounded-full font-black uppercase border-[4px] border-zk-border transition-all mx-auto ${
           isInactive
             ? 'bg-gray-700 text-white/50 cursor-not-allowed'
             : `${config.buttonColor} text-white hover:brightness-110 active:brightness-95`
@@ -54,23 +54,23 @@ export default function QuestionPrompt({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`w-full mx-auto flex flex-col h-auto max-h-[calc(100dvh-11rem)] sm:max-h-[calc(100dvh-10rem)] bg-white rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-zk-black overflow-hidden ${
+          className={`w-full mx-auto flex flex-col h-auto max-h-[calc(100dvh-11rem)] sm:max-h-[calc(100dvh-10rem)] bg-zk-panel-bg rounded-xl sm:rounded-2xl border-[3px] sm:border-[4px] border-zk-border overflow-hidden ${
             isDragLayers ? 'max-w-6xl lg:max-w-7xl' : 'max-w-5xl lg:max-w-6xl'
           }`}
         >
           <div className="flex flex-col h-auto w-full gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto">
             {question.imageUrl && (
-              <div className="w-full max-w-sm mx-auto rounded-lg overflow-hidden border-[3px] border-zk-black bg-gray-100 shrink-0 mb-1">
+              <div className="w-full max-w-sm mx-auto rounded-lg overflow-hidden border-[3px] border-zk-border bg-gray-100 shrink-0 mb-1">
                 <img src={question.imageUrl} alt="Question" className="w-full max-h-[15vh] object-contain" />
               </div>
             )}
-            <p className="text-zk-black font-black text-lg sm:text-xl lg:text-2xl leading-tight text-center shrink-0">
+            <p className="text-zk-text font-black text-lg sm:text-xl lg:text-2xl leading-tight text-center shrink-0">
               {question.questionText}
             </p>
 
             <div className="text-center px-1 shrink-0">
               {skillButton || (
-                <p className="inline-block max-w-full px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-zk-black border-[3px] border-zk-black text-white font-black text-xs sm:text-sm uppercase tracking-wide sm:tracking-widest">
+                <p className="inline-block max-w-full px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-zk-black border-[3px] border-zk-border text-white font-black text-xs sm:text-sm uppercase tracking-wide sm:tracking-widest">
                   {isLineMatching
                     ? 'Drag or tap to connect · lock in when done'
                     : 'Drag or tap steps into order, then lock in'}
@@ -89,14 +89,14 @@ export default function QuestionPrompt({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-white rounded-2xl p-5 border-[4px] border-zk-black text-center"
+          className="w-full bg-zk-panel-bg rounded-2xl p-5 border-[4px] border-zk-border text-center"
         >
           {question.imageUrl && (
-            <div className="w-full max-w-sm mx-auto rounded-xl overflow-hidden border-[3px] border-zk-black bg-gray-100 mb-3">
+            <div className="w-full max-w-sm mx-auto rounded-xl overflow-hidden border-[3px] border-zk-border bg-gray-100 mb-3">
               <img src={question.imageUrl} alt="Question" className="w-full max-h-[25vh] object-contain" />
             </div>
           )}
-          <p className="text-zk-black font-black text-xl lg:text-2xl leading-tight">
+          <p className="text-zk-text font-black text-xl lg:text-2xl leading-tight">
             {question.questionText}
           </p>
         </motion.div>

@@ -78,7 +78,7 @@ export default function AnswerBarChart({ stats, revealed, questionType }) {
                 }}
               >
                 {s.isCorrect && revealed && (
-                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#27AE60] text-white w-8 h-8 rounded-lg flex items-center justify-center border-[2px] border-zk-black shadow-[2px_2px_0_#000]">
+                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#27AE60] text-white w-8 h-8 rounded-lg flex items-center justify-center border-[2px] border-zk-border shadow-[2px_2px_0_#000]">
                     <Check size={20} strokeWidth={4} />
                   </div>
                 )}

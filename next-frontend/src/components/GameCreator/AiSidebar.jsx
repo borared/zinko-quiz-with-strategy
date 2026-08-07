@@ -44,15 +44,15 @@ const AiSidebar = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className={`fixed top-[76px] right-0 w-96 bg-white border-l-[3px] border-zk-black flex flex-col h-[calc(100vh-76px)] z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+    <div className={`fixed top-[76px] right-0 w-96 bg-zk-panel-bg border-l-[3px] border-zk-border flex flex-col h-[calc(100vh-76px)] z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       {/* Header */}
-      <div className="p-4 bg-zk-yellow border-b-[3px] border-zk-black flex items-center justify-between">
+      <div className="p-4 bg-zk-bg border-b-[3px] border-zk-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={20} className="text-zk-black" />
-          <h2 className="font-black text-lg text-zk-black uppercase">Zinko Assistant</h2>
+          <Sparkles size={20} className="text-zk-text" />
+          <h2 className="font-black text-lg text-zk-text uppercase">Zinko Assistant</h2>
         </div>
-        <button type="button" onClick={onClose} className="p-1 hover:bg-white border-[2px] border-transparent hover:border-zk-black transition-colors rounded-xl">
-          <X size={20} className="text-zk-black" />
+        <button type="button" onClick={onClose} className="p-1 hover:bg-zk-panel-bg border-[2px] border-transparent hover:border-zk-border transition-colors rounded-xl">
+          <X size={20} className="text-zk-text" />
         </button>
       </div>
 
@@ -60,32 +60,32 @@ const AiSidebar = ({ isOpen, onClose }) => {
       <form onSubmit={handleSubmit} className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
         {/* Prompt Input */}
         <div className="flex flex-col gap-1">
-          <label className="font-bold text-zk-black text-sm">What should I create?</label>
+          <label className="font-bold text-zk-text text-sm">What should I create?</label>
           <textarea 
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="e.g., 6 true/false about space, line matching for capitals, order photosynthesis steps, or mix types..."
-            className="border-[3px] border-zk-black p-2 font-bold text-sm h-32 focus:outline-none focus:ring-2 focus:ring-zk-yellow placeholder-gray-400 rounded-lg"
+            className="border-[3px] border-zk-border p-2 font-bold text-sm h-32 focus:outline-none focus:ring-2 focus:ring-zk-yellow placeholder-gray-400 rounded-lg"
           />
         </div>
 
         {/* File Upload (Optional) */}
         <div className="flex flex-col gap-1">
-          <label className="font-bold text-zk-black text-sm">Reference File (Optional)</label>
-          <div className="border-[2px] border-dashed border-zk-black p-4 flex flex-col items-center justify-center gap-1 bg-gray-50 hover:bg-zk-yellow/10 transition-colors cursor-pointer relative rounded-xl">
+          <label className="font-bold text-zk-text text-sm">Reference File (Optional)</label>
+          <div className="border-[2px] border-dashed border-zk-border p-4 flex flex-col items-center justify-center gap-1 bg-zk-bg/10 hover:bg-zk-bg/20 transition-colors cursor-pointer relative rounded-xl">
             <input 
               type="file" 
               accept=".pdf,.docx,.pptx" 
               onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
-            <Upload size={20} className="text-zk-black" />
+            <Upload size={20} className="text-zk-text" />
             {file ? (
-              <p className="font-bold text-zk-black text-xs text-center truncate w-full">{file.name}</p>
+              <p className="font-bold text-zk-text text-xs text-center truncate w-full">{file.name}</p>
             ) : (
               <div className="text-center">
-                <p className="font-bold text-zk-black text-xs">Drop file here</p>
-                <p className="text-[10px] text-zk-black/60">PDF, DOCX, PPTX</p>
+                <p className="font-bold text-zk-text text-xs">Drop file here</p>
+                <p className="text-[10px] text-zk-text/60">PDF, DOCX, PPTX</p>
               </div>
             )}
           </div>
@@ -93,14 +93,14 @@ const AiSidebar = ({ isOpen, onClose }) => {
 
         {/* Number of Questions */}
         <div className="flex flex-col gap-1">
-          <label className="font-bold text-zk-black text-sm">Number of questions</label>
+          <label className="font-bold text-zk-text text-sm">Number of questions</label>
           <input 
             type="number" 
             min="1" 
             max="20" 
             value={numQuestions}
             onChange={(e) => setNumQuestions(e.target.value)}
-            className="border-[3px] border-zk-black p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-lg"
+            className="border-[3px] border-zk-border p-2 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-lg"
           />
         </div>
 
@@ -110,7 +110,7 @@ const AiSidebar = ({ isOpen, onClose }) => {
         <button 
           type="submit" 
           disabled={loading}
-          className="mt-auto border-[3px] border-zk-black bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+          className="mt-auto border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
         >
           {loading ? (
             <>

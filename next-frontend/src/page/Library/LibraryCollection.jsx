@@ -161,7 +161,7 @@ export default function LibraryCollection() {
   if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-black" size={32} />
+        <Loader2 className="animate-spin text-zk-text" size={32} />
       </div>
     );
   }
@@ -191,10 +191,10 @@ export default function LibraryCollection() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors ${
+                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-border rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors ${
                   isActive
                     ? 'bg-[#5D3FD3] text-white'
-                    : 'bg-white text-zk-black hover:bg-zk-yellow/30'
+                    : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/30'
                 }`}
               >
                 <Icon size={20} strokeWidth={3} />
@@ -208,7 +208,7 @@ export default function LibraryCollection() {
           <LibraryCollectionSkeleton count={skeletonCount} activeTab={activeTab} />
         ) : collectionItems.length === 0 ? (
           <div className="zk-panel !shadow-none p-10 text-center flex flex-col items-center gap-4">
-            <p className="text-lg font-bold text-zk-black/70">
+            <p className="text-lg font-bold text-zk-text/70">
               {trimmedSearch
                 ? `No items match "${trimmedSearch}".`
                 : activeTab === 'scenery'
@@ -221,7 +221,7 @@ export default function LibraryCollection() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="px-6 py-2.5 rounded-xl border-[3px] border-zk-black bg-white text-zk-black font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-yellow/30"
+                className="px-6 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-bg/30"
               >
                 Clear search
               </button>
@@ -229,7 +229,7 @@ export default function LibraryCollection() {
               <button
                 type="button"
                 onClick={() => router.push('/shop')}
-                className="px-6 py-2.5 rounded-xl border-[3px] border-zk-black bg-[#5D3FD3] text-white font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#4e33b8]"
+                className="px-6 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#4e33b8]"
               >
                 Browse shop
               </button>

@@ -4,7 +4,6 @@ import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
 import WorkspaceShell from '@/components/layout/WorkspaceShell';
-import HubWorld from './HubWorld';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
 import { useSocketStore } from '@/store/useSocketStore';
@@ -39,19 +38,6 @@ const Dashboard = () => {
   const [clientReady, setClientReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const [viewMode, setViewMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('zinko_dashboard_mode') || 'hub';
-    }
-    return 'hub';
-  });
-
-  const handleSetViewMode = (mode) => {
-    setViewMode(mode);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('zinko_dashboard_mode', mode);
-    }
-  };
 
   const paginationRef = useRef({
     nextCursor: null,
@@ -222,32 +208,17 @@ const Dashboard = () => {
 
   return (
     <WorkspaceShell sidebar={<Sidebar />} contentClassName="dashboard-shell">
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={() => handleSetViewMode(viewMode === 'hub' ? 'classic' : 'hub')}
-          className="bg-white text-zk-black hover:bg-zk-yellow/30 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none"
-        >
-          {viewMode === 'hub' ? 'List View' : 'Hub View'}
-        </button>
-      </div>
+      <WelcomeBanner />
 
-      {viewMode === 'hub' ? (
-        <HubWorld onSwitchToClassic={() => handleSetViewMode('classic')} />
-      ) : (
-        <>
-          <WelcomeBanner />
-
-          <QuizGrid
-            quizzes={quizzes}
-            loading={
-              !clientReady
-              || (((!isLoaded || !isJwtReady) && !hasPersistedData)
-              || (loading && !quizzesCached && quizzes.length === 0))
-            }
-            totalQuizCount={totalQuizCount}
-          />
-        </>
-      )}
+      <QuizGrid
+        quizzes={quizzes}
+        loading={
+          !clientReady
+          || (((!isLoaded || !isJwtReady) && !hasPersistedData)
+          || (loading && !quizzesCached && quizzes.length === 0))
+        }
+        totalQuizCount={totalQuizCount}
+      />
 
       {fetchError && (
         <div className="zk-panel !shadow-none bg-red-50 text-red-700 font-bold p-4">
@@ -263,7 +234,7 @@ const Dashboard = () => {
         type="button"
         onClick={() => router.push('/create-game')}
         aria-label="Create new game"
-        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border-[3px] border-zk-black bg-zk-purple text-white !shadow-none transition-colors hover:bg-zk-blue"
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border-[5px] border-zk-border bg-zk-purple text-white !shadow-none transition-colors hover:bg-zk-blue"
       >
         <Plus size={32} strokeWidth={4} />
       </button>

@@ -68,10 +68,10 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-white border-[4px] border-zk-black shadow-[8px_8px_0_#000] rounded-2xl overflow-hidden mb-6 flex-1 flex flex-col items-center justify-center"
+          className="bg-zk-panel-bg border-[4px] border-zk-border shadow-[8px_8px_0_#000] rounded-2xl overflow-hidden mb-6 flex-1 flex flex-col items-center justify-center"
         >
           {question.imageUrl && (
-            <div className="w-full bg-[#2C3E50] flex items-center justify-center p-4 border-b-[3px] border-zk-black">
+            <div className="w-full bg-[#2C3E50] flex items-center justify-center p-4 border-b-[3px] border-zk-border">
               <img
                 src={question.imageUrl}
                 alt="Question"
@@ -80,7 +80,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
             </div>
           )}
           <div className="flex-1 flex items-center justify-center p-8">
-            <p className="text-2xl lg:text-4xl xl:text-5xl font-black text-zk-black text-center leading-tight uppercase">
+            <p className="text-2xl lg:text-4xl xl:text-5xl font-black text-zk-text text-center leading-tight uppercase">
               {question.questionText}
             </p>
           </div>
@@ -97,11 +97,11 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.07 }}
-                className={`flex items-center gap-4 rounded-2xl px-5 py-4 border-[3px] border-zk-black shadow-[4px_4px_0_#000] ${isTrueFalse ? 'justify-center' : ''}`}
+                className={`flex items-center gap-4 rounded-2xl px-5 py-4 border-[3px] border-zk-border shadow-[4px_4px_0_#000] ${isTrueFalse ? 'justify-center' : ''}`}
                 style={{ backgroundColor: color.bg }}
               >
                 {!isTrueFalse && (
-                  <div className="w-10 h-10 bg-white/30 rounded-lg flex items-center justify-center border-[2px] border-black/20 flex-shrink-0">
+                  <div className="w-10 h-10 bg-zk-panel-bg/30 rounded-lg flex items-center justify-center border-[2px] border-black/20 flex-shrink-0">
                     <span className="font-black text-lg" style={{ color: color.text }}>
                       {color.label}
                     </span>

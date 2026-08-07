@@ -26,7 +26,7 @@ export default function TestResultPage() {
       <ResultOverlay resultData={dummyResultData} />
       
       {/* Controls Overlay for easy testing */}
-      <div className="absolute top-4 left-4 z-50 bg-white/95 p-4 rounded-xl border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-3 font-sans">
+      <div className="absolute top-4 left-4 z-50 bg-zk-panel-bg/95 p-4 rounded-xl border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-3 font-sans">
         <h3 className="font-black text-xl border-b-2 border-black/10 pb-2">Result Preview Controls</h3>
         
         <button 
@@ -47,7 +47,7 @@ export default function TestResultPage() {
         
         <button 
           onClick={() => setStolenPoints(stolenPoints === 0 ? 500 : (stolenPoints > 0 ? -300 : 0))}
-          className="px-4 py-2 font-bold border-2 border-black rounded bg-zk-yellow text-black hover:opacity-80 transition-opacity"
+          className="px-4 py-2 font-bold border-2 border-black rounded bg-zk-bg text-black hover:opacity-80 transition-opacity"
         >
           Frog Skill: {stolenPoints === 0 ? 'None' : (stolenPoints > 0 ? `+${stolenPoints} (You Stole)` : `${stolenPoints} (Got Stolen)`)}
         </button>

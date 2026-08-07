@@ -29,7 +29,7 @@ export default function ProfileLottie({ className = '' }) {
       {animationData ? (
         <Lottie animationData={animationData} loop className="w-full h-full max-w-[220px] max-h-[220px]" />
       ) : (
-        <div className="w-[180px] h-[180px] rounded-full border-[3px] border-dashed border-zk-black/20 animate-pulse" />
+        <div className="w-[180px] h-[180px] rounded-full border-[3px] border-dashed border-zk-border/20 animate-pulse" />
       )}
     </div>
   );

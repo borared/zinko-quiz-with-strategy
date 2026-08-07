@@ -37,7 +37,7 @@ function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
       style={{ width: size, height: size * 0.55, left: x, top: y }}
     >
       <motion.div
-        className="w-full h-full rounded-full bg-white border-[3px] border-[#000000] flex items-center justify-center overflow-hidden"
+        className="w-full h-full rounded-full bg-zk-panel-bg border-[3px] border-[#000000] flex items-center justify-center overflow-hidden"
         style={{ boxShadow: '3px 3px 0px 0px rgba(0,0,0,0.4)' }}
         animate={{ scaleY: [1, 1, 0.05, 1, 1] }}
         transition={{
@@ -115,7 +115,7 @@ function PlayerSlot({ player, isFirst, teamId }) {
       {...attributes}
       className="w-full aspect-square border-[2px] border-white flex flex-col items-center justify-center relative overflow-hidden rounded cursor-grab active:cursor-grabbing"
     >
-      <div className="absolute inset-0 bg-white/10" />
+      <div className="absolute inset-0 bg-zk-panel-bg/10" />
       
         <img 
           src={player.avatar || ''} 
@@ -123,7 +123,7 @@ function PlayerSlot({ player, isFirst, teamId }) {
           className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
         />
 
-      <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+      <div className="absolute bottom-0 right-0 bg-zk-panel-bg px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
         <span className="text-[#000000] font-black text-[10px] md:text-xs tracking-wider relative block">
           {player.nickname}
         </span>
@@ -154,7 +154,7 @@ function TeamPanel({ teamName, teamId, players }) {
         <span className="font-black text-xl text-white tracking-wider">
           {teamName}
         </span>
-        <div className="bg-white border-[2px] border-[#000000] px-2 py-[2px] rounded-xl flex items-center justify-center">
+        <div className="bg-zk-panel-bg border-[2px] border-[#000000] px-2 py-[2px] rounded-xl flex items-center justify-center">
           <span className="font-black text-[10px] text-[#000000] tracking-wider leading-none mt-[2px]">
             Player Count: {players.length}
           </span>
@@ -427,7 +427,7 @@ export default function HostLobby() {
         {/* QR Code */}
         <div
           onClick={() => setIsQRExpanded(true)}
-          className="bg-white border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44 cursor-pointer hover:scale-105 transition-transform"
+          className="bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44 cursor-pointer hover:scale-105 transition-transform"
         >
           <div className="w-full flex justify-center aspect-square">
             <QRCode value={gameUrl} style={{ width: '100%', height: '100%' }} level="H" />
@@ -499,7 +499,7 @@ export default function HostLobby() {
             }
           }}
           disabled={teams.length >= 9 || startCountdown !== null}
-          className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-white border-[2px] border-black text-black hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
+          className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-zk-panel-bg border-[2px] border-black text-black hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
         >
           + Add Team
         </button>
@@ -579,7 +579,7 @@ export default function HostLobby() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="bg-white border-[8px] border-[#000000] rounded-3xl p-8 flex flex-col items-center justify-center max-w-sm md:max-w-md w-full cursor-default"
+            className="bg-zk-panel-bg border-[8px] border-[#000000] rounded-3xl p-8 flex flex-col items-center justify-center max-w-sm md:max-w-md w-full cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-full aspect-square mb-6">

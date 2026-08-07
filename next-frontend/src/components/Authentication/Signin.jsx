@@ -147,44 +147,44 @@ const Signin = () => {
   return (
     <>
       <ClerkLoading>
-        <div className="flex-1 w-full bg-zk-yellow flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
+        <div className="flex-1 w-full bg-zk-bg flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
           <Loader2 className="animate-spin text-[#5D3FD3]" size={48} />
         </div>
       </ClerkLoading>
       <ClerkLoaded>
-        <div className="flex-1 w-full bg-zk-yellow flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
+        <div className="flex-1 w-full bg-zk-bg flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
           
           {/* Floating Elements */}
           <motion.div 
             animate={{ y: [-10, 10, -10], rotate: 360 }}
             transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 15, repeat: Infinity, ease: "linear" } }}
-            className="absolute -top-16 -left-16 md:top-0 md:left-0 w-32 h-32 rounded-full border-[4px] border-zk-black bg-[#FF6B4A] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block"
+            className="absolute -top-16 -left-16 md:top-0 md:left-0 w-32 h-32 rounded-full border-[4px] border-zk-border bg-[#FF6B4A] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block"
           />
           <motion.div 
             animate={{ y: [10, -10, 10], rotate: -360 }}
             transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
-            className="absolute -bottom-16 -right-16 md:bottom-0 md:right-0 w-40 h-40 rounded-2xl border-[4px] border-zk-black bg-[#00C2FF] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block"
+            className="absolute -bottom-16 -right-16 md:bottom-0 md:right-0 w-40 h-40 rounded-2xl border-[4px] border-zk-border bg-[#00C2FF] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pointer-events-none hidden md:block"
           />
           <motion.div 
             animate={{ y: [-5, 5, -5] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-1/4 right-[10%] w-8 h-8 rounded-full border-[3px] border-zk-black bg-[#FFD12B] pointer-events-none hidden md:block"
+            className="absolute top-1/4 right-[10%] w-8 h-8 rounded-full border-[3px] border-zk-border bg-[#FFD12B] pointer-events-none hidden md:block"
           />
           <motion.div 
             animate={{ y: [8, -8, 8] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute bottom-1/4 left-[10%] w-6 h-6 border-[3px] border-zk-black bg-white pointer-events-none hidden md:block rotate-45 rounded-xl"
+            className="absolute bottom-1/4 left-[10%] w-6 h-6 border-[3px] border-zk-border bg-zk-panel-bg pointer-events-none hidden md:block rotate-45 rounded-xl"
           />
 
           {/* Main Card Container */}
-          <div className="relative z-10 w-full max-w-md bg-white border-[4px] border-zk-black p-8 md:p-10 rounded-xl">
+          <div className="relative z-10 w-full max-w-md bg-zk-panel-bg border-[4px] border-zk-border p-8 md:p-10 rounded-xl">
             
             {/* Header */}
             <div className="text-center mb-8">
-              <h2 className="text-4xl font-black text-zk-black mb-2 tracking-tight">
+              <h2 className="text-4xl font-black text-zk-text mb-2 tracking-tight">
                 {resetStep === 'verification' ? 'Check your email' : 'Welcome Back!'}
               </h2>
-              <p className="text-zk-black/70 font-bold text-sm">
+              <p className="text-zk-text/70 font-bold text-sm">
                 {resetStep === 'verification' ? `We sent a code to ${form.email}` : 'Ready for another battle?'}
               </p>
             </div>
@@ -203,16 +203,16 @@ const Signin = () => {
                   
                   {/* Email Field */}
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Email Address</label>
+                    <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Email Address</label>
                     <div className="relative flex items-center">
-                      <User className="absolute left-3 text-zk-black/50" size={20} />
+                      <User className="absolute left-3 text-zk-text/50" size={20} />
                       <input 
                         name="email"
                         type="email" 
                         value={form.email}
                         onChange={handleChange}
                         placeholder="you@awesome.com" 
-                        className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
+                        className="w-full border-[3px] border-zk-border pl-10 pr-4 py-3 font-bold text-zk-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                         required
                       />
                     </div>
@@ -220,16 +220,16 @@ const Signin = () => {
 
                   {/* Password Field */}
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Password</label>
+                    <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Password</label>
                     <div className="relative flex items-center">
-                      <Lock className="absolute left-3 text-zk-black/50" size={20} />
+                      <Lock className="absolute left-3 text-zk-text/50" size={20} />
                       <input 
                         name="password"
                         type="password" 
                         value={form.password}
                         onChange={handleChange}
                         placeholder="••••••••" 
-                        className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
+                        className="w-full border-[3px] border-zk-border pl-10 pr-4 py-3 font-bold text-zk-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                         required
                       />
                     </div>
@@ -251,7 +251,7 @@ const Signin = () => {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
+                    className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-border py-4 font-black text-lg mt-2 transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
                   >
                     {loading ? <><Loader2 className="animate-spin" size={20} /> Loading...</> : 'LOG IN'}
                   </button>
@@ -269,46 +269,46 @@ const Signin = () => {
                 <button 
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full bg-white text-zk-black border-[3px] border-zk-black py-3 font-black text-sm flex items-center justify-center gap-3 transition-opacity hover:opacity-90 rounded-lg"
+                  className="w-full bg-zk-panel-bg text-zk-text border-[3px] border-zk-border py-3 font-black text-sm flex items-center justify-center gap-3 transition-opacity hover:opacity-90 rounded-lg"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
                   CONTINUE WITH GOOGLE
                 </button>
 
                 {/* Footer Link */}
-                <div className="text-center mt-8 text-sm font-bold text-zk-black/80">
+                <div className="text-center mt-8 text-sm font-bold text-zk-text/80">
                   New hero? <Link href="/signup" className="text-[#5D3FD3] hover:underline decoration-2 underline-offset-4">Create an account</Link>
                 </div>
               </>
             ) : (
               <form className="flex flex-col gap-6" onSubmit={handleResetPassword}>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Verification Code</label>
+                  <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Verification Code</label>
                   <div className="relative flex items-center">
-                    <Mail className="absolute left-3 text-zk-black/50" size={20} />
+                    <Mail className="absolute left-3 text-zk-text/50" size={20} />
                     <input 
                       name="code"
                       type="text" 
                       value={form.code}
                       onChange={handleChange}
                       placeholder="6-digit code" 
-                      className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
+                      className="w-full border-[3px] border-zk-border pl-10 pr-4 py-3 font-bold text-zk-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-zk-black uppercase tracking-wider">New Password</label>
+                  <label className="text-xs font-bold text-zk-text uppercase tracking-wider">New Password</label>
                   <div className="relative flex items-center">
-                    <Lock className="absolute left-3 text-zk-black/50" size={20} />
+                    <Lock className="absolute left-3 text-zk-text/50" size={20} />
                     <input 
                       name="newPassword"
                       type="password" 
                       value={form.newPassword}
                       onChange={handleChange}
                       placeholder="••••••••" 
-                      className="w-full border-[3px] border-zk-black pl-10 pr-4 py-3 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
+                      className="w-full border-[3px] border-zk-border pl-10 pr-4 py-3 font-bold text-zk-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all rounded-xl"
                       required
                     />
                   </div>
@@ -317,7 +317,7 @@ const Signin = () => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-black py-4 font-black text-lg mt-2 transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
+                  className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] text-white border-[3px] border-zk-border py-4 font-black text-lg mt-2 transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl"
                 >
                   {loading ? <><Loader2 className="animate-spin" size={20} /> Loading...</> : 'RESET PASSWORD'}
                 </button>
@@ -330,7 +330,7 @@ const Signin = () => {
                     setError('');
                   }}
                   disabled={loading}
-                  className="w-full text-sm font-bold text-zk-black/70 hover:text-zk-black hover:underline mt-2"
+                  className="w-full text-sm font-bold text-zk-text/70 hover:text-zk-text hover:underline mt-2"
                 >
                   Back to Sign In
                 </button>

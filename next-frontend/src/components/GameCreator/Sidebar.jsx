@@ -20,11 +20,11 @@ const Sidebar = memo(() => {
 
   return (
     <div className="h-full zk-panel border-t-0 border-l-0 rounded-none flex flex-col overflow-hidden">
-      <div className="h-16 px-5 border-b-[3px] border-zk-black flex items-center justify-between shrink-0 bg-zk-yellow/30">
-        <h2 className="font-black text-zk-black uppercase tracking-wider text-sm">
+      <div className="h-16 px-5 border-b-[3px] border-zk-border flex items-center justify-between shrink-0 bg-zk-bg/30">
+        <h2 className="font-black text-zk-text uppercase tracking-wider text-sm">
           Questions
         </h2>
-        <span className="text-[10px] font-bold bg-zk-purple text-white px-2 py-0.5 rounded border border-zk-black">
+        <span className="text-[10px] font-bold bg-zk-purple text-white px-2 py-0.5 rounded border border-zk-border">
           R{activeRound}
         </span>
       </div>
@@ -41,13 +41,13 @@ const Sidebar = memo(() => {
               transition={{ duration: 0.15 }}
               key={q.id}
               onClick={() => setActiveQuestionId(q.id)}
-              className={`relative w-full text-left p-3 border-[3px] border-zk-black rounded-lg transition-colors ${
+              className={`relative w-full text-left p-3 border-[3px] border-zk-border rounded-lg transition-colors ${
                 q.id === activeQuestionId
                   ? 'bg-zk-purple text-white'
-                  : 'bg-white text-zk-black hover:bg-zk-yellow/20'
+                  : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'
               }`}
             >
-              <span className="absolute -top-2.5 -left-1 bg-zk-black text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-zk-black">
+              <span className="absolute -top-2.5 -left-1 bg-zk-black text-white text-[10px] font-black px-1.5 py-0.5 rounded border border-zk-border">
                 Q{index + 1}
               </span>
               <p className="font-bold text-sm truncate pt-1">
@@ -62,12 +62,12 @@ const Sidebar = memo(() => {
             <button
               type="button"
               onClick={handleAddQuestion}
-              className="w-full border-[3px] border-zk-black bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl transition-colors hover:bg-[#00b34a]"
+              className="w-full border-[3px] border-zk-border bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl transition-colors hover:bg-[#00b34a]"
             >
               <Plus size={20} strokeWidth={3} />
               Add Question
             </button>
-            <p className="text-center text-xs font-bold text-zk-black/40 py-4 px-2">
+            <p className="text-center text-xs font-bold text-zk-text/40 py-4 px-2">
               No questions in this round yet
             </p>
           </>
@@ -75,7 +75,7 @@ const Sidebar = memo(() => {
           <button
             type="button"
             onClick={handleAddQuestion}
-            className="w-full border-[3px] border-zk-black bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl mt-1 transition-colors hover:bg-[#00b34a]"
+            className="w-full border-[3px] border-zk-border bg-zk-green text-white py-3 font-black text-sm flex items-center justify-center gap-2 rounded-xl mt-1 transition-colors hover:bg-[#00b34a]"
           >
             <Plus size={20} strokeWidth={3} />
             Add Question

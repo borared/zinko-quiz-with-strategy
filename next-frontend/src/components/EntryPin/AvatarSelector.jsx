@@ -17,17 +17,17 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white border-[4px] border-zk-black rounded-2xl w-full max-w-[450px] max-h-[80vh] flex flex-col overflow-hidden"
+        className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl w-full max-w-[450px] max-h-[80vh] flex flex-col overflow-hidden"
       >
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b-[3px] border-zk-black">
-          <h3 className="text-xl font-black italic text-zk-black uppercase tracking-tight permanent-marker-regular">
+        <div className="flex items-center justify-between p-6 border-b-[3px] border-zk-border">
+          <h3 className="text-xl font-black italic text-zk-text uppercase tracking-tight permanent-marker-regular">
             Pick Your Character
           </h3>
           <button 
             onClick={onClose}
-            className="p-1 hover:bg-gray-200 rounded-lg transition-colors border-[2px] border-transparent hover:border-zk-black"
+            className="p-1 hover:bg-gray-200 rounded-lg transition-colors border-[2px] border-transparent hover:border-zk-border"
           >
             <X size={24} />
           </button>
@@ -47,8 +47,8 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                   whileTap={{ scale: 0.95 }}
                   className={`relative cursor-pointer aspect-square rounded-xl border-[3px] flex items-center justify-center overflow-hidden transition-colors ${
                     isSelected 
-                      ? 'border-zk-black bg-[#FFCD29]'
-                      : 'border-zk-black/10 bg-white hover:border-zk-black/30'
+                      ? 'border-zk-border bg-[#FFCD29]'
+                      : 'border-zk-border/10 bg-zk-panel-bg hover:border-zk-border/30'
                   }`}
                 >
                   <img 
@@ -62,7 +62,7 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="absolute top-2 right-2 bg-white rounded-full p-0.5 border-[2px] border-zk-black shadow-sm"
+                      className="absolute top-2 right-2 bg-zk-panel-bg rounded-full p-0.5 border-[2px] border-zk-border shadow-sm"
                     >
                       <Check size={14} strokeWidth={4} />
                     </motion.div>

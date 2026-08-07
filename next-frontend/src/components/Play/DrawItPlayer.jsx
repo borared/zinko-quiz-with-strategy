@@ -103,7 +103,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
       </h2>
 
       {/* Canvas Container */}
-      <div className="relative w-full flex-1 max-h-[500px] bg-white border-[4px] border-[#000000] rounded-xl overflow-hidden">
+      <div className="relative w-full flex-1 max-h-[500px] bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl overflow-hidden">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
@@ -125,7 +125,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
               <p className="text-gray-300 font-bold mt-1 text-sm uppercase">{winnerNickname} guessed the word.</p>
               
               {word && (
-                <div className="mt-4 bg-white border-[3px] border-[#000000] rounded-xl px-6 py-2">
+                <div className="mt-4 bg-zk-panel-bg border-[3px] border-[#000000] rounded-xl px-6 py-2">
                   <span className="text-black font-black text-2xl uppercase tracking-widest">{word}</span>
                 </div>
               )}
@@ -143,7 +143,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
             onChange={(e) => setGuess(e.target.value)}
             disabled={winnerTeam !== null || hasGuessedCorrectly}
             placeholder={winnerTeam ? "Round Over..." : "Type your guess..."}
-            className="flex-1 bg-white border-[3px] border-[#000000] rounded-xl px-4 py-3 font-black text-lg text-black placeholder:text-gray-400 outline-none focus:ring-4 focus:ring-white/50"
+            className="flex-1 bg-zk-panel-bg border-[3px] border-[#000000] rounded-xl px-4 py-3 font-black text-lg text-black placeholder:text-gray-400 outline-none focus:ring-4 focus:ring-white/50"
           />
           <button
             type="submit"

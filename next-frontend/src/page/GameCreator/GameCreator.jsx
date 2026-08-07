@@ -19,7 +19,7 @@ const SIDEBAR_W = 320;
 
 const QUIZ_TITLE_PLACEHOLDER = `Name your quiz (max ${QUIZ_TITLE_MAX_LENGTH} chars)`;
 const QUIZ_TITLE_INPUT_CLASS =
-  "bg-transparent border-0 border-b-[3px] border-b-zk-blue font-['Outfit'] font-bold text-zk-black focus:outline-none transition-colors placeholder:font-medium placeholder:italic placeholder:text-zk-black/40 placeholder:normal-case";
+  "bg-transparent border-0 border-b-[3px] border-b-zk-blue font-['Outfit'] font-bold text-zk-text focus:outline-none transition-colors placeholder:font-medium placeholder:italic placeholder:text-zk-text/40 placeholder:normal-case";
 
 const CreatorSkeleton = () => (
   <div className="creator-shell min-h-[calc(100vh-76px)] font-sans relative">
@@ -41,12 +41,12 @@ const CreatorSkeleton = () => (
         style={{ width: SIDEBAR_W, height: 'calc(100vh - 76px)' }}
       >
         <div className="h-full zk-panel border-t-0 border-l-0 rounded-none flex flex-col">
-          <div className="h-16 border-b-[3px] border-zk-black px-6 flex items-center">
+          <div className="h-16 border-b-[3px] border-zk-border px-6 flex items-center">
             <div className="h-4 w-32 zk-skeleton rounded" />
           </div>
           <div className="flex-1 p-4 flex flex-col gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-16 zk-skeleton rounded-lg border-[3px] border-zk-black/20" />
+              <div key={i} className="h-16 zk-skeleton rounded-lg border-[3px] border-zk-border/20" />
             ))}
           </div>
         </div>
@@ -55,13 +55,13 @@ const CreatorSkeleton = () => (
         <div className="lg:ml-80 max-w-[1200px] mx-auto flex flex-col gap-6">
           <div className="grid grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+              <div key={i} className="h-20 zk-skeleton rounded-xl border-[3px] border-zk-border/20" />
             ))}
           </div>
-          <div className="h-64 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+          <div className="h-64 zk-skeleton rounded-xl border-[3px] border-zk-border/20" />
           <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-24 zk-skeleton rounded-xl border-[3px] border-zk-black/20" />
+              <div key={i} className="h-24 zk-skeleton rounded-xl border-[3px] border-zk-border/20" />
             ))}
           </div>
         </div>
@@ -175,8 +175,8 @@ const GameCreatorContent = () => {
               <button
                 type="button"
                 onClick={() => setIsImageModalOpen(true)}
-                className={`flex items-center gap-2 px-3 py-1.5 font-bold text-sm rounded-lg border-[3px] border-zk-black shadow-none ${
-                  coverImage ? 'bg-zk-blue text-white' : 'bg-white text-zk-black'
+                className={`flex items-center gap-2 px-3 py-1.5 font-bold text-sm rounded-lg border-[3px] border-zk-border shadow-none ${
+                  coverImage ? 'bg-zk-blue text-white' : 'bg-zk-panel-bg text-zk-text'
                 }`}
               >
                 <Image size={16} />
@@ -185,7 +185,7 @@ const GameCreatorContent = () => {
               <button
                 type="button"
                 onClick={() => setIsAiSidebarOpen(true)}
-                className="lg:hidden border-[3px] border-zk-black bg-zk-purple text-white p-2 rounded-lg transition-colors hover:bg-zk-purple-light"
+                className="lg:hidden border-[3px] border-zk-border bg-zk-purple text-white p-2 rounded-lg transition-colors hover:bg-zk-purple-light"
                 aria-label="Open AI assistant"
               >
                 <Wand2 size={18} strokeWidth={3} />
@@ -194,7 +194,7 @@ const GameCreatorContent = () => {
                 type="button"
                 onClick={onSave}
                 disabled={isSaving}
-                className="bg-zk-green text-white px-4 lg:px-6 py-2 font-black text-sm uppercase tracking-wider rounded-lg border-[3px] border-zk-black shadow-none disabled:opacity-50"
+                className="bg-zk-green text-white px-4 lg:px-6 py-2 font-black text-sm uppercase tracking-wider rounded-lg border-[3px] border-zk-border shadow-none disabled:opacity-50"
               >
                 {isSaving ? 'Saving...' : 'Save'}
               </button>
@@ -223,10 +223,10 @@ const GameCreatorContent = () => {
                     key={q.id}
                     type="button"
                     onClick={() => setActiveQuestionId(q.id)}
-                    className={`shrink-0 px-3 py-2 border-[2px] border-zk-black rounded-lg font-bold text-xs transition-colors ${
+                    className={`shrink-0 px-3 py-2 border-[2px] border-zk-border rounded-lg font-bold text-xs transition-colors ${
                       q.id === activeQuestionId
                         ? 'bg-zk-purple text-white'
-                        : 'bg-white text-zk-black hover:bg-zk-yellow/20'
+                        : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'
                     }`}
                   >
                     Q{index + 1}
@@ -235,7 +235,7 @@ const GameCreatorContent = () => {
                 <button
                   type="button"
                   onClick={handleAddQuestion}
-                  className="shrink-0 px-3 py-2 border-[2px] border-dashed border-zk-black rounded-lg font-bold text-xs bg-zk-green text-white"
+                  className="shrink-0 px-3 py-2 border-[2px] border-dashed border-zk-border rounded-lg font-bold text-xs bg-zk-green text-white"
                 >
                   + Add
                 </button>
@@ -255,17 +255,17 @@ const GameCreatorContent = () => {
                       key={round.id}
                       type="button"
                       onClick={() => setActiveRound(round.id)}
-                      className={`relative border-[3px] border-zk-black p-3 lg:p-4 transition-colors rounded-xl ${
+                      className={`relative border-[3px] border-zk-border p-3 lg:p-4 transition-colors rounded-xl ${
                         isActive
-                          ? `${round.color} text-zk-black`
-                          : 'bg-white text-zk-black hover:bg-zk-yellow/20'
+                          ? `${round.color} text-zk-text`
+                          : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-left min-w-0">
                           <p
                             className={`text-[9px] lg:text-[10px] font-black uppercase tracking-widest ${
-                              isActive ? 'text-zk-black/60' : 'text-zk-black/50'
+                              isActive ? 'text-zk-text/60' : 'text-zk-text/50'
                             }`}
                           >
                             {round.difficulty}
@@ -275,12 +275,12 @@ const GameCreatorContent = () => {
                           </h3>
                         </div>
                         <div
-                          className={`w-9 h-9 lg:w-10 lg:h-10 border-[3px] border-zk-black flex items-center justify-center font-black text-sm rounded-lg shrink-0 ${
+                          className={`w-9 h-9 lg:w-10 lg:h-10 border-[3px] border-zk-border flex items-center justify-center font-black text-sm rounded-lg shrink-0 ${
                             isComplete
                               ? 'bg-zk-blue text-white'
                               : count > 0
-                                ? 'bg-white text-zk-black'
-                                : 'bg-zk-black/5 text-zk-black/40'
+                                ? 'bg-zk-panel-bg text-zk-text'
+                                : 'bg-zk-black/5 text-zk-text/40'
                           }`}
                         >
                           {count}/5
@@ -318,16 +318,16 @@ const GameCreatorContent = () => {
                     exit={{ opacity: 0 }}
                     className="zk-panel border-dashed p-10 lg:p-12 flex flex-col items-center justify-center gap-3 text-center min-h-[200px]"
                   >
-                    <p className="font-['Outfit'] text-3xl font-black text-zk-black/40 tracking-tight">
+                    <p className="font-['Outfit'] text-3xl font-black text-zk-text/40 tracking-tight">
                       Pick a question
                     </p>
-                    <p className="font-bold text-sm text-zk-black/50">
+                    <p className="font-bold text-sm text-zk-text/50">
                       Select from the list or add a new one to start editing
                     </p>
                     <button
                       type="button"
                       onClick={handleAddQuestion}
-                      className="border-[3px] border-zk-black bg-zk-green text-white px-6 py-2 rounded-lg font-bold mt-2 transition-colors hover:bg-[#00b34a] lg:hidden"
+                      className="border-[3px] border-zk-border bg-zk-green text-white px-6 py-2 rounded-lg font-bold mt-2 transition-colors hover:bg-[#00b34a] lg:hidden"
                     >
                       + Add Question
                     </button>
@@ -341,7 +341,7 @@ const GameCreatorContent = () => {
               <button
                 type="button"
                 onClick={() => setIsAiSidebarOpen(true)}
-                className="border-[3px] border-zk-black bg-zk-purple text-white p-4 rounded-xl flex flex-col items-center gap-2 transition-colors hover:bg-zk-purple-light group"
+                className="border-[3px] border-zk-border bg-zk-purple text-white p-4 rounded-xl flex flex-col items-center gap-2 transition-colors hover:bg-zk-purple-light group"
               >
                 <Wand2
                   size={24}
@@ -386,8 +386,8 @@ const GameCreatorContent = () => {
                 <X size={20} />
               </button>
 
-              <h2 className="font-['Outfit'] text-4xl font-black text-zk-black tracking-tight mb-1">Quiz Cover</h2>
-              <p className="text-zk-black/60 font-bold text-sm mb-6 tracking-wide">
+              <h2 className="font-['Outfit'] text-4xl font-black text-zk-text tracking-tight mb-1">Quiz Cover</h2>
+              <p className="text-zk-text/60 font-bold text-sm mb-6 tracking-wide">
                 Choose a visual for your game
               </p>
 
@@ -395,7 +395,7 @@ const GameCreatorContent = () => {
                 <div
                   role="button"
                   tabIndex={0}
-                  className="aspect-video bg-zk-black/5 border-[3px] border-dashed border-zk-black rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zk-purple/5 transition-all group"
+                  className="aspect-video bg-zk-black/5 border-[3px] border-dashed border-zk-border rounded-xl overflow-hidden flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zk-purple/5 transition-all group"
                   onClick={() => document.getElementById('cover-upload')?.click()}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && document.getElementById('cover-upload')?.click()
@@ -407,9 +407,9 @@ const GameCreatorContent = () => {
                     <>
                       <Upload
                         size={36}
-                        className="text-zk-black/30 group-hover:text-zk-purple transition-colors"
+                        className="text-zk-text/30 group-hover:text-zk-purple transition-colors"
                       />
-                      <span className="font-bold text-sm uppercase tracking-wider text-zk-black/40">
+                      <span className="font-bold text-sm uppercase tracking-wider text-zk-text/40">
                         Upload image
                       </span>
                     </>
@@ -432,7 +432,7 @@ const GameCreatorContent = () => {
 
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <LinkIcon size={16} className="text-zk-black/40" />
+                    <LinkIcon size={16} className="text-zk-text/40" />
                   </div>
                   <input
                     type="text"
@@ -443,7 +443,7 @@ const GameCreatorContent = () => {
                         : ''
                     }
                     onChange={(e) => setCoverImage(e.target.value)}
-                    className="w-full border-[3px] border-zk-black p-3 pl-11 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-zk-purple/20 rounded-xl"
+                    className="w-full border-[3px] border-zk-border p-3 pl-11 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-zk-purple/20 rounded-xl"
                   />
                 </div>
 
@@ -453,7 +453,7 @@ const GameCreatorContent = () => {
                     setIsImageModalOpen(false);
                     if (coverImage) showToast('Cover uploaded successfully!', 'success');
                   }}
-                  className="w-full border-[3px] border-zk-black bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl transition-colors hover:bg-zk-black/90"
+                  className="w-full border-[3px] border-zk-border bg-zk-black text-white py-3 font-black uppercase tracking-widest rounded-xl transition-colors hover:bg-zk-black/90"
                 >
                   Done
                 </button>

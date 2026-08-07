@@ -16,10 +16,10 @@ const PricingCard = ({
   const isPro = theme === 'pro';
   const isSchool = theme === 'school';
   
-  const cardBorderClass = isPro ? 'border-[#6E5CF2]' : 'border-zk-black';
-  const buttonBgClass = isPro ? 'bg-[#6E5CF2] text-white hover:bg-zk-blue border-zk-black' : 
-                        isSchool ? 'bg-[#5D3FD3] text-white hover:bg-zk-blue border-zk-black' : 
-                        'bg-white text-zk-black hover:bg-gray-100 border-zk-black';
+  const cardBorderClass = isPro ? 'border-[#6E5CF2]' : 'border-zk-border';
+  const buttonBgClass = isPro ? 'bg-[#6E5CF2] text-white hover:bg-zk-blue border-zk-border' : 
+                        isSchool ? 'bg-[#5D3FD3] text-white hover:bg-zk-blue border-zk-border' : 
+                        'bg-zk-panel-bg text-zk-text hover:bg-gray-100 border-zk-border';
                         
   const getIcon = (type) => {
     switch(type) {
@@ -32,7 +32,7 @@ const PricingCard = ({
   };
 
   return (
-    <div className={`relative flex flex-col h-full bg-white border-[4px] ${cardBorderClass} rounded-xl p-8 transition-transform duration-300 hover:-translate-y-4`}>
+    <div className={`relative flex flex-col h-full bg-zk-panel-bg border-[4px] ${cardBorderClass} rounded-xl p-8 transition-transform duration-300 hover:-translate-y-4`}>
       
       {isPopular && (
         <>
@@ -54,24 +54,24 @@ const PricingCard = ({
               }}
             />
           </div>
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF6B4A] text-white font-black text-[10px] sm:text-xs px-3 sm:px-4 py-1 uppercase tracking-wider border-[3px] border-zk-black whitespace-nowrap z-10 rounded-lg">
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF6B4A] text-white font-black text-[10px] sm:text-xs px-3 sm:px-4 py-1 uppercase tracking-wider border-[3px] border-zk-border whitespace-nowrap z-10 rounded-lg">
             Most Popular
           </div>
         </>
       )}
 
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-zk-black mb-1">{title}</h3>
+        <h3 className="text-2xl font-bold text-zk-text mb-1">{title}</h3>
         <div className="flex items-baseline gap-1 mb-2">
-          <span className="text-5xl font-black text-zk-black tracking-tighter">{price}</span>
-          {price !== 'Free' && price !== 'Custom' && <span className="font-bold text-zk-black/60">/mo</span>}
+          <span className="text-5xl font-black text-zk-text tracking-tighter">{price}</span>
+          {price !== 'Free' && price !== 'Custom' && <span className="font-bold text-zk-text/60">/mo</span>}
         </div>
-        <p className="text-sm font-bold text-zk-black/60">{subtitle}</p>
+        <p className="text-sm font-bold text-zk-text/60">{subtitle}</p>
       </div>
 
       <ul className="flex flex-col gap-4 mb-8 flex-1">
         {features.map((feature, idx) => (
-          <li key={idx} className="flex items-start sm:items-center gap-3 text-sm font-bold text-zk-black/80">
+          <li key={idx} className="flex items-start sm:items-center gap-3 text-sm font-bold text-zk-text/80">
             <div className="mt-0.5 sm:mt-0">{getIcon(feature.icon)}</div>
             <span className={feature.icon === 'cross' ? 'text-gray-400 line-through decoration-2' : ''}>
               {feature.text}

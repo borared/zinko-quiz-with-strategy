@@ -40,7 +40,7 @@ export default function CreatorSelectPicker({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center justify-between gap-3 bg-white text-zk-black border-[2px] border-zk-black hover:bg-zk-yellow/20 px-3 py-1.5 transition-colors font-black text-sm uppercase tracking-widest ${
+        className={`flex items-center justify-between gap-3 bg-zk-panel-bg text-zk-text border-[2px] border-zk-border hover:bg-zk-bg/20 px-3 py-1.5 transition-colors font-black text-sm uppercase tracking-widest ${
           fullWidth ? 'w-full' : 'min-w-[12.5rem]'
         } ${
           open
@@ -67,7 +67,7 @@ export default function CreatorSelectPicker({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: opensUp ? -4 : 4, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className={`absolute left-0 right-0 w-full bg-white border-[2px] border-zk-black z-[100] overflow-hidden ${
+            className={`absolute left-0 right-0 w-full bg-zk-panel-bg border-[2px] border-zk-border z-[100] overflow-hidden ${
               opensUp
                 ? 'bottom-[calc(100%-3px)] border-b-0 rounded-t-lg rounded-b-none'
                 : 'top-[calc(100%-3px)] border-t-0 rounded-b-lg rounded-t-none'
@@ -85,8 +85,8 @@ export default function CreatorSelectPicker({
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 hover:bg-zk-yellow/30 font-bold text-zk-black text-sm transition-colors text-left ${
-                    !isLast ? 'border-b border-zk-black/10' : ''
+                  className={`w-full flex items-center justify-between px-4 py-2.5 hover:bg-zk-bg/30 font-bold text-zk-text text-sm transition-colors text-left ${
+                    !isLast ? 'border-b border-zk-border/10' : ''
                   }`}
                 >
                   <span>{option.label}</span>

@@ -71,9 +71,9 @@ export default function ResultOverlay({ resultData }) {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="bg-white border-[4px] border-zk-black rounded-2xl px-8 py-3"
+              className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl px-8 py-3"
             >
-              <p className="text-zk-black font-black text-5xl md:text-6xl tracking-widest gasoek-one-regular">
+              <p className="text-zk-text font-black text-5xl md:text-6xl tracking-widest gasoek-one-regular">
                 +{resultData.pointsEarned?.toLocaleString()}
               </p>
             </motion.div>
@@ -81,7 +81,7 @@ export default function ResultOverlay({ resultData }) {
         )}
 
         <div className="mt-10 flex items-center justify-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-white animate-pulse shadow-md" />
+          <div className="w-3 h-3 rounded-full bg-zk-panel-bg animate-pulse shadow-md" />
           <p 
             className="text-white/90 text-3xl font-bold drop-shadow-md"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
@@ -100,7 +100,7 @@ export default function ResultOverlay({ resultData }) {
           opacity: { duration: 0.5 },
           y: { repeat: Infinity, duration: 2.5, ease: "easeInOut" } 
         }}
-        className="absolute bottom-6 left-6 z-20 bg-white text-zk-black border-[4px] border-zk-black rounded-xl px-6 py-2 font-['Outfit'] tracking-wide"
+        className="absolute bottom-6 left-6 z-20 bg-zk-panel-bg text-zk-text border-[4px] border-zk-border rounded-xl px-6 py-2 font-['Outfit'] tracking-wide"
       >
         <p className="font-bold text-xl md:text-2xl">
           Total Score: <span className="text-zk-blue ml-2 font-black text-2xl md:text-3xl">{resultData.totalScore?.toLocaleString()}</span>
@@ -119,7 +119,7 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.5, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.5 }
             }}
-            className="px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl bg-zk-yellow text-zk-black font-['Outfit'] tracking-wide"
+            className="px-6 py-2 rounded-xl border-[4px] border-zk-border font-bold text-xl md:text-2xl bg-zk-bg text-zk-text font-['Outfit'] tracking-wide"
           >
             +20% Points!
           </motion.div>
@@ -135,7 +135,7 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.4, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.4 }
             }}
-            className="px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl bg-zk-yellow text-zk-black font-['Outfit'] tracking-wide"
+            className="px-6 py-2 rounded-xl border-[4px] border-zk-border font-bold text-xl md:text-2xl bg-zk-bg text-zk-text font-['Outfit'] tracking-wide"
           >
             Rabbit Bonus 2x!
           </motion.div>
@@ -151,9 +151,9 @@ export default function ResultOverlay({ resultData }) {
               opacity: { delay: 0.6, duration: 0.5 },
               y: { repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.6 }
             }}
-            className={`px-6 py-2 rounded-xl border-[4px] border-zk-black font-bold text-xl md:text-2xl font-['Outfit'] tracking-wide ${
+            className={`px-6 py-2 rounded-xl border-[4px] border-zk-border font-bold text-xl md:text-2xl font-['Outfit'] tracking-wide ${
               resultData.stolenPoints > 0 
-                ? 'bg-zk-yellow text-zk-black'
+                ? 'bg-zk-bg text-zk-text'
                 : 'bg-black text-white border-white'
             }`}
           >

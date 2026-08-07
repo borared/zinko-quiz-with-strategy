@@ -34,7 +34,7 @@ export default function PlayHeader({ nickname, question, timeLeft, totalTime = D
 
       {/* Status bar */}
       <div className="w-full mt-4 mb-1">
-        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-zk-panel-bg/10 overflow-hidden">
           <motion.div
             className="h-full bg-[#FFCD29] rounded-full"
             animate={{ width: `${(timeLeft / totalTime) * 100}%` }}

@@ -59,12 +59,12 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-white border-[4px] border-zk-black rounded-2xl overflow-hidden mb-6 p-8"
+          className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl overflow-hidden mb-6 p-8"
         >
-          <p className="text-2xl lg:text-4xl font-black text-zk-black text-center leading-tight uppercase">
+          <p className="text-2xl lg:text-4xl font-black text-zk-text text-center leading-tight uppercase">
             {question.questionText}
           </p>
-          <p className="text-center text-zk-black/50 font-bold text-sm mt-3 uppercase tracking-widest">
+          <p className="text-center text-zk-text/50 font-bold text-sm mt-3 uppercase tracking-widest">
             {showOrderedKey
               ? 'Correct step order (answer key)'
               : `Players order ${layerCount} steps`}
@@ -81,12 +81,12 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
                 transition={{ delay: index * 0.06 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-14 h-14 rounded-xl border-[3px] border-zk-black bg-zk-yellow flex flex-col items-center justify-center shrink-0">
-                  <span className="text-[9px] font-black uppercase text-zk-black/50">Step</span>
-                  <span className="font-black text-lg text-zk-black">{index + 1}</span>
+                <div className="w-14 h-14 rounded-xl border-[3px] border-zk-border bg-zk-bg flex flex-col items-center justify-center shrink-0">
+                  <span className="text-[9px] font-black uppercase text-zk-text/50">Step</span>
+                  <span className="font-black text-lg text-zk-text">{index + 1}</span>
                 </div>
                 <div
-                  className={`flex-1 rounded-xl border-[3px] border-zk-black px-4 py-3 font-black text-white ${answer.color}`}
+                  className={`flex-1 rounded-xl border-[3px] border-zk-border px-4 py-3 font-black text-white ${answer.color}`}
                 >
                   {displayAnswerText(answer.text) || `Step ${index + 1}`}
                 </div>
@@ -94,15 +94,15 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
             ))}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto w-full rounded-xl border-[3px] border-zk-black bg-white/90 p-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/50 mb-3">
+          <div className="max-w-2xl mx-auto w-full rounded-xl border-[3px] border-zk-border bg-zk-panel-bg/90 p-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/50 mb-3">
               Steps in play
             </p>
             <div className="flex flex-wrap gap-2">
               {steps.map((answer) => (
                 <div
                   key={answer.id}
-                  className={`rounded-xl border-[3px] border-zk-black px-4 py-2 font-black text-white ${answer.color}`}
+                  className={`rounded-xl border-[3px] border-zk-border px-4 py-2 font-black text-white ${answer.color}`}
                 >
                   {displayAnswerText(answer.text) || 'Step'}
                 </div>

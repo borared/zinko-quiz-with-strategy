@@ -148,7 +148,7 @@ function PoolChip({
         }
       }}
       className={`flex rounded-xl border-[3px] text-left touch-none select-none ${compact ? 'flex-col items-center gap-1.5 px-2.5 py-2.5 text-center' : 'items-center gap-2 px-3 py-3'
-        } ${isSelected ? 'border-zk-yellow ring-2 ring-zk-yellow' : 'border-zk-black'
+        } ${isSelected ? 'border-zk-yellow ring-2 ring-zk-yellow' : 'border-zk-border'
         } ${getPlayLayerColor(answer.color, answer.layerIndex)} text-white min-w-0 ${fillWidth ? 'w-full' : compact ? 'w-full' : 'shrink-0'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
         } ${isDragging ? 'opacity-[0.35]' : isSelected ? 'scale-[1.02]' : ''}`}
       {...dragHandleProps}
@@ -230,7 +230,7 @@ function LayerSlot({
       transition={LAYER_SPRING}
       className="relative min-w-0 pt-2"
     >
-      <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-[2px] sm:border-[3px] border-zk-black min-w-[24px] sm:min-w-[28px] text-center pointer-events-none">
+      <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-[2px] sm:border-[3px] border-zk-border min-w-[24px] sm:min-w-[28px] text-center pointer-events-none">
         {index + 1}
       </span>
 
@@ -273,10 +273,10 @@ function EmptyBankDropZoneVisual({
     <div
       className={`col-span-full min-h-[120px] sm:min-h-[140px] rounded-lg border-2 border-dashed flex items-center justify-center px-3 ${(selectedChipId && !isDisabled) || active
         ? 'border-[#5D3FD3] bg-[#5D3FD3]/10'
-        : 'border-zk-black/20 bg-transparent'
+        : 'border-zk-border/20 bg-transparent'
         }`}
     >
-      <p className="text-xs sm:text-sm font-bold text-zk-black/40 text-center leading-tight">
+      <p className="text-xs sm:text-sm font-bold text-zk-text/40 text-center leading-tight">
         {selectedChipId && !isDisabled
           ? 'Tap or drop here to return a step'
           : 'Drag steps back here to reorder'}
@@ -311,11 +311,11 @@ function AnswerBank({
         e.stopPropagation();
         onReturnSelected();
       }}
-      className={`rounded-xl border-[3px] border-zk-black flex flex-col w-full shrink-0 transition-shadow ${inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-white/90 p-2 gap-1.5'
+      className={`rounded-xl border-[3px] border-zk-border flex flex-col w-full shrink-0 transition-shadow ${inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-zk-panel-bg/90 p-2 gap-1.5'
         } ${!isDisabled && selectedChipId ? 'cursor-pointer ring-2 ring-[#5D3FD3]/30' : ''} ${bankActive ? 'ring-2 ring-[#5D3FD3]/40 shadow-[0_0_0_3px_#5D3FD3]' : ''
         }`}
     >
-      <p className="text-xs font-black uppercase tracking-widest text-zk-black/50 px-0.5">
+      <p className="text-xs font-black uppercase tracking-widest text-zk-text/50 px-0.5">
         Answer bank {selectedChipId ? '· tap here to return' : ''}
       </p>
       <div
@@ -593,7 +593,7 @@ export default function DragLayersPlay({
   const dragOverSlotBg = inPanel ? 'rgba(93, 63, 211, 0.12)' : 'rgba(255, 255, 255, 0.18)';
   const emptyBorderColor = inPanel ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255,255,255,0.5)';
   const placeholderClass = inPanel
-    ? 'text-zk-black/45 font-bold text-xs sm:text-sm text-center px-1 self-center leading-tight'
+    ? 'text-zk-text/45 font-bold text-xs sm:text-sm text-center px-1 self-center leading-tight'
     : 'text-white/70 font-bold text-xs sm:text-sm text-center px-1 self-center leading-tight';
 
   const activeAnswer = activeId ? answerMap[activeId] : null;
@@ -683,11 +683,11 @@ export default function DragLayersPlay({
           whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
           onClick={handleSubmit}
           disabled={!isComplete || isDisabled}
-          className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-black font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${isComplete && !isDisabled
+          className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-border font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${isComplete && !isDisabled
             ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
             : inPanel
-              ? 'bg-zk-black/10 text-zk-black/35 cursor-not-allowed'
-              : 'bg-white/30 text-white/50 cursor-not-allowed'
+              ? 'bg-zk-black/10 text-zk-text/35 cursor-not-allowed'
+              : 'bg-zk-panel-bg/30 text-white/50 cursor-not-allowed'
             }`}
         >
           <Send size={16} />

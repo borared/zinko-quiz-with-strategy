@@ -13,10 +13,10 @@ export default function LibraryCollectionSection({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <h2 className="font-['Outfit'] text-xl md:text-2xl font-black text-zk-black tracking-tight">
+        <h2 className="font-['Outfit'] text-xl md:text-2xl font-black text-zk-text tracking-tight">
           {title}
         </h2>
-        <span className="inline-flex min-w-[1.75rem] items-center justify-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-2 py-0.5 text-xs font-black text-zk-black">
+        <span className="inline-flex min-w-[1.75rem] items-center justify-center rounded-lg border-[2px] border-zk-border bg-zk-bg px-2 py-0.5 text-xs font-black text-zk-text">
           {count}
         </span>
       </div>

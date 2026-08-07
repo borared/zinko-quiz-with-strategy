@@ -8,12 +8,12 @@ export default function SkillsPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-zk-yellow text-zk-black font-sans selection:bg-zk-black selection:text-zk-white pb-24">
+    <div className="min-h-screen bg-zk-bg text-zk-text font-sans selection:bg-zk-black selection:text-zk-white pb-24">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-zk-yellow border-b-[4px] border-zk-black flex items-center">
+      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-zk-bg border-b-[4px] border-zk-border flex items-center">
         <button 
           onClick={() => router.push('/')}
-          className="flex items-center gap-2 bg-zk-white border-[3px] border-zk-black px-4 py-2 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all text-xl font-['Outfit']"
+          className="flex items-center gap-2 bg-zk-panel-bg border-[3px] border-zk-border px-4 py-2 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all text-xl font-['Outfit']"
         >
           <ArrowLeftIcon />
           Back to Home
@@ -35,7 +35,7 @@ export default function SkillsPage() {
             Master the Elements
           </h1>
           
-          <p className="text-xl md:text-2xl text-zk-black font-bold font-['Outfit'] max-w-2xl px-8 py-4">
+          <p className="text-xl md:text-2xl text-zk-text font-bold font-['Outfit'] max-w-2xl px-8 py-4">
             Discover the powerful skills that will turn the tide of every round. Timing is everything.
           </p>
         </motion.div>
@@ -61,15 +61,15 @@ export default function SkillsPage() {
                 <div className="flex-1 w-full flex justify-center">
                   <motion.div 
                     whileHover={{ scale: 1.05, rotate: isEven ? 5 : -5 }}
-                    className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl border-[6px] border-zk-black flex items-center justify-center bg-zk-white"
+                    className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl border-[6px] border-zk-border flex items-center justify-center bg-zk-panel-bg"
                   >
                     <div 
-                      className="absolute inset-4 rounded-2xl border-[4px] border-zk-black border-dashed opacity-30"
+                      className="absolute inset-4 rounded-2xl border-[4px] border-zk-border border-dashed opacity-30"
                       style={{ borderColor: skill.color }}
                     />
                     
                     <div
-                      className="w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border-[5px] border-zk-black"
+                      className="w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border-[5px] border-zk-border"
                       style={{ backgroundColor: skill.color }}
                     >
                       <Icon size={72} className="text-zk-white" strokeWidth={3} />
@@ -87,13 +87,13 @@ export default function SkillsPage() {
                   </h2>
                   
                   <div 
-                    className="inline-block px-6 py-3 rounded-xl border-[4px] border-zk-black font-black text-xl mb-6 text-zk-white font-['Outfit']"
+                    className="inline-block px-6 py-3 rounded-xl border-[4px] border-zk-border font-black text-xl mb-6 text-zk-white font-['Outfit']"
                     style={{ backgroundColor: skill.color }}
                   >
                     {skill.skillDescription}
                   </div>
                   
-                  <p className="text-zk-black text-lg font-bold leading-relaxed font-['Outfit'] mt-2">
+                  <p className="text-zk-text text-lg font-bold leading-relaxed font-['Outfit'] mt-2">
                     Strategic use of {skill.name} can completely change the dynamic of the game. Wait for the perfect moment to deploy this ability and leave your opponents scrambling to catch up.
                   </p>
                 </div>
@@ -109,14 +109,14 @@ export default function SkillsPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="inline-flex flex-col items-center p-12 rounded-3xl bg-zk-blue border-[6px] border-zk-black"
+          className="inline-flex flex-col items-center p-12 rounded-3xl bg-zk-blue border-[6px] border-zk-border"
         >
           <h2 className="gasoek-one-regular text-4xl md:text-5xl text-zk-white mb-8" style={{ WebkitTextStroke: '2px black' }}>
             Ready to test your strategy?
           </h2>
           <button 
             onClick={() => router.push('/')}
-            className="bg-zk-yellow text-zk-black border-[4px] border-zk-black px-8 py-3 rounded-2xl font-bold text-4xl uppercase hover:scale-105 active:scale-95 transition-all"
+            className="bg-zk-bg text-zk-text border-[4px] border-zk-border px-8 py-3 rounded-2xl font-bold text-4xl uppercase hover:scale-105 active:scale-95 transition-all"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             Play Now

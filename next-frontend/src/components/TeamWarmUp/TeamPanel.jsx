@@ -9,7 +9,7 @@ const TeamPanel = ({ teamName, playerCount, color }) => {
 
   return (
     <div
-      className="flex-1 border-[4px] border-zk-black p-4 flex flex-col gap-3 rounded-xl"
+      className="flex-1 border-[4px] border-zk-border p-4 flex flex-col gap-3 rounded-xl"
       style={{ backgroundColor: bgColor, boxShadow: `8px 8px 0px 0px ${shadowColor}` }}
     >
       {/* Panel header */}
@@ -18,12 +18,12 @@ const TeamPanel = ({ teamName, playerCount, color }) => {
           <span className="font-black text-xl text-white uppercase tracking-wider">
             {teamName}
           </span>
-          <div className="w-7 h-7 bg-white/20 border-[2px] border-white flex items-center justify-center">
+          <div className="w-7 h-7 bg-zk-panel-bg/20 border-[2px] border-white flex items-center justify-center">
             <Edit3 size={13} color="white" />
           </div>
         </div>
-        <div className="bg-white border-[2px] border-zk-black px-2 py-0.5 rounded-xl">
-          <span className="font-black text-[10px] text-zk-black uppercase tracking-wider">
+        <div className="bg-zk-panel-bg border-[2px] border-zk-border px-2 py-0.5 rounded-xl">
+          <span className="font-black text-[10px] text-zk-text uppercase tracking-wider">
             Player Count: {playerCount}
           </span>
         </div>

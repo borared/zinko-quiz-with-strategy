@@ -5,15 +5,15 @@ import { useUser } from '@clerk/nextjs';
 import { Camera, Loader2, Lock, Mail, X } from 'lucide-react';
 
 const inputClass =
-  'w-full border-[2px] border-zk-black rounded-lg px-3 py-2 font-bold text-zk-black bg-white disabled:bg-zk-black/5 disabled:text-zk-black/50';
+  'w-full border-[2px] border-zk-border rounded-lg px-3 py-2 font-bold text-zk-text bg-zk-panel-bg disabled:bg-zk-black/5 disabled:text-zk-text/50';
 
-const labelClass = 'text-xs font-black uppercase tracking-wider text-zk-black/60';
+const labelClass = 'text-xs font-black uppercase tracking-wider text-zk-text/60';
 
 const btnPrimary =
-  'px-5 py-2.5 rounded-xl border-[3px] border-zk-black bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest hover:translate-y-0.5 disabled:opacity-60';
+  'px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest hover:translate-y-0.5 disabled:opacity-60';
 
 const btnSecondary =
-  'px-5 py-2.5 rounded-xl border-[3px] border-zk-black bg-white text-zk-black font-black text-sm uppercase tracking-widest hover:bg-zk-yellow/20';
+  'px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm uppercase tracking-widest hover:bg-zk-bg/20';
 
 export default function ManageAccountPanel({ onClose, onToast }) {
   const { user } = useUser();
@@ -79,25 +79,25 @@ export default function ManageAccountPanel({ onClose, onToast }) {
   };
 
   return (
-    <div className="rounded-xl border-[3px] border-zk-black bg-[#FDF9F1] p-4 sm:p-5 flex flex-col gap-5">
+    <div className="rounded-xl border-[3px] border-zk-border bg-zk-light-bg p-4 sm:p-5 flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-black tracking-tight text-zk-black">Manage account</h3>
+        <h3 className="text-lg font-black tracking-tight text-zk-text">Manage account</h3>
         <button
           type="button"
           onClick={onClose}
-          className="w-9 h-9 rounded-lg border-[2px] border-zk-black bg-white flex items-center justify-center hover:bg-zk-yellow/30"
+          className="w-9 h-9 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg flex items-center justify-center hover:bg-zk-bg/30"
           aria-label="Close manage account"
         >
           <X size={18} />
         </button>
       </div>
 
-      <div className="rounded-xl border-[2px] border-zk-black/15 bg-white p-4 grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-4 items-center">
+      <div className="rounded-xl border-[2px] border-zk-border/15 bg-zk-panel-bg p-4 grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-4 items-center">
         <div className="relative shrink-0">
           <img
             src={user.imageUrl}
             alt={user.fullName || 'Profile'}
-            className="w-20 h-20 rounded-xl border-[3px] border-zk-black object-cover"
+            className="w-20 h-20 rounded-xl border-[3px] border-zk-border object-cover"
           />
           {photoLoading && (
             <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center">
@@ -106,8 +106,8 @@ export default function ManageAccountPanel({ onClose, onToast }) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-zk-black truncate">{user.fullName}</p>
-          <p className="text-sm font-bold text-zk-black/50 truncate">{email}</p>
+          <p className="font-black text-zk-text truncate">{user.fullName}</p>
+          <p className="text-sm font-bold text-zk-text/50 truncate">{email}</p>
         </div>
         <div>
           <input
@@ -137,7 +137,7 @@ export default function ManageAccountPanel({ onClose, onToast }) {
           </span>
         </label>
         <input value={email} disabled className={inputClass} />
-        <p className="text-xs font-bold text-zk-black/45 mt-1">
+        <p className="text-xs font-bold text-zk-text/45 mt-1">
           Email is managed through your sign-in provider. Contact support to change it.
         </p>
       </div>
@@ -149,12 +149,12 @@ export default function ManageAccountPanel({ onClose, onToast }) {
             {connectedAccounts.map((account) => (
               <div
                 key={account.id}
-                className="flex items-center justify-between gap-3 p-3 rounded-xl border-[2px] border-zk-black/15 bg-white"
+                className="flex items-center justify-between gap-3 p-3 rounded-xl border-[2px] border-zk-border/15 bg-zk-panel-bg"
               >
-                <span className="font-black text-sm text-zk-black capitalize">
+                <span className="font-black text-sm text-zk-text capitalize">
                   {account.provider.replace('oauth_', '').replace('_', ' ')}
                 </span>
-                <span className="text-xs font-bold text-zk-black/50 truncate">
+                <span className="text-xs font-bold text-zk-text/50 truncate">
                   {account.emailAddress || account.username || 'Connected'}
                 </span>
               </div>
@@ -202,8 +202,8 @@ export default function ManageAccountPanel({ onClose, onToast }) {
           </button>
         </form>
       ) : (
-        <div className="rounded-xl border-[2px] border-zk-black/15 bg-white/70 p-4">
-          <p className="text-sm font-bold text-zk-black/55">
+        <div className="rounded-xl border-[2px] border-zk-border/15 bg-zk-panel-bg/70 p-4">
+          <p className="text-sm font-bold text-zk-text/55">
             You signed in with a connected account. Password is managed by that provider.
           </p>
         </div>

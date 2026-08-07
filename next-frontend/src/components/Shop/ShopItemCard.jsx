@@ -38,14 +38,14 @@ export default function ShopItemCard({
       >
         {isScenery && sceneryDetails?.level && (
           <span
-            className={`absolute left-4 top-4 z-20 text-[10px] font-black uppercase tracking-wider rounded border-[2px] border-zk-black px-2.5 py-1 ${
+            className={`absolute left-4 top-4 z-20 text-[10px] font-black uppercase tracking-wider rounded border-[2px] border-zk-border px-2.5 py-1 ${
               sceneryDetails.level === 'Epic'
                 ? 'bg-zk-pink text-white'
                 : sceneryDetails.level === 'Rare'
                   ? 'bg-zk-blue text-white'
                   : sceneryDetails.level === 'Elite'
-                    ? 'bg-white text-zk-black'
-                    : (SCENERY_LEVEL_CLASSES[sceneryDetails.level] ?? 'bg-zk-yellow text-zk-black')
+                    ? 'bg-zk-panel-bg text-zk-text'
+                    : (SCENERY_LEVEL_CLASSES[sceneryDetails.level] ?? 'bg-zk-bg text-zk-text')
             }`}
           >
             {sceneryDetails.level}
@@ -53,7 +53,7 @@ export default function ShopItemCard({
         )}
 
         <div
-          className={`relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-black bg-zk-yellow/20 ${
+          className={`relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-border bg-zk-bg/20 ${
             isScenery ? 'aspect-video' : 'aspect-square'
           }`}
         >
@@ -64,12 +64,12 @@ export default function ShopItemCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold uppercase tracking-wider text-zk-black/40">
+            <div className="flex h-full w-full items-center justify-center text-xs font-bold uppercase tracking-wider text-zk-text/40">
               No preview
             </div>
           )}
           {item.owned ? (
-            <span className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-[#2ea84a] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded border-[2px] border-zk-black">
+            <span className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-[#2ea84a] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded border-[2px] border-zk-border">
               <Check size={12} strokeWidth={3} />
               Owned
             </span>
@@ -78,7 +78,7 @@ export default function ShopItemCard({
               type="button"
               onClick={handleAddToCart}
               disabled={inCart}
-              className="absolute top-4 right-4 z-20 inline-flex items-center gap-1 bg-white text-zk-black text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded border-[2px] border-zk-black !shadow-none transition-colors hover:bg-zk-yellow disabled:opacity-60"
+              className="absolute top-4 right-4 z-20 inline-flex items-center gap-1 bg-zk-panel-bg text-zk-text text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded border-[2px] border-zk-border !shadow-none transition-colors hover:bg-zk-bg disabled:opacity-60"
             >
               <ShoppingCart size={14} strokeWidth={3} />
               {inCart ? 'In cart' : 'Add'}
@@ -88,11 +88,11 @@ export default function ShopItemCard({
 
         <div className="flex flex-1 flex-col gap-3 p-4">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-black/50">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-text/50">
               {isScenery ? 'Quiz Scenery' : 'Player Avatar'}
             </p>
             <h3
-              className={`text-xl font-black tracking-tight text-zk-black ${
+              className={`text-xl font-black tracking-tight text-zk-text ${
                 isScenery
                   ? "font-['Outfit'] normal-case"
                   : 'permanent-marker-regular uppercase'
@@ -103,8 +103,8 @@ export default function ShopItemCard({
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-3">
-            <div className="inline-flex h-10 shrink-0 items-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-3">
-              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-black">{priceLabel}</span>
+            <div className="inline-flex h-10 shrink-0 items-center rounded-lg border-[2px] border-zk-border bg-zk-bg px-3">
+              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-text">{priceLabel}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export default function ShopItemCard({
                 <button
                   type="button"
                   onClick={() => setShowDetails(true)}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black !shadow-none transition-colors hover:bg-zk-yellow"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-text !shadow-none transition-colors hover:bg-zk-bg"
                 >
                   <Info size={16} strokeWidth={3} />
                   Details
@@ -124,7 +124,7 @@ export default function ShopItemCard({
                   type="button"
                   onClick={handlePurchase}
                   disabled={isCheckingOut}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isCheckingOut ? (
                     <Loader2 size={16} className="animate-spin" />

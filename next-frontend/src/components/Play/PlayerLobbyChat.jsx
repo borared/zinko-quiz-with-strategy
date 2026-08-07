@@ -187,18 +187,18 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.94 }}
               transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-              className="w-full min-w-[260px] bg-white border-[4px] border-zk-black rounded-2xl px-5 py-4 pointer-events-auto"
+              className="w-full min-w-[260px] bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl px-5 py-4 pointer-events-auto"
             >
               <div className="flex items-center gap-2.5 mb-2">
                 <span className={`text-xs font-black uppercase text-white px-2.5 py-1 rounded-md ${teamAccent(popup.team)}`}>
                   Team {popup.team}
                 </span>
-                <span className="text-sm md:text-base font-black text-zk-black uppercase truncate">
+                <span className="text-sm md:text-base font-black text-zk-text uppercase truncate">
                   {popup.nickname}
                   {popup.nickname === nickname ? ' (you)' : ''}
                 </span>
               </div>
-              <p className="font-bold text-zk-black/90 break-words">
+              <p className="font-bold text-zk-text/90 break-words">
                 <ChatMessageBody message={popup.message} variant="popup" />
               </p>
             </motion.div>
@@ -214,12 +214,12 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-            className="fixed bottom-24 right-6 z-[46] w-[min(340px,calc(100vw-3rem))] bg-white border-[3px] border-zk-black rounded-2xl flex flex-col overflow-visible"
+            className="fixed bottom-24 right-6 z-[46] w-[min(340px,calc(100vw-3rem))] bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl flex flex-col overflow-visible"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b-[3px] border-zk-black bg-zk-yellow rounded-t-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b-[3px] border-zk-border bg-zk-bg rounded-t-2xl">
               <div>
-                <p className="font-black text-zk-black uppercase text-sm tracking-wide">Lobby Chat</p>
-                <p className="text-[10px] font-bold text-zk-black/60 uppercase">All players · Host can&apos;t see</p>
+                <p className="font-black text-zk-text uppercase text-sm tracking-wide">Lobby Chat</p>
+                <p className="text-[10px] font-bold text-zk-text/60 uppercase">All players · Host can&apos;t see</p>
               </div>
               <button
                 type="button"
@@ -231,9 +231,9 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
               </button>
             </div>
 
-            <div ref={listRef} className="flex-1 max-h-64 min-h-40 overflow-y-auto px-3 py-3 space-y-2 bg-zk-yellow/20">
+            <div ref={listRef} className="flex-1 max-h-64 min-h-40 overflow-y-auto px-3 py-3 space-y-2 bg-zk-bg/20">
               {messages.length === 0 ? (
-                <p className="text-center text-xs font-bold text-zk-black/50 uppercase py-8">
+                <p className="text-center text-xs font-bold text-zk-text/50 uppercase py-8">
                   Emojis pop on avatars · Text shows here
                 </p>
               ) : (
@@ -246,21 +246,21 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
                     >
                       <div className="flex items-center gap-1.5 mb-0.5">
                         {isMe ? (
-                          <span className="text-[8px] font-black uppercase text-zk-black/50">You · Team {msg.team}</span>
+                          <span className="text-[8px] font-black uppercase text-zk-text/50">You · Team {msg.team}</span>
                         ) : (
                           <>
                             <span className={`text-[8px] font-black uppercase text-white px-1 py-0.5 rounded ${teamAccent(msg.team)}`}>
                               Team {msg.team}
                             </span>
-                            <span className="text-[8px] font-black uppercase text-zk-black/70">{msg.nickname}</span>
+                            <span className="text-[8px] font-black uppercase text-zk-text/70">{msg.nickname}</span>
                           </>
                         )}
                       </div>
                       <div
                         className={`max-w-[85%] px-3 py-2 rounded-xl border-[2px] break-words ${
                           isMe
-                            ? 'bg-zk-blue text-white border-zk-black'
-                            : `bg-white text-zk-black border-zk-black ${msg.team === 'A' ? 'ring-2 ring-[#2ea84a]/40' : 'ring-2 ring-[#c0392b]/40'}`
+                            ? 'bg-zk-blue text-white border-zk-border'
+                            : `bg-zk-panel-bg text-zk-text border-zk-border ${msg.team === 'A' ? 'ring-2 ring-[#2ea84a]/40' : 'ring-2 ring-[#c0392b]/40'}`
                         } ${isEmojiHeavy(msg.message) ? 'text-2xl' : 'text-sm font-bold'}`}
                       >
                         {msg.message}
@@ -272,7 +272,7 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
             </div>
 
             {/* Quick emoji reactions */}
-            <div className="flex gap-1 px-3 py-2 border-t-[2px] border-zk-black/15 bg-white overflow-x-auto scrollbar-hide">
+            <div className="flex gap-1 px-3 py-2 border-t-[2px] border-zk-border/15 bg-zk-panel-bg overflow-x-auto scrollbar-hide">
               {QUICK_EMOJIS.map((emoji) => {
                 const sticker = getLobbySticker(emoji);
                 return (
@@ -281,7 +281,7 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
                     type="button"
                     onClick={() => handleQuickEmoji(emoji)}
                     disabled={disabled || isCooldown}
-                    className="flex-shrink-0 w-9 h-9 flex items-center justify-center border-[2px] border-zk-black rounded-lg bg-zk-yellow/40 hover:bg-zk-yellow hover:scale-110 active:scale-95 transition-transform disabled:opacity-50 overflow-hidden"
+                    className="flex-shrink-0 w-9 h-9 flex items-center justify-center border-[2px] border-zk-border rounded-lg bg-zk-bg/40 hover:bg-zk-bg hover:scale-110 active:scale-95 transition-transform disabled:opacity-50 overflow-hidden"
                     aria-label={`Send ${sticker?.label || emoji}`}
                   >
                     <LobbySticker emoji={emoji} size="md" withShadow={false} />
@@ -290,11 +290,11 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
               })}
             </div>
 
-            <div className="relative flex items-center gap-2 p-3 border-t-[3px] border-zk-black bg-white rounded-b-2xl">
+            <div className="relative flex items-center gap-2 p-3 border-t-[3px] border-zk-border bg-zk-panel-bg rounded-b-2xl">
               {showEmojiPicker && (
                 <div
                   ref={pickerRef}
-                  className="absolute bottom-full right-0 mb-2 z-50 border-[3px] border-zk-black rounded-xl overflow-hidden"
+                  className="absolute bottom-full right-0 mb-2 z-50 border-[3px] border-zk-border rounded-xl overflow-hidden"
                 >
                   <EmojiPicker
                     onEmojiClick={(data) => insertEmoji(data.emoji)}
@@ -311,8 +311,8 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
                 type="button"
                 onClick={() => setShowEmojiPicker((v) => !v)}
                 disabled={disabled}
-                className={`border-[2px] border-zk-black p-2 rounded-lg transition-colors disabled:opacity-50 ${
-                  showEmojiPicker ? 'bg-zk-yellow text-zk-black' : 'bg-white text-zk-black hover:bg-zk-yellow/50'
+                className={`border-[2px] border-zk-border p-2 rounded-lg transition-colors disabled:opacity-50 ${
+                  showEmojiPicker ? 'bg-zk-bg text-zk-text' : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/50'
                 }`}
                 aria-label="Open emoji picker"
               >
@@ -327,13 +327,13 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Type or pick an emoji..."
                 disabled={disabled}
-                className="flex-1 border-[2px] border-zk-black rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-zk-blue/40 disabled:opacity-50"
+                className="flex-1 border-[2px] border-zk-border rounded-lg px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-zk-blue/40 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={disabled || isCooldown || !draft.trim()}
-                className="bg-zk-blue hover:bg-[#5D3FD3] text-white border-[2px] border-zk-black p-2 rounded-lg disabled:opacity-50 transition-colors"
+                className="bg-zk-blue hover:bg-[#5D3FD3] text-white border-[2px] border-zk-border p-2 rounded-lg disabled:opacity-50 transition-colors"
                 aria-label="Send message"
               >
                 <Send size={18} strokeWidth={3} />
@@ -350,12 +350,12 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
         disabled={disabled}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.92 }}
-        className="fixed bottom-6 right-6 z-[47] flex items-center justify-center w-14 h-14 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="fixed bottom-6 right-6 z-[47] flex items-center justify-center w-14 h-14 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-border rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
       >
         {isOpen ? <X size={26} strokeWidth={3} /> : <MessageCircle size={26} strokeWidth={3} />}
         {!isOpen && unread > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 bg-[#FF4B4B] text-white text-[10px] font-black rounded-full border-[2px] border-zk-black flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 bg-[#FF4B4B] text-white text-[10px] font-black rounded-full border-[2px] border-zk-border flex items-center justify-center">
             {unread > 9 ? '9+' : unread}
           </span>
         )}

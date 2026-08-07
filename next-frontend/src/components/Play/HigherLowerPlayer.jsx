@@ -53,7 +53,7 @@ export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, sub
     <motion.button
       whileTap={{ scale: 0.9, y: 4, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
       onClick={onClick}
-      className={`w-full h-20 sm:h-24 rounded-2xl border-[4px] border-black flex items-center justify-center text-4xl sm:text-5xl gasoek-one-regular ${customColor || 'bg-white text-black'}`}
+      className={`w-full h-20 sm:h-24 rounded-2xl border-[4px] border-black flex items-center justify-center text-4xl sm:text-5xl gasoek-one-regular ${customColor || 'bg-zk-panel-bg text-black'}`}
       style={{ boxShadow: "0px 8px 0px 0px rgba(0,0,0,1)" }}
     >
       {label}
@@ -120,7 +120,7 @@ export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, sub
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="bg-zk-yellow px-10 py-6 rounded-3xl border-[6px] border-black shadow-[0_8px_0_0_#000] rotate-[-2deg] flex flex-col items-center">
+          <div className="bg-zk-bg px-10 py-6 rounded-3xl border-[6px] border-black shadow-[0_8px_0_0_#000] rotate-[-2deg] flex flex-col items-center">
             <h2 className="gasoek-one-regular text-4xl text-black uppercase tracking-widest text-center" style={{ textShadow: "2px 2px 0px rgba(255,255,255,0.5)" }}>
               ENEMY TURN
             </h2>

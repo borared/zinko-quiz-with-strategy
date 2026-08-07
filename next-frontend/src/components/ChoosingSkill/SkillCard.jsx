@@ -89,7 +89,7 @@ const SkillCard = ({
         >
           <div className="absolute inset-0 opacity-20"
                style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #FFCD29 25%, #FFCD29 75%, #000 75%, #000)", backgroundPosition: "0 0, 10px 10px", backgroundSize: "20px 20px" }} />
-          <div className="bg-white border-[4px] border-black px-6 py-2 rounded-xl transform -rotate-6 z-10 shadow-[4px_4px_0_#000]">
+          <div className="bg-zk-panel-bg border-[4px] border-black px-6 py-2 rounded-xl transform -rotate-6 z-10 shadow-[4px_4px_0_#000]">
              <span className="font-black text-black text-3xl lg:text-5xl uppercase tracking-widest">Zinko</span>
           </div>
         </div>

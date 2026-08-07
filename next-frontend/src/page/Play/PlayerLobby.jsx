@@ -33,7 +33,7 @@ function BlinkingEye({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) {
       style={{ width: size, height: size * 0.55, left: x, top: y }}
     >
       <motion.div
-        className="w-full h-full rounded-full bg-white border-[3px] border-[#000000] flex items-center justify-center overflow-hidden"
+        className="w-full h-full rounded-full bg-zk-panel-bg border-[3px] border-[#000000] flex items-center justify-center overflow-hidden"
         style={{ boxShadow: '3px 3px 0px 0px rgba(0,0,0,0.4)' }}
         animate={{ scaleY: [1, 1, 0.05, 1, 1] }}
         transition={{
@@ -107,7 +107,7 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
             className="absolute inset-0 bg-[#FFCD29]/30 pointer-events-none"
           />
         )}
-        <div className="absolute inset-0 bg-white/10" />
+        <div className="absolute inset-0 bg-zk-panel-bg/10" />
 
         <img
           src={player.avatar || ''}
@@ -115,7 +115,7 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
           className="absolute inset-0 w-full h-full object-cover z-10"
         />
 
-        <div className="absolute bottom-0 right-0 bg-white px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+        <div className="absolute bottom-0 right-0 bg-zk-panel-bg px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
           <span className="text-[#000000] font-black text-[10px] md:text-xs tracking-wider relative block">
             {player.nickname}
           </span>
@@ -192,13 +192,13 @@ function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
           >
             {teamName}
             {myNickname && players.some(p => p.nickname === myNickname) && (
-              <div className="bg-white text-black p-1.5 rounded-full ml-1 hover:bg-gray-100 transition-colors border-[2px] border-black cursor-pointer">
+              <div className="bg-zk-panel-bg text-black p-1.5 rounded-full ml-1 hover:bg-gray-100 transition-colors border-[2px] border-black cursor-pointer">
                 <Pencil size={14} strokeWidth={3} />
               </div>
             )}
           </span>
         )}
-        <div className="bg-white border-[2px] border-[#000000] px-2 py-[2px] rounded-xl flex items-center justify-center">
+        <div className="bg-zk-panel-bg border-[2px] border-[#000000] px-2 py-[2px] rounded-xl flex items-center justify-center">
           <span className="font-black text-[10px] text-[#000000] tracking-wider leading-none mt-[2px]">
             Player Count: {players.length}
           </span>
@@ -405,7 +405,7 @@ export default function PlayerLobby() {
         disabled={startCountdown !== null}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.95, y: 4 }}
-        className="fixed bottom-2 left-1/2 -translate-x-1/2 md:bottom-4 z-50 flex items-center justify-center gap-2 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-black px-6 py-2 md:px-8 md:py-3 rounded-xl uppercase font-black shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="fixed bottom-2 left-1/2 -translate-x-1/2 md:bottom-4 z-50 flex items-center justify-center gap-2 bg-zk-blue hover:bg-[#5D3FD3] text-white border-[3px] border-zk-border px-6 py-2 md:px-8 md:py-3 rounded-xl uppercase font-black shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '1.5rem', letterSpacing: '1px' }}
       >
         <ArrowLeft size={24} strokeWidth={3} />

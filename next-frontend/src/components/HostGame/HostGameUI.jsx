@@ -447,8 +447,8 @@ export default function HostGameUI() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={battleBackgroundStyle(background)}>
         <div className="text-center">
-          <div className="w-14 h-14 border-[5px] border-zk-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-black uppercase tracking-widest text-zk-black/50">
+          <div className="w-14 h-14 border-[5px] border-zk-border border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-black uppercase tracking-widest text-zk-text/50">
             Loading game...
           </p>
         </div>

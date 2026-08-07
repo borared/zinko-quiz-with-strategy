@@ -78,7 +78,7 @@ export default function LibraryCart() {
   if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-black" size={32} />
+        <Loader2 className="animate-spin text-zk-text" size={32} />
       </div>
     );
   }
