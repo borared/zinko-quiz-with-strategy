@@ -443,7 +443,7 @@ export default function SettingsPanel() {
                       type="button"
                       onClick={saveUsername}
                       disabled={usernameSaving}
-                      className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest disabled:opacity-60 hover:translate-y-0.5 transition-transform"
+                      className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm tracking-widest disabled:opacity-60 hover:translate-y-0.5 transition-transform"
                     >
                       {usernameSaving ? 'Saving…' : 'Save username'}
                     </button>
@@ -451,9 +451,9 @@ export default function SettingsPanel() {
                 </label>
 
                 <div className="flex flex-wrap gap-3 mt-2">
-                  <button type="button" onClick={saveProfileNames} disabled={saving} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest hover:translate-y-0.5 disabled:opacity-60">Save profile</button>
-                  <button type="button" onClick={() => setManageAccountOpen((open) => !open)} className={`px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest inline-flex items-center gap-2 ${manageAccountOpen ? 'bg-zk-bg text-zk-text' : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'}`}>Manage account</button>
-                  <button type="button" onClick={() => setIsCoverModalOpen(true)} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20 inline-flex items-center gap-2"><ImageIcon size={16} /> Edit Cover</button>
+                  <button type="button" onClick={saveProfileNames} disabled={saving} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm tracking-widest hover:translate-y-0.5 disabled:opacity-60">Save profile</button>
+                  <button type="button" onClick={() => setManageAccountOpen((open) => !open)} className={`px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm tracking-widest inline-flex items-center gap-2 ${manageAccountOpen ? 'bg-zk-bg text-zk-text' : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'}`}>Manage account</button>
+                  <button type="button" onClick={() => setIsCoverModalOpen(true)} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm tracking-widest bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20 inline-flex items-center gap-2"><ImageIcon size={16} /> Edit Cover</button>
                 </div>
               </div>
               <div className="hidden md:flex items-center justify-center h-full min-h-[200px] lg:min-h-0 mx-auto lg:mx-0 lg:-translate-y-12">
@@ -492,7 +492,7 @@ export default function SettingsPanel() {
             </div>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black text-sm uppercase tracking-widest hover:translate-y-0.5 w-fit"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black text-sm tracking-widest hover:translate-y-0.5 w-fit"
             >
               View plans
             </Link>
@@ -599,7 +599,7 @@ export default function SettingsPanel() {
 
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm uppercase tracking-widest hover:bg-zk-bg/20 w-fit"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm tracking-widest hover:bg-zk-bg/20 w-fit"
             >
               Billing & upgrades
               <ExternalLink size={14} />
@@ -616,7 +616,7 @@ export default function SettingsPanel() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Link
                 href="/privacy"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm uppercase tracking-widest hover:bg-zk-bg/20 w-fit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm tracking-widest hover:bg-zk-bg/20 w-fit"
               >
                 <Shield size={16} />
                 Privacy policy
@@ -624,7 +624,7 @@ export default function SettingsPanel() {
               <button
                 type="button"
                 onClick={() => setSignOutOpen(true)}
-                className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black text-sm uppercase tracking-widest inline-flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black text-sm tracking-widest inline-flex items-center gap-2"
               >
                 <LogOut size={16} />
                 Sign out
@@ -632,7 +632,7 @@ export default function SettingsPanel() {
               <button
                 type="button"
                 onClick={openDeleteModal}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-[#E74C3C] text-[#E74C3C] font-black text-sm uppercase tracking-widest hover:bg-red-50 w-fit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-[#E74C3C] text-[#E74C3C] font-black text-sm tracking-widest hover:bg-red-50 w-fit"
               >
                 <Trash2 size={16} />
                 Delete account
@@ -658,7 +658,7 @@ export default function SettingsPanel() {
               setSigningOut(false);
             }}
             disabled={signingOut}
-            className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black uppercase text-sm disabled:opacity-60"
+            className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm disabled:opacity-60"
           >
             Cancel
           </button>
@@ -666,7 +666,7 @@ export default function SettingsPanel() {
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black uppercase text-sm disabled:opacity-60"
+            className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black text-sm disabled:opacity-60"
           >
             {signingOut ? 'Signing out…' : 'Sign out'}
           </button>
@@ -704,7 +704,7 @@ export default function SettingsPanel() {
                 <button
                   type="button"
                   onClick={closeDeleteModal}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black uppercase text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm"
                 >
                   Cancel
                 </button>
@@ -714,7 +714,7 @@ export default function SettingsPanel() {
                     setDeleteConfirmText('');
                     setDeleteStep('confirm');
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black uppercase text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black text-sm"
                 >
                   I understand
                 </button>
@@ -759,7 +759,7 @@ export default function SettingsPanel() {
                     setDeleteStep('clarify');
                   }}
                   disabled={deleting}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black uppercase text-sm disabled:opacity-60"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm disabled:opacity-60"
                 >
                   Go back
                 </button>
@@ -767,7 +767,7 @@ export default function SettingsPanel() {
                   type="button"
                   onClick={handleDeleteAccount}
                   disabled={deleting || !isDeleteConfirmPhraseMatch}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black uppercase text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] text-white font-black text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {deleting ? 'Deleting…' : 'Delete account'}
                 </button>
@@ -887,7 +887,7 @@ export default function SettingsPanel() {
                          .catch(() => showToast('Failed to remove.', 'error'));
                       setIsCoverModalOpen(false);
                     }}
-                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border font-black uppercase text-sm hover:bg-red-50 text-red-500 transition-colors"
+                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border font-black text-sm hover:bg-red-50 text-red-500 transition-colors"
                   >
                     Remove
                   </button>
@@ -895,7 +895,7 @@ export default function SettingsPanel() {
                     type="button"
                     onClick={saveCover}
                     disabled={coverSaving}
-                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black uppercase text-sm transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                    className="flex-1 px-4 py-3 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     {coverSaving ? 'Saving...' : 'Save Cover'}
                   </button>

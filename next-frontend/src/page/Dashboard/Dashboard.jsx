@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
+import FlashcardGrid from '../../components/Dashboard/FlashcardGrid';
 import WorkspaceShell from '@/components/layout/WorkspaceShell';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
@@ -35,6 +36,7 @@ const Dashboard = () => {
   const quizzesCached = Boolean(user?.id && isCachedForUser(user.id));
   const hasPersistedData = hasPersistedQuizzes();
 
+  const [activeFilter, setActiveFilter] = useState('quizzes'); // 'quizzes' or 'flashcards'
   const [clientReady, setClientReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -210,24 +212,45 @@ const Dashboard = () => {
     <WorkspaceShell sidebar={<Sidebar />} contentClassName="dashboard-shell">
       <WelcomeBanner />
 
-      <QuizGrid
-        quizzes={quizzes}
-        loading={
-          !clientReady
-          || (((!isLoaded || !isJwtReady) && !hasPersistedData)
-          || (loading && !quizzesCached && quizzes.length === 0))
-        }
-        totalQuizCount={totalQuizCount}
-      />
+      <div className="w-full flex items-center gap-2 mb-6">
+        <button
+          onClick={() => setActiveFilter('quizzes')}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'quizzes' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+        >
+          Quizzes
+        </button>
+        <button
+          onClick={() => setActiveFilter('flashcards')}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'flashcards' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+        >
+          Flashcards
+        </button>
+      </div>
 
-      {fetchError && (
-        <div className="zk-panel !shadow-none bg-red-50 text-red-700 font-bold p-4">
-          Unable to load your quizzes: {fetchError}
-        </div>
-      )}
+      {activeFilter === 'quizzes' ? (
+        <>
+          <QuizGrid
+            quizzes={quizzes}
+            loading={
+              !clientReady
+              || (((!isLoaded || !isJwtReady) && !hasPersistedData)
+              || (loading && !quizzesCached && quizzes.length === 0))
+            }
+            totalQuizCount={totalQuizCount}
+          />
 
-      {!loading && hasNextPage && (
-        <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
+          {fetchError && (
+            <div className="zk-panel !shadow-none bg-red-50 text-red-700 font-bold p-4">
+              Unable to load your quizzes: {fetchError}
+            </div>
+          )}
+
+          {!loading && hasNextPage && (
+            <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
+          )}
+        </>
+      ) : (
+        <FlashcardGrid />
       )}
 
       <button

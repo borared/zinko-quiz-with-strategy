@@ -53,4 +53,22 @@ router.post(
   aiController.generateQuiz
 );
 
+/**
+ * @swagger
+ * /api/ai/generate-flashcards:
+ *   post:
+ *     summary: POST /generate-flashcards
+ *     tags: [Ai]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+router.post(
+  '/generate-flashcards',
+  requireCustomAuth,
+  aiLimiter,
+  upload.single('file'),
+  aiController.generateFlashcards
+);
+
 module.exports = router;

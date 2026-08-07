@@ -24,7 +24,7 @@ const PricingPanel = () => {
     },
     {
       title: "Pro",
-      price: "$12",
+      price: "$6.99",
       subtitle: "Unlock the full power of play.",
       buttonText: "GO PRO NOW",
       theme: "pro",
