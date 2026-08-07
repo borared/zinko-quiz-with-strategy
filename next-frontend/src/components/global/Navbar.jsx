@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser, useAuth } from '@clerk/nextjs';
-import { LayoutDashboard, Bell, Settings, LogOut, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Bell, Settings, LogOut, ShoppingBag, ChevronDown, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
@@ -18,6 +18,9 @@ const Navbar = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -101,10 +104,10 @@ const Navbar = () => {
       return (
         <div className="flex items-center gap-6">
           <button
-            onClick={() => router.push('/create-game')}
-            className="bg-[#5D3FD3] text-white border-[3px] border-zk-border px-6 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
+            onClick={() => router.push('/join')}
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-border px-8 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none tracking-wider"
           >
-            Create New Quiz
+            Join
           </button>
 
           <ThemeToggle />
@@ -140,6 +143,13 @@ const Navbar = () => {
                       <p className="font-bold text-zk-text text-sm truncate">{displayUser?.firstName} {displayUser?.lastName}</p>
                       <p className="text-xs text-zk-text/60 truncate">{displayUser?.email}</p>
                     </div>
+
+                    <button
+                      onClick={() => { setMenuOpen(false); router.push(`/u/${displayUser?.username || displayUser?.id}`); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
+                    >
+                      <User size={16} /> Profile
+                    </button>
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/dashboard'); }}
@@ -236,43 +246,165 @@ const Navbar = () => {
           >
             PRICING
           </a>
-          <a
-            onClick={() => router.push('/classpin')}
-            className={getLinkClass('/classpin')}
+
+          {/* Manage & Create Dropdown */}
+          <div 
+            className="relative" 
+            onMouseEnter={() => setManageOpen(true)} 
+            onMouseLeave={() => setManageOpen(false)}
           >
-            CLASSPIN
-          </a>
-          <a
-            onClick={() => router.push('/discovery')}
-            className={getLinkClass('/discovery')}
+            <div 
+              className={
+                ['/dashboard', '/discovery', '/classpin'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
+                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
+                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
+              }
+            >
+              MANAGE & CREATE <ChevronDown size={20} className={`transition-transform ${manageOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            <AnimatePresence>
+              {manageOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zk-panel-bg border-[3px] border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                >
+                  <button
+                    onClick={() => { setManageOpen(false); router.push('/dashboard'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={() => { setManageOpen(false); router.push('/discovery'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Discovery
+                  </button>
+                  <button
+                    onClick={() => { setManageOpen(false); router.push('/classpin'); }}
+                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Classpin
+                    <span className="bg-[#FFCD29] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
+                      Soon
+                    </span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Social Dropdown */}
+          <div 
+            className="relative" 
+            onMouseEnter={() => setSocialOpen(true)} 
+            onMouseLeave={() => setSocialOpen(false)}
           >
-            DISCOVERY
-          </a>
+            <div 
+              className={
+                pathname?.startsWith('/dashboard/social')
+                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
+                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+              }
+            >
+              Social <ChevronDown size={20} className={`transition-transform ${socialOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            <AnimatePresence>
+              {socialOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-[3px] border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                >
+                  <button
+                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=friends'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Friends
+                  </button>
+                  <button
+                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=requests'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Requests
+                  </button>
+                  <button
+                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=add'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Add Friend
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          {/* Library Dropdown */}
+          <div 
+            className="relative" 
+            onMouseEnter={() => setLibraryOpen(true)} 
+            onMouseLeave={() => setLibraryOpen(false)}
+          >
+            <div 
+              className={
+                pathname?.startsWith('/library')
+                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
+                  : "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+              }
+            >
+              Library 
+              {showLibraryCartAlert && (
+                <span className="absolute -top-1 -right-1 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border !shadow-none flex items-center justify-center pointer-events-none">
+                  {cartAlertCount > 99 ? '99+' : cartAlertCount}
+                </span>
+              )}
+              <ChevronDown size={20} className={`transition-transform ${libraryOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            <AnimatePresence>
+              {libraryOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-[3px] border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                >
+                  <button
+                    onClick={() => { setLibraryOpen(false); router.push('/library'); }}
+                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Collection
+                  </button>
+                  <button
+                    onClick={() => { setLibraryOpen(false); router.push('/library/cart'); }}
+                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                  >
+                    Cart
+                    {showLibraryCartAlert && (
+                      <span className="bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border flex items-center justify-center">
+                        {cartAlertCount > 99 ? '99+' : cartAlertCount}
+                      </span>
+                    )}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <a
             onClick={() => router.push('/shop')}
             className={getLinkClass('/shop')}
           >
             SHOP
           </a>
-          <span className="relative inline-block">
-            <a
-              onClick={() => router.push('/library')}
-              className={getLinkClass('/library')}
-            >
-              LIBRARY
-            </a>
-            {showLibraryCartAlert && (
-              <span className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border !shadow-none flex items-center justify-center pointer-events-none">
-                {cartAlertCount > 99 ? '99+' : cartAlertCount}
-              </span>
-            )}
-          </span>
-          <a
-            onClick={() => router.push('/dashboard')}
-            className={getLinkClass('/dashboard')}
-          >
-            DASHBOARD
-          </a>
+
         </div>
       </div>
 

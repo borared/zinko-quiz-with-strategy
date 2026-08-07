@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Search, UserPlus, Users, Inbox, UserMinus, Check, X, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import WorkspaceShell from '@/components/layout/WorkspaceShell';
 import api from '@/services/api';
@@ -20,13 +22,23 @@ export default function SocialPage() {
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
   const { showToast } = useToastStore();
 
-  const [activeTab, setActiveTab] = useState('friends');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  
+  const [activeTab, setActiveTab] = useState(tabParam || 'friends');
+
+  useEffect(() => {
+    if (tabParam && ['friends', 'requests', 'add'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
   const [friends, setFriends] = useState([]);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [outgoingRequests, setOutgoingRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
 
   const fetchFriends = useCallback(async () => {
@@ -52,11 +64,18 @@ export default function SocialPage() {
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !isJwtReady) return;
-    if (activeTab === 'friends') {
-      fetchFriends();
-    } else if (activeTab === 'requests') {
-      fetchRequests();
-    }
+    
+    const loadData = async () => {
+      setIsFetchingData(true);
+      if (activeTab === 'friends') {
+        await fetchFriends();
+      } else if (activeTab === 'requests') {
+        await fetchRequests();
+      }
+      setIsFetchingData(false);
+    };
+
+    loadData();
   }, [activeTab, isLoaded, isSignedIn, isJwtReady, fetchFriends, fetchRequests]);
 
   const handleSearch = async (e) => {
@@ -139,7 +158,7 @@ export default function SocialPage() {
   }
 
   return (
-    <WorkspaceShell sidebar={<Sidebar />} contentClassName="social-shell">
+    <WorkspaceShell contentClassName="social-shell">
       <section className="flex flex-col gap-6 md:gap-8">
         <div className="border-b-[3px] border-zk-border pb-4">
           <h2 className="font-['Amatic_SC'] text-5xl font-black text-zk-text uppercase tracking-tight">
@@ -177,7 +196,11 @@ export default function SocialPage() {
         <div className="w-full">
           {activeTab === 'friends' && (
             <div className="flex flex-col gap-4">
-              {friends.length === 0 ? (
+              {isFetchingData ? (
+                <div className="flex justify-center p-10">
+                  <Loader2 className="animate-spin text-zk-text" size={32} />
+                </div>
+              ) : friends.length === 0 ? (
                 <div className="zk-panel !shadow-none p-10 text-center bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl">
                   <p className="text-lg font-bold text-zk-text/70 font-['Outfit']">
                     Your friends list is currently empty. Go to the "Add Friend" tab to start adding!
@@ -190,21 +213,21 @@ export default function SocialPage() {
                       key={friend.clerk_id}
                       className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                     >
-                      <div className="flex items-center gap-3">
+                      <Link href={`/u/${friend.username || friend.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
                         <img
                           src={friend.avatar_url || '/images/avatars/default.png'}
                           alt={friend.username}
-                          className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
+                          className="w-12 h-12 rounded-full border-2 border-zk-border object-cover group-hover:scale-105 transition-transform"
                         />
                         <div>
-                          <p className="font-['Outfit'] font-black text-zk-text text-lg">
+                          <p className="font-['Outfit'] font-black text-zk-text text-lg group-hover:text-zk-blue transition-colors">
                             {friend.first_name || friend.username}
                           </p>
                           <p className="font-['Outfit'] text-sm text-zk-text/60">
                             @{friend.username}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                       <button
                         type="button"
                         onClick={() => handleRemoveFriend(friend.clerk_id)}
@@ -226,37 +249,43 @@ export default function SocialPage() {
 
           {activeTab === 'requests' && (
             <div className="flex flex-col gap-6">
-              {/* Incoming requests */}
-              <div>
-                <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-text mb-3">
-                  Incoming Requests ({incomingRequests.length})
-                </h3>
-                {incomingRequests.length === 0 ? (
-                  <div className="p-6 bg-zk-panel-bg/50 border-2 border-dashed border-zk-border/35 rounded-2xl text-center">
-                    <p className="font-['Outfit'] text-zk-text/55">No incoming friend requests.</p>
-                  </div>
-                ) : (
+              {isFetchingData ? (
+                <div className="flex justify-center p-10">
+                  <Loader2 className="animate-spin text-zk-text" size={32} />
+                </div>
+              ) : (
+                <>
+                  {/* Incoming requests */}
+                  <div>
+                    <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-text mb-3">
+                      Incoming Requests ({incomingRequests.length})
+                    </h3>
+                    {incomingRequests.length === 0 ? (
+                      <div className="p-6 bg-zk-panel-bg/50 border-2 border-dashed border-zk-border/35 rounded-2xl text-center">
+                        <p className="font-['Outfit'] text-zk-text/55">No incoming friend requests.</p>
+                      </div>
+                    ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {incomingRequests.map((req) => (
                       <div
                         key={req.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
-                        <div className="flex items-center gap-3">
+                        <Link href={`/u/${req.username || req.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover group-hover:scale-105 transition-transform"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-text">
+                            <p className="font-['Outfit'] font-black text-zk-text group-hover:text-zk-blue transition-colors">
                               {req.first_name || req.username}
                             </p>
                             <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{req.username}
                             </p>
                           </div>
-                        </div>
+                        </Link>
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -297,21 +326,21 @@ export default function SocialPage() {
                         key={req.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between opacity-80"
                       >
-                        <div className="flex items-center gap-3">
+                        <Link href={`/u/${req.username || req.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover group-hover:scale-105 transition-transform"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-text">
+                            <p className="font-['Outfit'] font-black text-zk-text group-hover:text-zk-blue transition-colors">
                               {req.first_name || req.username}
                             </p>
                             <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{req.username}
                             </p>
                           </div>
-                        </div>
+                        </Link>
                         <span className="font-['Outfit'] text-xs font-bold bg-zk-bg text-zk-text px-2 py-1 rounded border border-zk-border">
                           Pending
                         </span>
@@ -320,6 +349,8 @@ export default function SocialPage() {
                   </div>
                 )}
               </div>
+                </>
+              )}
             </div>
           )}
 
@@ -360,21 +391,21 @@ export default function SocialPage() {
                         key={result.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
-                        <div className="flex items-center gap-3">
+                        <Link href={`/u/${result.username || result.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
                           <img
                             src={result.avatar_url || '/images/avatars/default.png'}
                             alt={result.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover group-hover:scale-105 transition-transform"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-text">
+                            <p className="font-['Outfit'] font-black text-zk-text group-hover:text-zk-blue transition-colors">
                               {result.first_name || result.username}
                             </p>
                             <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{result.username}
                             </p>
                           </div>
-                        </div>
+                        </Link>
 
                         <div>
                           {result.relationship === 'none' && (

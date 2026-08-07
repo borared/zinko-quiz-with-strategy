@@ -211,7 +211,7 @@ export default function Shop() {
   }
 
   return (
-    <WorkspaceShell sidebar={<Sidebar />} contentClassName="shop-shell">
+    <WorkspaceShell contentClassName="shop-shell">
       <section className="flex flex-col gap-6 md:gap-8">
         {showSkeleton ? (
           <TrendingSceneryCarouselSkeleton />

@@ -402,7 +402,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               {isPublicLocal ? "This quiz will no longer be visible in the Discovery section." : "This quiz will be visible to everyone in the Discovery section!"}
             </p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-zk-bg/30 rounded-lg leading-none pt-2 disabled:opacity-60">NO</button>
+              <button onClick={() => setShowPublicModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 dark:bg-zk-border/50 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-zk-bg/30 rounded-lg leading-none pt-2 disabled:opacity-60">NO</button>
               <button onClick={handleTogglePublic} disabled={isUpdating} className="flex-1 bg-green-400 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black transition-colors hover:bg-green-300 rounded-lg flex justify-center items-center leading-none pt-2 disabled:opacity-60">
                 {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "YES"}
               </button>
@@ -417,7 +417,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
             <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-text text-center">Delete Quiz?</h3>
             <p className="text-zk-text/70 mb-6 text-center font-bold text-sm">Are you sure you want to delete this quiz? This cannot be undone.</p>
             <div className="flex gap-4 w-full">
-              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg leading-none pt-2 transition-colors hover:bg-zk-bg/30 disabled:opacity-60">NO</button>
+              <button onClick={() => setShowDeleteModal(false)} disabled={isUpdating} className="flex-1 bg-gray-200 dark:bg-zk-border/50 text-zk-text border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg leading-none pt-2 transition-colors hover:bg-zk-bg/30 disabled:opacity-60">NO</button>
               <button onClick={handleDelete} disabled={isUpdating} className="flex-1 bg-[#FF4B4B] text-white border-[3px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] text-2xl font-black rounded-lg flex justify-center items-center leading-none pt-2 transition-colors hover:bg-[#e63e3e] disabled:opacity-60">
                 {isUpdating ? <Loader2 size={20} className="animate-spin" /> : "DELETE"}
               </button>

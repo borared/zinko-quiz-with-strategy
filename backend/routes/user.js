@@ -48,6 +48,18 @@ router.patch('/settings', requireCustomAuth, userController.patchSettings);
  *         description: Successful response
  */
 router.patch('/username', requireCustomAuth, userController.patchUsername);
+
+/**
+ * @swagger
+ * /api/user/cover:
+ *   patch:
+ *     summary: PATCH /cover
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+router.patch('/cover', requireCustomAuth, userController.patchCover);
 /**
  * @swagger
  * /api/user/account:
@@ -59,5 +71,17 @@ router.patch('/username', requireCustomAuth, userController.patchUsername);
  *         description: Successful response
  */
 router.delete('/account', requireCustomAuth, userController.deleteAccount);
+
+/**
+ * @swagger
+ * /api/user/profile/{username}:
+ *   get:
+ *     summary: GET /profile/{username}
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+router.get('/profile/:username', requireCustomAuth, userController.getPublicProfile);
 
 module.exports = router;

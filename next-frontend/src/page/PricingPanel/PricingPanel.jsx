@@ -61,7 +61,7 @@ const PricingPanel = () => {
       <motion.div 
         animate={{ y: [-15, 15, -15], rotate: [-10, 10, -10] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[2%] left-[5%] md:top-[6%] md:left-[10%] w-24 h-24 md:w-32 md:h-32 z-20 pointer-events-none mix-blend-multiply opacity-80"
+        className="absolute top-[2%] left-[5%] md:top-[6%] md:left-[10%] w-24 h-24 md:w-32 md:h-32 z-20 pointer-events-none"
       >
         <img src="/heart.png" alt="Kawaii Heart" className="w-full h-full object-contain" />
       </motion.div>
