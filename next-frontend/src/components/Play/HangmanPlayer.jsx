@@ -113,7 +113,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
       )}
 
       {/* Lives counter */}
-      <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-4 rounded-full border-[4px] border-black mb-8">
+      <div className="flex items-center gap-3 bg-zk-panel-bg/20 backdrop-blur-md px-6 py-4 rounded-full border-[4px] border-black mb-8">
         <Heart className="w-8 h-8 text-zk-red fill-zk-red animate-pulse" />
         <span className="font-black text-4xl text-white">{lives}</span>
         <span className="text-white/80 font-bold uppercase tracking-widest" style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '24px' }}>Lives</span>
@@ -128,7 +128,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: i * 0.05 }}
-              className="w-12 h-14 sm:w-14 sm:h-16 bg-zk-yellow border-[4px] border-black shadow-[4px_4px_0_#000] flex items-center justify-center text-4xl sm:text-5xl font-black text-black uppercase rounded-lg"
+              className="w-12 h-14 sm:w-14 sm:h-16 bg-zk-bg border-[4px] border-black shadow-[4px_4px_0_#000] flex items-center justify-center text-4xl sm:text-5xl font-black text-black uppercase rounded-lg"
               style={{ fontFamily: 'var(--font-amatic-sc)' }}
             >
               {isGuessed ? char : ''}
@@ -152,7 +152,7 @@ export default function HangmanPlayer({ hangmanData, team, onGuess, background }
                       relative w-10 h-14 sm:w-12 sm:h-16 rounded-lg font-black text-3xl flex items-center justify-center transition-all border-[4px] border-black
                       ${isGuessed 
                         ? 'bg-black/30 text-white/30 cursor-not-allowed shadow-none translate-y-1' 
-                        : 'bg-white text-black hover:-translate-y-1 active:translate-y-1 shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] active:shadow-none'}
+                        : 'bg-zk-panel-bg text-black hover:-translate-y-1 active:translate-y-1 shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] active:shadow-none'}
                     `}
                     style={{ fontFamily: 'var(--font-amatic-sc)' }}
                   >

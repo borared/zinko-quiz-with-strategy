@@ -171,7 +171,7 @@ export default function HigherLowerHost({ teamA, teamB, winner, subPhase, curren
               initial={{ scale: 0, y: 50 }}
               animate={{ scale: 1, y: 0 }}
               transition={{ type: "spring", bounce: 0.5 }}
-              className="bg-zk-yellow px-20 py-12 rounded-3xl border-[8px] border-black shadow-[0_12px_0_0_#000] rotate-[2deg] flex flex-col items-center"
+              className="bg-zk-bg px-20 py-12 rounded-3xl border-[8px] border-black shadow-[0_12px_0_0_#000] rotate-[2deg] flex flex-col items-center"
             >
               <h1 className="gasoek-one-regular text-7xl md:text-9xl text-white uppercase" style={{ textShadow: "6px 6px 0 #000" }}>
                 TEAM {winner} WINS!

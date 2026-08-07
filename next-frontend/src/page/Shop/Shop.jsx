@@ -205,7 +205,7 @@ export default function Shop() {
   if (!isLoaded) {
     return (
       <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-black" size={32} />
+        <Loader2 className="animate-spin text-zk-text" size={32} />
       </div>
     );
   }
@@ -232,10 +232,10 @@ export default function Shop() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none ${
+                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-border rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none ${
                   isActive
                     ? 'bg-[#5D3FD3] text-white'
-                    : 'bg-white text-zk-black hover:bg-zk-yellow/30'
+                    : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/30'
                 }`}
               >
                 <Icon size={20} strokeWidth={3} />
@@ -248,12 +248,12 @@ export default function Shop() {
         {showSkeleton ? (
           <ShopSkeleton count={skeletonCount} isScenery={activeTab === 'scenery'} />
         ) : activeTab === 'avatar' ? (
-          <p className="font-['Outfit'] font-bold text-zk-black/70 text-center text-xl my-10">
+          <p className="font-['Outfit'] font-bold text-zk-text/70 text-center text-xl my-10">
             (Not yet product)
           </p>
         ) : activeItems.length === 0 ? (
           <div className="zk-panel !shadow-none p-10 text-center">
-            <p className="text-lg font-bold text-zk-black/70">
+            <p className="text-lg font-bold text-zk-text/70">
               No scenery for sale right now. Check back soon!
             </p>
           </div>

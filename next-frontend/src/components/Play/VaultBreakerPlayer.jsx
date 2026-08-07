@@ -101,7 +101,7 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
                 ? { scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }
                 : { scale: 1.05, x: -2, y: -2, boxShadow: "14px 14px 0px 0px rgba(0,0,0,1)" }}
               whileTap={{ scale: 0.95, x: 8, y: 8, boxShadow: "0px 0px 0px 0px rgba(0,0,0,1)" }}
-              className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-[6px] border-zk-black focus:outline-none flex flex-col items-center justify-center transition-colors"
+              className="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-[6px] border-zk-border focus:outline-none flex flex-col items-center justify-center transition-colors"
               style={{ backgroundColor: COLOR_MAP[color] }}
               onPointerDown={(e) => {
                 if (isPressedViaKey) return;

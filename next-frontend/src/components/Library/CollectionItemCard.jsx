@@ -30,29 +30,29 @@ export default function CollectionItemCard({ item, onDetails }) {
       >
         {isScenery && sceneryDetails?.level && (
           <span
-            className={`absolute left-4 top-4 z-20 text-[10px] font-black uppercase tracking-wider rounded border-[2px] border-zk-black px-2.5 py-1 ${
+            className={`absolute left-4 top-4 z-20 text-[10px] font-black uppercase tracking-wider rounded border-[2px] border-zk-border px-2.5 py-1 ${
               sceneryDetails.level === 'Epic'
                 ? 'bg-zk-pink text-white'
                 : sceneryDetails.level === 'Rare'
                   ? 'bg-zk-blue text-white'
                   : sceneryDetails.level === 'Elite'
-                    ? 'bg-white text-zk-black'
-                    : (SCENERY_LEVEL_CLASSES[sceneryDetails.level] ?? 'bg-zk-yellow text-zk-black')
+                    ? 'bg-zk-panel-bg text-zk-text'
+                    : (SCENERY_LEVEL_CLASSES[sceneryDetails.level] ?? 'bg-zk-bg text-zk-text')
             }`}
           >
             {sceneryDetails.level}
           </span>
         )}
 
-        <div className="relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-black bg-zk-yellow/20 aspect-video">
+        <div className="relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-border bg-zk-bg/20 aspect-video">
           {imageSrc ? (
             <img src={imageSrc} alt={item.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold uppercase tracking-wider text-zk-black/40">
+            <div className="flex h-full w-full items-center justify-center text-xs font-bold uppercase tracking-wider text-zk-text/40">
               No preview
             </div>
           )}
-          <span className="absolute top-4 right-4 z-10 bg-[#2ea84a] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded border-[2px] border-zk-black">
+          <span className="absolute top-4 right-4 z-10 bg-[#2ea84a] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded border-[2px] border-zk-border">
             Owned
           </span>
         </div>
@@ -60,10 +60,10 @@ export default function CollectionItemCard({ item, onDetails }) {
         <div className="flex flex-col gap-3 p-4">
           {isScenery && (
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-black/50">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zk-text/50">
                 Quiz Scenery
               </p>
-              <h3 className="text-xl font-black tracking-tight text-zk-black font-['Outfit'] normal-case">
+              <h3 className="text-xl font-black tracking-tight text-zk-text font-['Outfit'] normal-case">
                 {item.name}
               </h3>
             </div>
@@ -74,7 +74,7 @@ export default function CollectionItemCard({ item, onDetails }) {
               <button
                 type="button"
                 onClick={handleOpenDetails}
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black transition-colors hover:bg-zk-yellow"
+                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-text transition-colors hover:bg-zk-bg"
               >
                 <Info size={16} strokeWidth={3} />
                 View details
@@ -82,7 +82,7 @@ export default function CollectionItemCard({ item, onDetails }) {
             ) : (
               <Link
                 href="/create-game"
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black transition-colors hover:bg-zk-yellow"
+                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-text transition-colors hover:bg-zk-bg"
               >
                 <Gamepad2 size={16} strokeWidth={3} />
                 Use in host lobby
@@ -91,7 +91,7 @@ export default function CollectionItemCard({ item, onDetails }) {
           ) : (
             <Link
               href="/join"
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3]/10 px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-black transition-colors hover:bg-[#5D3FD3]/20"
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-[#5D3FD3]/10 px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-zk-text transition-colors hover:bg-[#5D3FD3]/20"
             >
               <VenetianMask size={16} strokeWidth={3} />
               Equip when you join a game

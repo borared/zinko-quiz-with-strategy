@@ -16,11 +16,11 @@ export default function ToastContainer() {
             initial={{ opacity: 0, x: 20, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.8 }}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border-[3px] border-zk-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] min-w-[280px] ${
+            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border-[3px] border-zk-border shadow-[2px_2px_0_0_rgba(0,0,0,1)] min-w-[280px] ${
               toast.type === 'success' ? 'bg-[#00C853] text-white' :
               toast.type === 'error' ? 'bg-[#FF4B4B] text-white' :
               toast.type === 'orange' ? 'bg-zk-coral text-white' :
-              'bg-white text-zk-black'
+              'bg-zk-panel-bg text-zk-text'
             }`}
           >
             {toast.type === 'success' ? (

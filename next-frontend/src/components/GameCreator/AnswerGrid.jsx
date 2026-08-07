@@ -53,31 +53,31 @@ const AnswerGrid = memo(() => {
       {activeQuestion.answers.map((ans) => (
         <div 
           key={ans.id}
-          className={`flex items-center gap-4 p-4 border-[3px] border-zk-black rounded-xl ${ans.color} text-white relative w-full min-w-0 ${ans.checked ? 'animate-boing' : ''}`}
+          className={`flex items-center gap-4 p-4 border-[3px] border-zk-border rounded-xl ${ans.color} text-white relative w-full min-w-0 ${ans.checked ? 'animate-boing' : ''}`}
         >
           {/* Math/Formatting Toolbar (shown when focused) */}
           {!isTrueFalse && focusedAnswerId === ans.id && (
             <div 
-              className="absolute bottom-full left-0 mb-2 bg-[#E0E0E0] border-[2px] border-zk-black flex items-center gap-3 p-1.5 text-zk-black font-bold z-20 rounded-lg"
+              className="absolute bottom-full left-0 mb-2 bg-[#E0E0E0] border-[2px] border-zk-border flex items-center gap-3 p-1.5 text-zk-text font-bold z-20 rounded-lg"
               onMouseDown={(e) => e.preventDefault()} // Prevent losing focus on input
             >
-              <button onClick={() => alert('Image upload for answer is not implemented yet!')} className="p-1 hover:bg-white transition-colors rounded"><ImageIcon size={18} /></button>
-              <div className="border-l border-zk-black h-5 rounded-xl"></div>
+              <button onClick={() => alert('Image upload for answer is not implemented yet!')} className="p-1 hover:bg-zk-panel-bg transition-colors rounded"><ImageIcon size={18} /></button>
+              <div className="border-l border-zk-border h-5 rounded-xl"></div>
               
-              <button onClick={() => document.execCommand('bold')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm font-bold rounded">B</button>
-              <button onClick={() => document.execCommand('italic')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm italic rounded">I</button>
-              <button onClick={() => document.execCommand('subscript')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">X₂</button>
-              <button onClick={() => document.execCommand('superscript')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">X²</button>
+              <button onClick={() => document.execCommand('bold')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">B</button>
+              <button onClick={() => document.execCommand('italic')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm italic rounded">I</button>
+              <button onClick={() => document.execCommand('subscript')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">X₂</button>
+              <button onClick={() => document.execCommand('superscript')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">X²</button>
               
-              <div className="border-l border-zk-black h-5 rounded-xl"></div>
-              <button onClick={() => insertText('<')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm font-bold rounded">&lt;</button>
-              <button onClick={() => insertText('>')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm font-bold rounded">&gt;</button>
-              <button onClick={() => insertText('Ω')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">Ω</button>
-              <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-white transition-colors px-1.5 text-sm rounded">f(x)</button>
+              <div className="border-l border-zk-border h-5 rounded-xl"></div>
+              <button onClick={() => insertText('<')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">&lt;</button>
+              <button onClick={() => insertText('>')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">&gt;</button>
+              <button onClick={() => insertText('Ω')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">Ω</button>
+              <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">f(x)</button>
             </div>
           )}
 
-          <div className="w-10 h-10 bg-white border-[2px] border-zk-black flex items-center justify-center text-zk-black font-black text-lg rounded-lg">
+          <div className="w-10 h-10 bg-zk-panel-bg border-[2px] border-zk-border flex items-center justify-center text-zk-text font-black text-lg rounded-lg">
             {ans.id}
           </div>
 
@@ -100,8 +100,8 @@ const AnswerGrid = memo(() => {
 
           <div 
             onClick={() => handleToggleAnswer(ans.id)}
-            className={`w-8 h-8 rounded-full border-[2px] border-zk-black flex items-center justify-center cursor-pointer ${
-              ans.checked ? 'bg-[#00C853]' : 'bg-white/20'
+            className={`w-8 h-8 rounded-full border-[2px] border-zk-border flex items-center justify-center cursor-pointer ${
+              ans.checked ? 'bg-[#00C853]' : 'bg-zk-panel-bg/20'
             }`}
           >
             {ans.checked && <Check size={16} strokeWidth={3} className="text-white" />}

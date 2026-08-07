@@ -20,7 +20,7 @@ const DESKTOP_GRID = 'sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)_2.5rem]';
 
 function MatchInput({ value, onChange, placeholder, color }) {
   return (
-    <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-[3px] border-zk-black ${color} text-white min-w-0 w-full`}>
+    <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-[3px] border-zk-border ${color} text-white min-w-0 w-full`}>
       <input
         value={displayAnswerText(value)}
         onChange={(event) => onChange(event.target.value)}
@@ -33,7 +33,7 @@ function MatchInput({ value, onChange, placeholder, color }) {
 
 function ColumnLabel({ children }) {
   return (
-    <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/40 sm:hidden">
+    <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/40 sm:hidden">
       {children}
     </p>
   );
@@ -66,28 +66,28 @@ export default function LineMatchingEditor() {
     <div className="zk-panel p-5 lg:p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-widest text-zk-black/50">Answer widget</p>
-          <h3 className="font-black text-lg text-zk-black uppercase">Line matching pairs</h3>
+          <p className="text-xs font-black uppercase tracking-widest text-zk-text/50">Answer widget</p>
+          <h3 className="font-black text-lg text-zk-text uppercase">Line matching pairs</h3>
         </div>
         <button
           type="button"
           onClick={() => syncPairs(addLineMatchingPair(pairs))}
           disabled={pairs.length >= MAX_LINE_MATCH_PAIRS}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-[2px] border-zk-black bg-zk-green text-white font-black text-xs uppercase tracking-widest disabled:opacity-40"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-[2px] border-zk-border bg-zk-green text-white font-black text-xs uppercase tracking-widest disabled:opacity-40"
         >
           <Plus size={14} strokeWidth={3} />
           Add pair
         </button>
       </div>
 
-      <p className="text-sm font-bold text-zk-black/60">
+      <p className="text-sm font-bold text-zk-text/60">
         Create matching pairs — left prompts connect to the correct right answers in battle.
       </p>
 
       <div className={`hidden sm:grid ${DESKTOP_GRID} gap-x-3 gap-y-1 items-end`}>
-        <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/40">Left</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/40">Left</p>
         <span aria-hidden="true" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-zk-black/40">Right</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/40">Right</p>
         <span className="w-10" aria-hidden="true" />
       </div>
 
@@ -114,7 +114,7 @@ export default function LineMatchingEditor() {
               </div>
 
               <div className="hidden sm:flex items-center justify-center">
-                <div className="flex items-center gap-1 text-zk-black/35">
+                <div className="flex items-center gap-1 text-zk-text/35">
                   <span className="w-6 h-[3px] bg-zk-black/20 rounded-full" />
                   <Link2 size={16} strokeWidth={3} />
                   <span className="w-6 h-[3px] bg-zk-black/20 rounded-full" />

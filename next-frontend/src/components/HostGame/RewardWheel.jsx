@@ -341,7 +341,7 @@ export default function RewardWheel({ pin, winnerTeam, spinnerName, isSpinner, p
                     onClick={() => setSelectedSkillId(skill.id)}
                     className={`cursor-pointer rounded-2xl p-4 flex flex-col items-center text-center border-[4px] transition-all duration-200 ${
                       isSelected 
-                        ? 'border-white bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
+                        ? 'border-white bg-zk-panel-bg/20 shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
                         : 'border-black bg-black/40 hover:bg-black/20'
                     }`}
                   >

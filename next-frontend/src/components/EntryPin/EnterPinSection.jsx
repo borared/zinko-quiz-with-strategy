@@ -99,7 +99,10 @@ const EnterPinSection = () => {
       router.push(`/play/${trimmedPin}/join-nickname`);
 
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Game not found. Check your PIN and try again.';
+      let errorMessage = err.response?.data?.message || err.message || 'Game not found. Check your PIN and try again.';
+      // Clean up technical backend error messages for the user
+      errorMessage = errorMessage.replace('API Error: Not Found: ', '');
+      errorMessage = errorMessage.replace(/^API Error: [A-Za-z ]+: /, '');
       setError(errorMessage);
       triggerShake();
     } finally {
@@ -108,7 +111,7 @@ const EnterPinSection = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow w-full py-20 px-4 font-sans">
+    <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-zk-bg w-full py-20 px-4 font-sans">
 
       {/* Decorative Elements - Strategy / Quiz Theme */}
       <motion.div
@@ -153,10 +156,10 @@ const EnterPinSection = () => {
 
         {/* Title */}
         <div className="text-center mb-8 permanent-marker-regular">
-          <h2 className="text-4xl md:text-5xl font-bold text-zk-black mb-2 uppercase tracking-wide">
+          <h2 className="text-4xl md:text-5xl font-bold text-zk-text mb-2 uppercase tracking-wide">
             Join
           </h2>
-          <h3 className="text-2xl md:text-3xl font-bold text-zk-black uppercase tracking-wide">
+          <h3 className="text-2xl md:text-3xl font-bold text-zk-text uppercase tracking-wide">
             Enter 6 Digit Number
           </h3>
         </div>
@@ -165,7 +168,7 @@ const EnterPinSection = () => {
         <motion.div
           animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { x: 0 }}
           transition={{ duration: 0.4 }}
-          className="w-full bg-white border-[4px] border-zk-black p-6 md:p-10 flex flex-col gap-4 rounded-xl"
+          className="w-full bg-zk-panel-bg border-[4px] border-zk-border p-6 md:p-10 flex flex-col gap-4 rounded-xl"
         >
 
           {/* Input Box */}
@@ -184,7 +187,7 @@ const EnterPinSection = () => {
               className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
             />
             {/* Visual Slots */}
-            <div className="w-full border-[3px] border-zk-black p-3 md:p-4 rounded-xl flex items-center justify-between gap-2 md:gap-3 bg-white focus-within:ring-4 focus-within:ring-zk-blue/30 transition-all">
+            <div className="w-full border-[3px] border-zk-border p-3 md:p-4 rounded-xl flex items-center justify-between gap-2 md:gap-3 bg-zk-panel-bg focus-within:ring-4 focus-within:ring-zk-blue/30 transition-all">
               {[...Array(6)].map((_, i) => {
                 const char = pin[i];
                 const isFilled = char !== undefined;
@@ -193,7 +196,7 @@ const EnterPinSection = () => {
                   <div
                     key={i}
                     className={`relative flex-1 aspect-[3/4] max-h-16 md:max-h-20 flex items-center justify-center rounded-2xl md:rounded-[24px] transition-all ${
-                      isFilled ? 'bg-zk-black' : 'bg-gray-200'
+                      isFilled ? 'bg-zk-black' : 'bg-gray-200 dark:bg-zk-border/50'
                     } ${isActive ? 'ring-4 ring-[#5D3FD3] scale-[1.05] shadow-lg' : ''}`}
                   >
                     <span
@@ -211,7 +214,7 @@ const EnterPinSection = () => {
 
           {/* Error Message */}
           {error && (
-            <p className="text-center text-sm font-bold text-red-500 border-[2px] border-red-300 bg-red-50 py-2 px-4 rounded-lg">
+            <p className="text-center text-sm font-bold text-red-500 border-[2px] border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 py-2 px-4 rounded-lg">
               {error}
             </p>
           )}
@@ -224,7 +227,7 @@ const EnterPinSection = () => {
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
             disabled={loading || pin.length < 6}
-            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 font-black text-4xl uppercase tracking-wider transition-colors rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+            className="w-full bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-border py-4 font-black text-4xl uppercase tracking-wider transition-colors rounded-xl disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
             style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
           >
             {loading ? (

@@ -60,7 +60,7 @@ export default function AnswerGrid({
             disabled={isDisabled}
             className={`
               relative rounded-3xl px-4 py-6 flex flex-col items-center justify-center gap-3
-              border-[4px] border-zk-black transition-all duration-150 min-h-[140px] w-full
+              border-[4px] border-zk-border transition-all duration-150 min-h-[140px] w-full
               ${isSelected
                 ? `${style.activeBg} opacity-100`
                 : isDisabled
@@ -72,14 +72,14 @@ export default function AnswerGrid({
             {!isTrueFalse && (
               <span className="text-white text-3xl font-black opacity-80">{style.shape}</span>
             )}
-            <span className={`font-black text-center leading-tight ${isTrueFalse ? 'text-white text-2xl md:text-3xl' : 'text-zk-black text-xl md:text-2xl'}`}>
+            <span className={`font-black text-center leading-tight ${isTrueFalse ? 'text-white text-2xl md:text-3xl' : 'text-zk-text text-xl md:text-2xl'}`}>
               {label}
             </span>
             {isSelected && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-2 right-2 w-6 h-6 bg-white/30 rounded-full flex items-center justify-center"
+                className="absolute top-2 right-2 w-6 h-6 bg-zk-panel-bg/30 rounded-full flex items-center justify-center"
               >
                 <span className="text-white text-xs">✓</span>
               </motion.div>

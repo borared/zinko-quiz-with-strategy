@@ -61,7 +61,7 @@ export default function LibraryCartHero({
             <button
               type="button"
               onClick={onClearCart}
-              className="shrink-0 rounded-lg border-[2px] border-white/80 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              className="shrink-0 rounded-lg border-[2px] border-white/80 bg-zk-panel-bg/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white backdrop-blur-sm transition-colors hover:bg-zk-panel-bg/20"
             >
               Clear all
             </button>
@@ -70,23 +70,23 @@ export default function LibraryCartHero({
 
         {itemCount > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
             <ShoppingCart size={12} strokeWidth={3} />
             {itemCount} {itemCount === 1 ? 'item' : 'items'} waiting
           </span>
           {sceneryCount > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
               <ImageIcon size={12} strokeWidth={3} />
               {sceneryCount} scenery
             </span>
           )}
           {avatarCount > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
               <VenetianMask size={12} strokeWidth={3} />
               {avatarCount} avatars
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-zk-yellow/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-bg/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
             <CreditCard size={12} strokeWidth={3} />
             One checkout per item
           </span>

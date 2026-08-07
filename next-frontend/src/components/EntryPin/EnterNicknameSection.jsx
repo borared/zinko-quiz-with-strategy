@@ -125,7 +125,7 @@ const EnterNicknameSection = () => {
   };
 
   return (
-    <div className="flex-1 w-full flex flex-col items-center justify-center relative overflow-hidden bg-zk-yellow px-4 py-20 font-sans">
+    <div className="flex-1 w-full flex flex-col items-center justify-center relative overflow-hidden bg-zk-bg px-4 py-20 font-sans">
 
       {/* Decorative Elements - Strategy / Quiz Theme */}
       <motion.div
@@ -169,21 +169,21 @@ const EnterNicknameSection = () => {
 
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl font-black italic text-zk-black mb-1 uppercase tracking-tight permanent-marker-regular">
+          <h2 className="text-3xl md:text-4xl font-black italic text-zk-text mb-1 uppercase tracking-tight permanent-marker-regular">
             Get in the game!
           </h2>
-          <p className="text-base font-bold text-zk-black/70">
+          <p className="text-base font-bold text-zk-text/70">
             Your squad is waiting for you.
           </p>
         </div>
 
         {/* Selected Avatar Display */}
         {loadingAvatars ? (
-          <p className="text-sm text-zk-black/70 mb-6">Loading avatars…</p>
+          <p className="text-sm text-zk-text/70 mb-6">Loading avatars…</p>
         ) : selectedAvatar ? (
           <div 
             onClick={() => setIsAvatarModalOpen(true)}
-            className="relative mb-6 w-40 h-40 border-[4px] border-zk-black rounded-xl bg-white flex items-center justify-center cursor-pointer group hover:-translate-y-1 transition-transform"
+            className="relative mb-6 w-40 h-40 border-[4px] border-zk-border rounded-xl bg-zk-panel-bg flex items-center justify-center cursor-pointer group hover:-translate-y-1 transition-transform"
           >
             <img
               src={selectedAvatar.image_url}
@@ -191,7 +191,7 @@ const EnterNicknameSection = () => {
               className="w-full h-full object-cover rounded-lg"
             />
             {/* Edit Badge */}
-            <div className="absolute -top-3 -right-3 bg-white text-zk-black p-2 rounded-full border-[3px] border-zk-black group-hover:scale-110 group-hover:bg-gray-100 transition-all z-20">
+            <div className="absolute -top-3 -right-3 bg-zk-panel-bg text-zk-text p-2 rounded-full border-[3px] border-zk-border group-hover:scale-110 group-hover:bg-gray-100 transition-all z-20">
               <Edit2 size={18} strokeWidth={2.5} />
             </div>
           </div>
@@ -202,7 +202,7 @@ const EnterNicknameSection = () => {
 
           {/* Input Group */}
           <div className="w-full mb-4">
-            <label className="block text-sm font-black text-zk-black uppercase tracking-wider mb-2">
+            <label className="block text-sm font-black text-zk-text uppercase tracking-wider mb-2">
               Choose Nickname
             </label>
             <input
@@ -211,7 +211,7 @@ const EnterNicknameSection = () => {
               onChange={(e) => setNickname(e.target.value)}
               maxLength={15}
               placeholder="TYPE SOMETHING COOL..."
-              className="w-full border-[3px] border-zk-black p-4 text-center text-sm md:text-base font-bold text-zk-black placeholder-black focus:outline-none focus:ring-zk-blue/30 transition-all rounded-xl"
+              className="w-full border-[3px] border-zk-border p-4 text-center text-sm md:text-base font-bold text-zk-text placeholder-black focus:outline-none focus:ring-zk-blue/30 transition-all rounded-xl"
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
             />
           </div>
@@ -232,7 +232,7 @@ const EnterNicknameSection = () => {
             whileTap={{ scale: 0.95, y: 4 }}
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={handleEnter}
-            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-black py-4 px-6 font-black text-base uppercase tracking-wider mb-6 rounded-xl transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[3px] border-zk-border py-4 px-6 font-black text-base uppercase tracking-wider mb-6 rounded-xl transition-colors"
           >
             Enter <Rocket size={20} />
           </motion.button>
@@ -240,7 +240,7 @@ const EnterNicknameSection = () => {
           {/* Divider */}
           <div className="w-full flex items-center gap-4 mb-6">
             <div className="flex-1 h-[2px] bg-zk-black/10"></div>
-            <span className="text-sm font-bold text-zk-black/40 uppercase">Or</span>
+            <span className="text-sm font-bold text-zk-text/40 uppercase">Or</span>
             <div className="flex-1 h-[2px] bg-zk-black/10"></div>
           </div>
 
@@ -248,13 +248,13 @@ const EnterNicknameSection = () => {
           <div className="w-full grid grid-cols-2 gap-4">
             <button
               onClick={() => setIsAvatarModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-gray-100 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <VenetianMask size={18} /> Change Avatar
             </button>
             <button
               onClick={() => router.push('/join')}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-zk-black border-[3px] border-zk-black py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-gray-100 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <RefreshCw size={18} /> New PIN
             </button>

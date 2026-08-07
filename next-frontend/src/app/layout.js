@@ -1,6 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import ClientLayoutWrapper from './ClientLayoutWrapper';
+import { ThemeProvider } from '@/components/global/ThemeProvider';
 import { Amatic_SC } from 'next/font/google';
 
 const amaticSC = Amatic_SC({
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
   console.log('[Layout] CLERK KEY:', process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? 'FOUND ✓' : 'MISSING ✗');
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -31,10 +32,12 @@ export default function RootLayout({ children }) {
           <link rel="dns-prefetch" href="https://content-panda-63.clerk.accounts.dev" />
           <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&family=Kantumruy+Pro:wght@100..700&display=swap" rel="stylesheet" />
         </head>
-        <body className={`min-h-screen bg-zk-yellow flex flex-col font-sans ${amaticSC.variable}`}>
-          <ClientLayoutWrapper>
-            {children}
-          </ClientLayoutWrapper>
+        <body className={`min-h-screen bg-zk-bg flex flex-col font-sans ${amaticSC.variable}`}>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <ClientLayoutWrapper>
+              {children}
+            </ClientLayoutWrapper>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

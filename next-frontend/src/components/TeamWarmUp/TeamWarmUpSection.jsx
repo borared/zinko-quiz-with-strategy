@@ -32,7 +32,7 @@ const TeamWarmUpSection = () => {
 
   return (
     <div 
-      className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-yellow flex flex-col items-center justify-center font-sans px-6 py-8 bg-cover bg-center"
+      className="relative w-full h-screen max-h-screen overflow-hidden bg-zk-bg flex flex-col items-center justify-center font-sans px-6 py-8 bg-cover bg-center"
       style={{ backgroundImage: `url('${bgImage}')` }}
     >
       {/* Dark overlay for better readability over random backgrounds */}
@@ -44,7 +44,7 @@ const TeamWarmUpSection = () => {
           const pin = sessionStorage.getItem('game_pin') || '';
           router.push(`/play/${pin}/choose-skill`);
         }}
-        className="absolute top-4 right-4 z-50 bg-[#5D3FD3] text-white px-4 py-2 rounded-xl font-bold border-2 border-zk-black shadow-[4px_4px_0px_#1a1a1a] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#1a1a1a] transition-all uppercase tracking-widest text-sm"
+        className="absolute top-4 right-4 z-50 bg-[#5D3FD3] text-white px-4 py-2 rounded-xl font-bold border-2 border-zk-border shadow-[4px_4px_0px_#1a1a1a] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_#1a1a1a] transition-all uppercase tracking-widest text-sm"
       >
         Test Choose Skill
       </button>
@@ -59,7 +59,7 @@ const TeamWarmUpSection = () => {
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-14 left-16 w-14 h-14 rounded-full bg-[#D4A322]/70 border-[3px] border-zk-black/20 pointer-events-none"
+        className="absolute top-14 left-16 w-14 h-14 rounded-full bg-[#D4A322]/70 border-[3px] border-zk-border/20 pointer-events-none"
       />
 
       {/* Content */}

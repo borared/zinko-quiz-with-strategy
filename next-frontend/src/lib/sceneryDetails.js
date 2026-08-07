@@ -3,8 +3,8 @@
 export const SCENERY_LEVEL_CLASSES = {
   Epic: 'bg-zk-pink text-white',
   Rare: 'bg-zk-blue text-white',
-  Elite: 'bg-white text-zk-black',
-  Starter: 'bg-zk-yellow text-zk-black',
+  Elite: 'bg-zk-panel-bg text-zk-text',
+  Starter: 'bg-zk-bg text-zk-text',
 };
 
 export const SCENERY_DETAILS = {

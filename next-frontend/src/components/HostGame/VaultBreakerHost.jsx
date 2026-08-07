@@ -103,7 +103,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-white z-10"
+                className="absolute inset-0 bg-zk-panel-bg z-10"
               />
             )}
           </AnimatePresence>
@@ -129,7 +129,7 @@ export default function VaultBreakerHost({ teamVaults, heldColors, vaultsToWin, 
             animate={{ scale: 1, opacity: 1 }}
             className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
-            <div className="bg-zk-yellow px-12 py-6 rounded-3xl border-[6px] border-black shadow-[0_8px_0_0_#000] rotate-[-5deg]">
+            <div className="bg-zk-bg px-12 py-6 rounded-3xl border-[6px] border-black shadow-[0_8px_0_0_#000] rotate-[-5deg]">
               <h1 className="gasoek-one-regular text-6xl text-black">VAULT CRACKED!</h1>
             </div>
           </motion.div>

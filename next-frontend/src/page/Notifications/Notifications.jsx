@@ -36,10 +36,10 @@ function NotificationCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-black transition-colors ${
+      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-border transition-colors ${
         notif.is_read
-          ? 'bg-white opacity-70 hover:opacity-100 cursor-default'
-          : 'bg-zk-yellow/20 hover:bg-zk-yellow/40 cursor-pointer'
+          ? 'bg-zk-panel-bg opacity-70 hover:opacity-100 cursor-default'
+          : 'bg-zk-bg/20 hover:bg-zk-bg/40 cursor-pointer'
       }`}
     >
       <button
@@ -48,14 +48,14 @@ function NotificationCard({
           event.stopPropagation();
           onDelete(notif.id);
         }}
-        className="absolute top-4 right-4 text-zk-black/30 hover:text-red-500 transition-colors"
+        className="absolute top-4 right-4 text-zk-text/30 hover:text-red-500 transition-colors"
         aria-label="Delete notification"
       >
         <Trash2 size={20} />
       </button>
 
       <div className="relative flex-shrink-0">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-black overflow-hidden bg-zk-yellow flex items-center justify-center p-1.5">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-border overflow-hidden bg-zk-bg flex items-center justify-center p-1.5">
           <img
             src={senderAvatar}
             alt={senderName}
@@ -74,14 +74,14 @@ function NotificationCard({
           }`}>
             {notif.type.replace(/_/g, ' ')}
           </span>
-          <span className="text-xs font-bold text-zk-black/50">
+          <span className="text-xs font-bold text-zk-text/50">
             {new Date(notif.created_at).toLocaleDateString(undefined, {
               month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
             })}
           </span>
         </div>
 
-        <p className="text-base sm:text-lg text-zk-black font-semibold mt-2">
+        <p className="text-base sm:text-lg text-zk-text font-semibold mt-2">
           <span className={`font-black ${isSceneryGift ? 'text-orange-700' : 'text-zk-blue'}`}>
             {senderName}
           </span>{' '}
@@ -91,7 +91,7 @@ function NotificationCard({
         {isSceneryGift && metadata.scenery_image && (
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div
-              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-black overflow-hidden"
+              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-border overflow-hidden"
               style={{
                 backgroundImage: `url('${metadata.scenery_image}')`,
                 backgroundSize: 'cover',
@@ -99,7 +99,7 @@ function NotificationCard({
               }}
             />
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-black uppercase tracking-wide text-zk-black">
+              <span className="text-sm font-black uppercase tracking-wide text-zk-text">
                 {metadata.scenery_name || 'Background Scenery'}
               </span>
               {isCollected ? (
@@ -114,7 +114,7 @@ function NotificationCard({
                     onCollectScenery(notif.id);
                   }}
                   disabled={collectingId === notif.id}
-                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-black px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#268f3f] disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-border px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#268f3f] disabled:opacity-60"
                 >
                   {collectingId === notif.id ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -178,14 +178,14 @@ export default function Notifications() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#FDF9F1] flex items-center justify-center">
-        <Loader2 className="animate-spin w-12 h-12 text-zk-black" />
+      <div className="min-h-screen bg-zk-light-bg flex items-center justify-center">
+        <Loader2 className="animate-spin w-12 h-12 text-zk-text" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF9F1] flex flex-col font-['Outfit'] relative overflow-hidden z-0">
+    <div className="min-h-screen bg-zk-light-bg flex flex-col font-['Outfit'] relative overflow-hidden z-0">
       <Navbar />
 
       {/* Floating Background Shapes */}
@@ -220,26 +220,26 @@ export default function Notifications() {
       </motion.div>
 
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 mt-4 relative z-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border-[4px] border-zk-black p-6 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-zk-panel-bg border-[4px] border-zk-border p-6 rounded-2xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-zk-yellow border-[3px] border-zk-black rounded-xl flex items-center justify-center">
-              <BellRing className="text-zk-black" size={24} />
+            <div className="w-12 h-12 bg-zk-bg border-[3px] border-zk-border rounded-xl flex items-center justify-center">
+              <BellRing className="text-zk-text" size={24} />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-zk-black tracking-tight">Notifications</h1>
-              <p className="text-zk-black/60 font-bold">Collect scenery gifts and stay up to date.</p>
+              <h1 className="text-3xl font-black text-zk-text tracking-tight">Notifications</h1>
+              <p className="text-zk-text/60 font-bold">Collect scenery gifts and stay up to date.</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => user?.id && markAllAsRead(user.id)}
-              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-[3px] border-zk-black px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-blue/90 whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-[3px] border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-blue/90 whitespace-nowrap"
             >
               <CheckCheck size={20} /> Mark as read
             </button>
             <button
               onClick={() => user?.id && clearAllNotifications(user.id)}
-              className="flex items-center justify-center gap-2 bg-red-500 text-white border-[3px] border-zk-black px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-red-600 whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-red-500 text-white border-[3px] border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-red-600 whitespace-nowrap"
             >
               Clear all
             </button>
@@ -249,13 +249,13 @@ export default function Notifications() {
         <div className="flex flex-col gap-4">
           {isLoading && !notificationsCached ? (
             <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
-              <Loader2 className="animate-spin w-12 h-12 text-zk-black mb-4" />
-              <h2 className="text-2xl font-black text-zk-black">Loading Notifications...</h2>
+              <Loader2 className="animate-spin w-12 h-12 text-zk-text mb-4" />
+              <h2 className="text-2xl font-black text-zk-text">Loading Notifications...</h2>
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center justify-center mt-12">
-              <h2 className="text-2xl font-black text-zk-black">You&apos;re all caught up!</h2>
-              <p className="text-zk-black/60 font-bold mt-2">No new notifications to display.</p>
+              <h2 className="text-2xl font-black text-zk-text">You&apos;re all caught up!</h2>
+              <p className="text-zk-text/60 font-bold mt-2">No new notifications to display.</p>
             </div>
           ) : (
             notifications.map((notif) => (

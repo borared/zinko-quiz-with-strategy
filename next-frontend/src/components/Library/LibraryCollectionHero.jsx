@@ -54,15 +54,15 @@ export default function LibraryCollectionHero({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
             <Layers size={12} strokeWidth={3} />
             {totalCount} {totalCount === 1 ? 'item' : 'items'} owned
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
             <ImageIcon size={12} strokeWidth={3} />
             {sceneryCount} scenery
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-white/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-black">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-zk-text">
             <VenetianMask size={12} strokeWidth={3} />
             {avatarCount} avatars
           </span>

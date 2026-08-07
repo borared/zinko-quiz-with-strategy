@@ -5,7 +5,7 @@ export const DEFAULT_SCENERY_SKELETON_COUNT = 3;
 export const DEFAULT_AVATAR_SKELETON_COUNT = 4;
 
 function SkeletonBlock({ className = '' }) {
-  return <div className={`zk-skeleton border-[2px] border-zk-black/10 ${className}`} />;
+  return <div className={`zk-skeleton border-[2px] border-zk-border/10 ${className}`} />;
 }
 
 export function CollectionItemCardSkeleton({ isScenery = true }) {
@@ -15,7 +15,7 @@ export function CollectionItemCardSkeleton({ isScenery = true }) {
         <SkeletonBlock className="absolute left-4 top-4 z-20 h-6 w-14 rounded" />
       )}
 
-      <div className="relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-black bg-zk-yellow/20 aspect-video">
+      <div className="relative w-full shrink-0 overflow-hidden border-b-[3px] border-zk-border bg-zk-bg/20 aspect-video">
         <SkeletonBlock className="h-full w-full rounded-none border-0" />
         <SkeletonBlock className="absolute top-4 right-4 z-10 h-6 w-16 rounded" />
       </div>

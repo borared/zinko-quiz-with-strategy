@@ -50,7 +50,7 @@ export default function ScenerySoundToggle({
       disabled={disabled}
       aria-label={isPlaying ? `Mute ${config.label} ambience` : `Unmute ${config.label} ambience`}
       title={isPlaying ? `Mute ${config.label} sound` : `Play ${config.label} sound`}
-      className={`flex items-center justify-center bg-white border-[3px] border-[#000000] rounded-xl p-3 hover:scale-[1.02] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`flex items-center justify-center bg-zk-panel-bg border-[3px] border-[#000000] rounded-xl p-3 hover:scale-[1.02] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       style={{ boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)' }}
     >
       {isPlaying ? (

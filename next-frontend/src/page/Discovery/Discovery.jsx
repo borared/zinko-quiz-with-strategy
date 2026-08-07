@@ -425,11 +425,11 @@ const Discovery = () => {
 
       <div ref={searchWrapRef} className="relative z-20">
         <div className="zk-panel-glass !shadow-none px-4 py-3 flex items-center gap-3">
-          <Search size={22} strokeWidth={2.5} className="text-zk-black shrink-0" />
+          <Search size={22} strokeWidth={2.5} className="text-zk-text shrink-0" />
           <input
             type="text"
             placeholder="Search by title..."
-            className="w-full text-base md:text-lg font-bold outline-none placeholder:text-zk-black/40 text-zk-black bg-transparent"
+            className="w-full text-base md:text-lg font-bold outline-none placeholder:text-zk-text/40 text-zk-text bg-transparent"
             value={inputValue}
             onChange={(e) => {
               const next = e.target.value;
@@ -454,7 +454,7 @@ const Discovery = () => {
             <button
               type="button"
               onClick={handleClear}
-              className="text-xs font-black uppercase text-zk-black/50 hover:text-zk-black shrink-0"
+              className="text-xs font-black uppercase text-zk-text/50 hover:text-zk-text shrink-0"
             >
               Clear
             </button>
@@ -467,13 +467,13 @@ const Discovery = () => {
             role="listbox"
           >
             {suggestionsLoading && (
-              <li className="px-4 py-3 flex items-center gap-2 text-sm font-bold text-zk-black/50">
+              <li className="px-4 py-3 flex items-center gap-2 text-sm font-bold text-zk-text/50">
                 <Loader2 size={16} className="animate-spin" />
                 Finding matches...
               </li>
             )}
             {!suggestionsLoading && suggestions.length === 0 && inputValue.trim() && (
-              <li className="px-4 py-3 text-sm font-bold text-zk-black/50">
+              <li className="px-4 py-3 text-sm font-bold text-zk-text/50">
                 No similar titles found — press Enter to search
               </li>
             )}
@@ -483,9 +483,9 @@ const Discovery = () => {
                   <button
                     type="button"
                     onClick={() => commitSearch(quiz.title)}
-                    className="w-full text-left px-4 py-3 font-bold text-zk-black hover:bg-zk-yellow/40 transition-colors flex items-center gap-3 border-b border-zk-black/10 last:border-b-0"
+                    className="w-full text-left px-4 py-3 font-bold text-zk-text hover:bg-zk-bg/40 transition-colors flex items-center gap-3 border-b border-zk-border/10 last:border-b-0"
                   >
-                    <Search size={14} className="text-zk-black/40 shrink-0" />
+                    <Search size={14} className="text-zk-text/40 shrink-0" />
                     <span className="truncate">{quiz.title}</span>
                   </button>
                 </li>

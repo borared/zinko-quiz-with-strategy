@@ -16,7 +16,7 @@ const HeroSection = () => {
           y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 10, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
       <motion.div
         animate={{ y: [15, -15, 15], rotate: -360 }}
@@ -24,17 +24,17 @@ const HeroSection = () => {
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 12, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full"
+        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full"
       />
       <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl"
       />
 
       {/* Main Text */}
@@ -53,8 +53,7 @@ const HeroSection = () => {
         {/* Description Box */}
         <div className="mt-8 border-[2px] border-transparent px-8 py-4 rounded-lg max-w-3xl">
           <p
-            className="text-zk-black text-3xl md:text-5xl font-bold"
-            style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
+            className="text-zk-text text-xl md:text-3xl font-normal font-['Outfit']"
           >
             Empower your classroom with interactive quizzes that feel like real games. No<br className="hidden md:block" />
             topic limits, no hassle — just pure fun.
@@ -83,7 +82,7 @@ const HeroSection = () => {
             whileTap={{ scale: 0.9, y: 5 }}
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             onClick={() => router.push('/join')}
-            className="bg-zk-blue text-zk-white border-[4px] border-zk-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-xl"
+            className="bg-zk-blue text-zk-white border-[4px] border-zk-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] rounded-xl"
           >
             <span className="font-bold text-4xl tracking-wide"
               style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>JOIN</span>

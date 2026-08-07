@@ -12,7 +12,7 @@ const BlinkingEye = ({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) => 
     >
       {/* Eye white (oval) */}
       <motion.div
-        className="w-full h-full rounded-full bg-white border-[3px] border-zk-black shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden"
+        className="w-full h-full rounded-full bg-zk-panel-bg border-[3px] border-zk-border shadow-[3px_3px_0px_0px_rgba(0,0,0,0.4)] flex items-center justify-center overflow-hidden"
         animate={{ scaleY: [1, 1, 0.05, 1, 1] }}
         transition={{
           duration: 4,
@@ -24,7 +24,7 @@ const BlinkingEye = ({ size = 60, x, y, delay = 0, pupilColor = '#1a1a1a' }) => 
       >
         {/* Pupil */}
         <div
-          className="rounded-full border-[2px] border-zk-black"
+          className="rounded-full border-[2px] border-zk-border"
           style={{
             width: size * 0.38,
             height: size * 0.38,

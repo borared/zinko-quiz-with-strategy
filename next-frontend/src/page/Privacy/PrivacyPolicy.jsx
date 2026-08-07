@@ -150,24 +150,24 @@ const sections = [
 
 export default function PrivacyPolicy() {
   return (
-    <div className="flex-1 w-full bg-zk-yellow relative overflow-hidden pt-12 pb-16 font-sans min-h-[80vh]">
+    <div className="flex-1 w-full bg-zk-bg relative overflow-hidden pt-12 pb-16 font-sans min-h-[80vh]">
       <PrivacyFloatingDecor />
       <div className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="p-8 sm:p-12">
           <p className="text-sm font-bold uppercase tracking-wider text-zk-purple mb-3">Legal</p>
           <h1
-            className="text-4xl sm:text-5xl font-bold text-zk-black mb-2"
+            className="text-4xl sm:text-5xl font-bold text-zk-text mb-2"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
             Privacy Policy
           </h1>
-          <p className="text-sm text-zk-black/60 mb-10">Last updated: June 30, 2026</p>
+          <p className="text-sm text-zk-text/60 mb-10">Last updated: June 30, 2026</p>
 
-          <div className="space-y-10 text-zk-black/90 leading-relaxed">
+          <div className="space-y-10 text-zk-text/90 leading-relaxed">
             {sections.map((section) => (
               <section key={section.title}>
                 <h2
-                  className="text-xl font-bold text-zk-black mb-3"
+                  className="text-xl font-bold text-zk-text mb-3"
                   style={{ fontFamily: 'var(--font-heading)' }}
                 >
                   {section.title}
@@ -177,7 +177,7 @@ export default function PrivacyPolicy() {
             ))}
           </div>
 
-          <div className="mt-12 pt-8 border-t-2 border-zk-black/10">
+          <div className="mt-12 pt-8 border-t-2 border-zk-border/10">
             <Link
               href="/"
               className="inline-flex items-center text-sm font-bold text-zk-blue hover:text-zk-purple transition-colors"

@@ -133,7 +133,7 @@ export default function SocialPage() {
   if (!isLoaded || !isJwtReady) {
     return (
       <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-black" size={32} />
+        <Loader2 className="animate-spin text-zk-text" size={32} />
       </div>
     );
   }
@@ -141,11 +141,11 @@ export default function SocialPage() {
   return (
     <WorkspaceShell sidebar={<Sidebar />} contentClassName="social-shell">
       <section className="flex flex-col gap-6 md:gap-8">
-        <div className="border-b-[3px] border-zk-black pb-4">
-          <h2 className="font-['Amatic_SC'] text-5xl font-black text-zk-black uppercase tracking-tight">
+        <div className="border-b-[3px] border-zk-border pb-4">
+          <h2 className="font-['Amatic_SC'] text-5xl font-black text-zk-text uppercase tracking-tight">
             Zinko Social Club
           </h2>
-          <p className="text-sm font-bold text-zk-black/60 font-['Outfit'] mt-1">
+          <p className="text-sm font-bold text-zk-text/60 font-['Outfit'] mt-1">
             Connect with friends, share knowledge, and learn together.
           </p>
         </div>
@@ -160,10 +160,10 @@ export default function SocialPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-black rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none ${
+                className={`flex items-center gap-2 px-5 py-2 border-[3px] border-zk-border rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors !shadow-none ${
                   isActive
                     ? 'bg-[#5D3FD3] text-white'
-                    : 'bg-white text-zk-black hover:bg-zk-yellow/30'
+                    : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/30'
                 }`}
               >
                 <Icon size={20} strokeWidth={3} />
@@ -178,8 +178,8 @@ export default function SocialPage() {
           {activeTab === 'friends' && (
             <div className="flex flex-col gap-4">
               {friends.length === 0 ? (
-                <div className="zk-panel !shadow-none p-10 text-center bg-white border-[3px] border-zk-black rounded-2xl">
-                  <p className="text-lg font-bold text-zk-black/70 font-['Outfit']">
+                <div className="zk-panel !shadow-none p-10 text-center bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl">
+                  <p className="text-lg font-bold text-zk-text/70 font-['Outfit']">
                     Your friends list is currently empty. Go to the "Add Friend" tab to start adding!
                   </p>
                 </div>
@@ -188,19 +188,19 @@ export default function SocialPage() {
                   {friends.map((friend) => (
                     <div
                       key={friend.clerk_id}
-                      className="bg-white border-[3px] border-zk-black rounded-2xl p-4 flex items-center justify-between !shadow-none"
+                      className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                     >
                       <div className="flex items-center gap-3">
                         <img
                           src={friend.avatar_url || '/images/avatars/default.png'}
                           alt={friend.username}
-                          className="w-12 h-12 rounded-full border-2 border-zk-black object-cover"
+                          className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
                         />
                         <div>
-                          <p className="font-['Outfit'] font-black text-zk-black text-lg">
+                          <p className="font-['Outfit'] font-black text-zk-text text-lg">
                             {friend.first_name || friend.username}
                           </p>
-                          <p className="font-['Outfit'] text-sm text-zk-black/60">
+                          <p className="font-['Outfit'] text-sm text-zk-text/60">
                             @{friend.username}
                           </p>
                         </div>
@@ -209,7 +209,7 @@ export default function SocialPage() {
                         type="button"
                         onClick={() => handleRemoveFriend(friend.clerk_id)}
                         disabled={actionLoading[friend.clerk_id]}
-                        className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-xl border-2 border-zk-black transition-colors"
+                        className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-xl border-2 border-zk-border transition-colors"
                       >
                         {actionLoading[friend.clerk_id] ? (
                           <Loader2 className="animate-spin" size={18} />
@@ -228,31 +228,31 @@ export default function SocialPage() {
             <div className="flex flex-col gap-6">
               {/* Incoming requests */}
               <div>
-                <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-black mb-3">
+                <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-text mb-3">
                   Incoming Requests ({incomingRequests.length})
                 </h3>
                 {incomingRequests.length === 0 ? (
-                  <div className="p-6 bg-white/50 border-2 border-dashed border-zk-black/35 rounded-2xl text-center">
-                    <p className="font-['Outfit'] text-zk-black/55">No incoming friend requests.</p>
+                  <div className="p-6 bg-zk-panel-bg/50 border-2 border-dashed border-zk-border/35 rounded-2xl text-center">
+                    <p className="font-['Outfit'] text-zk-text/55">No incoming friend requests.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {incomingRequests.map((req) => (
                       <div
                         key={req.clerk_id}
-                        className="bg-white border-[3px] border-zk-black rounded-2xl p-4 flex items-center justify-between !shadow-none"
+                        className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-black object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-black">
+                            <p className="font-['Outfit'] font-black text-zk-text">
                               {req.first_name || req.username}
                             </p>
-                            <p className="font-['Outfit'] text-xs text-zk-black/60">
+                            <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{req.username}
                             </p>
                           </div>
@@ -262,7 +262,7 @@ export default function SocialPage() {
                             type="button"
                             onClick={() => handleAcceptRequest(req.clerk_id)}
                             disabled={actionLoading[req.clerk_id]}
-                            className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-xl border-2 border-zk-black transition-colors"
+                            className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-xl border-2 border-zk-border transition-colors"
                           >
                             <Check size={18} />
                           </button>
@@ -270,7 +270,7 @@ export default function SocialPage() {
                             type="button"
                             onClick={() => handleRejectRequest(req.clerk_id)}
                             disabled={actionLoading[req.clerk_id]}
-                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl border-2 border-zk-black transition-colors"
+                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-xl border-2 border-zk-border transition-colors"
                           >
                             <X size={18} />
                           </button>
@@ -283,36 +283,36 @@ export default function SocialPage() {
 
               {/* Outgoing requests */}
               <div>
-                <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-black mb-3">
+                <h3 className="font-['Amatic_SC'] text-3xl font-bold text-zk-text mb-3">
                   Sent Requests ({outgoingRequests.length})
                 </h3>
                 {outgoingRequests.length === 0 ? (
-                  <div className="p-6 bg-white/50 border-2 border-dashed border-zk-black/35 rounded-2xl text-center">
-                    <p className="font-['Outfit'] text-zk-black/55">No sent friend requests.</p>
+                  <div className="p-6 bg-zk-panel-bg/50 border-2 border-dashed border-zk-border/35 rounded-2xl text-center">
+                    <p className="font-['Outfit'] text-zk-text/55">No sent friend requests.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {outgoingRequests.map((req) => (
                       <div
                         key={req.clerk_id}
-                        className="bg-white border-[3px] border-zk-black rounded-2xl p-4 flex items-center justify-between opacity-80"
+                        className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between opacity-80"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-black object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-black">
+                            <p className="font-['Outfit'] font-black text-zk-text">
                               {req.first_name || req.username}
                             </p>
-                            <p className="font-['Outfit'] text-xs text-zk-black/60">
+                            <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{req.username}
                             </p>
                           </div>
                         </div>
-                        <span className="font-['Outfit'] text-xs font-bold bg-zk-yellow text-zk-black px-2 py-1 rounded border border-zk-black">
+                        <span className="font-['Outfit'] text-xs font-bold bg-zk-bg text-zk-text px-2 py-1 rounded border border-zk-border">
                           Pending
                         </span>
                       </div>
@@ -332,14 +332,14 @@ export default function SocialPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by username..."
-                    className="w-full bg-white border-[3px] border-zk-black rounded-xl p-3 pl-10 font-['Outfit'] text-sm"
+                    className="w-full bg-zk-panel-bg border-[3px] border-zk-border rounded-xl p-3 pl-10 font-['Outfit'] text-sm"
                   />
-                  <Search className="absolute left-3 top-3.5 text-zk-black/50" size={18} />
+                  <Search className="absolute left-3 top-3.5 text-zk-text/50" size={18} />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-zk-purple text-white px-6 rounded-xl border-[3px] border-zk-black font-['Amatic_SC'] text-2xl font-bold hover:bg-zk-blue transition-colors"
+                  className="bg-zk-purple text-white px-6 rounded-xl border-[3px] border-zk-border font-['Amatic_SC'] text-2xl font-bold hover:bg-zk-blue transition-colors"
                 >
                   Search
                 </button>
@@ -349,28 +349,28 @@ export default function SocialPage() {
               <div className="flex flex-col gap-4">
                 {loading ? (
                   <div className="flex justify-center p-6">
-                    <Loader2 className="animate-spin text-zk-black" size={24} />
+                    <Loader2 className="animate-spin text-zk-text" size={24} />
                   </div>
                 ) : searchResults.length === 0 && searchQuery ? (
-                  <p className="font-['Outfit'] text-zk-black/60">No users found matching that username.</p>
+                  <p className="font-['Outfit'] text-zk-text/60">No users found matching that username.</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {searchResults.map((result) => (
                       <div
                         key={result.clerk_id}
-                        className="bg-white border-[3px] border-zk-black rounded-2xl p-4 flex items-center justify-between !shadow-none"
+                        className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
                         <div className="flex items-center gap-3">
                           <img
                             src={result.avatar_url || '/images/avatars/default.png'}
                             alt={result.username}
-                            className="w-12 h-12 rounded-full border-2 border-zk-black object-cover"
+                            className="w-12 h-12 rounded-full border-2 border-zk-border object-cover"
                           />
                           <div>
-                            <p className="font-['Outfit'] font-black text-zk-black">
+                            <p className="font-['Outfit'] font-black text-zk-text">
                               {result.first_name || result.username}
                             </p>
-                            <p className="font-['Outfit'] text-xs text-zk-black/60">
+                            <p className="font-['Outfit'] text-xs text-zk-text/60">
                               @{result.username}
                             </p>
                           </div>
@@ -382,23 +382,23 @@ export default function SocialPage() {
                               type="button"
                               onClick={() => handleSendRequest(result.clerk_id)}
                               disabled={actionLoading[result.clerk_id]}
-                              className="bg-zk-purple hover:bg-zk-blue text-white px-3 py-1.5 rounded-xl border-2 border-zk-black font-['Outfit'] text-xs font-bold transition-all"
+                              className="bg-zk-purple hover:bg-zk-blue text-white px-3 py-1.5 rounded-xl border-2 border-zk-border font-['Outfit'] text-xs font-bold transition-all"
                             >
                               Add Friend
                             </button>
                           )}
                           {result.relationship === 'sent_pending' && (
-                            <span className="font-['Outfit'] text-xs font-bold bg-zk-yellow text-zk-black px-2 py-1 rounded border border-zk-black">
+                            <span className="font-['Outfit'] text-xs font-bold bg-zk-bg text-zk-text px-2 py-1 rounded border border-zk-border">
                               Sent
                             </span>
                           )}
                           {result.relationship === 'received_pending' && (
-                            <span className="font-['Outfit'] text-xs font-bold bg-zk-blue text-white px-2 py-1 rounded border border-zk-black">
+                            <span className="font-['Outfit'] text-xs font-bold bg-zk-blue text-white px-2 py-1 rounded border border-zk-border">
                               Review Request
                             </span>
                           )}
                           {result.relationship === 'friends' && (
-                            <span className="font-['Outfit'] text-xs font-bold bg-green-500 text-white px-2 py-1 rounded border border-zk-black">
+                            <span className="font-['Outfit'] text-xs font-bold bg-green-500 text-white px-2 py-1 rounded border border-zk-border">
                               Friends
                             </span>
                           )}

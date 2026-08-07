@@ -8,8 +8,8 @@ export default function TestDrawItHost() {
   return (
     <div className="w-full h-screen relative">
       <div className="absolute top-4 right-4 z-[100] flex gap-2">
-        <button onClick={() => setWinner("A")} className="bg-white p-2 rounded border-2 border-black font-bold">Team A Wins</button>
-        <button onClick={() => setWinner(null)} className="bg-white p-2 rounded border-2 border-black font-bold">Reset Winner</button>
+        <button onClick={() => setWinner("A")} className="bg-zk-panel-bg p-2 rounded border-2 border-black font-bold">Team A Wins</button>
+        <button onClick={() => setWinner(null)} className="bg-zk-panel-bg p-2 rounded border-2 border-black font-bold">Reset Winner</button>
       </div>
       <DrawItHost 
         pin="TEST_PIN" 

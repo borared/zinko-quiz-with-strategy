@@ -141,17 +141,17 @@ export default function TestLineMatchingPlayerPage() {
         </QuestionPrompt>
 
         {submittedPayload && (
-          <div className="mx-4 mb-6 rounded-xl border-[3px] border-zk-black bg-white/95 p-4 text-center shadow-[4px_4px_0_0_#000]">
+          <div className="mx-4 mb-6 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg/95 p-4 text-center shadow-[4px_4px_0_0_#000]">
             <p className="font-black uppercase tracking-widest text-sm mb-2">
               {isCorrect ? 'All pairs correct!' : 'Submitted — check the console for payload'}
             </p>
-            <p className="text-zk-black/70 text-sm font-bold mb-3 break-all">
+            <p className="text-zk-text/70 text-sm font-bold mb-3 break-all">
               {submittedPayload}
             </p>
             <button
               type="button"
               onClick={handleReset}
-              className="px-5 py-2 rounded-lg border-[3px] border-zk-black bg-zk-yellow font-black uppercase text-sm shadow-[3px_3px_0_0_#000] active:translate-y-0.5"
+              className="px-5 py-2 rounded-lg border-[3px] border-zk-border bg-zk-bg font-black uppercase text-sm shadow-[3px_3px_0_0_#000] active:translate-y-0.5"
             >
               Try again
             </button>

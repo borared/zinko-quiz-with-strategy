@@ -7,10 +7,10 @@ const DiscoverySearchIdle = ({ query }) => (
     <p className="permanent-marker-regular text-6xl md:text-7xl text-zk-purple tracking-tight">
       Zinko
     </p>
-    <div className="flex items-center gap-2 text-zk-black/50">
+    <div className="flex items-center gap-2 text-zk-text/50">
       <Search size={18} />
       <p className="font-bold text-sm md:text-base">
-        Press <span className="text-zk-black font-black">Enter</span> to search
+        Press <span className="text-zk-text font-black">Enter</span> to search
         {query ? (
           <>
             {' '}
@@ -21,7 +21,7 @@ const DiscoverySearchIdle = ({ query }) => (
         )}
       </p>
     </div>
-    <p className="text-xs font-bold text-zk-black/40 max-w-sm">
+    <p className="text-xs font-bold text-zk-text/40 max-w-sm">
       Pick a suggestion below or hit Enter to see matching quizzes.
     </p>
   </div>

@@ -121,11 +121,11 @@ export default function TestDragLayersPlayerPage() {
         </QuestionPrompt>
 
         {submittedOrder && (
-          <div className="mx-4 mb-6 rounded-xl border-[3px] border-zk-black bg-white/95 p-4 text-center shadow-[4px_4px_0_0_#000]">
+          <div className="mx-4 mb-6 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg/95 p-4 text-center shadow-[4px_4px_0_0_#000]">
             <p className="font-black uppercase tracking-widest text-sm mb-2">
               {isCorrect ? 'Correct order!' : 'Submitted — check the console for step IDs'}
             </p>
-            <ol className="text-left text-zk-black/70 text-sm font-bold mb-3 space-y-1 max-w-lg mx-auto">
+            <ol className="text-left text-zk-text/70 text-sm font-bold mb-3 space-y-1 max-w-lg mx-auto">
               {submittedOrder.map((id, index) => (
                 <li key={id}>
                   {index + 1}. {LABEL_BY_ID[id]}
@@ -135,7 +135,7 @@ export default function TestDragLayersPlayerPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="px-5 py-2 rounded-lg border-[3px] border-zk-black bg-zk-yellow font-black uppercase text-sm shadow-[3px_3px_0_0_#000] active:translate-y-0.5"
+              className="px-5 py-2 rounded-lg border-[3px] border-zk-border bg-zk-bg font-black uppercase text-sm shadow-[3px_3px_0_0_#000] active:translate-y-0.5"
             >
               Try again
             </button>

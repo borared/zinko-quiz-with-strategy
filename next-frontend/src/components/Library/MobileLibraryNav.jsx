@@ -13,7 +13,7 @@ export default function MobileLibraryNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zk-purple border-t-[3px] border-zk-black px-2 py-2 safe-area-pb"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zk-purple border-t-[3px] border-zk-border px-2 py-2 safe-area-pb"
       aria-label="Library navigation"
     >
       <div className="flex items-center justify-around gap-1">
@@ -32,7 +32,7 @@ export default function MobileLibraryNav() {
               onClick={() => router.push(item.path)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all min-w-0 flex-1 ${
                 isActive
-                  ? 'bg-zk-purple-light border-[2px] border-zk-black shadow-[1px_1px_0_0_#000] text-white'
+                  ? 'bg-zk-purple-light border-[2px] border-zk-border shadow-[1px_1px_0_0_#000] text-white'
                   : 'text-white/80 hover:text-white'
               }`}
             >
@@ -41,7 +41,7 @@ export default function MobileLibraryNav() {
                 {item.shortName}
               </span>
               {showBadge && (
-                <span className="absolute top-0 right-2 min-w-[1rem] h-4 px-1 bg-red-500 text-white text-[9px] font-black rounded-full border border-zk-black flex items-center justify-center">
+                <span className="absolute top-0 right-2 min-w-[1rem] h-4 px-1 bg-red-500 text-white text-[9px] font-black rounded-full border border-zk-border flex items-center justify-center">
                   {cartAlertCount > 9 ? '9+' : cartAlertCount}
                 </span>
               )}

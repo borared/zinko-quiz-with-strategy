@@ -10,12 +10,12 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
   if (loading) {
     return (
       <div className="flex flex-col gap-6">
-        <div className="h-10 w-48 zk-skeleton rounded-lg border-[3px] border-zk-black/20" />
+        <div className="h-10 w-48 zk-skeleton rounded-lg border-[3px] border-zk-border/20" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="zk-skeleton border-[3px] border-zk-black rounded-xl h-[320px]"
+              className="zk-skeleton border-[3px] border-zk-border rounded-xl h-[320px]"
             />
           ))}
         </div>
@@ -28,17 +28,17 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
       {!isDiscoveryMode && (
         <div className="zk-panel-glass !shadow-none px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-['Outfit'] text-3xl font-black text-zk-black tracking-tight uppercase">
+            <h2 className="font-['Outfit'] text-3xl font-black text-zk-text tracking-tight uppercase">
               {quizzes.length > 0 ? 'Your Quizzes' : 'No Quizzes Yet'}
             </h2>
-            <p className="text-sm font-bold text-zk-black/60 mt-1">
+            <p className="text-sm font-bold text-zk-text/60 mt-1">
               {quizzes.length > 0
                 ? 'Pick a quiz to host or edit'
                 : 'Create your first battle-ready quiz below'}
             </p>
           </div>
           <div className="flex flex-col items-start sm:items-end shrink-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-zk-black/50">
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-zk-text/50">
               Total Quizzes
             </p>
             <p className="font-['Outfit'] text-5xl font-black text-zk-purple leading-none">
@@ -51,13 +51,13 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
       {quizzes.length === 0 && !isDiscoveryMode ? (
         <div
           onClick={() => router.push('/create-game')}
-          className="zk-panel !shadow-none border-dashed p-12 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white transition-colors min-h-[280px] text-center"
+          className="zk-panel !shadow-none border-dashed p-12 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-zk-panel-bg transition-colors min-h-[280px] text-center"
         >
-          <div className="w-16 h-16 rounded-full border-[3px] border-zk-black bg-zk-yellow flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full border-[3px] border-zk-border bg-zk-bg flex items-center justify-center">
             <Plus size={32} strokeWidth={3} />
           </div>
           <h3 className="zk-section-title text-3xl">Start Your First Quiz</h3>
-          <p className="font-bold text-zk-black/60 max-w-md">
+          <p className="font-bold text-zk-text/60 max-w-md">
             Build 3 rounds of questions, add a cover image, and host a live game in minutes.
           </p>
         </div>
@@ -73,12 +73,12 @@ const QuizGrid = ({ quizzes, loading, isDiscoveryMode, totalQuizCount = null }) 
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && router.push('/create-game')}
-              className="border-[3px] border-dashed border-zk-black p-8 flex flex-col items-center justify-center gap-4 bg-white/70 cursor-pointer hover:bg-white hover:-translate-y-0.5 transition-all h-[320px] !shadow-none rounded-xl group"
+              className="border-[3px] border-dashed border-zk-border p-8 flex flex-col items-center justify-center gap-4 bg-zk-panel-bg/70 cursor-pointer hover:bg-zk-panel-bg hover:-translate-y-0.5 transition-all h-[320px] !shadow-none rounded-xl group"
             >
-              <div className="w-14 h-14 rounded-full border-[3px] border-zk-black flex items-center justify-center bg-zk-purple text-white group-hover:scale-105 transition-transform">
+              <div className="w-14 h-14 rounded-full border-[3px] border-zk-border flex items-center justify-center bg-zk-purple text-white group-hover:scale-105 transition-transform">
                 <Plus size={28} strokeWidth={3} />
               </div>
-              <p className="font-bold text-zk-black amatic-sc-regular text-2xl">Create New Quiz</p>
+              <p className="font-bold text-zk-text amatic-sc-regular text-2xl">Create New Quiz</p>
             </div>
           )}
         </div>

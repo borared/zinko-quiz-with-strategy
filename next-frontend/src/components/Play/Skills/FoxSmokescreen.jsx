@@ -15,7 +15,7 @@ export default function FoxSmokescreen({ isActive }) {
           <motion.div 
             animate={{ x: [0, -50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-20 -left-20 w-[150vw] h-[150vh] bg-white/20 blur-[100px] rounded-full"
+            className="absolute -top-20 -left-20 w-[150vw] h-[150vh] bg-zk-panel-bg/20 blur-[100px] rounded-full"
           />
           <motion.div 
             animate={{ x: [0, 50, 0], y: [0, -40, 0], scale: [1, 1.2, 1] }}

@@ -33,7 +33,7 @@ export default function HangmanHost({ hangmanData }) {
         ) : (
           <>
             <div className="flex items-center justify-center gap-3 mb-8">
-              <div className="flex items-center gap-3 bg-white/20 px-6 py-4 rounded-full border-[4px] border-black shadow-[4px_4px_0_#000]">
+              <div className="flex items-center gap-3 bg-zk-panel-bg/20 px-6 py-4 rounded-full border-[4px] border-black shadow-[4px_4px_0_#000]">
                 <Heart className={`w-10 h-10 ${style.text} ${style.fill} animate-pulse`} />
                 <span className="text-4xl font-black text-white">{teamData.lives}</span>
                 <span className="text-xl text-white/50 uppercase tracking-widest font-bold">Lives</span>
@@ -84,9 +84,9 @@ export default function HangmanHost({ hangmanData }) {
             {renderTeam(teamName, state?.[teamName] || { lives: 0, isEliminated: false })}
             {index < teams.length - 1 && teams.length === 2 && (
               <div className="hidden md:flex flex-col justify-center items-center px-4">
-                <div className="w-1 h-32 bg-white/20 rounded-full mb-4" />
+                <div className="w-1 h-32 bg-zk-panel-bg/20 rounded-full mb-4" />
                 <span className="text-4xl font-black text-white/40 italic">VS</span>
-                <div className="w-1 h-32 bg-white/20 rounded-full mt-4" />
+                <div className="w-1 h-32 bg-zk-panel-bg/20 rounded-full mt-4" />
               </div>
             )}
           </React.Fragment>

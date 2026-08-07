@@ -30,7 +30,7 @@ const SkillTimer = () => {
       transition={{ delay: 0.45, type: "spring", stiffness: 300, damping: 20 }}
       className="absolute bottom-2 left-0 w-full flex flex-col items-center justify-center z-20"
     >
-      <div className="bg-white border-4 border-[#1a1a1a] rounded-2xl px-6 py-2 flex items-center justify-center mb-3 shadow-[4px_4px_0px_#1a1a1a]">
+      <div className="bg-zk-panel-bg border-4 border-[#1a1a1a] rounded-2xl px-6 py-2 flex items-center justify-center mb-3 shadow-[4px_4px_0px_#1a1a1a]">
         <svg
           className="w-6 h-6 text-[#5D3FD3] mr-2"
           fill="none"

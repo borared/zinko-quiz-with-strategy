@@ -37,7 +37,7 @@ function DragChip({
           ? '0 8px 20px rgba(0,0,0,0.18)'
           : '0 0 0 rgba(0,0,0,0)',
       }}
-      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-[3px] border-zk-black ${answer.color} text-white min-w-0 ${
+      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-[3px] border-zk-border ${answer.color} text-white min-w-0 ${
         fillWidth ? 'w-full' : ''
       } ${draggable ? 'cursor-grab active:cursor-grabbing' : ''}`}
       draggable={draggable}
@@ -99,21 +99,21 @@ export default function DragLayersEditor() {
     <div className="zk-panel p-5 lg:p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-widest text-zk-black/50">Answer widget</p>
-          <h3 className="font-black text-lg text-zk-black uppercase">Drag steps into the right layer</h3>
+          <p className="text-xs font-black uppercase tracking-widest text-zk-text/50">Answer widget</p>
+          <h3 className="font-black text-lg text-zk-text uppercase">Drag steps into the right layer</h3>
         </div>
         <button
           type="button"
           onClick={() => updateAnswers(addDragLayer(answers))}
           disabled={answers.length >= MAX_DRAG_LAYERS}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-[2px] border-zk-black bg-zk-green text-white font-black text-xs uppercase tracking-widest disabled:opacity-40"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-[2px] border-zk-border bg-zk-green text-white font-black text-xs uppercase tracking-widest disabled:opacity-40"
         >
           <Plus size={14} strokeWidth={3} />
           Add layer
         </button>
       </div>
 
-      <p className="text-sm font-bold text-zk-black/60">
+      <p className="text-sm font-bold text-zk-text/60">
         Arrange the cards top to bottom — that order is the correct answer in battle.
       </p>
 
@@ -133,15 +133,15 @@ export default function DragLayersEditor() {
                 <motion.div
                   layout
                   transition={LAYER_SPRING}
-                  className="w-16 shrink-0 flex flex-col items-center justify-center rounded-xl border-[3px] border-zk-black bg-zk-yellow/40"
+                  className="w-16 shrink-0 flex flex-col items-center justify-center rounded-xl border-[3px] border-zk-border bg-zk-bg/40"
                 >
-                  <span className="text-[10px] font-black uppercase text-zk-black/50">Step</span>
+                  <span className="text-[10px] font-black uppercase text-zk-text/50">Step</span>
                   <motion.span
                     key={`step-label-${index}`}
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.18 }}
-                    className="font-black text-xl text-zk-black"
+                    className="font-black text-xl text-zk-text"
                   >
                     {index + 1}
                   </motion.span>
@@ -162,7 +162,7 @@ export default function DragLayersEditor() {
                     backgroundColor: dragOverIndex === index ? 'rgba(255, 205, 41, 0.35)' : 'rgba(255, 255, 255, 0.5)',
                     borderColor: dragOverIndex === index ? '#5D3FD3' : '#000000',
                   }}
-                  className="flex-1 min-h-[56px] rounded-xl border-[3px] border-dashed border-zk-black bg-white/50 p-2 flex items-center"
+                  className="flex-1 min-h-[56px] rounded-xl border-[3px] border-dashed border-zk-border bg-zk-panel-bg/50 p-2 flex items-center"
                 >
                   <DragChip
                     answer={answer}

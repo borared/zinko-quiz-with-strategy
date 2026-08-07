@@ -10,6 +10,7 @@ import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 import { useShopStore } from '@/store/useShopStore';
 import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { useAuthStore, getNavAuthCache, setNavAuthCache, clearNavAuthCache } from '@/store/useAuthStore';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
   const router = useRouter();
@@ -81,9 +82,9 @@ const Navbar = () => {
     const isExact = pathname === path;
 
     if (isActive || isExact) {
-      return "bg-[#5D3FD3] text-white border-[2px] border-zk-black px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
+      return "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
     }
-    return "text-zk-black hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
+    return "text-zk-text hover:underline decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
   };
 
   const handleSignOut = () => {
@@ -101,16 +102,18 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/create-game')}
-            className="bg-[#5D3FD3] text-white border-[3px] border-zk-black px-6 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
+            className="bg-[#5D3FD3] text-white border-[3px] border-zk-border px-6 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none"
           >
             Create New Quiz
           </button>
+
+          <ThemeToggle />
 
           {/* Profile Avatar + Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
-              className="relative w-12 h-12 border-[3px] border-zk-black overflow-hidden bg-white cursor-pointer rounded-xl transition-opacity hover:opacity-90"
+              className="relative w-12 h-12 border-[3px] border-zk-border overflow-hidden bg-zk-panel-bg cursor-pointer rounded-xl transition-opacity hover:opacity-90"
             >
               <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
             </div>
@@ -129,32 +132,32 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 mt-2 w-64 bg-white border-[3px] border-zk-black z-50 rounded-xl overflow-hidden"
+                  className="absolute right-0 mt-2 w-64 bg-zk-panel-bg border-[3px] border-zk-border z-50 rounded-xl overflow-hidden"
                 >
                   {/* Default Profile Menu */}
                   <>
-                    <div className="px-4 py-3 border-b-[2px] border-zk-black bg-zk-yellow/40">
-                      <p className="font-bold text-zk-black text-sm truncate">{displayUser?.firstName} {displayUser?.lastName}</p>
-                      <p className="text-xs text-zk-black/60 truncate">{displayUser?.email}</p>
+                    <div className="px-4 py-3 border-b-[2px] border-zk-border bg-zk-bg/40">
+                      <p className="font-bold text-zk-text text-sm truncate">{displayUser?.firstName} {displayUser?.lastName}</p>
+                      <p className="text-xs text-zk-text/60 truncate">{displayUser?.email}</p>
                     </div>
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/dashboard'); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
                     >
                       <LayoutDashboard size={16} /> Dashboard
                     </button>
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/shop'); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
                     >
                       <ShoppingBag size={16} /> Shop
                     </button>
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/notifications'); }}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zk-yellow/30 border-b-[1px] border-zk-black/10 font-bold text-zk-black text-sm transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <Bell size={16} /> Notification
@@ -168,7 +171,7 @@ const Navbar = () => {
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push('/settings'); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-yellow/30 border-b-[2px] border-zk-black font-bold text-zk-black text-sm transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[2px] border-zk-border font-bold text-zk-text text-sm transition-colors"
                     >
                       <Settings size={16} /> Settings
                     </button>
@@ -190,15 +193,16 @@ const Navbar = () => {
 
     return (
       <>
+        <ThemeToggle />
         <button
           onClick={() => router.push('/join')}
-          className="bg-zk-blue text-zk-white border-[3px] border-zk-black px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
+          className="bg-zk-blue text-zk-white border-[3px] border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
         >
           Join
         </button>
         <button
           onClick={() => router.push('/signup')}
-          className="bg-zk-white text-zk-black border-[3px] border-zk-black px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
+          className="bg-zk-panel-bg text-zk-text border-[3px] border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
         >
           Sign up
         </button>
@@ -207,13 +211,13 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full border-b-[4px] border-zk-black bg-zk-yellow px-6 py-4 flex items-center justify-between font-sans">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b-[4px] border-zk-border bg-zk-bg px-6 py-4 flex items-center justify-between font-sans">
 
       {/* Left: Logo */}
       <div className="flex items-center gap-8">
         <Link
           href="/"
-          className="bg-zk-white border-[3px] border-zk-black px-4 py-1 flex items-center justify-center transform transition-colors rounded-lg hover:bg-zk-white/90"
+          className="bg-zk-panel-bg border-[3px] border-zk-border px-4 py-1 flex items-center justify-center transform transition-colors rounded-lg hover:bg-zk-panel-bg/90"
         >
           <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
         </Link>
@@ -258,7 +262,7 @@ const Navbar = () => {
               LIBRARY
             </a>
             {showLibraryCartAlert && (
-              <span className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-black !shadow-none flex items-center justify-center pointer-events-none">
+              <span className="absolute -top-1.5 -right-1.5 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border !shadow-none flex items-center justify-center pointer-events-none">
                 {cartAlertCount > 99 ? '99+' : cartAlertCount}
               </span>
             )}
@@ -283,14 +287,14 @@ const Navbar = () => {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            className="bg-zk-white border-[4px] border-zk-black p-8 max-w-sm w-full mx-4 flex flex-col items-center rounded-xl"
+            className="bg-zk-panel-bg border-[4px] border-zk-border p-8 max-w-sm w-full mx-4 flex flex-col items-center rounded-xl"
           >
-            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-black">Sign out?</h3>
-            <p className="text-zk-black/70 mb-6 text-center font-bold">Are you sure you want to sign out of your account?</p>
+            <h3 className="font-['Outfit'] text-2xl font-black uppercase tracking-tight mb-2 text-zk-text">Sign out?</h3>
+            <p className="text-zk-text/70 mb-6 text-center font-bold">Are you sure you want to sign out of your account?</p>
             <div className="flex gap-4 w-full">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 bg-zk-white text-zk-black border-[3px] border-zk-black px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-zk-yellow/20"
+                className="flex-1 bg-zk-panel-bg text-zk-text border-[3px] border-zk-border px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-zk-bg/20"
                 style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 CANCEL
@@ -305,7 +309,7 @@ const Navbar = () => {
                   useShopStore.getState().invalidate();
                   signOut();
                 }}
-                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-black px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-[#e63e3e]"
+                className="flex-1 bg-[#FF4B4B] text-zk-white border-[3px] border-zk-border px-4 py-2 font-black text-2xl rounded-lg transition-colors hover:bg-[#e63e3e]"
                 style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
               >
                 SURE!

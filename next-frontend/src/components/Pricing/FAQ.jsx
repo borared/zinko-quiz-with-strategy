@@ -38,33 +38,33 @@ const FAQ = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-24 px-4 bg-transparent">
-      <h2 className="text-3xl md:text-4xl font-black text-center text-zk-black mb-12 uppercase tracking-tight">
+      <h2 className="text-3xl md:text-4xl font-black text-center text-zk-text mb-12 uppercase tracking-tight">
         FAQ
       </h2>
 
-      <div className="flex flex-col border-t-[3px] border-zk-black">
+      <div className="flex flex-col border-t-[3px] border-zk-border">
         {faqs.map((faq, idx) => {
           const Icon = faq.icon;
           return (
             <div 
               key={idx} 
-              className="group border-b-[3px] border-zk-black transition-colors hover:bg-zk-black/5"
+              className="group border-b-[3px] border-zk-border transition-colors hover:bg-zk-black/5"
             >
               <div className="flex items-center justify-between py-6 px-2 sm:px-4 cursor-pointer">
                 <div className="flex items-center gap-4 sm:gap-6">
-                  <Icon size={28} className="text-zk-black shrink-0" strokeWidth={2.5} />
-                  <h3 className="text-lg sm:text-xl font-bold text-zk-black m-0">{faq.question}</h3>
+                  <Icon size={28} className="text-zk-text shrink-0" strokeWidth={2.5} />
+                  <h3 className="text-lg sm:text-xl font-bold text-zk-text m-0">{faq.question}</h3>
                 </div>
                 <ChevronDown 
                   size={24} 
                   strokeWidth={3}
-                  className="text-zk-black/50 transition-transform duration-300 group-hover:rotate-180 shrink-0 ml-4" 
+                  className="text-zk-text/50 transition-transform duration-300 group-hover:rotate-180 shrink-0 ml-4" 
                 />
               </div>
               
               <div className="grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100">
                 <div className="overflow-hidden">
-                  <p className="px-2 sm:px-4 pb-6 ml-12 sm:ml-14 text-sm sm:text-base font-bold text-zk-black/70 leading-relaxed max-w-2xl">
+                  <p className="px-2 sm:px-4 pb-6 ml-12 sm:ml-14 text-sm sm:text-base font-bold text-zk-text/70 leading-relaxed max-w-2xl">
                     {faq.answer}
                   </p>
                 </div>

@@ -31,8 +31,8 @@ const QuestionEditor = () => {
 
   if (!activeQuestion) {
     return (
-      <div className="flex-1 flex items-center justify-center p-12 bg-white/40 backdrop-blur-md border-[3px] border-dashed border-zk-black rounded-xl">
-        <p className="font-black text-2xl text-zk-black/30 uppercase tracking-tighter">Select or Add a question to get started</p>
+      <div className="flex-1 flex items-center justify-center p-12 bg-zk-panel-bg/40 backdrop-blur-md border-[3px] border-dashed border-zk-border rounded-xl">
+        <p className="font-black text-2xl text-zk-text/30 uppercase tracking-tighter">Select or Add a question to get started</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ const QuestionEditor = () => {
       {/* Question Title */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center gap-3">
-          <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Question {questionNumber}</label>
+          <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Question {questionNumber}</label>
           <div className="flex items-center gap-2">
             <QuestionTypePicker
               value={activeQuestion.questionType || QUESTION_TYPES.MULTIPLE_CHOICE}
@@ -67,7 +67,7 @@ const QuestionEditor = () => {
           value={activeQuestion.text || ''}
           onChange={(e) => updateActiveQuestion({ text: e.target.value })}
           placeholder="Start typing your question here..."
-          className="w-full border-[3px] border-zk-black p-4 font-bold text-zk-black placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all text-xl h-24 resize-none rounded-lg bg-white/50"
+          className="w-full border-[3px] border-zk-border p-4 font-bold text-zk-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-zk-blue/30 transition-all text-xl h-24 resize-none rounded-lg bg-zk-panel-bg/50"
         />
       </div>
 
@@ -75,15 +75,15 @@ const QuestionEditor = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Media Upload */}
         <div 
-          className="border-[3px] border-dashed border-zk-black p-4 flex flex-col items-center justify-center gap-4 bg-white/40 cursor-pointer hover:bg-zk-yellow/10 transition-colors h-48 relative rounded-lg"
+          className="border-[3px] border-dashed border-zk-border p-4 flex flex-col items-center justify-center gap-4 bg-zk-panel-bg/40 cursor-pointer hover:bg-zk-bg/10 transition-colors h-48 relative rounded-lg"
           onClick={() => document.getElementById('image-upload').click()}
         >
           {activeQuestion.image ? (
             <img src={activeQuestion.image} alt="Uploaded" className="h-full object-contain" />
           ) : (
             <>
-              <Image size={48} className="text-zk-black/50" />
-              <p className="font-bold text-zk-black/70 text-sm">Drag & drop or click to upload</p>
+              <Image size={48} className="text-zk-text/50" />
+              <p className="font-bold text-zk-text/70 text-sm">Drag & drop or click to upload</p>
             </>
           )}
           <input 
@@ -105,10 +105,10 @@ const QuestionEditor = () => {
         </div>
 
         {/* Question Settings */}
-        <div className="border-[3px] border-zk-black p-6 bg-white/40 backdrop-blur-md flex flex-col gap-4 rounded-lg overflow-visible">
+        <div className="border-[3px] border-zk-border p-6 bg-zk-panel-bg/40 backdrop-blur-md flex flex-col gap-4 rounded-lg overflow-visible">
           <div className="flex gap-4 overflow-visible">
             <div className="flex-1 flex flex-col gap-1 relative z-20">
-              <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Time Limit</label>
+              <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Time Limit</label>
               <CreatorSelectPicker
                 fullWidth
                 placement="top"
@@ -118,7 +118,7 @@ const QuestionEditor = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-1 relative z-20">
-              <label className="text-xs font-bold text-zk-black uppercase tracking-wider">Points</label>
+              <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Points</label>
               <CreatorSelectPicker
                 fullWidth
                 placement="top"
@@ -129,7 +129,7 @@ const QuestionEditor = () => {
             </div>
           </div>
 
-          <button className="w-full bg-white text-zk-black border-[2px] border-zk-black py-2 font-bold text-sm flex items-center justify-center gap-2 transition-colors hover:bg-gray-50 rounded-lg mt-auto">
+          <button className="w-full bg-zk-panel-bg text-zk-text border-[2px] border-zk-border py-2 font-bold text-sm flex items-center justify-center gap-2 transition-colors hover:bg-gray-50 rounded-lg mt-auto">
             <Settings size={16} />
             Advanced Question Settings
           </button>

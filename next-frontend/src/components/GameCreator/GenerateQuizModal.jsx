@@ -57,47 +57,47 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white border-[4px] border-zk-black max-w-lg w-full p-6 relative rounded-xl">
+      <div className="bg-zk-panel-bg border-[4px] border-zk-border max-w-lg w-full p-6 relative rounded-xl">
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 hover:bg-zk-yellow border-[2px] border-transparent hover:border-zk-black transition-colors rounded-xl"
+          className="absolute top-4 right-4 p-1 hover:bg-zk-bg border-[2px] border-transparent hover:border-zk-border transition-colors rounded-xl"
         >
-          <X size={24} className="text-zk-black" />
+          <X size={24} className="text-zk-text" />
         </button>
 
-        <h2 className="font-black text-2xl text-zk-black uppercase mb-4">Generate Quiz with AI</h2>
+        <h2 className="font-black text-2xl text-zk-text uppercase mb-4">Generate Quiz with AI</h2>
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* File Upload Area */}
-          <div className="border-[3px] border-dashed border-zk-black p-6 flex flex-col items-center justify-center gap-2 bg-zk-yellow/10 hover:bg-zk-yellow/20 transition-colors cursor-pointer relative rounded-xl">
+          <div className="border-[3px] border-dashed border-zk-border p-6 flex flex-col items-center justify-center gap-2 bg-zk-bg/10 hover:bg-zk-bg/20 transition-colors cursor-pointer relative rounded-xl">
             <input 
               type="file" 
               accept=".pdf,.docx,.pptx" 
               onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
-            <Upload size={32} className="text-zk-black" />
+            <Upload size={32} className="text-zk-text" />
             {file ? (
-              <p className="font-bold text-zk-black text-center">{file.name}</p>
+              <p className="font-bold text-zk-text text-center">{file.name}</p>
             ) : (
               <div className="text-center">
-                <p className="font-bold text-zk-black">Drag & drop or click to upload</p>
-                <p className="text-xs text-zk-black/60">Supports PDF, DOCX, PPTX</p>
+                <p className="font-bold text-zk-text">Drag & drop or click to upload</p>
+                <p className="text-xs text-zk-text/60">Supports PDF, DOCX, PPTX</p>
               </div>
             )}
           </div>
 
           {/* Number of Questions */}
           <div className="flex flex-col gap-1">
-            <label className="font-bold text-zk-black text-sm">How many questions?</label>
+            <label className="font-bold text-zk-text text-sm">How many questions?</label>
             <input 
               type="number" 
               min="1" 
               max="20" 
               value={numQuestions}
               onChange={(e) => setNumQuestions(e.target.value)}
-              className="border-[3px] border-zk-black p-2 font-bold focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-xl"
+              className="border-[3px] border-zk-border p-2 font-bold focus:outline-none focus:ring-2 focus:ring-zk-yellow rounded-xl"
             />
           </div>
 
@@ -107,7 +107,7 @@ const GenerateQuizModal = ({ isOpen, onClose, onGenerate }) => {
           <button 
             type="submit" 
             disabled={loading}
-            className="border-[3px] border-zk-black bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+            className="border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black py-3 transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
           >
             {loading ? (
               <>

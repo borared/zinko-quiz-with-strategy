@@ -43,17 +43,17 @@ export default function PrivacyFloatingDecor() {
           y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
           rotate: { duration: 14, repeat: Infinity, ease: 'linear' },
         }}
-        className="absolute top-[18%] right-[8%] hidden md:block w-14 h-14 bg-zk-blue border-[3px] border-zk-black shadow-[3px_3px_0_0_#000] rounded-xl"
+        className="absolute top-[18%] right-[8%] hidden md:block w-14 h-14 bg-zk-blue border-[3px] border-zk-border shadow-[3px_3px_0_0_#000] rounded-xl"
       />
       <motion.div
         animate={{ y: [8, -8, 8] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-        className="absolute bottom-[22%] left-[10%] hidden md:block w-10 h-10 bg-[#FF6B6B] border-[3px] border-zk-black shadow-[3px_3px_0_0_#000] rounded-full"
+        className="absolute bottom-[22%] left-[10%] hidden md:block w-10 h-10 bg-[#FF6B6B] border-[3px] border-zk-border shadow-[3px_3px_0_0_#000] rounded-full"
       />
       <motion.div
         animate={{ y: [-6, 6, -6], rotate: [-6, 6, -6] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="absolute top-[55%] right-[4%] hidden lg:block w-16 h-16 bg-[#6E5CF2] border-[3px] border-zk-black shadow-[4px_4px_0_0_#000] rounded-xl"
+        className="absolute top-[55%] right-[4%] hidden lg:block w-16 h-16 bg-[#6E5CF2] border-[3px] border-zk-border shadow-[4px_4px_0_0_#000] rounded-xl"
       />
     </div>
   );

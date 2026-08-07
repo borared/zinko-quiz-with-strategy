@@ -171,12 +171,12 @@ export default function TrendingSceneryCarousel({
       <div className="relative z-10 flex h-full min-h-[240px] md:min-h-[300px] lg:min-h-[440px] xl:min-h-[520px] flex-col justify-between p-6 md:p-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border-[2px] border-zk-black bg-zk-yellow px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-zk-black">
+            <span className="inline-flex items-center gap-1.5 rounded-full border-[2px] border-zk-border bg-zk-bg px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-zk-text">
               <Sparkles size={12} strokeWidth={3} />
               Trending scenery
             </span>
             {isNew && (
-              <span className="rounded-full border-[2px] border-zk-black bg-[#FF6B4A] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+              <span className="rounded-full border-[2px] border-zk-border bg-[#FF6B4A] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white">
                 New
               </span>
             )}
@@ -218,12 +218,12 @@ export default function TrendingSceneryCarousel({
           </div>
 
           <div className="absolute bottom-0 right-0 flex items-center gap-2">
-            <div className="inline-flex h-10 items-center rounded-lg border-[2px] border-zk-black bg-zk-yellow px-3">
-              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-black">{priceLabel}</span>
+            <div className="inline-flex h-10 items-center rounded-lg border-[2px] border-zk-border bg-zk-bg px-3">
+              <span className="font-['Outfit'] text-lg font-black leading-none text-zk-text">{priceLabel}</span>
             </div>
 
             {item.owned ? (
-              <span className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#2ea84a] px-4 text-sm font-black uppercase tracking-wider text-white">
+              <span className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-[#2ea84a] px-4 text-sm font-black uppercase tracking-wider text-white">
                 <Check size={16} strokeWidth={3} />
                 Owned
               </span>
@@ -232,7 +232,7 @@ export default function TrendingSceneryCarousel({
                 type="button"
                 onClick={handlePurchase}
                 disabled={isCheckingOut}
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-black bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center gap-1.5 rounded-lg border-[2px] border-zk-border bg-[#5D3FD3] px-4 font-['Amatic_SC'] text-xl font-bold leading-none text-white !shadow-none transition-colors hover:bg-[#4e33b8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isCheckingOut ? (
                   <Loader2 size={16} className="animate-spin" />
