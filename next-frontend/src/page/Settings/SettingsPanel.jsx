@@ -429,7 +429,28 @@ export default function SettingsPanel() {
                   <label className="flex flex-col gap-1"><span className="text-xs font-black uppercase tracking-wider text-zk-text/60">First name</span><input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="border-[2px] border-zk-border rounded-lg px-3 py-2 font-bold text-zk-text bg-zk-panel-bg" /></label>
                   <label className="flex flex-col gap-1"><span className="text-xs font-black uppercase tracking-wider text-zk-text/60">Last name</span><input value={lastName} onChange={(e) => setLastName(e.target.value)} className="border-[2px] border-zk-border rounded-lg px-3 py-2 font-bold text-zk-text bg-zk-panel-bg" /></label>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                
+                <label className="flex flex-col gap-1 mt-1">
+                  <span className="text-xs font-black uppercase tracking-wider text-zk-text/60">Username</span>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      value={usernameDraft}
+                      onChange={(e) => setUsernameDraft(e.target.value)}
+                      placeholder="your_username"
+                      className="flex-1 border-[2px] border-zk-border rounded-lg px-3 py-2 font-bold text-zk-text bg-zk-panel-bg lowercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={saveUsername}
+                      disabled={usernameSaving}
+                      className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest disabled:opacity-60 hover:translate-y-0.5 transition-transform"
+                    >
+                      {usernameSaving ? 'Saving…' : 'Save username'}
+                    </button>
+                  </div>
+                </label>
+
+                <div className="flex flex-wrap gap-3 mt-2">
                   <button type="button" onClick={saveProfileNames} disabled={saving} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest hover:translate-y-0.5 disabled:opacity-60">Save profile</button>
                   <button type="button" onClick={() => setManageAccountOpen((open) => !open)} className={`px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest inline-flex items-center gap-2 ${manageAccountOpen ? 'bg-zk-bg text-zk-text' : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'}`}>Manage account</button>
                   <button type="button" onClick={() => setIsCoverModalOpen(true)} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm uppercase tracking-widest bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20 inline-flex items-center gap-2"><ImageIcon size={16} /> Edit Cover</button>
@@ -562,30 +583,9 @@ export default function SettingsPanel() {
 
           <SettingSection
             icon={Sparkles}
-            title="Discovery & billing"
-            description="Username, discovery, and advanced account options."
-           
+            title="Advanced options"
+            description="Discovery and advanced account preferences."
           >
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-black uppercase tracking-wider text-zk-text/60">Username</span>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  value={usernameDraft}
-                  onChange={(e) => setUsernameDraft(e.target.value)}
-                  placeholder="your_username"
-                  className="flex-1 border-[2px] border-zk-border rounded-lg px-3 py-2 font-bold text-zk-text bg-zk-panel-bg lowercase"
-                />
-                <button
-                  type="button"
-                  onClick={saveUsername}
-                  disabled={usernameSaving}
-                  className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white font-black text-sm uppercase tracking-widest disabled:opacity-60"
-                >
-                  {usernameSaving ? 'Saving…' : 'Save username'}
-                </button>
-              </div>
-            </label>
-
             <SettingToggle
               label="Discovery opt-in"
               description="Appear in creator discovery when you publish public quizzes."
@@ -605,14 +605,6 @@ export default function SettingsPanel() {
               <ExternalLink size={14} />
             </Link>
 
-            <button
-              type="button"
-              onClick={openDeleteModal}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-[#E74C3C] text-[#E74C3C] font-black text-sm uppercase tracking-widest hover:bg-red-50 w-fit"
-            >
-              <Trash2 size={16} />
-              Delete account
-            </button>
           </SettingSection>
 
           <SettingSection
@@ -624,8 +616,9 @@ export default function SettingsPanel() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Link
                 href="/privacy"
-                className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm uppercase tracking-widest hover:bg-zk-bg/20"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg text-zk-text font-black text-sm uppercase tracking-widest hover:bg-zk-bg/20 w-fit"
               >
+                <Shield size={16} />
                 Privacy policy
               </Link>
               <button
@@ -635,6 +628,14 @@ export default function SettingsPanel() {
               >
                 <LogOut size={16} />
                 Sign out
+              </button>
+              <button
+                type="button"
+                onClick={openDeleteModal}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-[3px] border-[#E74C3C] text-[#E74C3C] font-black text-sm uppercase tracking-widest hover:bg-red-50 w-fit"
+              >
+                <Trash2 size={16} />
+                Delete account
               </button>
             </div>
           </SettingSection>

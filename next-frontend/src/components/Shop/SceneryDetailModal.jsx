@@ -98,7 +98,7 @@ export default function SceneryDetailModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="fixed bottom-0 left-0 right-0 z-[45] flex items-center justify-center bg-black/50 p-4 sm:p-6 md:left-64"
+          className="fixed bottom-0 left-0 right-0 z-[45] flex items-center justify-center bg-black/50 p-4 sm:p-6"
           style={{ top: NAVBAR_HEIGHT_PX }}
           onClick={onClose}
           role="presentation"
