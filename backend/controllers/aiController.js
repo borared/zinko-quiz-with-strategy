@@ -39,11 +39,9 @@ const generateQuiz = async (req, res) => {
       if (file.originalname.toLowerCase().endsWith('.pdf')) {
         console.log('Using pdf-parse for PDF...');
         try {
-          const { PDFParse } = require('pdf-parse');
-          const parser = new PDFParse({ data: file.buffer });
-          const result = await parser.getText();
-          extractedText = result.text;
-          await parser.destroy();
+          const pdfParse = require('pdf-parse');
+          const data = await pdfParse(file.buffer);
+          extractedText = data.text;
           console.log(`Extracted ${extractedText.length} characters of text.`);
         } catch (err) {
           console.error('pdf-parse failed:', err);
@@ -154,11 +152,9 @@ const generateFlashcards = async (req, res) => {
       if (file.originalname.toLowerCase().endsWith('.pdf')) {
         console.log('Using pdf-parse for PDF...');
         try {
-          const { PDFParse } = require('pdf-parse');
-          const parser = new PDFParse({ data: file.buffer });
-          const result = await parser.getText();
-          extractedText = result.text;
-          await parser.destroy();
+          const pdfParse = require('pdf-parse');
+          const data = await pdfParse(file.buffer);
+          extractedText = data.text;
           console.log(`Extracted ${extractedText.length} characters of text.`);
         } catch (err) {
           console.error('pdf-parse failed:', err);
