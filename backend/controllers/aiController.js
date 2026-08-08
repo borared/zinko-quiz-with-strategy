@@ -36,41 +36,27 @@ const generateQuiz = async (req, res) => {
     if (file) {
       console.log(`Processing file: ${file.originalname}`);
       
-      if (file.originalname.toLowerCase().endsWith('.pdf')) {
-        console.log('Using pdf-parse for PDF...');
-        try {
-          const pdfParse = require('pdf-parse');
-          const data = await pdfParse(file.buffer);
-          extractedText = data.text;
-          console.log(`Extracted ${extractedText.length} characters of text.`);
-        } catch (err) {
-          console.error('pdf-parse failed:', err);
-          return res.status(500).json({ error: 'Failed to read PDF file.' });
-        }
-      } else {
-        // Use officeparser for DOCX, PPTX
-        const uploadsDir = path.join(__dirname, '../uploads');
-        const tempFilePath = path.join(uploadsDir, `temp_${Date.now()}_${file.originalname}`);
-        
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        
-        fs.writeFileSync(tempFilePath, file.buffer);
-        console.log(`Saved temp file to ${tempFilePath}`);
-        
-        try {
-          console.log('Calling officeParser with file path...');
-          extractedText = await officeParser.parseOffice(tempFilePath);
-          console.log(`Extracted ${extractedText.length} characters of text.`);
-        } catch (err) {
-          console.error('officeParser failed:', err);
-          if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-          return res.status(500).json({ error: 'Failed to read file content.' });
-        }
-        
-        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const tempFilePath = path.join(uploadsDir, `temp_${Date.now()}_${file.originalname}`);
+      
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
       }
+      
+      fs.writeFileSync(tempFilePath, file.buffer);
+      console.log(`Saved temp file to ${tempFilePath}`);
+      
+      try {
+        console.log('Calling officeParser with file path...');
+        extractedText = await officeParser.parseOffice(tempFilePath);
+        console.log(`Extracted ${extractedText.length} characters of text.`);
+      } catch (err) {
+        console.error('officeParser failed:', err);
+        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+        return res.status(500).json({ error: 'Failed to read file content.', details: err.message, stack: err.stack });
+      }
+      
+      if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
     }
 
     // 2. Call Groq API
@@ -149,40 +135,27 @@ const generateFlashcards = async (req, res) => {
     if (file) {
       console.log(`Processing file: ${file.originalname}`);
       
-      if (file.originalname.toLowerCase().endsWith('.pdf')) {
-        console.log('Using pdf-parse for PDF...');
-        try {
-          const pdfParse = require('pdf-parse');
-          const data = await pdfParse(file.buffer);
-          extractedText = data.text;
-          console.log(`Extracted ${extractedText.length} characters of text.`);
-        } catch (err) {
-          console.error('pdf-parse failed:', err);
-          return res.status(500).json({ error: 'Failed to read PDF file.' });
-        }
-      } else {
-        const uploadsDir = path.join(__dirname, '../uploads');
-        const tempFilePath = path.join(uploadsDir, `temp_${Date.now()}_${file.originalname}`);
-        
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        
-        fs.writeFileSync(tempFilePath, file.buffer);
-        console.log(`Saved temp file to ${tempFilePath}`);
-        
-        try {
-          console.log('Calling officeParser with file path...');
-          extractedText = await officeParser.parseOffice(tempFilePath);
-          console.log(`Extracted ${extractedText.length} characters of text.`);
-        } catch (err) {
-          console.error('officeParser failed:', err);
-          if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-          return res.status(500).json({ error: 'Failed to read file content.' });
-        }
-        
-        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const tempFilePath = path.join(uploadsDir, `temp_${Date.now()}_${file.originalname}`);
+      
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
       }
+      
+      fs.writeFileSync(tempFilePath, file.buffer);
+      console.log(`Saved temp file to ${tempFilePath}`);
+      
+      try {
+        console.log('Calling officeParser with file path...');
+        extractedText = await officeParser.parseOffice(tempFilePath);
+        console.log(`Extracted ${extractedText.length} characters of text.`);
+      } catch (err) {
+        console.error('officeParser failed:', err);
+        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+        return res.status(500).json({ error: 'Failed to read file content.', details: err.message, stack: err.stack });
+      }
+      
+      if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
     }
 
     // 2. Call Groq API
