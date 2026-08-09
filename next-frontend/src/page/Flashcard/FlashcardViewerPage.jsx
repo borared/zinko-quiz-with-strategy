@@ -70,7 +70,7 @@ export default function FlashcardViewerPage({ deckId }) {
           <h2 className="text-2xl font-bold text-zk-text/80 uppercase tracking-widest">{error || 'Deck not found'}</h2>
           <button 
             onClick={() => router.push('/dashboard')}
-            className="px-6 py-3 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg font-black uppercase text-sm mt-4 hover:bg-zk-bg transition-colors"
+            className="px-6 py-3 rounded-xl border-2 border-zk-border bg-zk-panel-bg font-black uppercase text-sm mt-4 hover:bg-zk-bg transition-colors"
           >
             Go to Dashboard
           </button>
@@ -100,7 +100,7 @@ export default function FlashcardViewerPage({ deckId }) {
         <div className="w-full flex items-center justify-between mb-8">
           <button 
             onClick={() => router.back()}
-            className="px-4 py-2 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg font-black text-sm flex items-center gap-2 hover:bg-zk-bg transition-colors"
+            className="px-4 py-2 rounded-xl border-2 border-zk-border bg-zk-panel-bg font-black text-sm flex items-center gap-2 hover:bg-zk-bg transition-colors"
           >
             <ArrowLeft size={18} /> Back
           </button>
@@ -137,7 +137,7 @@ export default function FlashcardViewerPage({ deckId }) {
                 >
                   {/* FRONT OF CARD */}
                   {!isFlipped ? (
-                    <div className="w-full h-full bg-zk-panel-bg border-[4px] border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
+                    <div className="w-full h-full bg-zk-panel-bg border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
                       
                       <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
                         <h2 className="text-3xl md:text-5xl font-black text-zk-text leading-tight">{flashcards[currentIndex].front}</h2>
@@ -151,7 +151,7 @@ export default function FlashcardViewerPage({ deckId }) {
                               <motion.div 
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className="bg-[#FFCD29] border-[3px] border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
+                                className="bg-[#FFCD29] border-2 border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Lightbulb size={24} className="shrink-0 mt-0.5 text-zk-black fill-white" />
@@ -162,7 +162,7 @@ export default function FlashcardViewerPage({ deckId }) {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={(e) => { e.stopPropagation(); setShowHint(true); }}
-                                className="bg-zk-bg border-[3px] border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
+                                className="bg-zk-bg border-2 border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
                               >
                                 <Lightbulb size={18} /> Need a hint?
                               </motion.button>
@@ -177,7 +177,7 @@ export default function FlashcardViewerPage({ deckId }) {
                     </div>
                   ) : (
                     /* BACK OF CARD */
-                    <div className="w-full h-full bg-[#00C853] text-white border-[4px] border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
+                    <div className="w-full h-full bg-[#00C853] text-white border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
                       
                       <div className="flex-1 flex flex-col items-center justify-center text-center">
                         <p className="text-xl md:text-3xl font-bold leading-relaxed">{flashcards[currentIndex].back}</p>
@@ -197,14 +197,14 @@ export default function FlashcardViewerPage({ deckId }) {
               <button 
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
-                className="bg-zk-bg border-[3px] border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
+                className="bg-zk-bg border-2 border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
               >
                 <ChevronLeft size={24} /> Prev
               </button>
               <button
                 onClick={handleNext}
                 disabled={currentIndex === flashcards.length - 1}
-                className="bg-zk-bg border-[3px] border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
+                className="bg-zk-bg border-2 border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
               >
                 Next <ChevronRight size={24} />
               </button>
