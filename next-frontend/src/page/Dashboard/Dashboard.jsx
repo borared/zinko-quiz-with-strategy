@@ -4,6 +4,7 @@ import Sidebar from '../../components/Dashboard/Sidebar';
 import WelcomeBanner from '../../components/Dashboard/WelcomeBanner';
 import QuizGrid from '../../components/Dashboard/QuizGrid';
 import FlashcardGrid from '../../components/Dashboard/FlashcardGrid';
+import PictureRaceGrid from '../../components/Dashboard/PictureRaceGrid';
 import WorkspaceShell from '@/components/layout/WorkspaceShell';
 import { useUser } from '@clerk/nextjs';
 import api from '../../services/api';
@@ -16,7 +17,7 @@ import { useRouter } from 'next/navigation';
 const PAGE_SIZE = 12;
 const PREFETCH_ROOT_MARGIN = '1200px';
 
-const Dashboard = () => {
+const Dashboard = ({ initialFilter = 'quizzes' }) => {
   const { user, isLoaded } = useUser();
   const { disconnectSocket } = useSocketStore();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
@@ -36,10 +37,14 @@ const Dashboard = () => {
   const quizzesCached = Boolean(user?.id && isCachedForUser(user.id));
   const hasPersistedData = hasPersistedQuizzes();
 
-  const [activeFilter, setActiveFilter] = useState('quizzes'); // 'quizzes' or 'flashcards'
+  const [activeFilter, setActiveFilter] = useState(initialFilter); // 'quizzes', 'flashcards', or 'picturerace'
   const [clientReady, setClientReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    setActiveFilter(initialFilter);
+  }, [initialFilter]);
 
   const paginationRef = useRef({
     nextCursor: null,
@@ -210,20 +215,29 @@ const Dashboard = () => {
 
   return (
     <WorkspaceShell sidebar={<Sidebar />} contentClassName="dashboard-shell">
+      {/* Prefetch Picture Race Background */}
+      <img src="/images/yeti.png" alt="prefetch" className="hidden" />
+      
       <WelcomeBanner />
 
       <div className="w-full flex items-center gap-2 mb-6">
         <button
-          onClick={() => setActiveFilter('quizzes')}
+          onClick={() => router.push('/dashboard')}
           className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'quizzes' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
         >
           Quizzes
         </button>
         <button
-          onClick={() => setActiveFilter('flashcards')}
+          onClick={() => router.push('/dashboard/flashcards')}
           className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'flashcards' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
         >
           Flashcards
+        </button>
+        <button
+          onClick={() => router.push('/dashboard/guess_picture')}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'picturerace' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+        >
+          Picture Race
         </button>
       </div>
 
@@ -249,8 +263,10 @@ const Dashboard = () => {
             <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
           )}
         </>
-      ) : (
+      ) : activeFilter === 'flashcards' ? (
         <FlashcardGrid />
+      ) : (
+        <PictureRaceGrid />
       )}
 
       <button
