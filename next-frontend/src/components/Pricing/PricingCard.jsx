@@ -74,6 +74,13 @@ const PricingCard = ({
                 </span>
               );
             }
+            if (word === 'Zinko') {
+              return (
+                <span key={i} className="font-bold text-[28px] sm:text-3xl tracking-tighter italic permanent-marker-regular pt-1">
+                  {word}
+                </span>
+              );
+            }
             return <span key={i}>{word}</span>;
           })}
         </h3>
