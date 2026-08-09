@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, Star, Building2 } from 'lucide-react';
 const PricingCard = ({ 
   title, 
   price, 
+  originalPrice,
   subtitle, 
   features, 
   buttonText, 
@@ -16,10 +17,12 @@ const PricingCard = ({
   const isPro = theme === 'pro';
   const isSchool = theme === 'school';
   
-  const cardBorderClass = isPro ? 'border-[#6E5CF2]' : 'border-zk-border';
-  const buttonBgClass = isPro ? 'bg-[#6E5CF2] text-white hover:bg-zk-blue border-zk-border' : 
-                        isSchool ? 'bg-[#5D3FD3] text-white hover:bg-zk-blue border-zk-border' : 
-                        'bg-zk-panel-bg text-zk-text hover:bg-gray-100 border-zk-border';
+  const cardBorderClass = isPro ? 'border-[#6E5CF2]' : 
+                          isSchool ? 'border-zk-border hover:border-zk-pink hover:shadow-[0_0_20px_rgba(255,95,168,0.6)]' : 
+                          'border-zk-border';
+  const buttonBgClass = isPro ? 'bg-[#6E5CF2] text-white hover:bg-zk-blue border-zk-border transition-colors' : 
+                        isSchool ? 'bg-[#5D3FD3] text-white hover:bg-zk-blue border-zk-border transition-colors' : 
+                        'bg-zk-panel-bg text-zk-text hover:border-zk-purple hover:shadow-[0_0_15px_rgba(93,63,211,0.5)] border-zk-border transition-all';
                         
   const getIcon = (type) => {
     switch(type) {
@@ -32,7 +35,7 @@ const PricingCard = ({
   };
 
   return (
-    <div className={`relative flex flex-col h-full bg-zk-panel-bg border-[4px] ${cardBorderClass} rounded-xl p-8 transition-transform duration-300 hover:-translate-y-4`}>
+    <div className={`relative flex flex-col h-full bg-zk-panel-bg border-2 ${cardBorderClass} rounded-xl p-8 transition-all duration-300 hover:-translate-y-4`}>
       
       {isPopular && (
         <>
@@ -54,16 +57,33 @@ const PricingCard = ({
               }}
             />
           </div>
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF6B4A] text-white font-black text-[10px] sm:text-xs px-3 sm:px-4 py-1 uppercase tracking-wider border-[3px] border-zk-border whitespace-nowrap z-10 rounded-lg">
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF6B4A] text-white font-black text-[10px] sm:text-xs px-3 sm:px-4 py-1 uppercase tracking-wider border-2 border-zk-border whitespace-nowrap z-10 rounded-lg">
             Most Popular
           </div>
         </>
       )}
 
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-zk-text mb-1">{title}</h3>
-        <div className="flex items-baseline gap-1 mb-2">
+        <h3 className="text-2xl font-bold text-zk-text mb-2 flex items-center gap-2">
+          {title.split(' ').map((word, i) => {
+            if (word === 'Pro' || word === 'Prime') {
+              const bgClass = word === 'Prime' ? 'bg-zk-pink' : 'bg-zk-blue';
+              return (
+                <span key={i} className={`${bgClass} text-white rounded-lg px-3 py-0.5 text-[22px] inline-flex items-center justify-center`}>
+                  {word}
+                </span>
+              );
+            }
+            return <span key={i}>{word}</span>;
+          })}
+        </h3>
+        <div className="flex items-baseline gap-2 mb-2 flex-wrap">
           <span className="text-5xl font-black text-zk-text tracking-tighter">{price}</span>
+          {originalPrice && (
+            <span className="text-xl font-bold text-zk-text/40 line-through decoration-1 decoration-zk-text">
+              {originalPrice}
+            </span>
+          )}
           {price !== 'Free' && price !== 'Custom' && <span className="font-bold text-zk-text/60">/mo</span>}
         </div>
         <p className="text-sm font-bold text-zk-text/60">{subtitle}</p>
@@ -94,7 +114,7 @@ const PricingCard = ({
           </button>
         </div>
       ) : (
-        <button className={`w-full py-4 font-black uppercase tracking-wider text-sm border-[3px] rounded-lg transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] ${buttonBgClass}`}>
+        <button className={`w-full py-4 font-black uppercase tracking-wider text-sm border-2 rounded-lg transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] ${buttonBgClass}`}>
           {buttonText}
         </button>
       )}

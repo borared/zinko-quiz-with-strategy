@@ -4,6 +4,7 @@ import Hero from '@/page/landing/Hero';
 import Engagement from '@/page/landing/Engagement';
 import SkillsFeature from '@/page/landing/SkillsFeature';
 import WhyZinko from '@/page/landing/WhyZinko';
+import PricingPanel from '@/page/PricingPanel/PricingPanel';
 import Ready from '@/page/landing/Ready';
 import { useSocketStore } from '@/store/useSocketStore';
 
@@ -20,6 +21,7 @@ export default function LandingPage() {
       <SkillsFeature />
       <Engagement />
       <WhyZinko />
+      <PricingPanel />
       <Ready />
     </>
   );

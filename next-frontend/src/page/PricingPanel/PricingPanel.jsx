@@ -23,7 +23,7 @@ const PricingPanel = () => {
       ]
     },
     {
-      title: "Pro",
+      title: "Zinko Pro",
       price: "$6.99",
       subtitle: "Unlock the full power of play.",
       buttonText: "GO PRO NOW",
@@ -38,24 +38,25 @@ const PricingPanel = () => {
       ]
     },
     {
-      title: "School",
-      price: "Custom",
+      title: "Zinko Prime",
+      price: "$14.99",
+      originalPrice: "$19.99",
       subtitle: "Empower your entire department.",
       buttonText: "CONTACT US",
       theme: "school",
       isPopular: false,
       features: [
-        { icon: "building", text: "District-wide Branding" },
-        { icon: "building", text: "Shared Resource Library" },
-        { icon: "building", text: "LMS Integration (Canvas/Schoology)" },
-        { icon: "building", text: "Single Sign-On (SSO)" },
+        { icon: "building", text: "Unlimited Flashcard Sets" },
+        { icon: "building", text: "Unlimited Guess Picture Races" },
+        { icon: "building", text: "Custom Branding & Themes" },
+        { icon: "building", text: "Advanced Live Analytics" },
         { icon: "building", text: "Priority Support" },
       ]
     }
   ];
 
   return (
-    <div className="flex-1 w-full bg-zk-bg relative overflow-hidden pt-16 pb-12 font-sans">
+    <div className="flex-1 w-full bg-zk-panel-bg relative overflow-hidden pt-16 pb-12 font-sans">
       
       {/* Floating Background Objects */}
       <motion.div 
@@ -69,7 +70,7 @@ const PricingPanel = () => {
       <motion.div 
         animate={{ y: [20, -20, 20], rotate: 360 }}
         transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 20, repeat: Infinity, ease: "linear" } }}
-        className="absolute bottom-[20%] right-[5%] md:bottom-[30%] md:right-[10%] w-16 h-16 md:w-20 md:h-20 bg-[#FF6B4A] border-[4px] border-zk-border rounded-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] pointer-events-none"
+        className="absolute bottom-[20%] right-[5%] md:bottom-[30%] md:right-[10%] w-16 h-16 md:w-20 md:h-20 bg-[#FF6B4A] border-2 border-zk-border rounded-full pointer-events-none"
       />
 
       {/* Main Container */}
