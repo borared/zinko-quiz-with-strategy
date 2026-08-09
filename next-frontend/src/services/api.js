@@ -4,11 +4,11 @@ const getDynamicApiUrl = () => {
   }
   if (typeof window !== 'undefined') {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5001';
+      return 'http://localhost:5000';
     }
-    return `http://${window.location.hostname}:5001`;
+    return `http://${window.location.hostname}:5000`;
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  return 'http://localhost:5000';
 };
 const API_URL = getDynamicApiUrl();
 
@@ -34,11 +34,11 @@ const getAuthHeaders = () => {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-function buildNetworkError(error) {
+function buildNetworkError(error, url) {
   const message =
     error?.message === 'Failed to fetch'
-      ? `Unable to reach the Zinko API at ${API_URL}. Check your internet connection and confirm the backend server is running.`
-      : error?.message || 'Network request failed.';
+      ? `Network Error at ${url}. Backend might be down or blocking CORS.`
+      : error?.message || `Network request failed at ${url}.`;
   const err = new Error(message);
   err.isNetworkError = true;
   return err;
@@ -48,7 +48,7 @@ async function request(url, options = {}) {
   try {
     return await fetch(url, options);
   } catch (error) {
-    throw buildNetworkError(error);
+    throw buildNetworkError(error, url);
   }
 }
 
