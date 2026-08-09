@@ -3,13 +3,10 @@
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import SocialPage from '@/page/Social/SocialPage';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 function SocialFallback() {
-  return (
-    <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-      <Loader2 className="animate-spin text-zk-text" size={32} />
-    </div>
-  );
+  return <FunLoadingScreen />;
 }
 
 export default function Page() {

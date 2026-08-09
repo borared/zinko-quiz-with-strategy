@@ -156,7 +156,7 @@ export default function FlashcardPage() {
             <div className="w-full flex flex-col gap-6 pt-4">
               
               {/* Tabs */}
-              <div className="flex items-center gap-2 bg-zk-bg p-1.5 rounded-xl border-[3px] border-zk-border">
+              <div className="flex items-center gap-2 bg-zk-bg p-1.5 rounded-xl border-2 border-zk-border">
                 <button
                   onClick={() => setInputType('file')}
                   className={`flex-1 py-2 font-black rounded-lg text-sm transition-colors ${inputType === 'file' ? 'bg-[#5D3FD3] text-white' : 'text-zk-text hover:bg-zk-panel-bg'}`}
@@ -178,7 +178,7 @@ export default function FlashcardPage() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-[4px] border-dashed border-zk-border/40 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:bg-zk-bg hover:border-zk-border ${file ? 'bg-zk-bg border-zk-border' : 'bg-zk-panel-bg'}`}
+                    className={`border-2 border-dashed border-zk-border/40 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:bg-zk-bg hover:border-zk-border ${file ? 'bg-zk-bg border-zk-border' : 'bg-zk-panel-bg'}`}
                   >
                     <input
                       type="file"
@@ -190,7 +190,7 @@ export default function FlashcardPage() {
 
                     {file ? (
                       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 bg-[#5D3FD3] text-white rounded-xl flex items-center justify-center border-[3px] border-zk-border">
+                        <div className="w-16 h-16 bg-[#5D3FD3] text-white rounded-xl flex items-center justify-center border-2 border-zk-border">
                           <FileText size={32} />
                         </div>
                         <div>
@@ -200,12 +200,12 @@ export default function FlashcardPage() {
                       </motion.div>
                     ) : (
                       <>
-                        <div className="w-16 h-16 bg-zk-bg border-[3px] border-zk-border rounded-full flex items-center justify-center mb-4">
+                        <div className="w-16 h-16 bg-zk-bg border-2 border-zk-border rounded-full flex items-center justify-center mb-4">
                           <Upload size={28} className="text-zk-text" />
                         </div>
                         <h3 className="text-xl font-black text-zk-text mb-2">Upload your study material</h3>
                         <p className="text-zk-text/60 font-bold mb-4 text-sm">Supports PDF, DOCX, TXT (Max 10MB)</p>
-                        <div className="px-6 py-2 rounded-xl border-[3px] border-zk-border bg-zk-panel-bg font-black text-sm pointer-events-none">
+                        <div className="px-6 py-2 rounded-xl border-2 border-zk-border bg-zk-panel-bg font-black text-sm pointer-events-none">
                           Browse files
                         </div>
                       </>
@@ -220,7 +220,7 @@ export default function FlashcardPage() {
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="e.g. Focus only on Chapter 3..."
-                      className="w-full border-[3px] border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text bg-zk-bg focus:outline-none focus:ring-4 focus:ring-[#00C2FF]/20"
+                      className="w-full border-2 border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text bg-zk-bg focus:outline-none focus:ring-4 focus:ring-[#00C2FF]/20"
                     />
                   </div>
                 </>
@@ -231,7 +231,7 @@ export default function FlashcardPage() {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Paste Wikipedia articles, notes, or any text here to turn them into flashcards!"
-                    className="w-full h-[300px] border-[3px] border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text bg-zk-bg focus:outline-none focus:ring-4 focus:ring-[#00C2FF]/20 resize-none"
+                    className="w-full h-[300px] border-2 border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text bg-zk-bg focus:outline-none focus:ring-4 focus:ring-[#00C2FF]/20 resize-none"
                   ></textarea>
                 </div>
               )}
@@ -240,7 +240,7 @@ export default function FlashcardPage() {
               <button
                 onClick={handleGenerate}
                 disabled={loading || (inputType === 'file' ? (!file && !prompt.trim()) : !prompt.trim())}
-                className="w-full mt-4 py-2 rounded-xl border-[4px] border-zk-border bg-[#5D3FD3] text-white font-bold font-['Amatic_SC'] text-4xl tracking-wider hover:translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
+                className="w-full mt-4 py-2 rounded-xl border-2 border-zk-border bg-[#5D3FD3] text-white font-bold font-['Amatic_SC'] text-4xl tracking-wider hover:translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
               >
                 {loading ? 'Analyzing...' : 'Generate Flashcards'}
               </button>
@@ -266,7 +266,7 @@ export default function FlashcardPage() {
                 <motion.div
                   animate={{ y: [-15, 15, -15], rotate: [-8, -12, -8] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute left-[5%] md:left-[10%] top-1/4 w-40 md:w-56 aspect-[3/4] bg-[#FF6B4A] border-[4px] border-zk-border rounded-2xl p-1.5 md:p-2 z-10 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)]"
+                  className="absolute left-[5%] md:left-[10%] top-1/4 w-40 md:w-56 aspect-[3/4] bg-[#FF6B4A] border-2 border-zk-border rounded-2xl p-1.5 md:p-2 z-10 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)]"
                 >
                   <div className="w-full h-full bg-zk-bg rounded-xl overflow-hidden border-[2px] border-zk-border relative">
                     <img src="/flashcard-red.png" alt="Science" className="w-full h-full object-cover" />
@@ -277,7 +277,7 @@ export default function FlashcardPage() {
                 <motion.div
                   animate={{ y: [15, -15, 15], rotate: [0, 4, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                  className="absolute left-1/2 -translate-x-1/2 top-4 w-48 md:w-64 aspect-[3/4] bg-[#00C853] border-[4px] border-zk-border rounded-2xl p-1.5 md:p-2 z-30 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.15)]"
+                  className="absolute left-1/2 -translate-x-1/2 top-4 w-48 md:w-64 aspect-[3/4] bg-[#00C853] border-2 border-zk-border rounded-2xl p-1.5 md:p-2 z-30 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.15)]"
                 >
                   <div className="w-full h-full bg-zk-bg rounded-xl overflow-hidden border-[2px] border-zk-border relative flex items-center justify-center">
                     <img src="/flashcard-yeti.png" alt="Yeti" className="w-full h-full object-cover" />
@@ -288,7 +288,7 @@ export default function FlashcardPage() {
                 <motion.div
                   animate={{ y: [-10, 20, -10], rotate: [12, 8, 12] }}
                   transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                  className="absolute right-[5%] md:right-[10%] top-1/4 w-40 md:w-56 aspect-[3/4] bg-[#3B68FF] border-[4px] border-zk-border rounded-2xl p-1.5 md:p-2 z-20 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)]"
+                  className="absolute right-[5%] md:right-[10%] top-1/4 w-40 md:w-56 aspect-[3/4] bg-[#3B68FF] border-2 border-zk-border rounded-2xl p-1.5 md:p-2 z-20 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)]"
                 >
                   <div className="w-full h-full bg-zk-bg rounded-xl overflow-hidden border-[2px] border-zk-border relative">
                     <img src="/flashcard-blue.png" alt="History" className="w-full h-full object-cover" />
@@ -314,7 +314,7 @@ export default function FlashcardPage() {
                       value={deckTitle}
                       onChange={(e) => setDeckTitle(e.target.value)}
                       placeholder="e.g. Biology Chapter 4"
-                      className="w-full bg-zk-panel-bg border-[3px] border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text focus:outline-none focus:border-zk-purple"
+                      className="w-full bg-zk-panel-bg border-2 border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text focus:outline-none focus:border-zk-purple"
                     />
                   </div>
                   <div className="flex-1">
@@ -324,14 +324,14 @@ export default function FlashcardPage() {
                       value={coverImage}
                       onChange={(e) => setCoverImage(e.target.value)}
                       placeholder="https://example.com/image.jpg"
-                      className="w-full bg-zk-panel-bg border-[3px] border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text focus:outline-none focus:border-zk-purple"
+                      className="w-full bg-zk-panel-bg border-2 border-zk-border rounded-xl px-4 py-3 font-bold text-zk-text focus:outline-none focus:border-zk-purple"
                     />
                   </div>
                 </div>
                 <button
                   onClick={handleSaveDeck}
                   disabled={isSaving}
-                  className="w-full md:w-auto mt-4 md:mt-0 whitespace-nowrap bg-zk-purple text-white border-[3px] border-zk-border px-6 py-2.5 rounded-xl font-bold font-['Amatic_SC'] text-2xl tracking-wider hover:bg-zk-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full md:w-auto mt-4 md:mt-0 whitespace-nowrap bg-zk-purple text-white border-2 border-zk-border px-6 py-2.5 rounded-xl font-bold font-['Amatic_SC'] text-2xl tracking-wider hover:bg-zk-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSaving ? 'Saving...' : 'Save to Dashboard'}
                 </button>
@@ -361,7 +361,7 @@ export default function FlashcardPage() {
                   >
                     {/* FRONT OF CARD */}
                     {!isFlipped ? (
-                      <div className="w-full h-full bg-zk-panel-bg border-[4px] border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
+                      <div className="w-full h-full bg-zk-panel-bg border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
 
                         <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
                           <h2 className="text-3xl md:text-5xl font-black text-zk-text leading-tight">{flashcards[currentIndex].front}</h2>
@@ -375,7 +375,7 @@ export default function FlashcardPage() {
                                 <motion.div
                                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  className="bg-[#FFCD29] border-[3px] border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
+                                  className="bg-[#FFCD29] border-2 border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <Lightbulb size={24} className="shrink-0 mt-0.5 text-zk-black fill-white" />
@@ -386,7 +386,7 @@ export default function FlashcardPage() {
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={(e) => { e.stopPropagation(); setShowHint(true); }}
-                                  className="bg-zk-bg border-[3px] border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
+                                  className="bg-zk-bg border-2 border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
                                 >
                                   <Lightbulb size={18} /> Need a hint?
                                 </motion.button>
@@ -401,7 +401,7 @@ export default function FlashcardPage() {
                       </div>
                     ) : (
                       /* BACK OF CARD */
-                      <div className="w-full h-full bg-[#00C853] text-white border-[4px] border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
+                      <div className="w-full h-full bg-[#00C853] text-white border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
 
                         <div className="flex-1 flex flex-col items-center justify-center text-center">
                           <p className="text-xl md:text-3xl font-bold leading-relaxed">{flashcards[currentIndex].back}</p>
@@ -421,14 +421,14 @@ export default function FlashcardPage() {
                 <button
                   onClick={handlePrev}
                   disabled={currentIndex === 0}
-                  className="bg-zk-bg border-[3px] border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
+                  className="bg-zk-bg border-2 border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
                 >
                   <ChevronLeft size={24} /> Prev
                 </button>
                 <button
                   onClick={handleNext}
                   disabled={currentIndex === flashcards.length - 1}
-                  className="bg-zk-bg border-[3px] border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
+                  className="bg-zk-bg border-2 border-zk-border px-6 py-3 rounded-2xl font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors disabled:opacity-50"
                 >
                   Next <ChevronRight size={24} />
                 </button>

@@ -20,6 +20,7 @@ import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
 import { useToastStore } from '@/store/useToastStore';
 import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { markSceneryAsNew } from '@/lib/newSceneryNotice';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 const TABS = [
   { id: 'scenery', label: 'Scenery', icon: ImageIcon },
@@ -203,11 +204,7 @@ export default function Shop() {
     || (isLoading && !shopCached && sceneries.length === 0 && avatars.length === 0));
 
   if (!isLoaded) {
-    return (
-      <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-text" size={32} />
-      </div>
-    );
+    return <FunLoadingScreen />;
   }
 
   return (

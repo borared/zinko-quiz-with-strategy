@@ -3,13 +3,10 @@
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import Shop from '@/page/Shop/Shop';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 function ShopFallback() {
-  return (
-    <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-      <Loader2 className="animate-spin text-zk-text" size={32} />
-    </div>
-  );
+  return <FunLoadingScreen />;
 }
 
 export default function Page() {

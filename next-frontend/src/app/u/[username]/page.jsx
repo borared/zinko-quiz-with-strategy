@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Calendar, User, BookOpen, Users } from 'lucide-react';
 import api from '@/services/api';
@@ -51,9 +52,7 @@ export default function UserProfilePage() {
     return (
       <div className="min-h-screen bg-zk-bg flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="animate-spin text-zk-text" size={48} />
-        </div>
+        <FunLoadingScreen />
       </div>
     );
   }

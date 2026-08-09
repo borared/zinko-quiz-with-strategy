@@ -223,19 +223,19 @@ const Dashboard = ({ initialFilter = 'quizzes' }) => {
       <div className="w-full flex items-center gap-2 mb-6">
         <button
           onClick={() => router.push('/dashboard')}
-          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'quizzes' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'quizzes' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-zk-panel-bg text-zk-text/60 border-transparent hover:bg-zk-bg/30'}`}
         >
           Quizzes
         </button>
         <button
           onClick={() => router.push('/dashboard/flashcards')}
-          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'flashcards' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'flashcards' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-zk-panel-bg text-zk-text/60 border-transparent hover:bg-zk-bg/30'}`}
         >
           Flashcards
         </button>
         <button
           onClick={() => router.push('/dashboard/guess_picture')}
-          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'picturerace' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-transparent text-zk-text/60 border-transparent hover:bg-zk-panel-bg'}`}
+          className={`px-6 py-2 rounded-xl font-bold transition-all border-[3px] ${activeFilter === 'picturerace' ? 'bg-zk-purple text-white border-zk-border shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]' : 'bg-zk-panel-bg text-zk-text/60 border-transparent hover:bg-zk-bg/30'}`}
         >
           Picture Race
         </button>

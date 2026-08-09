@@ -9,6 +9,7 @@ import { BellRing, CheckCheck, Loader2, Gift, Trash2 } from 'lucide-react';
 import Navbar from '@/components/global/Navbar';
 import { motion } from 'framer-motion';
 import { ZINKO_SENDER_AVATAR, ZINKO_SENDER_NAME } from '@/lib/lobbyScenery';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 function NotificationCard({
   notif,
@@ -177,11 +178,7 @@ export default function Notifications() {
   };
 
   if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-zk-light-bg flex items-center justify-center">
-        <Loader2 className="animate-spin w-12 h-12 text-zk-text" />
-      </div>
-    );
+    return <FunLoadingScreen />;
   }
 
   return (
