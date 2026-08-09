@@ -135,7 +135,7 @@
   }
 
   .zk-panel {
-    @apply bg-zk-panel-bg border-[3px] border-zk-border rounded-xl transition-colors duration-300 text-zk-text;
+    @apply bg-zk-panel-bg border-2 border-zk-border rounded-xl transition-colors duration-300 text-zk-text;
     box-shadow: var(--zk-shadow-md);
   }
 
@@ -176,7 +176,7 @@
   }
 
   .zk-panel-glass {
-    @apply border-[3px] border-zk-border rounded-xl backdrop-blur-md transition-colors duration-300;
+    @apply border-2 border-zk-border rounded-xl backdrop-blur-md transition-colors duration-300;
     background: rgba(255, 255, 255, 0.88);
     box-shadow: var(--zk-shadow-lg);
   }
@@ -191,7 +191,7 @@
   }
 
   .zk-btn-press {
-    @apply transition-all border-[3px] border-zk-border;
+    @apply transition-all border-2 border-zk-border;
     box-shadow: var(--zk-shadow-md);
   }
 

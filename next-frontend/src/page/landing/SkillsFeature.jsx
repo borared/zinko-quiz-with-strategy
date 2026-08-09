@@ -39,7 +39,7 @@ export default function SkillsFeature() {
   const router = useRouter();
 
   return (
-    <section className="bg-zk-panel-bg py-24 px-4 font-sans border-y-[4px] border-zk-border">
+    <section className="bg-zk-panel-bg py-24 px-4 font-sans border-y-2 border-zk-border">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
         
         {/* Left: Content */}
@@ -50,7 +50,7 @@ export default function SkillsFeature() {
           transition={{ duration: 0.6 }}
           className="flex-1 text-center lg:text-left flex flex-col items-center lg:items-start"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-xl bg-zk-panel-bg border-[4px] border-zk-border mb-8">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-xl bg-zk-panel-bg border-2 border-zk-border mb-8">
             <Zap size={24} className="text-zk-text" strokeWidth={3} />
             <span className="text-xl gasoek-one-regular text-zk-text tracking-wider">Dynamic Gameplay</span>
           </div>
@@ -65,7 +65,7 @@ export default function SkillsFeature() {
 
           <button 
             onClick={() => router.push('/skills')}
-            className="bg-zk-blue text-zk-white border-[4px] border-zk-border px-6 py-3 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 rounded-xl"
+            className="bg-zk-blue text-zk-white border-2 border-zk-border px-6 py-3 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 rounded-xl"
           >
             <span 
               className="font-bold text-2xl md:text-3xl tracking-wide" 
@@ -95,7 +95,7 @@ export default function SkillsFeature() {
                 <motion.div 
                   key={skill.id}
                   whileHover={{ y: -5, scale: 1.05 }}
-                  className={`border-[4px] border-zk-border rounded-2xl p-6 flex flex-col items-start transition-transform`}
+                  className={`border-2 border-zk-border rounded-2xl p-6 flex flex-col items-start transition-transform`}
                   style={{ backgroundColor: skill.color }}
                 >
                   <div className="mb-4">

@@ -48,7 +48,7 @@ const FlashcardGrid = () => {
     <div className="flex flex-col gap-6">
       <div className="zk-panel-glass !shadow-none px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="font-['Outfit'] text-3xl font-black text-zk-text tracking-tight uppercase">
+          <h2 className="font-['Outfit'] text-3xl font-black text-zk-text tracking-tight">
             {decks.length > 0 ? 'Your Flashcards' : 'No Flashcards Yet'}
           </h2>
           <p className="text-sm font-bold text-zk-text/60 mt-1">

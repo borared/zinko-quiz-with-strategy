@@ -36,7 +36,7 @@ function NotificationCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-[4px] border-zk-border transition-colors ${
+      className={`relative flex items-start sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 rounded-2xl border-2 border-zk-border transition-colors ${
         notif.is_read
           ? 'bg-zk-panel-bg opacity-70 hover:opacity-100 cursor-default'
           : 'bg-zk-bg/20 hover:bg-zk-bg/40 cursor-pointer'
@@ -55,7 +55,7 @@ function NotificationCard({
       </button>
 
       <div className="relative flex-shrink-0">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-zk-border overflow-hidden bg-zk-bg flex items-center justify-center p-1.5">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-zk-border overflow-hidden bg-zk-bg flex items-center justify-center p-1.5">
           <img
             src={senderAvatar}
             alt={senderName}
@@ -91,7 +91,7 @@ function NotificationCard({
         {isSceneryGift && metadata.scenery_image && (
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div
-              className="w-full sm:w-36 h-20 rounded-xl border-[3px] border-zk-border overflow-hidden"
+              className="w-full sm:w-36 h-20 rounded-xl border-2 border-zk-border overflow-hidden"
               style={{
                 backgroundImage: `url('${metadata.scenery_image}')`,
                 backgroundSize: 'cover',
@@ -114,7 +114,7 @@ function NotificationCard({
                     onCollectScenery(notif.id);
                   }}
                   disabled={collectingId === notif.id}
-                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-[3px] border-zk-border px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#268f3f] disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 bg-[#2ea84a] text-white border-2 border-zk-border px-4 py-2 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-[#268f3f] disabled:opacity-60"
                 >
                   {collectingId === notif.id ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -220,9 +220,9 @@ export default function Notifications() {
       </motion.div>
 
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 mt-4 relative z-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-zk-panel-bg border-[4px] border-zk-border p-6 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-zk-panel-bg border-2 border-zk-border p-6 rounded-2xl">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-zk-bg border-[3px] border-zk-border rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-zk-bg border-2 border-zk-border rounded-xl flex items-center justify-center">
               <BellRing className="text-zk-text" size={24} />
             </div>
             <div>
@@ -233,13 +233,13 @@ export default function Notifications() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => user?.id && markAllAsRead(user.id)}
-              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-[3px] border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-blue/90 whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-zk-blue text-white border-2 border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-zk-blue/90 whitespace-nowrap"
             >
               <CheckCheck size={20} /> Mark as read
             </button>
             <button
               onClick={() => user?.id && clearAllNotifications(user.id)}
-              className="flex items-center justify-center gap-2 bg-red-500 text-white border-[3px] border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-red-600 whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-red-500 text-white border-2 border-zk-border px-5 py-2.5 rounded-xl font-['Amatic_SC'] text-2xl font-bold transition-colors hover:bg-red-600 whitespace-nowrap"
             >
               Clear all
             </button>

@@ -23,6 +23,7 @@ const GAME_FLOW_PATHS = [
   "/library",
   "/host",
   "/play",
+  "/create-picture-race",
 ];
 
 export default function ClientLayoutWrapper({ children }) {

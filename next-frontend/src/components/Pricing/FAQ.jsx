@@ -38,17 +38,22 @@ const FAQ = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-24 px-4 bg-transparent">
-      <h2 className="text-3xl md:text-4xl font-black text-center text-zk-text mb-12 uppercase tracking-tight">
-        FAQ
-      </h2>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-black text-zk-text tracking-tight gasoek-one-regular mb-2">
+          Frequently Asked Questions
+        </h2>
+        <p className="font-['Outfit'] font-bold text-zk-text/60 text-lg uppercase tracking-widest">
+          FAQ
+        </p>
+      </div>
 
-      <div className="flex flex-col border-t-[3px] border-zk-border">
+      <div className="flex flex-col border-t-2 border-zk-border">
         {faqs.map((faq, idx) => {
           const Icon = faq.icon;
           return (
             <div 
               key={idx} 
-              className="group border-b-[3px] border-zk-border transition-colors hover:bg-zk-black/5"
+              className="group border-b-2 border-zk-border transition-colors hover:bg-zk-black/5"
             >
               <div className="flex items-center justify-between py-6 px-2 sm:px-4 cursor-pointer">
                 <div className="flex items-center gap-4 sm:gap-6">
