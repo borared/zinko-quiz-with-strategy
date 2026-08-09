@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { useShopStore } from '@/store/useShopStore';
 import { useToastStore } from '@/store/useToastStore';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 export default function LibraryCart() {
   const router = useRouter();
@@ -76,11 +77,7 @@ export default function LibraryCart() {
   };
 
   if (!isLoaded || !isSignedIn) {
-    return (
-      <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-text" size={32} />
-      </div>
-    );
+    return <FunLoadingScreen />;
   }
 
   return (

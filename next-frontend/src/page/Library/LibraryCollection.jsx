@@ -18,6 +18,7 @@ import { getSceneryDetails } from '@/lib/sceneryDetails';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLibraryCollectionStore } from '@/store/useLibraryCollectionStore';
 import { useToastStore } from '@/store/useToastStore';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 const TABS = [
   { id: 'all', label: 'All', icon: Layers },
@@ -159,11 +160,7 @@ export default function LibraryCollection() {
   };
 
   if (!isLoaded || !isSignedIn) {
-    return (
-      <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-text" size={32} />
-      </div>
-    );
+    return <FunLoadingScreen />;
   }
 
   return (

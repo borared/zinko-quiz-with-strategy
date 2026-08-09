@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSignIn, useAuth, useClerk, ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
 import { useAuthStore } from '@/store/useAuthStore';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 const Signin = () => {
   const { signIn, setActive } = useSignIn();
@@ -147,9 +148,7 @@ const Signin = () => {
   return (
     <>
       <ClerkLoading>
-        <div className="flex-1 w-full bg-zk-bg flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">
-          <Loader2 className="animate-spin text-[#5D3FD3]" size={48} />
-        </div>
+        <FunLoadingScreen fullScreen={true} />
       </ClerkLoading>
       <ClerkLoaded>
         <div className="flex-1 w-full bg-zk-bg flex items-center justify-center relative overflow-hidden font-sans p-4 py-16">

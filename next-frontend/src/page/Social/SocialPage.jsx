@@ -10,6 +10,7 @@ import WorkspaceShell from '@/components/layout/WorkspaceShell';
 import api from '@/services/api';
 import { useToastStore } from '@/store/useToastStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import FunLoadingScreen from '@/components/global/FunLoadingScreen';
 
 const TABS = [
   { id: 'friends', label: 'Friends', icon: Users },
@@ -150,11 +151,7 @@ export default function SocialPage() {
   };
 
   if (!isLoaded || !isJwtReady) {
-    return (
-      <div className="min-h-[calc(100vh-76px)] flex items-center justify-center">
-        <Loader2 className="animate-spin text-zk-text" size={32} />
-      </div>
-    );
+    return <FunLoadingScreen />;
   }
 
   return (
