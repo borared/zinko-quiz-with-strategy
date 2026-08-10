@@ -47,13 +47,25 @@ const generateQuiz = async (req, res) => {
       console.log(`Saved temp file to ${tempFilePath}`);
       
       try {
-        console.log('Calling officeParser with file path...');
-        extractedText = await officeParser.parseOffice(tempFilePath);
-        console.log(`Extracted ${extractedText.length} characters of text.`);
+        if (file.mimetype === 'text/plain' || tempFilePath.endsWith('.txt') || tempFilePath.endsWith('.csv')) {
+          extractedText = fs.readFileSync(tempFilePath, 'utf8');
+        } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
+          console.log('Calling pdf-parse...');
+          const pdf = require('pdf-parse');
+          const dataBuffer = fs.readFileSync(tempFilePath);
+          const parser = new pdf.PDFParse({ data: dataBuffer });
+          const pdfData = await parser.getText();
+          extractedText = pdfData.text;
+        } else {
+          console.log('Calling officeParser with file path...');
+          extractedText = await officeParser.parseOffice(tempFilePath);
+        }
+        console.log(`Extracted ${extractedText ? extractedText.length : 0} characters of text.`);
+        console.log(`=== PREVIEW ===\n${extractedText ? extractedText.substring(0, 300) : 'EMPTY'}\n===============`);
       } catch (err) {
         console.error('officeParser failed:', err);
         if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-        return res.status(500).json({ error: 'Failed to read file content.', details: err.message, stack: err.stack });
+        return res.status(500).json({ error: `Failed to read file content: ${err.message}` });
       }
       
       if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
@@ -146,13 +158,25 @@ const generateFlashcards = async (req, res) => {
       console.log(`Saved temp file to ${tempFilePath}`);
       
       try {
-        console.log('Calling officeParser with file path...');
-        extractedText = await officeParser.parseOffice(tempFilePath);
-        console.log(`Extracted ${extractedText.length} characters of text.`);
+        if (file.mimetype === 'text/plain' || tempFilePath.endsWith('.txt') || tempFilePath.endsWith('.csv')) {
+          extractedText = fs.readFileSync(tempFilePath, 'utf8');
+        } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
+          console.log('Calling pdf-parse...');
+          const pdf = require('pdf-parse');
+          const dataBuffer = fs.readFileSync(tempFilePath);
+          const parser = new pdf.PDFParse({ data: dataBuffer });
+          const pdfData = await parser.getText();
+          extractedText = pdfData.text;
+        } else {
+          console.log('Calling officeParser with file path...');
+          extractedText = await officeParser.parseOffice(tempFilePath);
+        }
+        console.log(`Extracted ${extractedText ? extractedText.length : 0} characters of text.`);
+        console.log(`=== PREVIEW ===\n${extractedText ? extractedText.substring(0, 300) : 'EMPTY'}\n===============`);
       } catch (err) {
         console.error('officeParser failed:', err);
         if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-        return res.status(500).json({ error: 'Failed to read file content.', details: err.message, stack: err.stack });
+        return res.status(500).json({ error: `Failed to read file content: ${err.message}` });
       }
       
       if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
