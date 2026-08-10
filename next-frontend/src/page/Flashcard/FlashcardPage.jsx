@@ -348,72 +348,72 @@ export default function FlashcardPage() {
               </div>
 
               {/* Flashcard 3D Container */}
-              <div className="w-full aspect-[5/3] relative perspective-1000">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentIndex + (isFlipped ? '-back' : '-front')}
-                    initial={{ rotateX: isFlipped ? -90 : 90, opacity: 0 }}
-                    animate={{ rotateX: 0, opacity: 1 }}
-                    exit={{ rotateX: isFlipped ? 90 : -90, opacity: 0 }}
-                    transition={{ duration: 0.3, type: "spring", stiffness: 200, damping: 20 }}
-                    className="w-full h-full absolute inset-0 cursor-pointer"
-                    onClick={() => setIsFlipped(!isFlipped)}
+              <div className="w-full aspect-[5/3] relative" style={{ perspective: '1000px' }}>
+                <motion.div
+                  key={currentIndex}
+                  initial={{ rotateY: 0, scale: 0.95, opacity: 0 }}
+                  animate={{ rotateY: isFlipped ? 180 : 0, scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="w-full h-full absolute inset-0 cursor-pointer"
+                  style={{ transformStyle: 'preserve-3d' }}
+                  onClick={() => setIsFlipped(!isFlipped)}
+                >
+                  {/* FRONT OF CARD */}
+                  <div
+                    className="w-full h-full bg-zk-panel-bg border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 absolute inset-0 group"
+                    style={{ backfaceVisibility: 'hidden' }}
                   >
-                    {/* FRONT OF CARD */}
-                    {!isFlipped ? (
-                      <div className="w-full h-full bg-zk-panel-bg border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
+                    <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
+                      <h2 className="text-3xl md:text-5xl font-black text-zk-text leading-tight">{flashcards[currentIndex].front}</h2>
+                    </div>
 
-                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-6">
-                          <h2 className="text-3xl md:text-5xl font-black text-zk-text leading-tight">{flashcards[currentIndex].front}</h2>
-                        </div>
-
-                        {/* NotebookLM Style Hint */}
-                        {flashcards[currentIndex].hint && (
-                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full px-8 flex flex-col items-center">
-                            <AnimatePresence>
-                              {showHint ? (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  className="bg-[#FFCD29] border-2 border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Lightbulb size={24} className="shrink-0 mt-0.5 text-zk-black fill-white" />
-                                  <p className="font-bold text-zk-black text-left flex-1">{flashcards[currentIndex].hint}</p>
-                                </motion.div>
-                              ) : (
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={(e) => { e.stopPropagation(); setShowHint(true); }}
-                                  className="bg-zk-bg border-2 border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
-                                >
-                                  <Lightbulb size={18} /> Need a hint?
-                                </motion.button>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-
-                        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="font-black text-sm uppercase tracking-widest text-zk-text/40 bg-zk-bg px-3 py-1 border-[2px] border-zk-border rounded-lg">Click to flip</span>
-                        </div>
-                      </div>
-                    ) : (
-                      /* BACK OF CARD */
-                      <div className="w-full h-full bg-[#00C853] text-white border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 relative overflow-hidden group">
-
-                        <div className="flex-1 flex flex-col items-center justify-center text-center">
-                          <p className="text-xl md:text-3xl font-bold leading-relaxed">{flashcards[currentIndex].back}</p>
-                        </div>
-
-                        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="font-black text-sm uppercase tracking-widest text-white/50 bg-black/20 px-3 py-1 border-[2px] border-transparent rounded-lg">Click to flip back</span>
-                        </div>
+                    {/* NotebookLM Style Hint */}
+                    {flashcards[currentIndex].hint && (
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full px-8 flex flex-col items-center">
+                        <AnimatePresence>
+                          {showHint ? (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              className="bg-[#FFCD29] border-2 border-zk-border px-6 py-4 rounded-xl flex items-start gap-3 max-w-xl w-full"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Lightbulb size={24} className="shrink-0 mt-0.5 text-zk-black fill-white" />
+                              <p className="font-bold text-zk-black text-left flex-1">{flashcards[currentIndex].hint}</p>
+                            </motion.div>
+                          ) : (
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => { e.stopPropagation(); setShowHint(true); }}
+                              className="bg-zk-bg border-2 border-zk-border px-5 py-2.5 rounded-full font-black text-zk-text flex items-center gap-2 hover:bg-zk-panel-bg transition-colors"
+                            >
+                              <Lightbulb size={18} /> Need a hint?
+                            </motion.button>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
-                  </motion.div>
-                </AnimatePresence>
+
+                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="font-black text-sm uppercase tracking-widest text-zk-text/40 bg-zk-bg px-3 py-1 border-[2px] border-zk-border rounded-lg">Click to flip</span>
+                    </div>
+                  </div>
+
+                  {/* BACK OF CARD */}
+                  <div
+                    className="w-full h-full bg-[#00C853] text-white border-2 border-zk-border rounded-3xl flex flex-col p-8 md:p-12 absolute inset-0 group"
+                    style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                  >
+                    <div className="flex-1 flex flex-col items-center justify-center text-center">
+                      <p className="text-xl md:text-3xl font-bold leading-relaxed">{flashcards[currentIndex].back}</p>
+                    </div>
+
+                    <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="font-black text-sm uppercase tracking-widest text-white/50 bg-black/20 px-3 py-1 border-[2px] border-transparent rounded-lg">Click to flip back</span>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
 
               {/* Controls */}
