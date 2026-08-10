@@ -1,9 +1,23 @@
 "use client";
 import React from 'react';
 import HeroSection from '../../components/landingSection/HeroSection';
+
 const Hero = () => {
   return (
-    <HeroSection />
+    <div className="relative w-full bg-black min-h-screen flex items-center justify-center pb-24 md:pb-32">
+      {/* Background Image Layer */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-60" 
+        style={{ backgroundImage: `url('/images/hero_bg.png')` }}
+      />
+      {/* Vignette Gradient Overlay (brighter in center, dark at edges) */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.8)_80%,rgba(0,0,0,1)_100%)] pointer-events-none" />
+
+      {/* Hero Content Area */}
+      <main className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full">
+        <HeroSection />
+      </main>
+    </div>
   );
 };
 
