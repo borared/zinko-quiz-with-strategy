@@ -41,9 +41,7 @@ const ReadySection = () => {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-zk-text font-bold text-xl md:text-3xl mb-10 max-w-2xl mx-auto"
-          style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}
-        >
+        <p className="text-zk-text font-medium text-xl md:text-2xl mb-10 max-w-2xl mx-auto font-['Outfit']">
           Join millions of educators, trainers, and team leaders who use Zinko to engage their audiences.
         </p>
 
