@@ -39,7 +39,7 @@ const FAQ = () => {
   return (
     <div className="w-full max-w-4xl mx-auto mb-24 px-4 bg-transparent">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-black text-zk-text tracking-tight gasoek-one-regular mb-2">
+        <h2 className="text-3xl md:text-5xl font-black text-zk-text tracking-tight gasoek-one-regular mb-2">
           Frequently Asked Questions
         </h2>
         <p className="font-['Outfit'] font-bold text-zk-text/60 text-lg uppercase tracking-widest">
@@ -58,7 +58,7 @@ const FAQ = () => {
               <div className="flex items-center justify-between py-6 px-2 sm:px-4 cursor-pointer">
                 <div className="flex items-center gap-4 sm:gap-6">
                   <Icon size={28} className="text-zk-text shrink-0" strokeWidth={2.5} />
-                  <h3 className="text-lg sm:text-xl font-bold text-zk-text m-0">{faq.question}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-zk-text m-0 font-['Outfit']">{faq.question}</h3>
                 </div>
                 <ChevronDown 
                   size={24} 
@@ -69,7 +69,7 @@ const FAQ = () => {
               
               <div className="grid transition-all duration-300 ease-in-out grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100">
                 <div className="overflow-hidden">
-                  <p className="px-2 sm:px-4 pb-6 ml-12 sm:ml-14 text-sm sm:text-base font-bold text-zk-text/70 leading-relaxed max-w-2xl">
+                  <p className="px-2 sm:px-4 pb-6 ml-12 sm:ml-14 text-base sm:text-lg font-medium text-zk-text/70 leading-relaxed max-w-2xl font-['Outfit']">
                     {faq.answer}
                   </p>
                 </div>
