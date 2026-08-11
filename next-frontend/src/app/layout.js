@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
           <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&family=Kantumruy+Pro:wght@100..700&display=swap" rel="stylesheet" />
         </head>
         <body className={`min-h-screen bg-zk-bg flex flex-col font-sans ${amaticSC.variable}`}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ClientLayoutWrapper>
               {children}
             </ClientLayoutWrapper>
