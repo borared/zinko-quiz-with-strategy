@@ -12,10 +12,12 @@ import { useLibraryCartStore } from '@/store/useLibraryCartStore';
 import { useAuthStore, getNavAuthCache, setNavAuthCache, clearNavAuthCache } from '@/store/useAuthStore';
 import { useProfileStore } from '@/store/useProfileStore';
 import ThemeToggle from './ThemeToggle';
+import NotificationSidebar from './NotificationSidebar';
 
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const isDashboardView = ['/dashboard', '/discovery', '/library', '/create-game', '/create-picture-race', '/flashcard', '/classpin', '/reports'].some(p => pathname?.startsWith(p));
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +25,7 @@ const Navbar = () => {
   const [socialOpen, setSocialOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const { unreadCount, fetchNotifications } = useNotificationStore();
@@ -94,9 +97,9 @@ const Navbar = () => {
     const isExact = pathname === path;
 
     if (isActive || isExact) {
-      return "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
+      return "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-pointer transition-colors leading-none pt-2 animate-float-nav inline-block";
     }
-    return "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
+    return "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
   };
 
   const handleSignOut = () => {
@@ -114,13 +117,13 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <button
             onClick={() => router.push('/join')}
-            className="bg-[#5D3FD3] text-white border-2 border-zk-border px-8 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-3xl rounded-lg leading-none tracking-wider"
+            className="bg-[#5D3FD3] text-white border-2 border-zk-border px-8 py-2 transition-colors hover:bg-[#4b33b3] font-['Amatic_SC'] font-bold text-2xl rounded-lg leading-none tracking-wider"
           >
             Join
           </button>
 
           <button
-            onClick={() => router.push('/notifications')}
+            onClick={() => setNotifOpen(true)}
             className="relative p-2 rounded-xl border-2 border-zk-border bg-zk-panel-bg text-zk-text hover:opacity-90 transition-all h-12 w-12 flex items-center justify-center"
             aria-label="Notifications"
           >
@@ -209,13 +212,13 @@ const Navbar = () => {
         <ThemeToggle />
         <button
           onClick={() => router.push('/join')}
-          className="bg-zk-blue text-zk-white border-2 border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
+          className="bg-zk-blue text-zk-white border-2 border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-2xl leading-none pt-2"
         >
           Join
         </button>
         <button
           onClick={() => router.push('/signup')}
-          className="bg-zk-panel-bg text-zk-text border-2 border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-3xl leading-none pt-2"
+          className="bg-zk-panel-bg text-zk-text border-2 border-zk-border px-6 py-2 transition-opacity hover:opacity-90 rounded-lg font-['Amatic_SC'] font-bold text-2xl leading-none pt-2"
         >
           Sign up
         </button>
@@ -224,214 +227,216 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full border-b-2 border-zk-border bg-zk-bg px-6 py-4 flex items-center justify-between font-sans">
-
-      {/* Left: Logo */}
-      <div className="flex items-center gap-8">
-        <Link
-          href="/"
-          className="bg-zk-panel-bg border-2 border-zk-border px-4 py-1 flex items-center justify-center transform transition-colors rounded-lg hover:bg-zk-panel-bg/90"
-        >
-          <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular">Zinko</span>
-        </Link>
-
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-6 font-bold text-sm">
-          <a
-            onClick={() => router.push('/blog')}
-            className={getLinkClass('/blog')}
+    <nav className={`fixed top-0 left-0 z-50 w-full border-b-2 border-zk-border bg-zk-bg py-3 font-sans transition-all duration-300 ease-in-out ${isDashboardView ? 'px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
+      <div className={`mx-auto flex items-center justify-between w-full transition-all duration-300 ease-in-out ${isDashboardView ? 'max-w-full' : 'max-w-7xl'}`}>
+        {/* Left: Logo */}
+        <div className="flex items-center gap-8">
+          <Link
+            href="/"
+            className="flex items-center gap-2 transform transition-all hover:opacity-90"
           >
-            BLOG
-          </a>
-          <a
-            onClick={() => router.push('/pricing')}
-            className={getLinkClass('/pricing')}
-          >
-            PRICING
-          </a>
+            <img src="/Zinkofavicon.png" alt="Zinko Logo" className="w-8 h-8 object-contain rounded-md" />
+            <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular text-zk-text">Zinko</span>
+          </Link>
 
-          {/* Manage & Create Dropdown */}
-          <div 
-            className="relative" 
-            onMouseEnter={() => setManageOpen(true)} 
-            onMouseLeave={() => setManageOpen(false)}
-          >
-            <div 
-              className={
-                ['/dashboard', '/discovery', '/classpin', '/flashcard', '/create-picture-race'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
-                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
-                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
-              }
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-6 font-bold text-sm">
+            <a
+              onClick={() => router.push('/blog')}
+              className={getLinkClass('/blog')}
             >
-              MANAGE & CREATE <ChevronDown size={20} className={`transition-transform ${manageOpen ? 'rotate-180' : ''}`} />
-            </div>
-
-            <AnimatePresence>
-              {manageOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
-                >
-                  <button
-                    onClick={() => { setManageOpen(false); router.push('/dashboard'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Dashboard
-                  </button>
-                  <button
-                    onClick={() => { setManageOpen(false); router.push('/discovery'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Discovery
-                  </button>
-                  <button
-                    onClick={() => { setManageOpen(false); router.push('/flashcard'); }}
-                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Flash card
-                    <span className="bg-[#00C2FF] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
-                      New
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => { setManageOpen(false); router.push('/create-picture-race'); }}
-                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Guess Picture
-                    <span className="bg-[#00C2FF] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
-                      New
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => { setManageOpen(false); router.push('/classpin'); }}
-                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Classpin
-                    <span className="bg-[#FFCD29] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
-                      Soon
-                    </span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Social Dropdown */}
-          <div 
-            className="relative" 
-            onMouseEnter={() => setSocialOpen(true)} 
-            onMouseLeave={() => setSocialOpen(false)}
-          >
-            <div 
-              className={
-                pathname?.startsWith('/dashboard/social')
-                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
-                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
-              }
+              BLOG
+            </a>
+            <a
+              onClick={() => router.push('/pricing')}
+              className={getLinkClass('/pricing')}
             >
-              Social <ChevronDown size={20} className={`transition-transform ${socialOpen ? 'rotate-180' : ''}`} />
-            </div>
+              PRICING
+            </a>
 
-            <AnimatePresence>
-              {socialOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
-                >
-                  <button
-                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=friends'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Friends
-                  </button>
-                  <button
-                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=requests'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Requests
-                  </button>
-                  <button
-                    onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=add'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Add Friend
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          {/* Library Dropdown */}
-          <div 
-            className="relative" 
-            onMouseEnter={() => setLibraryOpen(true)} 
-            onMouseLeave={() => setLibraryOpen(false)}
-          >
+            {/* Manage & Create Dropdown */}
             <div 
-              className={
-                pathname?.startsWith('/library')
-                  ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-3xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
-                  : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-3xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
-              }
+              className="relative" 
+              onMouseEnter={() => setManageOpen(true)} 
+              onMouseLeave={() => setManageOpen(false)}
             >
-              Library 
-              {showLibraryCartAlert && (
-                <span className="absolute -top-1 -right-1 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border !shadow-none flex items-center justify-center pointer-events-none">
-                  {cartAlertCount > 99 ? '99+' : cartAlertCount}
-                </span>
-              )}
-              <ChevronDown size={20} className={`transition-transform ${libraryOpen ? 'rotate-180' : ''}`} />
-            </div>
+              <div 
+                className={
+                  ['/dashboard', '/discovery', '/classpin', '/flashcard', '/create-picture-race'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
+                    ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
+                    : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
+                }
+              >
+                MANAGE & CREATE <ChevronDown size={20} className={`transition-transform ${manageOpen ? 'rotate-180' : ''}`} />
+              </div>
 
-            <AnimatePresence>
-              {libraryOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
-                >
-                  <button
-                    onClick={() => { setLibraryOpen(false); router.push('/library'); }}
-                    className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+              <AnimatePresence>
+                {manageOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
                   >
-                    Collection
-                  </button>
-                  <button
-                    onClick={() => { setLibraryOpen(false); router.push('/library/cart'); }}
-                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
-                  >
-                    Cart
-                    {showLibraryCartAlert && (
-                      <span className="bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border flex items-center justify-center">
-                        {cartAlertCount > 99 ? '99+' : cartAlertCount}
+                    <button
+                      onClick={() => { setManageOpen(false); router.push('/dashboard'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={() => { setManageOpen(false); router.push('/discovery'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Discovery
+                    </button>
+                    <button
+                      onClick={() => { setManageOpen(false); router.push('/flashcard'); }}
+                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Flash card
+                      <span className="bg-[#00C2FF] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
+                        New
                       </span>
-                    )}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    </button>
+                    <button
+                      onClick={() => { setManageOpen(false); router.push('/create-picture-race'); }}
+                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Guess Picture
+                      <span className="bg-[#00C2FF] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
+                        New
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => { setManageOpen(false); router.push('/classpin'); }}
+                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Classpin
+                      <span className="bg-[#FFCD29] text-black text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-black leading-none pt-1">
+                        Soon
+                      </span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Social Dropdown */}
+            <div 
+              className="relative" 
+              onMouseEnter={() => setSocialOpen(true)} 
+              onMouseLeave={() => setSocialOpen(false)}
+            >
+              <div 
+                className={
+                  pathname?.startsWith('/dashboard/social')
+                    ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
+                    : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+                }
+              >
+                Social <ChevronDown size={20} className={`transition-transform ${socialOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              <AnimatePresence>
+                {socialOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                  >
+                    <button
+                      onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=friends'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Friends
+                    </button>
+                    <button
+                      onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=requests'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Requests
+                    </button>
+                    <button
+                      onClick={() => { setSocialOpen(false); router.push('/dashboard/social?tab=add'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Add Friend
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            {/* Library Dropdown */}
+            <div 
+              className="relative" 
+              onMouseEnter={() => setLibraryOpen(true)} 
+              onMouseLeave={() => setLibraryOpen(false)}
+            >
+              <div 
+                className={
+                  pathname?.startsWith('/library')
+                    ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
+                    : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
+                }
+              >
+                Library 
+                {showLibraryCartAlert && (
+                  <span className="absolute -top-1 -right-1 z-10 bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border !shadow-none flex items-center justify-center pointer-events-none">
+                    {cartAlertCount > 99 ? '99+' : cartAlertCount}
+                  </span>
+                )}
+                <ChevronDown size={20} className={`transition-transform ${libraryOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              <AnimatePresence>
+                {libraryOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                  >
+                    <button
+                      onClick={() => { setLibraryOpen(false); router.push('/library'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Collection
+                    </button>
+                    <button
+                      onClick={() => { setLibraryOpen(false); router.push('/library/cart'); }}
+                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Cart
+                      {showLibraryCartAlert && (
+                        <span className="bg-red-500 text-white text-[10px] font-black min-w-[1.25rem] h-5 px-1.5 rounded-full border-[2px] border-zk-border flex items-center justify-center">
+                          {cartAlertCount > 99 ? '99+' : cartAlertCount}
+                        </span>
+                      )}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <a
+              onClick={() => router.push('/shop')}
+              className={getLinkClass('/shop')}
+            >
+              SHOP
+            </a>
+
           </div>
-
-          <a
-            onClick={() => router.push('/shop')}
-            className={getLinkClass('/shop')}
-          >
-            SHOP
-          </a>
-
         </div>
-      </div>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-4 font-bold text-sm">
-        {renderAuthButtons()}
+        {/* Right: Actions */}
+        <div className="flex items-center gap-4 font-bold text-sm">
+          {renderAuthButtons()}
+        </div>
       </div>
       {/* Sign Out Confirmation Modal */}
       {showModal && (
@@ -472,6 +477,7 @@ const Navbar = () => {
         </div>
       )}
 
+      <NotificationSidebar isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
     </nav>
   );
 };

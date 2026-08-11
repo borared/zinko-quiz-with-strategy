@@ -44,10 +44,10 @@ const WhyThis = () => {
                 <div className="mb-6 text-zk-blue">
                   <Icon size={48} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-zk-text mb-4">
+                <h3 className="text-xl font-bold text-zk-text mb-4 font-['Outfit']">
                   {feature.title}
                 </h3>
-                <p className="text-zk-text/70 text-base leading-relaxed px-4">
+                <p className="text-zk-text/70 text-base leading-relaxed px-4 font-['Outfit']">
                   {feature.description}
                 </p>
               </div>

@@ -45,7 +45,7 @@ const HeroSection = () => {
             </span>
           </h2>
           
-          <p className="text-zk-text text-xl md:text-2xl font-normal font-['Outfit'] max-w-xl mb-6 leading-relaxed">
+          <p className="text-white text-xl md:text-2xl font-normal font-['Outfit'] max-w-xl mb-6 leading-relaxed">
             Empower your classroom with interactive quizzes that feel like real games. No topic limits, no hassle just pure fun.
           </p>
           

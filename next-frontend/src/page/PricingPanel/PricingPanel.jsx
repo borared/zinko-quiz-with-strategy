@@ -23,7 +23,7 @@ const PricingPanel = () => {
       ]
     },
     {
-      title: "Zinko Pro",
+      title: "Zamba Pro",
       price: "$6.99",
       subtitle: "Unlock the full power of play.",
       buttonText: "GO PRO NOW",
@@ -38,7 +38,7 @@ const PricingPanel = () => {
       ]
     },
     {
-      title: "Zinko Prime",
+      title: "Zamba Prime",
       price: "$14.99",
       originalPrice: "$19.99",
       subtitle: "Empower your entire department.",

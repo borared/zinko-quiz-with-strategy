@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from 'react';
 import Hero from '@/page/landing/Hero';
+import TrustedBy from '@/components/landingSection/TrustedBy';
 import Engagement from '@/page/landing/Engagement';
 import SkillsFeature from '@/page/landing/SkillsFeature';
 import WhyZinko from '@/page/landing/WhyZinko';
@@ -18,6 +19,7 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
+      <TrustedBy />
       <SkillsFeature />
       <Engagement />
       <WhyZinko />
