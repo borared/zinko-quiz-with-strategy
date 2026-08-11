@@ -28,7 +28,7 @@
   --zk-bg: #0B0F19;
   --zk-light-bg: #0B0F19;
   --zk-text: #F8F9FA;
-  --zk-panel-bg: #151821;
+  --zk-panel-bg: #0B0F19;
   --zk-border: #2D3748;
   --zk-shadow-sm: 2px 2px 0 0 #2D3748;
   --zk-shadow-md: 4px 4px 0 0 #2D3748;
@@ -182,7 +182,7 @@
   }
 
   .dark .zk-panel-glass {
-    background: rgba(21, 24, 33, 0.88);
+    background: rgba(11, 15, 25, 0.88);
   }
 
   .zk-section-title {
