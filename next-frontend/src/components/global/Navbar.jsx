@@ -24,6 +24,7 @@ const Navbar = () => {
   const [manageOpen, setManageOpen] = useState(false);
   const [socialOpen, setSocialOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -241,12 +242,47 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-6 font-bold text-sm">
-            <a
-              onClick={() => router.push('/blog')}
-              className={getLinkClass('/blog')}
+            {/* Info Dropdown */}
+            <div 
+              className="relative" 
+              onMouseEnter={() => setInfoOpen(true)} 
+              onMouseLeave={() => setInfoOpen(false)}
             >
-              BLOG
-            </a>
+              <div 
+                className={
+                  ['/blog', '/tutorial'].some(p => pathname?.startsWith(p))
+                    ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 uppercase"
+                    : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 uppercase"
+                }
+              >
+                {pathname?.startsWith('/blog') ? 'BLOG' : pathname?.startsWith('/tutorial') ? 'TUTORIAL' : 'INFO'} <ChevronDown size={20} className={`transition-transform ${infoOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              <AnimatePresence>
+                {infoOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-zk-panel-bg border-2 border-zk-border z-50 rounded-xl overflow-hidden py-2"
+                  >
+                    <button
+                      onClick={() => { setInfoOpen(false); router.push('/blog'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Blog
+                    </button>
+                    <button
+                      onClick={() => { setInfoOpen(false); router.push('/tutorial'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Tutorial
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <a
               onClick={() => router.push('/pricing')}
               className={getLinkClass('/pricing')}
