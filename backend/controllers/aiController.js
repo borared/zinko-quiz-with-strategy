@@ -51,12 +51,9 @@ const generateQuiz = async (req, res) => {
           extractedText = fs.readFileSync(tempFilePath, 'utf8');
         } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
           console.log('Calling pdf-parse...');
-          require('pdf-parse/worker');
-          const { PDFParse } = require('pdf-parse');
+          const pdf = require('pdf-parse');
           const dataBuffer = fs.readFileSync(tempFilePath);
-          const parser = new PDFParse({ data: dataBuffer });
-          const pdfData = await parser.getText();
-          await parser.destroy();
+          const pdfData = await pdf(dataBuffer);
           extractedText = pdfData.text;
         } else {
           console.log('Calling officeParser with file path...');
@@ -165,12 +162,9 @@ const generateFlashcards = async (req, res) => {
           extractedText = fs.readFileSync(tempFilePath, 'utf8');
         } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
           console.log('Calling pdf-parse...');
-          require('pdf-parse/worker');
-          const { PDFParse } = require('pdf-parse');
+          const pdf = require('pdf-parse');
           const dataBuffer = fs.readFileSync(tempFilePath);
-          const parser = new PDFParse({ data: dataBuffer });
-          const pdfData = await parser.getText();
-          await parser.destroy();
+          const pdfData = await pdf(dataBuffer);
           extractedText = pdfData.text;
         } else {
           console.log('Calling officeParser with file path...');
