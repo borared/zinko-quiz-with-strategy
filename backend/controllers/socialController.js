@@ -116,7 +116,7 @@ const sendFriendRequest = async (req, res) => {
     // Notify the target user
     const currentUser = await prisma.users.findUnique({
       where: { clerk_id: currentClerkId },
-      select: { username: true, first_name: true },
+      select: { username: true, first_name: true, avatar_url: true },
     });
     const senderName = currentUser.username || currentUser.first_name || 'Someone';
 
@@ -125,7 +125,11 @@ const sendFriendRequest = async (req, res) => {
         user_id: targetClerkId,
         type: 'FRIEND_REQUEST',
         message: `${senderName} sent you a friend request.`,
-        metadata: { senderClerkId: currentClerkId },
+        metadata: { 
+          senderClerkId: currentClerkId,
+          cloner_name: senderName,
+          cloner_avatar: currentUser.avatar_url,
+        },
       },
     });
 
@@ -167,7 +171,7 @@ const acceptFriendRequest = async (req, res) => {
     // Notify the sender that it was accepted
     const currentUser = await prisma.users.findUnique({
       where: { clerk_id: currentClerkId },
-      select: { username: true, first_name: true },
+      select: { username: true, first_name: true, avatar_url: true },
     });
     const acceptorName = currentUser.username || currentUser.first_name || 'Someone';
 
@@ -176,7 +180,11 @@ const acceptFriendRequest = async (req, res) => {
         user_id: senderClerkId,
         type: 'FRIEND_ACCEPTED',
         message: `${acceptorName} accepted your friend request!`,
-        metadata: { acceptorClerkId: currentClerkId },
+        metadata: { 
+          acceptorClerkId: currentClerkId,
+          cloner_name: acceptorName,
+          cloner_avatar: currentUser.avatar_url,
+        },
       },
     });
 

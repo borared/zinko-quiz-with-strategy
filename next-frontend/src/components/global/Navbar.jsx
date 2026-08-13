@@ -235,7 +235,12 @@ const Navbar = () => {
             href="/"
             className="flex items-center gap-2 transform transition-all hover:opacity-90"
           >
-            <img src="/Zinkofavicon.png" alt="Zinko Logo" className="w-8 h-8 object-contain rounded-md" />
+            <img 
+              src="/Zinkofavicon.png" 
+              alt="Zinko Logo" 
+              className="w-8 h-8 object-contain rounded-md border-2 border-black contrast-[1.1] brightness-[1.02] dark:contrast-100 dark:brightness-100" 
+              style={{ imageRendering: '-webkit-optimize-contrast' }}
+            />
             <span className="font-bold text-2xl tracking-tighter italic permanent-marker-regular text-zk-text">Zinko</span>
           </Link>
 
