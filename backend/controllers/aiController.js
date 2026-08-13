@@ -51,14 +51,17 @@ const generateQuiz = async (req, res) => {
           extractedText = fs.readFileSync(tempFilePath, 'utf8');
         } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
           console.log('Calling pdf-parse...');
-          const pdf = require('pdf-parse');
+          require('pdf-parse/worker');
+          const { PDFParse } = require('pdf-parse');
           const dataBuffer = fs.readFileSync(tempFilePath);
-          const parser = new pdf.PDFParse({ data: dataBuffer });
+          const parser = new PDFParse({ data: dataBuffer });
           const pdfData = await parser.getText();
+          await parser.destroy();
           extractedText = pdfData.text;
         } else {
           console.log('Calling officeParser with file path...');
-          extractedText = await officeParser.parseOffice(tempFilePath);
+          const ast = await officeParser.parseOffice(tempFilePath);
+          extractedText = ast.toText();
         }
         console.log(`Extracted ${extractedText ? extractedText.length : 0} characters of text.`);
         console.log(`=== PREVIEW ===\n${extractedText ? extractedText.substring(0, 300) : 'EMPTY'}\n===============`);
@@ -162,14 +165,17 @@ const generateFlashcards = async (req, res) => {
           extractedText = fs.readFileSync(tempFilePath, 'utf8');
         } else if (file.mimetype === 'application/pdf' || tempFilePath.endsWith('.pdf')) {
           console.log('Calling pdf-parse...');
-          const pdf = require('pdf-parse');
+          require('pdf-parse/worker');
+          const { PDFParse } = require('pdf-parse');
           const dataBuffer = fs.readFileSync(tempFilePath);
-          const parser = new pdf.PDFParse({ data: dataBuffer });
+          const parser = new PDFParse({ data: dataBuffer });
           const pdfData = await parser.getText();
+          await parser.destroy();
           extractedText = pdfData.text;
         } else {
           console.log('Calling officeParser with file path...');
-          extractedText = await officeParser.parseOffice(tempFilePath);
+          const ast = await officeParser.parseOffice(tempFilePath);
+          extractedText = ast.toText();
         }
         console.log(`Extracted ${extractedText ? extractedText.length : 0} characters of text.`);
         console.log(`=== PREVIEW ===\n${extractedText ? extractedText.substring(0, 300) : 'EMPTY'}\n===============`);
