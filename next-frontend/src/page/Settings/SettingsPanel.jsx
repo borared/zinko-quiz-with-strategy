@@ -55,23 +55,32 @@ function SettingsFloatingDecor() {
     </div>
   );
 }
-function ProfileLottie({ className = '' }) {
+function ProfileLottie({ className = '', width = 200, height = 200 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  const lottieWidth = Math.max(width - 20, 20);
+  const lottieHeight = Math.max(height - 20, 20);
+  const placeholderWidth = Math.max(width - 40, 20);
+  const placeholderHeight = Math.max(height - 40, 20);
+
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden w-[200px] h-[200px] shrink-0 ${className}`}
+      className={`flex items-center justify-center overflow-hidden shrink-0 ${className}`}
+      style={{ width, height }}
       aria-hidden
     >
       {mounted ? (
         <Lottie
           animationData={profileLottieData}
           loop
-          style={{ width: 180, height: 180 }}
+          style={{ width: lottieWidth, height: lottieHeight }}
         />
       ) : (
-        <div className="w-[160px] h-[160px] rounded-full border-[3px] border-dashed border-zk-border/20 animate-pulse" />
+        <div 
+          className="rounded-full border-[3px] border-dashed border-zk-border/20 animate-pulse" 
+          style={{ width: placeholderWidth, height: placeholderHeight }}
+        />
       )}
     </div>
   );
@@ -116,7 +125,7 @@ function SettingsAlertModal({ open, children }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 24 }}
             transition={ALERT_SPRING}
-            className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl p-6 max-w-md w-full shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="bg-zk-panel-bg border-2 border-zk-border rounded-2xl p-6 max-w-md w-full shadow-none"
           >
             {children}
           </motion.div>
@@ -193,11 +202,31 @@ export default function SettingsPanel() {
   const hasPersistedSettings = useUserSettingsStore((s) => s.hasPersistedSettings);
   const updateDiscoveryCreatorUsername = useDiscoveryQuizStore((s) => s.updateCreatorUsername);
 
-  const [usernameDraft, setUsernameDraft] = useState('');
+  const [usernameDraft, setUsernameDraft] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('zinko_user_settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed.username || '';
+      }
+    } catch (e) {}
+    return '';
+  });
   
   const coverUrl = useUserSettingsStore((s) => s.coverUrl);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
-  const [coverDraft, setCoverDraft] = useState('');
+  const [coverDraft, setCoverDraft] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('zinko_user_settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed.coverUrl || '';
+      }
+    } catch (e) {}
+    return '';
+  });
   const [coverSaving, setCoverSaving] = useState(false);
 
   const loadSettings = useCallback(async ({ silent = false, userId } = {}) => {
@@ -225,7 +254,10 @@ export default function SettingsPanel() {
   }, [setSettingsCache, showToast]);
 
   useEffect(() => {
-    useUserSettingsStore.getState().hydrateFromSession();
+    const store = useUserSettingsStore.getState();
+    store.hydrateFromSession();
+    if (store.username) setUsernameDraft(store.username);
+    if (store.coverUrl) setCoverDraft(store.coverUrl);
     setClientReady(true);
   }, []);
 
@@ -257,6 +289,7 @@ export default function SettingsPanel() {
     const cached = isSettingsCachedForUser(user.id);
     if (cached) {
       setUsernameDraft(useUserSettingsStore.getState().username);
+      setCoverDraft(useUserSettingsStore.getState().coverUrl || '');
       setLoading(false);
       loadSettings({ silent: true, userId: user.id });
       return;
@@ -389,6 +422,10 @@ export default function SettingsPanel() {
   const plan = PLAN_COPY[usage.plan] || PLAN_COPY.basic;
   const settingsCached = isSettingsCachedForUser(user?.id);
 
+  const displayFullName = `${firstName} ${lastName}`.trim() || user?.fullName || 'User';
+  const displayUsername = usernameDraft ? usernameDraft.toLowerCase() : 'username';
+  const displayCover = coverDraft || coverUrl || '';
+
   if (!clientReady || !isLoaded || (loading && !settingsCached && !hasPersistedSettings())) {
     return (
       <div className="min-h-screen bg-zk-light-bg flex items-center justify-center relative overflow-hidden">
@@ -404,19 +441,24 @@ export default function SettingsPanel() {
       <div className="relative z-10"><Navbar /></div>
 
       <main className="relative z-10 flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 mt-4 pb-16">
-        <div className="zk-panel !shadow-none p-6 mb-6 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white flex items-center justify-center">
-            <Settings size={26} />
+        <div className="zk-panel !shadow-none p-6 mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white flex items-center justify-center shrink-0">
+              <Settings size={26} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-zk-text tracking-tight">Settings</h1>
+              <p className="text-sm font-bold text-zk-text/55">Manage your account and game preferences.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-zk-text tracking-tight">Settings</h1>
-            <p className="text-sm font-bold text-zk-text/55">Manage your account and game preferences.</p>
+          <div className="hidden sm:block mr-2 -my-6">
+            <ProfileLottie width={130} height={130} />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
           <SettingSection icon={User} title="Profile" description="Your name and account details." className="md:col-span-2">
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_220px] xl:grid-cols-[minmax(0,1fr)_240px] gap-5 items-stretch min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px] gap-8 items-center min-h-0">
               <div className="flex flex-col gap-4 min-w-0">
                 <div className="flex items-center gap-4">
                   <img src={user?.imageUrl} alt={user?.fullName || 'Profile'} className="w-16 h-16 rounded-xl border-[3px] border-zk-border object-cover" />
@@ -456,8 +498,78 @@ export default function SettingsPanel() {
                   <button type="button" onClick={() => setIsCoverModalOpen(true)} className="px-5 py-2.5 rounded-xl border-[3px] border-zk-border font-black text-sm tracking-widest bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20 inline-flex items-center gap-2"><ImageIcon size={16} /> Edit Cover</button>
                 </div>
               </div>
-              <div className="hidden md:flex items-center justify-center h-full min-h-[200px] lg:min-h-0 mx-auto lg:mx-0 lg:-translate-y-12">
-                <ProfileLottie />
+              
+              {/* Discord Profile Preview Card Container */}
+              <div className="flex items-center justify-center h-full min-h-[300px] lg:min-h-0 mx-auto lg:mx-0">
+                <div className="w-[280px] sm:w-[300px] border-[4px] border-zk-border bg-[#1E1F22] rounded-2xl overflow-hidden flex flex-col relative text-white font-sans shrink-0 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                  
+                  {/* Banner */}
+                  <div 
+                    className={`h-24 w-full relative ${!displayCover ? 'bg-gradient-to-r from-zk-purple to-zk-blue' : ''}`}
+                    style={{
+                      backgroundImage: displayCover ? `url("${displayCover}")` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
+                    <button 
+                      type="button"
+                      className="absolute top-2 right-2 bg-black/40 hover:bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors border border-white/20"
+                      onClick={() => setIsCoverModalOpen(true)}
+                    >
+                      Cover
+                    </button>
+                  </div>
+
+                  {/* Avatar (Overlapping) */}
+                  <div className="absolute top-12 left-4 z-10 w-[76px] h-[76px] rounded-full border-[5px] border-[#1E1F22] overflow-hidden bg-zk-border shadow-sm">
+                    <img 
+                      src={user?.imageUrl} 
+                      alt="Profile avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Profile Info Details */}
+                  <div className="pt-10 px-4 pb-4 flex flex-col">
+                    <h3 className="font-extrabold text-lg text-white leading-tight truncate">
+                      {displayFullName}
+                    </h3>
+                    <p className="text-xs font-bold text-gray-400 mt-0.5 truncate">
+                      @{displayUsername}
+                    </p>
+
+                    {/* Discord Bio/Details Container */}
+                    <div className="bg-[#111214] rounded-xl p-3 mt-4 flex flex-col gap-3 text-left">
+                      {/* Bio / About */}
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider">About Me</p>
+                        <p className="text-xs font-medium text-gray-200 mt-1 leading-normal">
+                          Learning is a game! Ready to test my strategy 🎮
+                        </p>
+                      </div>
+
+                      {/* Plan / Role */}
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-1">Rank / Plan</p>
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zk-purple/30 border border-zk-purple-light/40">
+                          <div className="w-2.5 h-2.5 rounded-full bg-zk-purple-light" />
+                          <span className="text-[10px] font-black text-white uppercase tracking-wide">
+                            {plan.title}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Joined Date */}
+                      <div className="border-t border-white/5 pt-2">
+                        <p className="text-[9px] font-black uppercase text-gray-500 tracking-wider">Zinko Member Since</p>
+                        <p className="text-[11px] font-bold text-gray-400 mt-0.5">
+                          {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Aug 2026'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             {manageAccountOpen && (
@@ -714,7 +826,7 @@ export default function SettingsPanel() {
                     setDeleteConfirmText('');
                     setDeleteStep('confirm');
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] hover:bg-[#E03F3F] text-white font-black text-sm transition-colors"
                 >
                   I understand
                 </button>
@@ -794,7 +906,7 @@ export default function SettingsPanel() {
               initial={{ scale: 0.95, y: 16 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 16 }}
-              className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl w-full max-w-md relative z-10 p-6 sm:p-8 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              className="bg-zk-panel-bg border-2 border-zk-border rounded-2xl w-full max-w-md relative z-10 p-6 sm:p-8 shadow-none"
             >
               <button
                 type="button"

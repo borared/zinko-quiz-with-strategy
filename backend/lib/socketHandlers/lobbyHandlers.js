@@ -49,6 +49,15 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
 
       console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
       socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
+
+      // Immediately send current players list to the newly connected host
+      socket.emit('lobby:players-update', {
+        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        count: game.players.length,
+        background: game.background,
+        teams: game.teams,
+        teamNames: game.teamNames || {},
+      });
     } catch (err) {
       console.error('❌ Failed to load questions:', err.message);
       socket.emit('error', { message: 'Failed to load quiz questions.' });

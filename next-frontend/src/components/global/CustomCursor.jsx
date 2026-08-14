@@ -11,15 +11,7 @@ export default function CustomCursor() {
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // JELLY EFFECT PHYSICS
-  const velocityX = useVelocity(mouseX);
-  const velocityY = useVelocity(mouseY);
 
-  const smoothVelocityX = useSpring(velocityX, { damping: 12, stiffness: 200, mass: 0.5 });
-  const smoothVelocityY = useSpring(velocityY, { damping: 12, stiffness: 200, mass: 0.5 });
-
-  const skewX = useTransform(smoothVelocityX, [-2000, 2000], [35, -35]);
-  const skewY = useTransform(smoothVelocityY, [-2000, 2000], [35, -35]);
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
@@ -88,8 +80,6 @@ export default function CustomCursor() {
         style={{
           x: mouseX,
           y: mouseY,
-          skewX,
-          skewY,
         }}
         animate={{
           scale: isClicking ? 0.8 : 1,
@@ -100,12 +90,12 @@ export default function CustomCursor() {
       >
         {/* ARROW CURSOR */}
         <motion.svg 
-          width="36" 
-          height="36" 
+          width="26" 
+          height="26" 
           viewBox="0 0 36 36" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg" 
-          className="absolute top-0 left-0 drop-shadow-[5px_5px_0px_rgba(0,0,0,1)]"
+          className="absolute top-0 left-0"
           style={{ x: -2, y: -2, originX: '2px', originY: '2px' }}
           initial={{ opacity: 1, scale: 1 }}
           animate={{ opacity: isHovering ? 0 : 1, scale: isHovering ? 0 : 1 }}
@@ -115,30 +105,30 @@ export default function CustomCursor() {
             d="M 2 2 L 2 26 L 10 18 L 24 32 L 32 24 L 18 10 L 26 2 Z" 
             fill="#FFFFFF"
             stroke="black" 
-            strokeWidth="5" 
+            strokeWidth="2.5" 
             strokeLinejoin="round" 
           />
         </motion.svg>
 
         {/* POINTING HAND CURSOR */}
         <motion.svg 
-          width="50" 
-          height="50" 
+          width="36" 
+          height="36" 
           viewBox="0 0 50 50" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg" 
-          className="absolute top-0 left-0 drop-shadow-[5px_5px_0px_rgba(0,0,0,1)]"
-          style={{ x: -27, y: -2, originX: '27px', originY: '2px' }}
+          className="absolute top-0 left-0"
+          style={{ x: -20, y: -2, originX: '20px', originY: '2px' }}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: isHovering ? 1 : 0, scale: isHovering ? 1 : 0 }}
           transition={{ duration: 0.15 }}
         >
-          <g transform="translate(27, 2) rotate(-20) scale(0.9) translate(-27, -2)">
+          <g transform="translate(20, 2) rotate(-20) scale(0.9) translate(-20, -2)">
             <path 
               d="M 24 2 h 6 v 10 h 4 v 2 h 4 v 2 h 4 v 2 h 4 v 12 l -6 8 H 24 l -8 -8 v -8 l 6 -6 h 2 z" 
               fill="#FFCD29" 
               stroke="black" 
-              strokeWidth="5" 
+              strokeWidth="2.5" 
               strokeLinejoin="round" 
             />
           </g>

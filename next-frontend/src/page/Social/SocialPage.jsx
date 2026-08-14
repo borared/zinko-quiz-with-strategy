@@ -11,6 +11,8 @@ import api from '@/services/api';
 import { useToastStore } from '@/store/useToastStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import FunLoadingScreen from '@/components/global/FunLoadingScreen';
+import { useProfileStore } from '@/store/useProfileStore';
+import { useSocialStore } from '@/store/useSocialStore';
 
 const TABS = [
   { id: 'friends', label: 'Friends', icon: Users },
@@ -22,6 +24,7 @@ export default function SocialPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
   const { showToast } = useToastStore();
+  const fetchProfileIfNotCached = useProfileStore((s) => s.fetchProfileIfNotCached);
 
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -33,13 +36,18 @@ export default function SocialPage() {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
-  const [friends, setFriends] = useState([]);
-  const [incomingRequests, setIncomingRequests] = useState([]);
-  const [outgoingRequests, setOutgoingRequests] = useState([]);
+  const friends = useSocialStore((s) => s.friends);
+  const incomingRequests = useSocialStore((s) => s.incomingRequests);
+  const outgoingRequests = useSocialStore((s) => s.outgoingRequests);
+  const isLoadedOnce = useSocialStore((s) => s.isLoadedOnce);
+  const setFriends = useSocialStore((s) => s.setFriends);
+  const setRequests = useSocialStore((s) => s.setRequests);
+  const setLoadedOnce = useSocialStore((s) => s.setLoadedOnce);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isFetchingData, setIsFetchingData] = useState(true);
+  const [isFetchingData, setIsFetchingData] = useState(!isLoadedOnce);
   const [actionLoading, setActionLoading] = useState({});
 
   const fetchFriends = useCallback(async () => {
@@ -50,34 +58,60 @@ export default function SocialPage() {
       console.error(err);
       showToast('Failed to load friends list.', 'error');
     }
-  }, [showToast]);
+  }, [showToast, setFriends]);
 
   const fetchRequests = useCallback(async () => {
     try {
       const data = await api.get('/api/social/requests');
-      setIncomingRequests(data.incoming || []);
-      setOutgoingRequests(data.outgoing || []);
+      setRequests(data.incoming || [], data.outgoing || []);
     } catch (err) {
       console.error(err);
       showToast('Failed to load friend requests.', 'error');
     }
-  }, [showToast]);
+  }, [showToast, setRequests]);
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !isJwtReady) return;
     
     const loadData = async () => {
-      setIsFetchingData(true);
+      if (!isLoadedOnce) {
+        setIsFetchingData(true);
+      }
       if (activeTab === 'friends') {
         await fetchFriends();
       } else if (activeTab === 'requests') {
         await fetchRequests();
       }
+      setLoadedOnce(true);
       setIsFetchingData(false);
     };
 
     loadData();
-  }, [activeTab, isLoaded, isSignedIn, isJwtReady, fetchFriends, fetchRequests]);
+  }, [activeTab, isLoaded, isSignedIn, isJwtReady, isLoadedOnce, fetchFriends, fetchRequests, setLoadedOnce]);
+
+  useEffect(() => {
+    if (friends.length === 0) return;
+    friends.forEach((friend) => {
+      const identifier = friend.username || friend.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [friends, fetchProfileIfNotCached]);
+
+  useEffect(() => {
+    if (incomingRequests.length === 0) return;
+    incomingRequests.forEach((req) => {
+      const identifier = req.username || req.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [incomingRequests, fetchProfileIfNotCached]);
+
+  useEffect(() => {
+    if (searchResults.length === 0) return;
+    searchResults.forEach((res) => {
+      const identifier = res.username || res.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [searchResults, fetchProfileIfNotCached]);
 
   const handleSearch = async (e) => {
     e.preventDefault();

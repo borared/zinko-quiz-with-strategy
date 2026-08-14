@@ -273,6 +273,7 @@ export default function HostLobby() {
     const storedQuizId = sessionStorage.getItem(`game_${pin}_quizId`);
     const token = localStorage.getItem('zinko_jwt');
     socket.emit('host:initialize', { pin, quizId: storedQuizId, token });
+    socket.emit('lobby:request-players', { pin });
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
@@ -468,7 +469,7 @@ export default function HostLobby() {
 
         {/* Team Panels Container */}
         <DndContext onDragEnd={handleDragEnd}>
-          <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto content-start pt-4 pb-8">
+          <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide content-start pt-4 pb-8">
             {teams.map((teamId, index) => {
               const teamPlayers = players.filter((p) => p.team === teamId);
               return (
