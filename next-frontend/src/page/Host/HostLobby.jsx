@@ -273,6 +273,7 @@ export default function HostLobby() {
     const storedQuizId = sessionStorage.getItem(`game_${pin}_quizId`);
     const token = localStorage.getItem('zinko_jwt');
     socket.emit('host:initialize', { pin, quizId: storedQuizId, token });
+    socket.emit('lobby:request-players', { pin });
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
