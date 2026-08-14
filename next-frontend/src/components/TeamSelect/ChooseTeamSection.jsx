@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useTransitionStore } from '@/store/useTransitionStore';
+
 import { useSocketStore } from '@/store/useSocketStore';
 import { useRouter, useParams } from 'next/navigation';
 import { useToastStore } from '@/store/useToastStore';
@@ -60,7 +60,7 @@ const ChooseTeamSection = () => {
   const [teams, setTeams] = useState(['A', 'B']);
   const [teamNames, setTeamNames] = useState({});
   const joinedRef = useRef(false);
-  const { blinkTo } = useTransitionStore();
+
   const { getSocket, isConnected } = useSocketStore();
   const router = useRouter();
   const { pin } = useParams();
@@ -141,7 +141,7 @@ const ChooseTeamSection = () => {
           socket.off('player:joined', onJoined);
           socket.off('error', onError);
           setJoining(false);
-          blinkTo(`/play/${pin}/lobby`);
+          router.push(`/play/${pin}/lobby`);
         };
 
       const onError = ({ message }) => {
@@ -160,7 +160,7 @@ const ChooseTeamSection = () => {
 
     } else {
       // No PIN in session — fallback to old warmup flow
-      blinkTo(`/play/${pin}/team-warmup`);
+      router.push(`/play/${pin}/team-warmup`);
     }
   };
 
