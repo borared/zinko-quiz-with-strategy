@@ -202,11 +202,31 @@ export default function SettingsPanel() {
   const hasPersistedSettings = useUserSettingsStore((s) => s.hasPersistedSettings);
   const updateDiscoveryCreatorUsername = useDiscoveryQuizStore((s) => s.updateCreatorUsername);
 
-  const [usernameDraft, setUsernameDraft] = useState('');
+  const [usernameDraft, setUsernameDraft] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('zinko_user_settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed.username || '';
+      }
+    } catch (e) {}
+    return '';
+  });
   
   const coverUrl = useUserSettingsStore((s) => s.coverUrl);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
-  const [coverDraft, setCoverDraft] = useState('');
+  const [coverDraft, setCoverDraft] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('zinko_user_settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed.coverUrl || '';
+      }
+    } catch (e) {}
+    return '';
+  });
   const [coverSaving, setCoverSaving] = useState(false);
 
   const loadSettings = useCallback(async ({ silent = false, userId } = {}) => {
