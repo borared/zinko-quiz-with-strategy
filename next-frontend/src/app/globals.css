@@ -1,5 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&family=Kantumruy+Pro:wght@100..700&display=swap');
 @import "tailwindcss";
+
+:root {
+  --font-sans: var(--font-inter), var(--font-kantumruy-pro), system-ui, sans-serif;
+  --font-heading: var(--font-outfit), var(--font-kantumruy-pro), system-ui, sans-serif;
+}
 
 
 :root {
@@ -36,8 +40,8 @@
 }
 
 @theme {
-  --font-sans: 'Inter', 'Kantumruy Pro', system-ui, sans-serif;
-  --font-heading: 'Outfit', 'Kantumruy Pro', system-ui, sans-serif;
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
   
   --color-zk-yellow: var(--zk-yellow);
   --color-zk-blue: var(--zk-blue);
@@ -64,19 +68,19 @@
 }
 
 .permanent-marker-regular {
-  font-family: "Permanent Marker", cursive;
+  font-family: var(--font-permanent-marker), cursive;
   font-weight: 400;
   font-style: normal;
 }
 
 .gasoek-one-regular {
-  font-family: "Gasoek One", sans-serif;
+  font-family: var(--font-gasoek-one), sans-serif;
   font-weight: 400;
   font-style: normal;
 }
 
 .amatic-sc-regular {
-  font-family: "Amatic SC", cursive;
+  font-family: var(--font-amatic-sc), cursive;
   font-weight: 700;
   font-style: normal;
 }
