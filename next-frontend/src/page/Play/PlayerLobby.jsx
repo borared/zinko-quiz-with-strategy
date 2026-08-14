@@ -439,7 +439,7 @@ export default function PlayerLobby() {
         </motion.div>
 
         {/* Team Panels + Go Back */}
-        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-6xl mx-auto min-h-0 overflow-y-auto pt-4 pb-8">
+        <div className="flex-1 flex flex-col items-center justify-start w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide pt-4 pb-8">
           <div className="flex flex-row flex-wrap items-center justify-center gap-4 w-full">
             {teams.map((teamId, index) => {
               const teamPlayers = players.filter((p) => p.team === teamId);
