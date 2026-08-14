@@ -2,7 +2,40 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import ClientLayoutWrapper from './ClientLayoutWrapper';
 import { ThemeProvider } from '@/components/global/ThemeProvider';
-import { Amatic_SC } from 'next/font/google';
+import { Inter, Outfit, Permanent_Marker, Gasoek_One, Kantumruy_Pro, Amatic_SC } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
+const permanentMarker = Permanent_Marker({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-permanent-marker',
+});
+
+const gasoekOne = Gasoek_One({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-gasoek-one',
+});
+
+const kantumruyPro = Kantumruy_Pro({
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
+  subsets: ['khmer', 'latin'],
+  display: 'swap',
+  variable: '--font-kantumruy-pro',
+});
 
 const amaticSC = Amatic_SC({
   weight: ['400', '700'],
@@ -26,13 +59,10 @@ export default function RootLayout({ children }) {
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://content-panda-63.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://content-panda-63.clerk.accounts.dev" />
-          <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Gasoek+One&family=Inter:wght@400;700&family=Outfit:wght@400;700&family=Permanent+Marker&family=Kantumruy+Pro:wght@100..700&display=swap" rel="stylesheet" />
         </head>
-        <body className={`min-h-screen bg-zk-bg flex flex-col font-sans ${amaticSC.variable}`}>
+        <body className={`min-h-screen bg-zk-bg flex flex-col font-sans transition-colors duration-300 ${inter.variable} ${outfit.variable} ${permanentMarker.variable} ${gasoekOne.variable} ${kantumruyPro.variable} ${amaticSC.variable}`}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ClientLayoutWrapper>
               {children}

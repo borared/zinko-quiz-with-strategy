@@ -20,9 +20,9 @@ const QRCode = typeof QRCodePackage === 'function'
 
 /* ── Shared animation helper ─────────────────────────────────────────────── */
 const bounceIn = (delay = 0) => ({
-  initial: { scale: 0, opacity: 0, y: 50 },
+  initial: { scale: 0.96, opacity: 0, y: 15 },
   animate: { scale: 1, opacity: 1, y: 0 },
-  transition: { delay, type: 'spring', stiffness: 380, damping: 18, mass: 0.9 },
+  transition: { delay, duration: 0.32, ease: [0.16, 1, 0.3, 1] },
 });
 
 
@@ -430,7 +430,9 @@ export default function HostLobby() {
           className="bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl p-3 flex flex-col items-center justify-center w-36 md:w-44 cursor-pointer hover:scale-105 transition-transform"
         >
           <div className="w-full flex justify-center aspect-square">
-            <QRCode value={gameUrl} style={{ width: '100%', height: '100%' }} level="H" />
+            {isMounted && gameUrl && (
+              <QRCode value={gameUrl} style={{ width: '100%', height: '100%' }} level="H" />
+            )}
           </div>
           <span
             className="text-[10px] font-black uppercase mt-2 text-center tracking-widest"

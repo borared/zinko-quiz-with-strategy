@@ -24,7 +24,7 @@ const HeroSection = () => {
 
         {/* Right Side: Text Content */}
         <div className="w-full lg:w-1/2 relative z-10 text-center lg:text-left flex flex-col items-center lg:items-start lg:mt-12">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-wide gasoek-one-regular leading-tight mb-6">
+          <h2 className="text-4xl md:text-[54px] lg:text-[66px] font-black tracking-wide gasoek-one-regular leading-tight mb-6">
             <span 
               className="text-zk-white block"
               style={{
@@ -54,10 +54,10 @@ const HeroSection = () => {
             <button
               type="button"
               onClick={() => router.push('/join')}
-              className="bg-zk-blue text-zk-white border-[4px] border-zk-border shadow-[4px_4px_0px_0px_#1e3a8a] px-10 py-5 flex items-center gap-3 transition-shadow hover:shadow-[6px_6px_0px_0px_#1e3a8a] rounded-xl hover:-translate-y-1 active:translate-y-1"
+              className="bg-zk-blue text-zk-white border-[3px] border-zk-border shadow-[4px_4px_0px_0px_#1e3a8a] px-8 py-3 flex items-center gap-3 transition-shadow hover:shadow-[6px_6px_0px_0px_#1e3a8a] rounded-xl hover:-translate-y-1 active:translate-y-1"
             >
-              <span className="font-bold text-4xl tracking-wide" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>JOIN</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <span className="font-bold text-3xl tracking-wide" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>JOIN</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polygon points="10 8 16 12 10 16 10 8"></polygon>
               </svg>

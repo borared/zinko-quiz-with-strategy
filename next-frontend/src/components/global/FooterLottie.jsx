@@ -16,12 +16,14 @@ export default function FooterLottie({ className = '' }) {
   return (
     <div
       className={`flex items-center justify-center w-40 h-40 shrink-0 ${className}`}
+      style={{ contain: 'layout paint', willChange: 'transform', transform: 'translateZ(0)' }}
       aria-hidden
     >
       {mounted ? (
         <Lottie
           animationData={footerLottieData}
           loop
+          renderer="canvas"
           style={{ width: '100%', height: '100%' }}
         />
       ) : (

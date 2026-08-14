@@ -91,6 +91,7 @@ export default function SkillsFeature() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
+          style={{ willChange: 'transform' }}
           className="flex-1 w-full max-w-lg"
         >
           <div className="grid grid-cols-2 gap-6">
@@ -110,7 +111,9 @@ export default function SkillsFeature() {
                   className="relative w-full aspect-[3/4] border-[6px] border-zk-border rounded-[2rem] overflow-hidden flex flex-col justify-end transition-all cursor-pointer"
                   style={{ 
                     boxShadow: '4px 4px 0px 0px var(--zk-border)',
-                    backgroundColor: skill.color
+                    backgroundColor: skill.color,
+                    willChange: 'transform',
+                    transform: 'translateZ(0)'
                   }}
                 >
                   {/* Full Background Image */}
