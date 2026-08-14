@@ -125,7 +125,7 @@ function SettingsAlertModal({ open, children }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 24 }}
             transition={ALERT_SPRING}
-            className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl p-6 max-w-md w-full shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="bg-zk-panel-bg border-2 border-zk-border rounded-2xl p-6 max-w-md w-full shadow-none"
           >
             {children}
           </motion.div>
@@ -906,7 +906,7 @@ export default function SettingsPanel() {
               initial={{ scale: 0.95, y: 16 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 16 }}
-              className="bg-zk-panel-bg border-[4px] border-zk-border rounded-2xl w-full max-w-md relative z-10 p-6 sm:p-8 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              className="bg-zk-panel-bg border-2 border-zk-border rounded-2xl w-full max-w-md relative z-10 p-6 sm:p-8 shadow-none"
             >
               <button
                 type="button"
