@@ -79,6 +79,7 @@ const getUserSettings = async (clerkId) => {
       last_name: true,
       username: true,
       avatar_url: true,
+      cover_url: true,
       settings: true,
     },
   });
@@ -122,6 +123,7 @@ const updateUserSettings = async (clerkId, patch = {}) => {
       last_name: true,
       username: true,
       avatar_url: true,
+      cover_url: true,
       settings: true,
     },
   });
@@ -177,6 +179,7 @@ const updateUsername = async (clerkId, username) => {
         last_name: true,
         username: true,
         avatar_url: true,
+        cover_url: true,
         settings: true,
       },
     });
