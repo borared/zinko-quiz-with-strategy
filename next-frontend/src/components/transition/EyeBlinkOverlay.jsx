@@ -27,7 +27,7 @@ const EyeBlinkOverlay = () => {
           <motion.div
             key="top-lid"
             className="fixed inset-x-0 top-0 z-[9999] flex flex-col items-center justify-end"
-            style={{ height: '50vh', backgroundColor: '#FFD12B' }}
+            style={{ height: '50vh', backgroundColor: '#FFD12B', willChange: 'transform' }}
             variants={topVariants}
             initial="hidden"
             animate={isClosing ? 'visible' : 'hidden'}
@@ -46,7 +46,7 @@ const EyeBlinkOverlay = () => {
           <motion.div
             key="bottom-lid"
             className="fixed inset-x-0 bottom-0 z-[9999] flex flex-col items-center justify-start"
-            style={{ height: '50vh', backgroundColor: '#FFD12B' }}
+            style={{ height: '50vh', backgroundColor: '#FFD12B', willChange: 'transform' }}
             variants={bottomVariants}
             initial="hidden"
             animate={isClosing ? 'visible' : 'hidden'}
