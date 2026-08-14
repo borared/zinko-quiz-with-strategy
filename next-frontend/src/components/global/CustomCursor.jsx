@@ -11,15 +11,7 @@ export default function CustomCursor() {
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // JELLY EFFECT PHYSICS
-  const velocityX = useVelocity(mouseX);
-  const velocityY = useVelocity(mouseY);
 
-  const smoothVelocityX = useSpring(velocityX, { damping: 12, stiffness: 200, mass: 0.5 });
-  const smoothVelocityY = useSpring(velocityY, { damping: 12, stiffness: 200, mass: 0.5 });
-
-  const skewX = useTransform(smoothVelocityX, [-2000, 2000], [35, -35]);
-  const skewY = useTransform(smoothVelocityY, [-2000, 2000], [35, -35]);
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
@@ -88,8 +80,6 @@ export default function CustomCursor() {
         style={{
           x: mouseX,
           y: mouseY,
-          skewX,
-          skewY,
         }}
         animate={{
           scale: isClicking ? 0.8 : 1,
