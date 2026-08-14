@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 
 export function ThemeProvider({ children, ...props }) {
   const pathname = usePathname();
-  const isGameRoute = pathname?.startsWith('/host') || pathname?.startsWith('/play');
+  const isLobbyOrJoin = pathname?.includes('/choose-team') || 
+                        pathname?.includes('/join-nickname') || 
+                        /^\/play\/[^/]+\/?$/.test(pathname || '');
+  const isGameRoute = (pathname?.startsWith('/host') || pathname?.startsWith('/play')) && !isLobbyOrJoin;
 
   return (
     <NextThemesProvider 
