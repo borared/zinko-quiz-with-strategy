@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Rocket, VenetianMask, RefreshCw, Edit2, Target, Puzzle, Crown, Sparkles } from 'lucide-react';
+import { Rocket, VenetianMask, RefreshCw, Edit2, Target, Puzzle, Crown, Sparkles, AlertCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
 import AvatarSelector from './AvatarSelector';
@@ -92,6 +92,11 @@ const EnterNicknameSection = () => {
     }
     if (trimmedNickname.length > 15) {
       setError('Nickname must be 15 characters or less.');
+      return;
+    }
+    const NICKNAME_PATTERN = /^[a-zA-Z0-9 _-]+$/;
+    if (!NICKNAME_PATTERN.test(trimmedNickname)) {
+      setError('Invalid nickname. Use letters, numbers, spaces, hyphens, or underscores.');
       return;
     }
     setError('');
@@ -211,20 +216,33 @@ const EnterNicknameSection = () => {
               onChange={(e) => setNickname(e.target.value)}
               maxLength={15}
               placeholder="TYPE SOMETHING COOL..."
-              className="w-full border-[3px] border-zk-border p-4 text-center text-sm md:text-base font-bold text-zk-text placeholder-black focus:outline-none focus:ring-zk-blue/30 transition-all rounded-xl"
+              className="w-full border-[3px] border-zk-border p-4 text-center text-sm md:text-base font-bold text-zk-text bg-zk-panel-bg placeholder-zk-text/40 focus:outline-none focus:ring-zk-blue/30 transition-all rounded-xl"
               onKeyDown={(e) => e.key === 'Enter' && handleEnter()}
             />
           </div>
 
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-red-500 font-bold text-sm mb-4 w-full text-center"
-            >
-              {error}
-            </motion.p>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="w-full flex items-center gap-2.5 px-4 py-3 mb-4 bg-[#FF4B4B] text-white border border-zk-border rounded-xl shadow-none"
+              >
+                <AlertCircle size={18} className="shrink-0" />
+                <p className="font-bold text-xs md:text-sm tracking-tight flex-1 text-left leading-snug">
+                  {error}
+                </p>
+                <button 
+                  type="button"
+                  onClick={() => setError('')} 
+                  className="hover:scale-110 active:scale-95 transition-transform"
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Enter Button */}
           <motion.button
@@ -239,22 +257,22 @@ const EnterNicknameSection = () => {
 
           {/* Divider */}
           <div className="w-full flex items-center gap-4 mb-6">
-            <div className="flex-1 h-[2px] bg-zk-black/10"></div>
+            <div className="flex-1 h-[2px] bg-zk-border/20"></div>
             <span className="text-sm font-bold text-zk-text/40 uppercase">Or</span>
-            <div className="flex-1 h-[2px] bg-zk-black/10"></div>
+            <div className="flex-1 h-[2px] bg-zk-border/20"></div>
           </div>
 
           {/* Bottom Actions */}
           <div className="w-full grid grid-cols-2 gap-4">
             <button
               onClick={() => setIsAvatarModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-gray-100 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-zk-border/10 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <VenetianMask size={18} /> Change Avatar
             </button>
             <button
               onClick={() => router.push('/join')}
-              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-gray-100 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 bg-zk-panel-bg hover:bg-zk-border/10 text-zk-text border-[3px] border-zk-border py-4 px-2 font-black text-xs md:text-sm uppercase tracking-wider rounded-xl transition-colors"
             >
               <RefreshCw size={18} /> New PIN
             </button>
