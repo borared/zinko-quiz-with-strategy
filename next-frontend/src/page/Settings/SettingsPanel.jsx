@@ -427,8 +427,8 @@ export default function SettingsPanel() {
               <p className="text-sm font-bold text-zk-text/55">Manage your account and game preferences.</p>
             </div>
           </div>
-          <div className="hidden sm:block mr-2">
-            <ProfileLottie width={80} height={80} />
+          <div className="hidden sm:block mr-2 -my-6">
+            <ProfileLottie width={130} height={130} />
           </div>
         </div>
 
