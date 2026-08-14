@@ -2,6 +2,7 @@ export const tutorialData = [
   {
     id: 'base-quiz',
     title: 'Base Quiz',
+    category: 'Gameplay Quiz',
     description: 'The core multiplayer trivia experience. Answer fast to earn more points!',
     image: '/images/hero_bg.png',
     color: 'bg-zk-blue',
@@ -23,6 +24,7 @@ export const tutorialData = [
   {
     id: 'draw-it',
     title: 'Draw It',
+    category: 'Mini Games',
     description: 'Unleash your creativity! One player draws, the rest guess.',
     image: '/collaborative_play.png',
     color: 'bg-zk-pink',
@@ -40,6 +42,7 @@ export const tutorialData = [
   {
     id: 'hangman',
     title: 'Hangman',
+    category: 'Mini Games',
     description: 'Classic word-guessing fun. Save the yeti before time runs out!',
     image: '/images/yeti.png',
     color: 'bg-zk-green',
@@ -57,6 +60,7 @@ export const tutorialData = [
   {
     id: 'higher-lower',
     title: 'Higher or Lower',
+    category: 'Mini Games',
     description: 'Test your intuition. Is the next number higher or lower?',
     image: '/images/hero_bg2.png',
     color: 'bg-zk-yellow',
@@ -74,6 +78,7 @@ export const tutorialData = [
   {
     id: 'vault-breaker',
     title: 'Vault Breaker',
+    category: 'Mini Games',
     description: 'Crack the code to unlock massive points.',
     image: '/images/discovery-day.jpg',
     color: 'bg-zk-purple',
@@ -91,6 +96,7 @@ export const tutorialData = [
   {
     id: 'line-matching',
     title: 'Line Matching',
+    category: 'Create & Study',
     description: 'Connect the dots! Match related concepts together.',
     image: '/images/library-day.jpg',
     color: 'bg-zk-coral',
@@ -108,6 +114,7 @@ export const tutorialData = [
   {
     id: 'flashcards',
     title: 'Flashcards',
+    category: 'Create & Study',
     description: 'Study smart with interactive flashcard decks.',
     image: '/flashcard-blue.png',
     color: 'bg-[#00C2FF]',
@@ -125,6 +132,7 @@ export const tutorialData = [
   {
     id: 'guess-picture',
     title: 'Guess Picture',
+    category: 'Create & Study',
     description: 'A zoomed-in image slowly reveals itself. What is it?',
     image: '/heart.png',
     color: 'bg-zk-cream',
@@ -136,6 +144,24 @@ export const tutorialData = [
       {
         heading: 'Fast Guesses',
         text: 'Type your guess as early as possible. The less of the picture revealed when you guess correctly, the more points you get!',
+      }
+    ]
+  },
+  {
+    id: 'drag-and-order',
+    title: 'Drag and Order',
+    category: 'Create & Study',
+    description: 'Test your knowledge of sequences by dragging items into the correct order.',
+    image: '/images/hero_bg2.png',
+    color: 'bg-[#FF9800]',
+    sections: [
+      {
+        heading: 'How it Works',
+        text: 'You will be presented with a list of items that are out of order. Drag and drop them into their correct sequence.',
+      },
+      {
+        heading: 'Scoring',
+        text: 'Complete the sequence as fast as you can. A perfect order grants maximum points!',
       }
     ]
   }
