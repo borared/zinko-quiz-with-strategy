@@ -826,7 +826,7 @@ export default function SettingsPanel() {
                     setDeleteConfirmText('');
                     setDeleteStep('confirm');
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-zk-bg text-zk-text font-black text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl border-[3px] border-zk-border bg-[#FF4B4B] hover:bg-[#E03F3F] text-white font-black text-sm transition-colors"
                 >
                   I understand
                 </button>
