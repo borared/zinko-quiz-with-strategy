@@ -1,5 +1,5 @@
 "use client";
-import EyeBlinkOverlay from '@/components/transition/EyeBlinkOverlay';
+import { useEffect } from 'react';
 import SoundToggle from '@/components/global/SoundToggle';
 import Navbar from '@/components/global/Navbar';
 import Footer from '@/components/global/Footer';
@@ -29,6 +29,33 @@ const GAME_FLOW_PATHS = [
 export default function ClientLayoutWrapper({ children }) {
   const pathname = usePathname();
   useButtonClickSound();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Preload heavy lobby background scenery images in background
+    const imagesToPreload = [
+      'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/city.jpg',
+      'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/halloween_scenery.jpg',
+      'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/inside_scenery.jpg',
+      'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/ghost_station.jpg'
+    ];
+    imagesToPreload.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+
+    // Preload scenery ambience audio tracks
+    const audiosToPreload = [
+      '/audio/halloween-ambience.mp3',
+      '/audio/inside-ambience.mp3'
+    ];
+    audiosToPreload.forEach((src) => {
+      const audio = new window.Audio();
+      audio.src = src;
+      audio.preload = 'auto';
+    });
+  }, []);
   
   const isFullScreen = pathname.startsWith("/host/") || pathname.startsWith("/play/");
   const showNavbar = !NO_NAVBAR_PATHS.includes(pathname) && !isFullScreen;
@@ -39,7 +66,6 @@ export default function ClientLayoutWrapper({ children }) {
     <>
       <CustomCursor />
       <AuthSync />
-      <EyeBlinkOverlay />
       <SoundToggle />
       <ToastContainer />
       {showNavbar && <Navbar />}
