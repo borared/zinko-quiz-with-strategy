@@ -13,7 +13,7 @@ const TeamCard = ({ team, teamName, label, badge, icon, bgColor, onJoin }) => {
       >
 
         {/* Team Letter */}
-        <span className="text-[100px] md:text-[130px] font-black text-zk-text leading-none select-none">
+        <span className="text-[100px] md:text-[130px] font-black text-black leading-none select-none">
           {team}
         </span>
 
