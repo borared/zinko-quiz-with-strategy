@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion } from 'framer-motion';
 import { Users, Zap, ArrowLeft, Pencil } from 'lucide-react';
-import { useTransitionStore } from '@/store/useTransitionStore';
+
 import PlayerLobbyChat from '@/components/Play/PlayerLobbyChat';
 import AvatarEmojiBurst from '@/components/Play/AvatarEmojiBurst';
 import { isEmojiHeavy } from '@/lib/lobbyChatUtils';
@@ -240,7 +240,7 @@ export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
-  const { blinkTo } = useTransitionStore();
+
 
   const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
   const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
@@ -359,7 +359,7 @@ export default function PlayerLobby() {
       socket.emit('player:leave-team', { pin, playerId });
     }
     sessionStorage.removeItem('player_team');
-    blinkTo(`/play/${pin}/choose-team`);
+    router.push(`/play/${pin}/choose-team`);
   };
 
   return (
