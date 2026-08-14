@@ -9,7 +9,6 @@ export default function LineMatchingStack() {
   const cards = [
     'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/tutorial/linematching1.png',
     'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/tutorial/linematching2.png',
-    'https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/tutorial/Screenshot%202026-07-19%20125807.png',
   ];
 
   const handleNext = (e) => {
