@@ -55,23 +55,32 @@ function SettingsFloatingDecor() {
     </div>
   );
 }
-function ProfileLottie({ className = '' }) {
+function ProfileLottie({ className = '', width = 200, height = 200 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  const lottieWidth = Math.max(width - 20, 20);
+  const lottieHeight = Math.max(height - 20, 20);
+  const placeholderWidth = Math.max(width - 40, 20);
+  const placeholderHeight = Math.max(height - 40, 20);
+
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden w-[200px] h-[200px] shrink-0 ${className}`}
+      className={`flex items-center justify-center overflow-hidden shrink-0 ${className}`}
+      style={{ width, height }}
       aria-hidden
     >
       {mounted ? (
         <Lottie
           animationData={profileLottieData}
           loop
-          style={{ width: 180, height: 180 }}
+          style={{ width: lottieWidth, height: lottieHeight }}
         />
       ) : (
-        <div className="w-[160px] h-[160px] rounded-full border-[3px] border-dashed border-zk-border/20 animate-pulse" />
+        <div 
+          className="rounded-full border-[3px] border-dashed border-zk-border/20 animate-pulse" 
+          style={{ width: placeholderWidth, height: placeholderHeight }}
+        />
       )}
     </div>
   );
@@ -408,13 +417,18 @@ export default function SettingsPanel() {
       <div className="relative z-10"><Navbar /></div>
 
       <main className="relative z-10 flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 mt-4 pb-16">
-        <div className="zk-panel !shadow-none p-6 mb-6 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white flex items-center justify-center">
-            <Settings size={26} />
+        <div className="zk-panel !shadow-none p-6 mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl border-[3px] border-zk-border bg-[#5D3FD3] text-white flex items-center justify-center shrink-0">
+              <Settings size={26} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-zk-text tracking-tight">Settings</h1>
+              <p className="text-sm font-bold text-zk-text/55">Manage your account and game preferences.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-zk-text tracking-tight">Settings</h1>
-            <p className="text-sm font-bold text-zk-text/55">Manage your account and game preferences.</p>
+          <div className="hidden sm:block mr-2">
+            <ProfileLottie width={80} height={80} />
           </div>
         </div>
 
