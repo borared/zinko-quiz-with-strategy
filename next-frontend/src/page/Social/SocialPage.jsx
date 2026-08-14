@@ -11,6 +11,7 @@ import api from '@/services/api';
 import { useToastStore } from '@/store/useToastStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import FunLoadingScreen from '@/components/global/FunLoadingScreen';
+import { useProfileStore } from '@/store/useProfileStore';
 
 const TABS = [
   { id: 'friends', label: 'Friends', icon: Users },
@@ -22,6 +23,7 @@ export default function SocialPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
   const { showToast } = useToastStore();
+  const fetchProfileIfNotCached = useProfileStore((s) => s.fetchProfileIfNotCached);
 
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -78,6 +80,30 @@ export default function SocialPage() {
 
     loadData();
   }, [activeTab, isLoaded, isSignedIn, isJwtReady, fetchFriends, fetchRequests]);
+
+  useEffect(() => {
+    if (friends.length === 0) return;
+    friends.forEach((friend) => {
+      const identifier = friend.username || friend.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [friends, fetchProfileIfNotCached]);
+
+  useEffect(() => {
+    if (incomingRequests.length === 0) return;
+    incomingRequests.forEach((req) => {
+      const identifier = req.username || req.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [incomingRequests, fetchProfileIfNotCached]);
+
+  useEffect(() => {
+    if (searchResults.length === 0) return;
+    searchResults.forEach((res) => {
+      const identifier = res.username || res.clerk_id;
+      if (identifier) fetchProfileIfNotCached(identifier);
+    });
+  }, [searchResults, fetchProfileIfNotCached]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
