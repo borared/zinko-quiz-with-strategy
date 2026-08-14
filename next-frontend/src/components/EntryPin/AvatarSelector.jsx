@@ -27,14 +27,14 @@ const AvatarSelector = ({ avatars, selectedAvatar, onSelect, onClose }) => {
           </h3>
           <button 
             onClick={onClose}
-            className="p-1 hover:bg-gray-200 rounded-lg transition-colors border-[2px] border-transparent hover:border-zk-border"
+            className="p-1 hover:bg-zk-border/10 rounded-lg transition-colors border-[2px] border-transparent hover:border-zk-border"
           >
             <X size={24} />
           </button>
         </div>
 
         {/* Scrollable Grid */}
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-50">
+        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-zk-light-bg">
           <div className="grid grid-cols-3 gap-4 w-full">
             {avatars?.map((avatar) => {
               const isSelected = selectedAvatar?.id === avatar.id;
