@@ -266,6 +266,7 @@ export default function SettingsPanel() {
     const cached = isSettingsCachedForUser(user.id);
     if (cached) {
       setUsernameDraft(useUserSettingsStore.getState().username);
+      setCoverDraft(useUserSettingsStore.getState().coverUrl || '');
       setLoading(false);
       loadSettings({ silent: true, userId: user.id });
       return;
@@ -481,9 +482,9 @@ export default function SettingsPanel() {
                   
                   {/* Banner */}
                   <div 
-                    className="h-24 w-full bg-gradient-to-r from-zk-purple to-zk-blue relative"
+                    className={`h-24 w-full relative ${!displayCover ? 'bg-gradient-to-r from-zk-purple to-zk-blue' : ''}`}
                     style={{
-                      backgroundImage: displayCover ? `url('${displayCover}')` : undefined,
+                      backgroundImage: displayCover ? `url("${displayCover}")` : undefined,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'
                     }}
