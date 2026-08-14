@@ -234,7 +234,10 @@ export default function SettingsPanel() {
   }, [setSettingsCache, showToast]);
 
   useEffect(() => {
-    useUserSettingsStore.getState().hydrateFromSession();
+    const store = useUserSettingsStore.getState();
+    store.hydrateFromSession();
+    if (store.username) setUsernameDraft(store.username);
+    if (store.coverUrl) setCoverDraft(store.coverUrl);
     setClientReady(true);
   }, []);
 
