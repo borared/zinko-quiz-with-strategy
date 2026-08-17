@@ -1,4 +1,5 @@
 const quizRepository = require('../../repositories/quizRepository');
+const pictureRaceRepository = require('../../repositories/pictureRaceRepository');
 const { buildGameQuestionPayload } = require('../gameQuestionPayload');
 const { verifyHostToken, isHostSocket, requirePlayerSocket, getPlayerBySocket } = require('../socketAuth');
 const sceneryService = require('../../services/sceneryService');
@@ -32,7 +33,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
-    if (quizId && game.quizId && quizId !== game.quizId) {
+    if (game.gameType !== 'PICTURE_RACE' && quizId && game.quizId && quizId !== game.quizId) {
       socket.emit('error', { message: 'Quiz does not match this game session.' });
       return;
     }
@@ -40,12 +41,18 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     game.hostSocketId = socket.id;
     socket.join(pin);
 
-    // Fetch quiz questions via Prisma
+    // Fetch questions via Prisma based on game type
     try {
-      const data = await quizRepository.getQuestionsByQuizId(quizId);
+      let data;
+      if (game.gameType === 'PICTURE_RACE') {
+        const race = await pictureRaceRepository.getPictureRaceById(game.pictureRaceId, game.hostUserId);
+        data = race?.questions || [];
+      } else {
+        data = await quizRepository.getQuestionsByQuizId(quizId);
+      }
 
       // Respect the creator's order and cap at 15 for 3 rounds of 5 matches
-      game.questions = data.slice(0, 15);
+      game.questions = game.gameType === 'PICTURE_RACE' ? data : data.slice(0, 15);
 
       console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
       socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
@@ -57,6 +64,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
         background: game.background,
         teams: game.teams,
         teamNames: game.teamNames || {},
+        gameType: game.gameType,
       });
     } catch (err) {
       console.error('❌ Failed to load questions:', err.message);
@@ -98,6 +106,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       answered: game.answers ? Object.keys(game.answers).length : 0,
       total: game.players.length,
       background: game.background,
+      gameType: game.gameType,
     };
 
     if (game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
@@ -114,7 +123,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
         } else if (questionType === QUESTION_TYPES.LINE_MATCHING) {
           syncData.correctId = JSON.stringify(getCorrectMatches(q.answers));
         } else {
-          const correctIds = q.answers
+          const correctIds = (q.answers || [])
             .filter((a) => a.isCorrect === true || a.checked === true || String(a.isCorrect) === 'true' || String(a.checked) === 'true')
             .map((a) => a.id);
           syncData.correctId = correctIds.length > 0 ? correctIds[0] : null;
@@ -173,11 +182,13 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     // Upsert player (handle reconnects and team/nickname changes)
     const existing = game.players.find(p => p.id === playerId);
 
-    // Check team capacity (max 4 per team)
-    const teamCount = game.players.filter(p => p.team === team && p.id !== playerId).length;
-    if (teamCount >= 4) {
-      socket.emit('error', { message: `Team ${team} is full (max 4 players).` });
-      return;
+    // Check team capacity (max 4 per team, bypass for PICTURE_RACE)
+    if (game.gameType !== 'PICTURE_RACE') {
+      const teamCount = game.players.filter(p => p.team === team && p.id !== playerId).length;
+      if (teamCount >= 4) {
+        socket.emit('error', { message: `Team ${team} is full (max 4 players).` });
+        return;
+      }
     }
 
     if (existing) {
@@ -211,6 +222,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       background: game.background,
       teams: game.teams,
       teamNames: game.teamNames || {},
+      gameType: game.gameType,
     });
 
     socket.emit('player:joined', { success: true, nickname: trimmedNickname, avatar, team });
@@ -235,6 +247,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       background: game.background,
       teams: game.teams,
       teamNames: game.teamNames || {},
+      gameType: game.gameType,
     });
   });
 
@@ -245,9 +258,9 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       callback({ available: false, message: 'Game not found' });
       return;
     }
-    const maxPlayers = (game.teams?.length || 2) * 4;
+    const maxPlayers = game.gameType === 'PICTURE_RACE' ? 999 : (game.teams?.length || 2) * 4;
     if (game.players.length >= maxPlayers) {
-      callback({ available: false, message: `Game room is already full (max ${maxPlayers} players)` });
+      callback({ available: false, message: `Game room is already full` });
       return;
     }
     const exists = game.players.some(p => p.nickname.toLowerCase() === nickname.trim().toLowerCase());
@@ -370,6 +383,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       background: game.background,
       teams: game.teams,
       teamNames: game.teamNames || {},
+      gameType: game.gameType,
     });
   });
 
@@ -452,6 +466,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       background: game.background,
       teams: game.teams,
       teamNames: game.teamNames || {},
+      gameType: game.gameType,
     });
   });
 
@@ -473,7 +488,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
           count: game.players.length,
           background: game.background,
           teams: game.teams,
-      teamNames: game.teamNames || {},
+          teamNames: game.teamNames || {},
+          gameType: game.gameType,
         });
       }
     }
