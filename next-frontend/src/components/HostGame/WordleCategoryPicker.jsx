@@ -52,13 +52,13 @@ const CATEGORIES = [
   }
 ];
 
-export default function HangmanCategoryPicker({ onSelectCategory }) {
+export default function WordleCategoryPicker({ onSelectCategory }) {
   return (
     <div className="absolute inset-0 flex flex-col p-6 md:p-10 z-20 overflow-hidden justify-between bg-black/80 backdrop-blur-[2px] h-screen max-h-screen">
       {/* Header section with Gold gradient title */}
       <div className="text-center mb-4 relative z-10 mt-2">
         <h1 className="gasoek-one-regular text-4xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#FDE08B] via-yellow-400 to-[#F1C40F] tracking-widest mb-2 drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)]">
-          Hangman Battle
+          Wordle Battle
         </h1>
         <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-bold uppercase tracking-[6px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
           Choose a Category

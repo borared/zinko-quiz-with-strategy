@@ -12,7 +12,7 @@ import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
 import DrawItPlayer from './DrawItPlayer';
-import HangmanPlayer from './HangmanPlayer';
+import WordlePlayer from './WordlePlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 import { useGameBackground } from '@/hooks/useGameBackground';
@@ -28,6 +28,7 @@ export default function PlayerControllerUI() {
     playerSkill,
     team,
     pin,
+    isLeader,
     
     question,
     selectedId,
@@ -38,7 +39,7 @@ export default function PlayerControllerUI() {
     
     minigameData,
     higherLowerData,
-    hangmanData,
+    wordleData,
     drawItData,
     minigameSpinner,
     isWheelSpinning,
@@ -74,22 +75,24 @@ export default function PlayerControllerUI() {
         assignedColors={assignedColors}
         onHold={handleHoldButton}
         onRelease={handleReleaseButton}
+        isLeader={isLeader}
       />
     );
   }
 
-  if (phase === 'MINIGAME_HANGMAN') {
+  if (phase === 'MINIGAME_WORDLE') {
     return (
-      <HangmanPlayer 
-        hangmanData={gameState.hangmanData}
+      <WordlePlayer 
+        wordleData={gameState.wordleData}
         team={team}
-        onGuess={gameState.handleHangmanGuess}
+        onGuess={gameState.handleWordleGuess}
         background={background}
+        isLeader={isLeader}
       />
     );
   }
 
-  if (phase === 'MINIGAME_HANGMAN_CATEGORY_PICK') {
+  if (phase === 'MINIGAME_WORDLE_CATEGORY_PICK') {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center p-6 text-center z-20 text-white"
@@ -116,6 +119,7 @@ export default function PlayerControllerUI() {
         currentTurn={higherLowerData.currentTurn}
         team={team}
         background={background}
+        isLeader={isLeader}
       />
     );
   }
@@ -135,6 +139,7 @@ export default function PlayerControllerUI() {
             winnerNickname={drawItData.winnerNickname}
             word={drawItData.word}
             teamNames={drawItData.teamNames}
+            isLeader={isLeader}
           />
         </div>
       </div>

@@ -5,6 +5,7 @@ const PLAYER_SESSION_DEFAULTS = {
   nickname: 'Player',
   playerSkill: null,
   team: 'A',
+  isLeader: false,
 };
 
 export function usePlayerSession() {
@@ -16,6 +17,7 @@ export function usePlayerSession() {
       nickname: sessionStorage.getItem('player_nickname') || PLAYER_SESSION_DEFAULTS.nickname,
       playerSkill: sessionStorage.getItem('player_skill') || PLAYER_SESSION_DEFAULTS.playerSkill,
       team: sessionStorage.getItem('player_team') || PLAYER_SESSION_DEFAULTS.team,
+      isLeader: sessionStorage.getItem('player_is_leader') === 'true',
     });
   }, []);
 

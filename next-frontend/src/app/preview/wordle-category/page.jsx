@@ -1,8 +1,8 @@
 "use client";
 import React from 'react';
-import HangmanCategoryPicker from '@/components/HostGame/HangmanCategoryPicker';
+import WordleCategoryPicker from '@/components/HostGame/WordleCategoryPicker';
 
-export default function PreviewHangmanCategory() {
+export default function PreviewWordleCategory() {
   return (
     <div 
       className="min-h-screen flex flex-col overflow-hidden relative font-sans bg-[#181824]"
@@ -13,7 +13,7 @@ export default function PreviewHangmanCategory() {
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45 pointer-events-none z-0" />
-      <HangmanCategoryPicker 
+      <WordleCategoryPicker 
         onSelectCategory={(category) => alert(`Selected category: ${category}`)} 
       />
     </div>

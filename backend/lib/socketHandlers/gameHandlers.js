@@ -160,6 +160,8 @@ module.exports = function registerGameHandlers(io, socket, games) {
       }
     }
 
+    const player = game.players.find(p => p.id === playerId);
+
     const minigameData = game.phase === 'MINIGAME_RACING' ? {
       vaultsToWin: game.vaultsToWin,
       teamVaults: game.teamVaults,
@@ -168,7 +170,16 @@ module.exports = function registerGameHandlers(io, socket, games) {
         A: Array.from(game.heldColors?.A || []),
         B: Array.from(game.heldColors?.B || [])
       }
+    } : game.phase === 'MINIGAME_WORDLE' ? {
+      wordLength: game.wordleSecret?.length || 5,
+      hint: game.wordleHint,
+      category: game.wordleCategory,
+      state: game.wordleState,
+      teams: game.teams,
+      teamNames: game.teamNames || {}
     } : null;
+
+    const isLeader = player && game.teamLeaders?.[player.team] === playerId;
 
     socket.emit('player:sync-state-response', {
       phase: game.phase,
@@ -177,6 +188,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
       hasAnswered: game.answers[playerId] !== undefined,
       minigameData,
       background: game.background,
+      isLeader,
     });
   });
 

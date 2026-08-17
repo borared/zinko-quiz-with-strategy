@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useSocketStore } from '@/store/useSocketStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap } from 'lucide-react';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import QRCodePackage from 'react-qr-code';
@@ -110,24 +110,35 @@ function PlayerSlot({ player, isFirst, teamId }) {
   return (
     <div
       ref={setNodeRef}
-      style={{ backgroundColor: darkColor, ...style }}
+      style={{ ...style }}
       {...listeners}
       {...attributes}
-      className="w-full aspect-square border-[2px] border-white flex flex-col items-center justify-center relative overflow-hidden rounded cursor-grab active:cursor-grabbing"
+      className="w-full aspect-square relative overflow-visible cursor-grab active:cursor-grabbing"
     >
-      <div className="absolute inset-0 bg-zk-panel-bg/10" />
-      
+      <div 
+        className="w-full h-full border-[2px] border-white flex flex-col items-center justify-center relative overflow-hidden rounded"
+        style={{ backgroundColor: darkColor }}
+      >
+        <div className="absolute inset-0 bg-zk-panel-bg/10" />
+        
         <img 
           src={player.avatar || ''} 
           alt="avatar" 
           className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
         />
 
-      <div className="absolute bottom-0 right-0 bg-zk-panel-bg px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
-        <span className="text-[#000000] font-black text-[10px] md:text-xs tracking-wider relative block">
-          {player.nickname}
-        </span>
+        <div className="absolute bottom-0 right-0 bg-zk-panel-bg px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
+          <span className="text-[#000000] font-black text-[10px] md:text-xs tracking-wider relative block">
+            {player.nickname}
+          </span>
+        </div>
       </div>
+
+      {player.isLeader && (
+        <span className="absolute -top-2 -left-2 text-[10px] bg-[#FFCD29] text-black px-2 py-[2px] rounded font-black z-30 border-[2px] border-[#000000] pointer-events-none transform -rotate-12">
+          LEADER
+        </span>
+      )}
     </div>
   );
 }
@@ -137,7 +148,14 @@ function TeamPanel({ teamName, teamId, players }) {
   const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
   const bgColor = theme.bg;
   const shadowColor = theme.shadow;
-  const slots = [...players, ...Array(Math.max(0, 4 - players.length)).fill(null)];
+  
+  // Sort leader to be first in the grid
+  const sortedPlayers = [...players].sort((a, b) => {
+    if (a.isLeader && !b.isLeader) return -1;
+    if (!a.isLeader && b.isLeader) return 1;
+    return 0;
+  });
+  const slots = [...sortedPlayers, ...Array(Math.max(0, 4 - sortedPlayers.length)).fill(null)];
 
   const { setNodeRef, isOver } = useDroppable({
     id: teamId,
@@ -164,7 +182,7 @@ function TeamPanel({ teamName, teamId, players }) {
       {/* 2×2 player grid */}
       <div className="grid grid-cols-2 gap-2">
         {slots.map((player, i) => (
-          <PlayerSlot key={i} player={player} isFirst={i === 0 && !player} teamId={teamId} />
+          <PlayerSlot key={player?.id || `empty-${i}`} player={player} isFirst={i === 0 && !player} teamId={teamId} />
         ))}
       </div>
     </div>
@@ -211,6 +229,8 @@ export default function HostLobby() {
   const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isQRExpanded, setIsQRExpanded] = useState(false);
+  const [sceneryProviderNickname, setSceneryProviderNickname] = useState(null);
+  const [requestedScenery, setRequestedScenery] = useState(null); // { playerId, nickname, background }
 
   const scrollContainerRef = useRef(null);
   const prevTeamsLengthRef = useRef(teams.length);
@@ -277,6 +297,9 @@ export default function HostLobby() {
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
+      if (data.sceneryProviderNickname !== undefined) {
+        setSceneryProviderNickname(data.sceneryProviderNickname);
+      }
     };
 
     const onPlayersUpdate = (data) => {
@@ -284,10 +307,18 @@ export default function HostLobby() {
       if (data.teams) setTeams(data.teams);
       if (data.teamNames) setTeamNames(data.teamNames);
       if (data.background) setBgImage(data.background);
+      if (data.sceneryProviderNickname !== undefined) {
+        setSceneryProviderNickname(data.sceneryProviderNickname);
+      }
     };
 
     const onBackgroundUpdate = (data) => {
       if (data.background) setBgImage(data.background);
+      setSceneryProviderNickname(data.sceneryProviderNickname || null);
+    };
+
+    const onSceneryRequested = ({ playerId, nickname, background }) => {
+      setRequestedScenery({ playerId, nickname, background });
     };
 
     const onError = (data) => {
@@ -302,6 +333,7 @@ export default function HostLobby() {
     socket.on('host:sync-state-response', onInitialized);
     socket.on('lobby:players-update', onPlayersUpdate);
     socket.on('lobby:background-update', onBackgroundUpdate);
+    socket.on('host:scenery-requested', onSceneryRequested);
     socket.on('error', onError);
 
     return () => {
@@ -309,6 +341,7 @@ export default function HostLobby() {
       socket.off('host:sync-state-response', onInitialized);
       socket.off('lobby:players-update', onPlayersUpdate);
       socket.off('lobby:background-update', onBackgroundUpdate);
+      socket.off('host:scenery-requested', onSceneryRequested);
       socket.off('error', onError);
     };
   }, [getSocket, isConnected, pin, router]);
@@ -327,11 +360,11 @@ export default function HostLobby() {
     }
   }, [getSocket, isConnected, pin]);
 
-  const handleSceneryChange = useCallback((image) => {
+  const handleSceneryChange = useCallback((image, providerNickname = null) => {
     setBgImage(image);
     const socket = getSocket();
     if (socket && isConnected && pin) {
-      socket.emit('lobby:set-background', { pin, background: image });
+      socket.emit('lobby:set-background', { pin, background: image, providerNickname });
     }
   }, [getSocket, isConnected, pin]);
 
@@ -597,6 +630,63 @@ export default function HostLobby() {
             <p className="mt-4 text-2xl gasoek-one-regular tracking-widest text-[#5D3FD3]">
               PIN: {pin}
             </p>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Scenery Suggestion Credit Badge */}
+      {sceneryProviderNickname && (
+        <div 
+          className="fixed bottom-6 left-6 bg-[#1A1A24]/90 border-[2px] border-black text-white text-sm font-black tracking-widest px-6 py-3 rounded-md backdrop-blur-md z-30 flex items-center gap-2"
+          style={{ fontFamily: 'var(--font-outfit)' }}
+        >
+          <span>🌄 Scenery by</span>
+          <span className="text-[#FFCD29]">{sceneryProviderNickname}</span>
+        </div>
+      )}
+
+      {/* Scenery Request Notification Modal */}
+      {requestedScenery && (
+        <div className="fixed inset-0 z-[110] bg-black/60 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-zk-panel-bg border-[2px] border-black rounded-md p-6 max-w-md w-full flex flex-col items-center text-center"
+          >
+            <h3 className="font-['Outfit'] font-black text-2xl text-black mb-1 uppercase tracking-wide">
+              Scenery Request
+            </h3>
+            <p className="text-sm font-bold text-black/60 mb-4">
+              <span className="text-zk-blue font-black">{requestedScenery.nickname}</span> wants to share their scenery skin!
+            </p>
+
+            {/* Thumbnail Preview */}
+            <div className="w-full aspect-[16/10] overflow-hidden rounded-md border-[2px] border-black bg-black/10 mb-6">
+              <img 
+                src={requestedScenery.background} 
+                alt="Requested Scenery" 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+
+            <div className="flex gap-4 w-full">
+              <button
+                onClick={() => setRequestedScenery(null)}
+                className="flex-1 px-4 py-2.5 bg-white border-[2px] border-black text-black font-black uppercase text-xs tracking-wider rounded-md transition-all hover:bg-gray-100 active:scale-95"
+              >
+                Decline
+              </button>
+              <button
+                onClick={() => {
+                  handleSceneryChange(requestedScenery.background, requestedScenery.nickname);
+                  setRequestedScenery(null);
+                }}
+                className="flex-1 px-4 py-2.5 bg-[#FFCD29] border-[2px] border-black text-black font-black uppercase text-xs tracking-wider rounded-md transition-all hover:brightness-105 active:scale-95"
+              >
+                Accept
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

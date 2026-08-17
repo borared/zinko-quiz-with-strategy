@@ -17,6 +17,7 @@
   --zk-coral: #FF6B4A;
   --zk-pink: #FF5FA8;
   --zk-cream: #FFD54F;
+  --zk-red: #FF3B30;
   --zk-shadow-sm: 2px 2px 0 0 #000;
   --zk-shadow-md: 4px 4px 0 0 #000;
   --zk-shadow-lg: 8px 8px 0 0 #000;
@@ -53,6 +54,7 @@
   --color-zk-coral: var(--zk-coral);
   --color-zk-pink: var(--zk-pink);
   --color-zk-cream: var(--zk-cream);
+  --color-zk-red: var(--zk-red);
   
   --color-zk-bg: var(--zk-bg);
   --color-zk-light-bg: var(--zk-light-bg);

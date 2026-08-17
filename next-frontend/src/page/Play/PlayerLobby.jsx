@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 ;
 import { useSocketStore } from '@/store/useSocketStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap, ArrowLeft, Pencil } from 'lucide-react';
 
 import PlayerLobbyChat from '@/components/Play/PlayerLobbyChat';
@@ -70,7 +70,7 @@ const TEAM_THEMES = {
   I: { bg: '#341f97', shadow: '#1e272e', dark: '#5f27cd', icon: Users },
 };
 
-function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
+function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [], onClick }) {
   const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
   const darkColor = theme.dark;
   const Icon = theme.icon;
@@ -95,7 +95,10 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
   }
 
   return (
-    <div className="relative w-full aspect-square overflow-visible">
+    <div 
+      className={`relative w-full aspect-square overflow-visible ${onClick ? 'cursor-pointer hover:brightness-[1.03] active:scale-95 transition-all' : ''}`}
+      onClick={onClick}
+    >
       <div
         className={`w-full h-full ${myHighlight} flex flex-col items-center justify-center relative overflow-hidden rounded`}
         style={{ backgroundColor: darkColor }}
@@ -112,7 +115,7 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
         <img
           src={player.avatar || ''}
           alt="avatar"
-          className="absolute inset-0 w-full h-full object-cover z-10"
+          className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
         />
 
         <div className="absolute bottom-0 right-0 bg-zk-panel-bg px-2 py-1 rounded-tl-lg z-20 border-t-[2px] border-l-[2px] border-[#000000]">
@@ -127,6 +130,12 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
         )}
       </div>
 
+      {player.isLeader && (
+        <span className="absolute -top-2 -left-2 text-[10px] bg-[#FFCD29] text-black px-2 py-[2px] rounded font-black z-30 border-[2px] border-[#000000] pointer-events-none transform -rotate-12">
+          LEADER
+        </span>
+      )}
+
       {floatingEmojis.map((reaction, index) => (
         <AvatarEmojiBurst
           key={reaction.reactionId}
@@ -140,11 +149,18 @@ function PlayerSlot({ player, isFirst, teamId, isMe, floatingEmojis = [] }) {
 }
 
 /* ─── TeamPanel ──────────────────────────────────────────────────────────── */
-function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
+function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions, onPromote }) {
   const theme = TEAM_THEMES[teamId] || TEAM_THEMES.A;
   const bgColor = theme.bg;
   const shadowColor = theme.shadow;
-  const slots = [...players, ...Array(Math.max(0, 4 - players.length)).fill(null)];
+
+  // Sort leader to be first in the grid
+  const sortedPlayers = [...players].sort((a, b) => {
+    if (a.isLeader && !b.isLeader) return -1;
+    if (!a.isLeader && b.isLeader) return 1;
+    return 0;
+  });
+  const slots = [...sortedPlayers, ...Array(Math.max(0, 4 - sortedPlayers.length)).fill(null)];
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(teamName);
@@ -164,6 +180,10 @@ function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
     }
     setIsEditing(false);
   };
+
+  const myPlayer = players.find(p => p.nickname === myNickname);
+  const isMyTeam = myPlayer && myPlayer.team === teamId;
+  const isMeLeader = myPlayer && myPlayer.isLeader;
 
   return (
     <div
@@ -207,16 +227,20 @@ function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
 
       {/* 2×2 player grid */}
       <div className="grid grid-cols-2 gap-2 overflow-visible py-2">
-        {slots.map((player, i) => (
-          <PlayerSlot
-            key={player?.id || `empty-${i}`}
-            player={player}
-            isFirst={i === 0 && !player}
-            teamId={teamId}
-            isMe={player && player.nickname === myNickname}
-            floatingEmojis={player ? avatarReactions[player.id] || [] : []}
-          />
-        ))}
+        {slots.map((player, i) => {
+          const isClickable = isMyTeam && isMeLeader && player && player.id !== myPlayer.id;
+          return (
+            <PlayerSlot
+              key={player?.id || `empty-${i}`}
+              player={player}
+              isFirst={i === 0 && !player}
+              teamId={teamId}
+              isMe={player && player.nickname === myNickname}
+              floatingEmojis={player ? avatarReactions[player.id] || [] : []}
+              onClick={isClickable ? () => onPromote(player) : undefined}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -236,6 +260,8 @@ function VsCard() {
   );
 }
 
+import { useOwnedSceneryStore } from '@/store/useOwnedSceneryStore';
+
 export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
@@ -251,8 +277,19 @@ export default function PlayerLobby() {
   const [teams, setTeams] = useState(['A', 'B']);
   const [teamNames, setTeamNames] = useState({});
   const [startCountdown, setStartCountdown] = useState(null);
+  const [promoteTarget, setPromoteTarget] = useState(null);
   const [avatarReactions, setAvatarReactions] = useState({});
   const reactionTimers = useRef(new Map());
+
+  const [isSceneryPickerOpen, setIsSceneryPickerOpen] = useState(false);
+  const [sceneryProviderNickname, setSceneryProviderNickname] = useState(null);
+
+  const ownedScenery = useOwnedSceneryStore((s) => s.ownedScenery);
+  const fetchOwnedScenery = useOwnedSceneryStore((s) => s.fetchOwnedScenery);
+
+  useEffect(() => {
+    fetchOwnedScenery();
+  }, [fetchOwnedScenery]);
 
   useEffect(() => {
     if (pin && bgImage) setStoredGameBackground(pin, bgImage);
@@ -311,10 +348,19 @@ export default function PlayerLobby() {
       if (data.teams) setTeams(data.teams);
       if (data.teamNames) setTeamNames(data.teamNames);
       if (data.background) setBgImage(data.background);
+      if (data.sceneryProviderNickname !== undefined) {
+        setSceneryProviderNickname(data.sceneryProviderNickname);
+      }
+
+      const myInfo = (data.players || []).find(p => p.id === playerId);
+      if (myInfo) {
+        sessionStorage.setItem('player_is_leader', myInfo.isLeader ? 'true' : 'false');
+      }
     };
 
     const onBackgroundUpdate = (data) => {
       if (data.background) setBgImage(data.background);
+      setSceneryProviderNickname(data.sceneryProviderNickname || null);
     };
 
     const onQuestion = (data) => {
@@ -457,6 +503,7 @@ export default function PlayerLobby() {
                       players={teamPlayers} 
                       myNickname={nickname} 
                       avatarReactions={avatarReactions} 
+                      onPromote={setPromoteTarget}
                     />
                   </motion.div>
                 </div>
@@ -475,6 +522,150 @@ export default function PlayerLobby() {
           disabled={startCountdown !== null}
           onChatMessage={handleLobbyChatMessage}
         />
+      )}
+
+      {/* Scenery Suggestion Credit Badge */}
+      {sceneryProviderNickname && (
+        <div 
+          className="fixed bottom-4 left-4 bg-[#1A1A24]/90 border-[2px] border-black text-white text-sm font-black tracking-widest px-5 py-2.5 rounded-md backdrop-blur-md z-30 flex items-center gap-2"
+          style={{ fontFamily: 'var(--font-outfit)' }}
+        >
+          <span>🌄 Scenery by</span>
+          <span className="text-[#FFCD29]">{sceneryProviderNickname}</span>
+        </div>
+      )}
+
+      {/* Suggest Scenery Button */}
+      {ownedScenery && ownedScenery.length > 0 && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsSceneryPickerOpen(true)}
+          className="fixed top-6 right-6 z-40 flex items-center gap-2 bg-[#FFCD29] text-black border-[2px] border-black px-4 py-2 rounded-md font-black uppercase text-xs tracking-wider"
+        >
+          🌄 Suggest Scenery
+        </motion.button>
+      )}
+
+      {/* Scenery Picker Modal */}
+      <AnimatePresence>
+        {isSceneryPickerOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSceneryPickerOpen(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-[3px]"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="relative z-10 w-full max-w-2xl bg-zk-panel-bg border-[2px] border-black rounded-md p-6 flex flex-col max-h-[80vh]"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-black/10 shrink-0">
+                <div>
+                  <h3 className="font-['Outfit'] font-black text-2xl text-black">
+                    Suggest Scenery
+                  </h3>
+                  <p className="text-xs font-bold text-black/60 mt-1">
+                    Suggest one of your owned background skins for this game room
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsSceneryPickerOpen(false)}
+                  className="w-8 h-8 rounded-md border-[2px] border-black bg-[#E74C3C] text-white flex items-center justify-center font-black text-sm hover:brightness-95 active:scale-95 transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Grid content */}
+              <div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 pr-1 scrollbar-none py-1">
+                {ownedScenery.map((scenery) => {
+                  const isCurrent = scenery.image === bgImage;
+                  return (
+                    <button
+                      key={scenery.id}
+                      type="button"
+                      onClick={() => {
+                        const socket = getSocket();
+                        if (socket && isConnected) {
+                          socket.emit('lobby:suggest-scenery', { pin, playerId, background: scenery.image });
+                          setIsSceneryPickerOpen(false);
+                        }
+                      }}
+                      className="group relative flex flex-col rounded-md border-[2px] overflow-hidden text-left bg-white transition-all border-black hover:scale-[1.01] active:scale-95"
+                    >
+                      {/* Image Preview */}
+                      <div className="w-full aspect-[16/10] overflow-hidden relative border-b-[2px] border-black bg-black/10 shrink-0">
+                        <img 
+                          src={scenery.image} 
+                          alt={scenery.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                        {isCurrent && (
+                          <div className="absolute top-2 left-2 bg-[#FFCD29] text-black border-[2px] border-black rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+                            Active
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="p-3 flex-1 flex flex-col justify-center">
+                        <span className="block text-sm font-black text-black truncate w-full">
+                          {scenery.name}
+                        </span>
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-zk-blue mt-0.5">
+                          {isCurrent ? 'Currently Equipped' : 'Suggest Background'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Leader Promotion Confirmation Modal */}
+      {promoteTarget && (
+        <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4">
+          <div className="bg-zk-panel-bg border-[2px] border-black rounded-md p-6 max-w-sm w-full flex flex-col items-center text-center">
+            <h3 className="font-['Outfit'] font-black text-xl text-zk-text mb-2 uppercase">
+              Promote to Leader
+            </h3>
+            <p className="text-sm font-bold text-zk-text/60 mb-6">
+              Are you sure you want to promote <span className="text-zk-text font-black">{promoteTarget.nickname}</span> to team leader? You will become a regular member.
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setPromoteTarget(null)}
+                className="flex-1 px-4 py-2 bg-white border-[2px] border-black text-black font-black uppercase text-[10px] tracking-wider rounded-md transition-all hover:bg-gray-100 active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const socket = getSocket();
+                  if (socket && isConnected && pin && playerId) {
+                    socket.emit('lobby:grant-leader', { pin, playerId, targetPlayerId: promoteTarget.id });
+                  }
+                  setPromoteTarget(null);
+                }}
+                className="flex-1 px-4 py-2 bg-zk-blue border-[2px] border-black text-white font-black uppercase text-[10px] tracking-wider rounded-md transition-all hover:brightness-105 active:scale-95"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

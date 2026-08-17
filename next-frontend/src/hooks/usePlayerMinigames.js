@@ -19,8 +19,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     currentTurn: null
   });
 
-  const [hangmanData, setHangmanData] = useState({
-    word: "",
+  const [wordleData, setWordleData] = useState({
     wordLength: 0,
     hint: "",
     category: "",
@@ -94,23 +93,23 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       setIsWheelSpinning(true);
     };
 
-    const onMinigameHangmanCategoryPick = () => {
-      setPhase('MINIGAME_HANGMAN_CATEGORY_PICK');
+    const onMinigameWordleCategoryPick = () => {
+      setPhase('MINIGAME_WORDLE_CATEGORY_PICK');
       setQuestion(null);
     };
 
-    const onMinigameHangmanStarted = ({ word, wordLength, hint, category, state }) => {
-      setHangmanData({ word, wordLength, hint, category, state });
-      setPhase('MINIGAME_HANGMAN');
+    const onMinigameWordleStarted = ({ wordLength, hint, category, state }) => {
+      setWordleData({ wordLength, hint, category, state });
+      setPhase('MINIGAME_WORDLE');
       setQuestion(null);
     };
 
-    const onHangmanProgress = ({ team, lives, guessedLetters, isEliminated }) => {
-      setHangmanData(prev => ({
+    const onWordleProgress = ({ team, lives, guesses, isEliminated }) => {
+      setWordleData(prev => ({
         ...prev,
         state: {
           ...prev.state,
-          [team]: { lives, guessedLetters, isEliminated }
+          [team]: { lives, guesses, isEliminated }
         }
       }));
     };
@@ -159,9 +158,9 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on('game:higher-lower-feedback', onHigherLowerFeedback);
     socket.on('game:minigame-finished', onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
-    socket.on("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
-    socket.on('game:minigame-hangman-started', onMinigameHangmanStarted);
-    socket.on('game:hangman-progress', onHangmanProgress);
+    socket.on("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
+    socket.on('game:minigame-wordle-started', onMinigameWordleStarted);
+    socket.on('game:wordle-progress', onWordleProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
     
     socket.on('game:minigame-draw-it-started', onMinigameDrawItStarted);
@@ -178,9 +177,9 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off('game:higher-lower-feedback', onHigherLowerFeedback);
       socket.off('game:minigame-finished', onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
-      socket.off("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
-      socket.off("game:minigame-hangman-started", onMinigameHangmanStarted);
-      socket.off('game:hangman-progress', onHangmanProgress);
+      socket.off("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
+      socket.off("game:minigame-wordle-started", onMinigameWordleStarted);
+      socket.off('game:wordle-progress', onWordleProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
       
       socket.off('game:minigame-draw-it-started', onMinigameDrawItStarted);
@@ -215,15 +214,15 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     if (socket) socket.emit('player:release-button', { pin, playerId, color });
   }, [pin, playerId, getSocket]);
 
-  const handleHangmanGuess = useCallback((letter) => {
+  const handleWordleGuess = useCallback((guess) => {
     const socket = getSocket();
-    if (socket) socket.emit('player:hangman-guess', { pin, playerId, letter });
+    if (socket) socket.emit('player:wordle-guess', { pin, playerId, guess });
   }, [pin, playerId, getSocket]);
 
   return {
     minigameData,
     higherLowerData,
-    hangmanData,
+    wordleData,
     drawItData,
     minigameSpinner,
     isWheelSpinning,
@@ -231,6 +230,6 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     handleHigherLowerSetSecret,
     handleHoldButton,
     handleReleaseButton,
-    handleHangmanGuess
+    handleWordleGuess
   };
 }

@@ -8,14 +8,12 @@ import { hasLayerOrdering, sortAnswersByLayer } from '@/lib/dragLayersUtils';
 export default function DragLayersPhase({ question, timeLeft, totalTime, answered, total }) {
   const steps = useMemo(() => {
     const answers = question?.answers || [];
-    if (hasLayerOrdering(answers)) {
-      return sortAnswersByLayer(answers);
-    }
-    return answers;
+    // Shuffle the answers for the host display so it doesn't give away the correct order
+    return [...answers].sort(() => Math.random() - 0.5);
   }, [question?.answers]);
 
   const layerCount = question?.layerCount ?? steps.length;
-  const showOrderedKey = hasLayerOrdering(steps);
+  const showOrderedKey = false; // Never show the answer key during the active play phase!
 
   return (
     <motion.div
@@ -61,7 +59,7 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
           animate={{ y: 0, opacity: 1 }}
           className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg overflow-hidden mb-6 p-8"
         >
-          <p className="text-2xl lg:text-4xl font-black text-zk-text text-center leading-tight uppercase">
+          <p className="text-2xl lg:text-4xl font-black text-zk-text text-center leading-tight">
             {question.questionText}
           </p>
           <p className="text-center text-zk-text/50 font-bold text-sm mt-3 uppercase tracking-widest">
@@ -94,15 +92,15 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
             ))}
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto w-full rounded-lg border-[2px] border-zk-border bg-zk-panel-bg/90 p-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zk-text/50 mb-3">
+          <div className="max-w-5xl mx-auto w-full rounded-xl border-2 border-zk-border bg-zk-panel-bg p-8 shadow-xl">
+            <p className="text-sm font-black uppercase tracking-widest text-zk-text/50 mb-6">
               Steps in play
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-4">
               {steps.map((answer) => (
                 <div
                   key={answer.id}
-                  className={`rounded-lg border-[2px] border-zk-border px-4 py-2 font-black text-white ${answer.color}`}
+                  className={`rounded-xl border-4 border-zk-border px-8 py-4 font-black text-white text-2xl shadow-md ${answer.color}`}
                 >
                   {displayAnswerText(answer.text) || 'Step'}
                 </div>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketStore } from '@/store/useSocketStore';
 import { Send } from 'lucide-react';
 
-export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, teamNames }) {
+export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, teamNames, isLeader }) {
   const canvasRef = useRef(null);
   const { getSocket, isConnected } = useSocketStore();
   const [guess, setGuess] = useState("");
@@ -134,25 +134,36 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
         </AnimatePresence>
       </div>
 
-      {/* Input Form */}
+      {/* Input Form or Leader message */}
       <div className="mt-4 mb-2 relative z-30">
-        <form onSubmit={handleGuess} className="flex items-center gap-2">
-          <input
-            type="text"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            disabled={winnerTeam !== null || hasGuessedCorrectly}
-            placeholder={winnerTeam ? "Round Over..." : "Type your guess..."}
-            className="flex-1 bg-zk-panel-bg border-[3px] border-[#000000] rounded-xl px-4 py-3 font-black text-lg text-black placeholder:text-gray-400 outline-none focus:ring-4 focus:ring-white/50"
-          />
-          <button
-            type="submit"
-            disabled={!guess.trim() || winnerTeam !== null}
-            className="bg-zk-blue disabled:bg-gray-400 disabled:shadow-none hover:bg-[#5D3FD3] text-white border-[3px] border-[#000000] rounded-xl px-6 py-3 font-black uppercase shadow-[4px_4px_0_0_#000] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2"
-          >
-            <Send size={20} strokeWidth={3} />
-          </button>
-        </form>
+        {isLeader ? (
+          <form onSubmit={handleGuess} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              disabled={winnerTeam !== null || hasGuessedCorrectly}
+              placeholder={winnerTeam ? "Round Over..." : "Type your guess..."}
+              className="flex-1 bg-zk-panel-bg border-[3px] border-[#000000] rounded-xl px-4 py-3 font-black text-lg text-black placeholder:text-gray-400 outline-none focus:ring-4 focus:ring-white/50"
+            />
+            <button
+              type="submit"
+              disabled={!guess.trim() || winnerTeam !== null}
+              className="bg-zk-blue disabled:bg-gray-400 disabled:shadow-none hover:bg-[#5D3FD3] text-white border-[3px] border-[#000000] rounded-xl px-6 py-3 font-black uppercase shadow-[4px_4px_0_0_#000] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2"
+            >
+              <Send size={20} strokeWidth={3} />
+            </button>
+          </form>
+        ) : (
+          <div className="bg-[#1A1A24]/60 border-[3px] border-black rounded-xl p-3 text-center">
+            <p className="text-zk-yellow font-black uppercase tracking-widest text-lg font-sans">
+              Waiting for Leader to guess...
+            </p>
+            <p className="text-white/80 font-bold text-xs mt-0.5">
+              Only the Team Leader can submit guesses for your team.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Closeness Progress Bar */}

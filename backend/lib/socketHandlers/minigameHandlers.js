@@ -1,5 +1,5 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
-const { getRandomHangmanWord } = require('../hangmanWords');
+const { getRandomWordleWord } = require('../wordleWords');
 const Groq = require('groq-sdk');
 const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 
@@ -50,8 +50,15 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const winningPlayers = game.players.filter(p => p.team === team);
     let spinnerId = null;
     let spinnerName = "Host";
-    if (winningPlayers.length > 0) {
-      const chosen = winningPlayers[Math.floor(Math.random() * winningPlayers.length)];
+    
+    const leaderId = game.teamLeaders?.[team];
+    const leader = winningPlayers.find(p => p.id === leaderId);
+
+    if (leader) {
+      spinnerId = leader.id;
+      spinnerName = leader.nickname;
+    } else if (winningPlayers.length > 0) {
+      const chosen = winningPlayers[0];
       spinnerId = chosen.id;
       spinnerName = chosen.nickname;
     }
@@ -81,22 +88,20 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       return shuffled.slice(0, 3);
     };
 
-    const assignButtons = (teamPlayers) => {
+    const assignButtons = (teamId, teamPlayers) => {
       const assignments = {};
-      const numPlayers = teamPlayers.length;
-      if (numPlayers === 0) return assignments;
+      if (teamPlayers.length === 0) return assignments;
       
-      const shuffled = [...colors].sort(() => 0.5 - Math.random());
-      const numColorsPerPlayer = Math.max(1, Math.ceil(4 / numPlayers));
-      
-      // Dynamically distribute colors cyclically to guarantee all 4 colors are covered
-      for (let i = 0; i < numPlayers; i++) {
-        const playerColors = [];
-        for (let c = 0; c < numColorsPerPlayer; c++) {
-          playerColors.push(shuffled[(i * numColorsPerPlayer + c) % 4]);
+      const leaderId = game.teamLeaders?.[teamId];
+      const leader = teamPlayers.find(p => p.id === leaderId) || teamPlayers[0];
+
+      assignments[leader.id] = ['RED', 'BLUE', 'GREEN', 'YELLOW'];
+
+      teamPlayers.forEach(p => {
+        if (p.id !== leader.id) {
+          assignments[p.id] = [];
         }
-        assignments[teamPlayers[i].id] = playerColors;
-      }
+      });
       return assignments;
     };
 
@@ -109,7 +114,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.teamVaults[team] = { required: generateVaultCode(), cracked: 0 };
       game.heldColors[team] = new Set();
       const teamPlayers = game.players.filter(p => p.team === team);
-      Object.assign(game.playerButtons, assignButtons(teamPlayers));
+      Object.assign(game.playerButtons, assignButtons(team, teamPlayers));
     });
 
     game.playerTeamMap = {};
@@ -171,6 +176,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     if (!requirePlayerSocket(game, socket, playerId)) return;
 
     const team = game.playerTeamMap[playerId];
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can hold
+
     if (team && game.heldColors[team]) {
       game.heldColors[team].add(color);
       checkVault(game, team, pin);
@@ -183,6 +191,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     if (!requirePlayerSocket(game, socket, playerId)) return;
 
     const team = game.playerTeamMap[playerId];
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can release
+
     if (team && game.heldColors[team]) {
       game.heldColors[team].delete(color);
       requestProgressUpdate(game, pin);
@@ -251,99 +262,110 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     }
   });
 
-  // ── host:start-minigame-hangman-intro ────────────────────────────────────────
-  socket.on('host:start-minigame-hangman-intro', ({ pin }) => {
+  // ── host:start-minigame-wordle-intro ────────────────────────────────────────
+  socket.on('host:start-minigame-wordle-intro', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
-    game.phase = 'MINIGAME_HANGMAN_CATEGORY_PICK';
-    io.to(pin).emit('game:minigame-hangman-category-pick');
+    game.phase = 'MINIGAME_WORDLE_CATEGORY_PICK';
+    io.to(pin).emit('game:minigame-wordle-category-pick');
   });
 
-  // ── host:start-minigame-hangman ──────────────────────────────────────────────
-  socket.on('host:start-minigame-hangman', ({ pin, category }) => {
+  // ── host:start-minigame-wordle ──────────────────────────────────────────────
+  socket.on('host:start-minigame-wordle', ({ pin, category }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
-    game.phase = 'MINIGAME_HANGMAN';
-    const secretObj = getRandomHangmanWord(category);
-    game.hangmanSecret = secretObj.word;
-    game.hangmanHint = secretObj.hint;
-    game.hangmanCategory = category;
+    game.phase = 'MINIGAME_WORDLE';
+    const secretObj = getRandomWordleWord(category);
+    game.wordleSecret = secretObj.word.toUpperCase();
+    game.wordleHint = secretObj.hint;
+    game.wordleCategory = category;
     
-    // Calculate lives
-    const baseLives = Math.max(5, secretObj.word.length + 2);
+    const baseLives = 5;
     
-    game.hangmanState = {};
+    game.wordleState = {};
     game.teams.forEach(team => {
-      game.hangmanState[team] = { lives: baseLives, guessedLetters: [], isEliminated: false };
+      game.wordleState[team] = { lives: baseLives, guesses: [], isEliminated: false };
     });
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
-    io.to(pin).emit('game:minigame-hangman-started', { 
-      word: secretObj.word,
-      wordLength: secretObj.word.length,
-      hint: secretObj.hint,
+    io.to(pin).emit('game:minigame-wordle-started', { 
+      wordLength: game.wordleSecret.length,
+      hint: game.wordleHint,
       category: category,
-      state: game.hangmanState,
+      state: game.wordleState,
       teams: game.teams,
       teamNames: game.teamNames || {}
     });
   });
 
-  // ── player:hangman-guess ───────────────────────────────────────────────────
-  socket.on('player:hangman-guess', ({ pin, playerId, letter }) => {
+  // ── player:wordle-guess ───────────────────────────────────────────────────
+  socket.on('player:wordle-guess', ({ pin, playerId, guess }) => {
     const game = games.get(pin);
-    if (!game || game.phase !== 'MINIGAME_HANGMAN') return;
+    if (!game || game.phase !== 'MINIGAME_WORDLE') return;
     if (!requirePlayerSocket(game, socket, playerId)) return;
 
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
 
-    const teamState = game.hangmanState[team];
-    if (teamState.isEliminated) return;
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can guess
 
-    const upperLetter = letter.toUpperCase();
-    if (teamState.guessedLetters.includes(upperLetter)) return;
+    const teamState = game.wordleState[team];
+    if (teamState.isEliminated || teamState.lives <= 0) return;
 
-    teamState.guessedLetters.push(upperLetter);
-    const secretWord = game.hangmanSecret;
+    const upperGuess = guess.trim().toUpperCase();
+    const secretWord = game.wordleSecret;
 
-    let isCorrect = secretWord.includes(upperLetter);
-    if (!isCorrect) {
-      teamState.lives -= 1;
-      if (teamState.lives <= 0) {
-        teamState.isEliminated = true;
+    if (upperGuess.length !== secretWord.length) return;
+
+    const result = Array(secretWord.length).fill('absent');
+    const secretLetterCount = {};
+
+    for (let i = 0; i < secretWord.length; i++) {
+      if (upperGuess[i] === secretWord[i]) {
+        result[i] = 'correct';
+      } else {
+        secretLetterCount[secretWord[i]] = (secretLetterCount[secretWord[i]] || 0) + 1;
       }
     }
 
-    const secretLetters = new Set(secretWord.split(''));
-    let hasWon = true;
-    for (const char of secretLetters) {
-      if (!teamState.guessedLetters.includes(char)) {
-        hasWon = false;
-        break;
+    for (let i = 0; i < secretWord.length; i++) {
+      if (result[i] === 'correct') continue;
+      const char = upperGuess[i];
+      if (secretLetterCount[char] > 0) {
+        result[i] = 'present';
+        secretLetterCount[char]--;
       }
     }
+
+    teamState.guesses.push({ word: upperGuess, result });
+    teamState.lives -= 1;
+
+    const hasWon = upperGuess === secretWord;
 
     if (hasWon) {
       triggerMinigameReward(game, team, pin);
     } else {
-      const allEliminated = game.teams.every(t => game.hangmanState[t]?.isEliminated);
+      if (teamState.lives <= 0) {
+        teamState.isEliminated = true;
+      }
+
+      const allEliminated = game.teams.every(t => game.wordleState[t]?.isEliminated);
       if (allEliminated) {
-        io.to(pin).emit('game:hangman-progress', {
+        io.to(pin).emit('game:wordle-progress', {
           team,
           lives: teamState.lives,
-          guessedLetters: teamState.guessedLetters,
+          guesses: teamState.guesses,
           isEliminated: teamState.isEliminated
         });
 
-        // After a delay to let players see they lost, finish the minigame with no winner
         setTimeout(() => {
-          if (games.has(pin) && game.phase === 'MINIGAME_HANGMAN') {
-            game.phase = 'MINIGAME_FINISHED_NO_WINNER'; // Keep state clean
+          if (games.has(pin) && game.phase === 'MINIGAME_WORDLE') {
+            game.phase = 'MINIGAME_FINISHED_NO_WINNER';
             io.to(pin).emit('game:minigame-finished', { 
               winnerTeam: null, 
               spinnerId: null, 
@@ -353,10 +375,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
           }
         }, 3000);
       } else {
-        io.to(pin).emit('game:hangman-progress', {
+        io.to(pin).emit('game:wordle-progress', {
           team,
           lives: teamState.lives,
-          guessedLetters: teamState.guessedLetters,
+          guesses: teamState.guesses,
           isEliminated: teamState.isEliminated
         });
       }
@@ -389,6 +411,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
 
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can set secret
+
     const numericSecret = parseInt(secret, 10);
     if (isNaN(numericSecret) || numericSecret < 1 || numericSecret > 99) return;
 
@@ -420,6 +445,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
+
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can guess
 
     const numericGuess = parseInt(guess, 10);
     if (isNaN(numericGuess)) return;
@@ -552,6 +580,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
     if (!team) return;
+
+    const leaderId = game.teamLeaders?.[team];
+    if (leaderId !== playerId) return; // Only leader can guess
 
     // Wait 3 seconds before next round/reward queue to show winner
     if (game.drawItRoundEnding) return;
