@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { requireCustomAuth } = require('../middleware/auth');
-const { createRace, getUserRaces, getRaceById, updateRace, deleteRace } = require('../controllers/pictureRaceController');
+const { createRace, getUserRaces, getRaceById, updateRace, deleteRace, hostRace } = require('../controllers/pictureRaceController');
 
+router.post('/host', requireCustomAuth, hostRace);
 router.post('/', requireCustomAuth, createRace);
 router.get('/user/:userId', requireCustomAuth, getUserRaces);
 router.get('/:id', requireCustomAuth, getRaceById);
