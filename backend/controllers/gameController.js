@@ -50,6 +50,7 @@ const getGameStatus = (req, res) => {
     valid: true,
     phase: game.phase,
     playerCount: game.players.length,
+    gameType: game.gameType,
   });
 };
 
