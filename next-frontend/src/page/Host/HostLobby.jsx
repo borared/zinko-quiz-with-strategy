@@ -171,6 +171,37 @@ function TeamPanel({ teamName, teamId, players }) {
   );
 }
 
+/* ─── IndividualPanel (For non-team games like Picture Race) ─────────────── */
+function IndividualPanel({ players }) {
+  const slots = [...players, ...Array(Math.max(0, 8 - players.length)).fill(null)];
+
+  return (
+    <div
+      className="w-full border-[4px] border-[#000000] p-6 flex flex-col gap-4 rounded-2xl transition-all max-w-4xl mx-auto"
+      style={{ backgroundColor: '#2ea84a', boxShadow: `8px 8px 0px 0px #1a6b2e` }}
+    >
+      {/* Panel header */}
+      <div className="flex items-center justify-between border-b-[3px] border-[#000000]/20 pb-4">
+        <span className="font-black text-3xl text-white tracking-wider uppercase">
+          Players
+        </span>
+        <div className="bg-zk-panel-bg border-[3px] border-[#000000] px-4 py-1 rounded-xl flex items-center justify-center">
+          <span className="font-black text-sm text-[#000000] tracking-wider leading-none mt-1">
+            Count: {players.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Grid for all players */}
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+        {slots.map((player, i) => (
+          <PlayerSlot key={i} player={player} isFirst={i === 0 && !player} teamId="A" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── VsCard (animated) ──────────────────────────────────────────────────── */
 function VsCard() {
   return (
@@ -211,6 +242,7 @@ export default function HostLobby() {
   const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isQRExpanded, setIsQRExpanded] = useState(false);
+  const [gameType, setGameType] = useState('STANDARD');
 
   const scrollContainerRef = useRef(null);
   const prevTeamsLengthRef = useRef(teams.length);
@@ -277,6 +309,7 @@ export default function HostLobby() {
 
     const onInitialized = (data) => {
       if (data.background) setBgImage(data.background);
+      if (data.gameType) setGameType(data.gameType);
     };
 
     const onPlayersUpdate = (data) => {
@@ -284,6 +317,7 @@ export default function HostLobby() {
       if (data.teams) setTeams(data.teams);
       if (data.teamNames) setTeamNames(data.teamNames);
       if (data.background) setBgImage(data.background);
+      if (data.gameType) setGameType(data.gameType);
     };
 
     const onBackgroundUpdate = (data) => {
@@ -467,61 +501,71 @@ export default function HostLobby() {
           </div>
         </motion.div>
 
-        {/* Team Panels Container */}
-        <DndContext onDragEnd={handleDragEnd}>
-          <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide content-start pt-4 pb-8">
-            {teams.map((teamId, index) => {
-              const teamPlayers = players.filter((p) => p.team === teamId);
-              return (
-                <div key={teamId} className="flex items-center justify-center gap-4">
-                  {teams.length === 2 && index === 1 && (
-                    <motion.div {...bounceIn(0.2)} className="hidden md:flex">
-                      <VsCard />
-                    </motion.div>
-                  )}
-                  <motion.div {...bounceIn(0.12 + index * 0.05)} className="w-[300px] md:w-[350px]">
-                    <TeamPanel teamName={teamNames[teamId] || `Team ${teamId}`} teamId={teamId} players={teamPlayers} />
-                  </motion.div>
-                </div>
-              );
-            })}
+        {/* Panels Container */}
+        {gameType === 'PICTURE_RACE' ? (
+          <div ref={scrollContainerRef} className="flex-1 flex flex-col items-center justify-start w-full max-w-5xl mx-auto min-h-0 overflow-y-auto scrollbar-hide pt-4 pb-8">
+            <motion.div {...bounceIn(0.1)} className="w-full">
+              <IndividualPanel players={players} />
+            </motion.div>
           </div>
-        </DndContext>
+        ) : (
+          <DndContext onDragEnd={handleDragEnd}>
+            <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide content-start pt-4 pb-8">
+              {teams.map((teamId, index) => {
+                const teamPlayers = players.filter((p) => p.team === teamId);
+                return (
+                  <div key={teamId} className="flex items-center justify-center gap-4">
+                    {teams.length === 2 && index === 1 && (
+                      <motion.div {...bounceIn(0.2)} className="hidden md:flex">
+                        <VsCard />
+                      </motion.div>
+                    )}
+                    <motion.div {...bounceIn(0.12 + index * 0.05)} className="w-[300px] md:w-[350px]">
+                      <TeamPanel teamName={teamNames[teamId] || `Team ${teamId}`} teamId={teamId} players={teamPlayers} />
+                    </motion.div>
+                  </div>
+                );
+              })}
+            </div>
+          </DndContext>
+        )}
       </div>
 
       {/* ── Add/Remove Team Buttons (Right Edge Above Bottom Bar) ──────────────── */}
-      <motion.div
-        {...bounceIn(0.2)}
-        className="absolute right-6 bottom-24 z-30 flex flex-col items-end gap-3"
-      >
-        <button
-          onClick={() => {
-            const socket = getSocket();
-            if (socket && isConnected && pin) {
-              socket.emit('lobby:add-team', { pin });
-            }
-          }}
-          disabled={teams.length >= 9 || startCountdown !== null}
-          className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-zk-panel-bg border-[2px] border-black text-black hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
+      {gameType !== 'PICTURE_RACE' && (
+        <motion.div
+          {...bounceIn(0.2)}
+          className="absolute right-6 bottom-24 z-30 flex flex-col items-end gap-3"
         >
-          + Add Team
-        </button>
-        {teams.length > 2 && (
           <button
             onClick={() => {
               const socket = getSocket();
               if (socket && isConnected && pin) {
-                socket.emit('lobby:remove-team', { pin });
+                socket.emit('lobby:add-team', { pin });
               }
             }}
-            disabled={startCountdown !== null || players.some(p => p.team === teams[teams.length - 1])}
-            className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-red-500 border-[2px] border-black text-white hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
-            title={players.some(p => p.team === teams[teams.length - 1]) ? "Cannot remove team with players" : "Remove last team"}
+            disabled={teams.length >= 9 || startCountdown !== null}
+            className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-zk-panel-bg border-[2px] border-black text-black hover:bg-gray-200 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
           >
-            - Remove Team
+            + Add Team
           </button>
-        )}
-      </motion.div>
+          {teams.length > 2 && (
+            <button
+              onClick={() => {
+                const socket = getSocket();
+                if (socket && isConnected && pin) {
+                  socket.emit('lobby:remove-team', { pin });
+                }
+              }}
+              disabled={startCountdown !== null || players.some(p => p.team === teams[teams.length - 1])}
+              className="inline-flex items-center justify-center font-black text-xs md:text-sm px-6 bg-red-500 border-[2px] border-black text-white hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-400 rounded-xl leading-none py-3 cursor-pointer disabled:cursor-not-allowed w-full no-click-sound"
+              title={players.some(p => p.team === teams[teams.length - 1]) ? "Cannot remove team with players" : "Remove last team"}
+            >
+              - Remove Team
+            </button>
+          )}
+        </motion.div>
+      )}
 
       {/* ── Start Button (bottom bar fixed) ──────────────────────────────────── */}
       <motion.div
@@ -559,7 +603,11 @@ export default function HostLobby() {
           <button
             id="start-game-btn"
             onClick={handleStartGame}
-            disabled={players.length === 0 || new Set(teams.map(t => players.filter(p => p.team === t).length)).size > 1 || startCountdown !== null}
+            disabled={
+              players.length === 0 || 
+              (gameType !== 'PICTURE_RACE' && new Set(teams.map(t => players.filter(p => p.team === t).length)).size > 1) || 
+              startCountdown !== null
+            }
             className="px-16 py-3 bg-[#3B68FF] text-white border-[4px] border-[#000000] rounded-xl font-black text-xl tracking-[0.15em] hover:bg-zk-blue hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)' }}
           >
