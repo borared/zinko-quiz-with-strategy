@@ -14,8 +14,8 @@ import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import DrawItHost from "./DrawItHost";
-import HangmanHost from "./HangmanHost";
-import HangmanCategoryPicker from "./HangmanCategoryPicker";
+import WordleHost from "./WordleHost";
+import WordleCategoryPicker from "./WordleCategoryPicker";
 import RewardWheel from "./RewardWheel";
 import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
@@ -254,8 +254,8 @@ export default function HostGameUI() {
       setIsWheelSpinning(true);
     };
 
-    const onMinigameHangmanCategoryPick = () => {
-      setPhase("MINIGAME_HANGMAN_CATEGORY_PICK");
+    const onMinigameWordleCategoryPick = () => {
+      setPhase("MINIGAME_WORDLE_CATEGORY_PICK");
     };
 
     const onMinigameDrawItStarted = ({ word }) => {
@@ -292,18 +292,18 @@ export default function HostGameUI() {
       getSocket().emit("game:next-question", { pin });
     };
 
-    const onMinigameHangmanStarted = ({ word, wordLength, hint, category, state }) => {
-      setMinigameData(prev => ({ ...prev, word, wordLength, hint, category, state, winner: null }));
+    const onMinigameWordleStarted = ({ wordLength, hint, category, state }) => {
+      setMinigameData(prev => ({ ...prev, wordLength, hint, category, state, winner: null }));
       setIsWheelSpinning(false);
-      setPhase("MINIGAME_HANGMAN");
+      setPhase("MINIGAME_WORDLE");
     };
 
-    const onHangmanProgress = ({ team, lives, guessedLetters, isEliminated }) => {
+    const onWordleProgress = ({ team, lives, guesses, isEliminated }) => {
       setMinigameData(prev => ({
         ...prev,
         state: {
           ...prev.state,
-          [team]: { lives, guessedLetters, isEliminated }
+          [team]: { lives, guesses, isEliminated }
         }
       }));
     };
@@ -356,9 +356,9 @@ export default function HostGameUI() {
     socket.on("game:reward-queue-empty", onRewardQueueEmpty);
     socket.on("game:minigame-finished", onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
-    socket.on("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
-    socket.on("game:minigame-hangman-started", onMinigameHangmanStarted);
-    socket.on("game:hangman-progress", onHangmanProgress);
+    socket.on("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
+    socket.on("game:minigame-wordle-started", onMinigameWordleStarted);
+    socket.on("game:wordle-progress", onWordleProgress);
     socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
@@ -384,9 +384,9 @@ export default function HostGameUI() {
       socket.off("game:reward-queue-empty", onRewardQueueEmpty);
       socket.off("game:minigame-finished", onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
-      socket.off("game:minigame-hangman-category-pick", onMinigameHangmanCategoryPick);
-      socket.off("game:minigame-hangman-started", onMinigameHangmanStarted);
-      socket.off("game:hangman-progress", onHangmanProgress);
+      socket.off("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
+      socket.off("game:minigame-wordle-started", onMinigameWordleStarted);
+      socket.off("game:wordle-progress", onWordleProgress);
       socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
   }, [getSocket, pin]);
@@ -403,7 +403,7 @@ export default function HostGameUI() {
 
     // If it's the end of Round 1 (assuming 5 questions per round, next index is 5)
     if (question?.index === 4) {
-      getSocket().emit("host:start-minigame-hangman-intro", { pin });
+      getSocket().emit("host:start-minigame-wordle-intro", { pin });
     } 
     // If it's the end of Round 2 (next index is 10)
     else if (question?.index === 9) {
@@ -523,16 +523,16 @@ export default function HostGameUI() {
           />
         )}
 
-        {phase === "MINIGAME_HANGMAN_CATEGORY_PICK" && (
-          <HangmanCategoryPicker 
+        {phase === "MINIGAME_WORDLE_CATEGORY_PICK" && (
+          <WordleCategoryPicker 
             onSelectCategory={(category) => {
-              getSocket().emit("host:start-minigame-hangman", { pin, category });
+              getSocket().emit("host:start-minigame-wordle", { pin, category });
             }}
           />
         )}
 
-        {phase === "MINIGAME_HANGMAN" && (
-          <HangmanHost hangmanData={minigameData} />
+        {phase === "MINIGAME_WORDLE" && (
+          <WordleHost wordleData={minigameData} />
         )}
 
         {phase === "MINIGAME_RACING" && minigameData.teamVaults && (
