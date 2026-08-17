@@ -40,20 +40,20 @@ export const tutorialData = [
     ]
   },
   {
-    id: 'hangman',
-    title: 'Hangman',
+    id: 'wordle',
+    title: 'Wordle',
     category: 'Mini Games',
-    description: 'Classic word-guessing fun. Save the yeti before time runs out!',
+    description: 'Classic word-guessing fun. Solve the 5-letter word before your attempts run out!',
     image: '/images/yeti.png',
     color: 'bg-zk-green',
     sections: [
       {
         heading: 'The Objective',
-        text: 'Guess the hidden word letter by letter. You have a limited number of incorrect guesses before the game ends.',
+        text: 'Guess the hidden 5-letter word. You have 6 attempts. Each guess gives color clues about correct letters and positions.',
       },
       {
         heading: 'Multiplayer Twist',
-        text: 'Work together with your lobby to guess the word, but compete to be the one who completes it or scores the most correct letters!',
+        text: 'Work together with your team leader to guess the word, and be the first team to correctly solve the Wordle to win!',
       }
     ]
   },
