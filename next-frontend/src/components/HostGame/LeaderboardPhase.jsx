@@ -19,7 +19,7 @@ const getTeamColor = (teamName) => TEAM_COLORS[teamName] || "#34495e";
 
 const RANK_COLORS = {
   1: "#FFD700", // Gold
-  2: "#C0C0C0", // Silver
+  2: "#27AE60", // Green
   3: "#CD7F32", // Bronze
 };
 
@@ -33,13 +33,12 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      whileHover={{ scale: 1.01, y: -2 }}
       transition={{ delay: 0.1 + index * 0.05, type: "spring", stiffness: 200 }}
-      className="bg-zk-panel-bg border-[4px] border-zk-border rounded-xl flex items-stretch w-full cursor-default overflow-hidden relative"
+      className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg flex items-stretch w-full cursor-default overflow-hidden relative"
     >
       {/* Rank Accent Bar */}
       <div 
-        className="w-4 flex-shrink-0 border-r-[4px] border-zk-border"
+        className="w-4 flex-shrink-0 border-r-[2px] border-zk-border"
         style={{ backgroundColor: rankColor }}
       />
       
@@ -56,7 +55,7 @@ const TeamRow = React.memo(({ teamData, index, highestScore }) => {
         {/* Team Badge & Crown */}
         <div className="flex-1 flex items-center gap-4 ml-4">
           <div 
-            className="text-white font-black text-xl tracking-widest px-6 py-2 rounded-xl border-[4px] border-zk-border"
+            className="text-white font-black text-xl tracking-widest px-6 py-2 rounded-lg border-[2px] border-zk-border"
             style={{ backgroundColor: teamColor }}
           >
             Team {teamData.team}
@@ -150,18 +149,18 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
         </motion.h2>
 
         {/* Unified Leaderboard Container */}
-        <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-bg border-[4px] border-zk-border rounded-3xl overflow-hidden">
+        <div className="flex-1 w-full max-w-5xl flex flex-col bg-zk-bg border-[2px] border-zk-border rounded-lg overflow-hidden">
           
           {/* Header Row */}
-          <div className="flex items-stretch bg-[#FFCD29] border-b-[4px] border-zk-border">
-            <div className="w-4 flex-shrink-0" /> {/* Spacer for accent bar */}
+          <div className="flex items-stretch bg-[#FFCD29] border-b-[2px] border-zk-border px-[22px]">
+            <div className="w-4 flex-shrink-0 border-r-[2px] border-transparent" /> {/* Spacer for accent bar */}
             <div className="flex-1 px-4 py-3 flex items-center gap-4">
-              <div className="w-10 text-center font-black text-zk-text/60 uppercase tracking-widest text-sm flex-shrink-0">Rank</div>
+              <div className="w-10 text-center font-black text-black uppercase tracking-widest text-sm flex-shrink-0">Rank</div>
               <div className="flex-1 flex items-center ml-4">
-                <div className="font-black text-zk-text/60 uppercase tracking-widest text-sm">Team</div>
+                <div className="font-black text-black uppercase tracking-widest text-sm">Team</div>
               </div>
-              <div className="w-32 text-center font-black text-zk-text/60 uppercase tracking-widest text-sm flex-shrink-0">Players</div>
-              <div className="w-40 text-right font-black text-zk-text/60 uppercase tracking-widest text-sm flex-shrink-0 pr-4">Total Score</div>
+              <div className="w-32 text-center font-black text-black uppercase tracking-widest text-sm flex-shrink-0">Players</div>
+              <div className="w-40 text-right font-black text-black uppercase tracking-widest text-sm flex-shrink-0 pr-4">Total Score</div>
             </div>
           </div>
 
@@ -189,7 +188,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="next-after-leaderboard-btn"
               onClick={handleNextQuestion}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-border rounded-xl px-12 py-4 font-black text-xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
+              className="bg-[#3B68FF] text-white border-[2px] border-zk-border rounded-lg px-12 py-4 font-black text-xl tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               Next Question <ChevronRight size={22} />
             </button>
@@ -197,7 +196,7 @@ export default function LeaderboardPhase({ leaderboard, isFinalLeaderboard, hand
             <button
               id="end-game-btn"
               onClick={handleEndGame}
-              className="bg-[#3B68FF] text-white border-[4px] border-zk-border rounded-xl px-12 py-3 amatic-sc-regular text-4xl uppercase tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
+              className="bg-[#3B68FF] text-white border-[2px] border-zk-border rounded-lg px-12 py-3 amatic-sc-regular text-4xl tracking-widest transition-all flex items-center gap-3 hover:bg-zk-blue"
             >
               <Home size={26} /> Home
             </button>
