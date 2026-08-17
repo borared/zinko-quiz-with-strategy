@@ -15,6 +15,8 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
   const [questionTimeLimit, setQuestionTimeLimit] = useState(DEFAULT_TIME_LIMIT);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [questionTotal, setQuestionTotal] = useState(1);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [isFinalLeaderboard, setIsFinalLeaderboard] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('current_question');
@@ -55,6 +57,12 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
       setPhase('RESULT');
     };
 
+    const onLeaderboard = ({ leaderboard: lb, isIntermediate }) => {
+      setLeaderboard(lb);
+      setIsFinalLeaderboard(!isIntermediate);
+      setPhase('LEADERBOARD');
+    };
+
     const onFinished = ({ leaderboard }) => {
       const myEntry = leaderboard.find(p => p.id === playerId);
       sessionStorage.setItem('leaderboard_data', JSON.stringify({ leaderboard, myEntry }));
@@ -74,9 +82,18 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
         setQuestionTotal(data.currentQuestion.total);
       }
       
+      if (data.gameType) {
+        sessionStorage.setItem('game_type', data.gameType);
+      }
+      
       if (data.hasAnswered) {
         setSelectedId('synced-answer'); // Block answering again
         if (clientPhase === 'PLAYING') setPhase('ANSWERED');
+      }
+
+      if (data.leaderboard) {
+        setLeaderboard(data.leaderboard);
+        setIsFinalLeaderboard(data.isFinalLeaderboard || false);
       }
     };
 
@@ -84,6 +101,7 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     socket.on('game:timer-tick', onTimerTick);
     socket.on('player:answer-received', onAnswerReceived);
     socket.on('game:player-result', onPlayerResult);
+    socket.on('game:leaderboard', onLeaderboard);
     socket.on('game:finished', onFinished);
     // sync state response is also listened to here for core state
     socket.on('player:sync-state-response', onSyncStateResponse);
@@ -93,6 +111,7 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
       socket.off('game:timer-tick', onTimerTick);
       socket.off('player:answer-received', onAnswerReceived);
       socket.off('game:player-result', onPlayerResult);
+      socket.off('game:leaderboard', onLeaderboard);
       socket.off('game:finished', onFinished);
       socket.off('player:sync-state-response', onSyncStateResponse);
     };
@@ -125,6 +144,15 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     });
   }, [phase, selectedId, pin, playerId, getSocket]);
 
+  const handleTextAnswer = useCallback((textAnswer) => {
+    if (phase !== 'PLAYING' || selectedId || !textAnswer.trim()) return;
+    getSocket().emit('player:submit-text-answer', {
+      pin,
+      playerId,
+      textAnswer: textAnswer.trim(),
+    });
+  }, [phase, selectedId, pin, playerId, getSocket]);
+
   return {
     question, setQuestion,
     selectedId, setSelectedId,
@@ -134,8 +162,11 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     questionTimeLimit,
     questionIndex,
     questionTotal,
+    leaderboard,
+    isFinalLeaderboard,
     handleAnswer,
     handleSubmitLayerOrder,
     handleSubmitMatches,
+    handleTextAnswer,
   };
 }
