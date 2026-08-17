@@ -178,7 +178,7 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
   return (
     <>
       {/* Message popups — visible even when panel is closed */}
-      <div className="fixed bottom-28 right-6 z-[45] flex flex-col items-end gap-3 pointer-events-none w-[min(400px,calc(100vw-2rem))]">
+      <div suppressHydrationWarning className="fixed bottom-28 right-6 z-[45] flex flex-col items-end gap-3 pointer-events-none w-[min(400px,calc(100vw-2rem))]">
         <AnimatePresence>
           {popups.map((popup) => (
             <motion.div
@@ -210,6 +210,7 @@ export default function PlayerLobbyChat({ pin, playerId, nickname, disabled = fa
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            suppressHydrationWarning
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
