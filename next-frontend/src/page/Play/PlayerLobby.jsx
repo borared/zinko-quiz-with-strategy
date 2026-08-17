@@ -222,6 +222,44 @@ function TeamPanel({ teamName, teamId, players, myNickname, avatarReactions }) {
   );
 }
 
+/* ─── IndividualPanel (For non-team games like Picture Race) ─────────────── */
+function IndividualPanel({ players, myNickname, avatarReactions }) {
+  const slots = [...players, ...Array(Math.max(0, 8 - players.length)).fill(null)];
+
+  return (
+    <div
+      className="w-full border-[4px] border-[#000000] p-6 flex flex-col gap-4 rounded-2xl transition-all max-w-4xl mx-auto"
+      style={{ backgroundColor: '#2ea84a', boxShadow: `8px 8px 0px 0px #1a6b2e` }}
+    >
+      {/* Panel header */}
+      <div className="flex items-center justify-between border-b-[3px] border-[#000000]/20 pb-4">
+        <span className="font-black text-3xl text-white tracking-wider uppercase">
+          Players
+        </span>
+        <div className="bg-zk-panel-bg border-[3px] border-[#000000] px-4 py-1 rounded-xl flex items-center justify-center">
+          <span className="font-black text-sm text-[#000000] tracking-wider leading-none mt-1">
+            Count: {players.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Grid for all players */}
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+        {slots.map((player, i) => (
+          <PlayerSlot
+            key={player?.id || `empty-${i}`}
+            player={player}
+            isFirst={i === 0 && !player}
+            teamId="A"
+            isMe={player && player.nickname === myNickname}
+            floatingEmojis={player ? avatarReactions[player.id] || [] : []}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── VsCard (animated) ──────────────────────────────────────────────────── */
 function VsCard() {
   return (
@@ -252,6 +290,7 @@ export default function PlayerLobby() {
   const [teamNames, setTeamNames] = useState({});
   const [startCountdown, setStartCountdown] = useState(null);
   const [avatarReactions, setAvatarReactions] = useState({});
+  const [gameType, setGameType] = useState('STANDARD');
   const reactionTimers = useRef(new Map());
 
   useEffect(() => {
@@ -301,8 +340,15 @@ export default function PlayerLobby() {
     const socket = getSocket();
     if (!socket || !isConnected) return;
 
-      // Request current player list for this lobby
-      if (pin) {
+      // Always ensure we are joined (re-joins if we refreshed)
+      if (pin && nickname && playerId) {
+        socket.emit('player:join', { 
+          pin, 
+          nickname, 
+          team, 
+          playerId, 
+          avatar: sessionStorage.getItem('player_avatar') || 'pizza' 
+        });
         socket.emit('lobby:request-players', { pin });
       }
 
@@ -311,6 +357,10 @@ export default function PlayerLobby() {
       if (data.teams) setTeams(data.teams);
       if (data.teamNames) setTeamNames(data.teamNames);
       if (data.background) setBgImage(data.background);
+      if (data.gameType) {
+        setGameType(data.gameType);
+        sessionStorage.setItem('game_type', data.gameType);
+      }
     };
 
     const onBackgroundUpdate = (data) => {
@@ -328,7 +378,12 @@ export default function PlayerLobby() {
           if (prev <= 1) {
             clearInterval(interval);
             setTimeout(() => {
-              router.push(`/play/${pin}/choose-skill`);
+              const currentType = sessionStorage.getItem('game_type') || 'STANDARD';
+              if (currentType === 'PICTURE_RACE') {
+                router.push(`/play/${pin}/game`);
+              } else {
+                router.push(`/play/${pin}/choose-skill`);
+              }
             }, 0);
             return null;
           }
@@ -440,29 +495,39 @@ export default function PlayerLobby() {
 
         {/* Team Panels + Go Back */}
         <div className="flex-1 flex flex-col items-center justify-start w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide pt-4 pb-8">
-          <div className="flex flex-row flex-wrap items-center justify-center gap-4 w-full">
-            {teams.map((teamId, index) => {
-              const teamPlayers = players.filter((p) => p.team === teamId);
-              return (
-                <div key={teamId} className="flex items-center justify-center gap-4">
-                  {teams.length === 2 && index === 1 && (
-                    <motion.div {...bounceIn(0.2)} className="hidden md:flex">
-                      <VsCard />
+          {gameType === 'PICTURE_RACE' ? (
+            <motion.div {...bounceIn(0.1)} className="w-full">
+              <IndividualPanel 
+                players={players} 
+                myNickname={nickname} 
+                avatarReactions={avatarReactions} 
+              />
+            </motion.div>
+          ) : (
+            <div className="flex flex-row flex-wrap items-center justify-center gap-4 w-full">
+              {teams.map((teamId, index) => {
+                const teamPlayers = players.filter((p) => p.team === teamId);
+                return (
+                  <div key={teamId} className="flex items-center justify-center gap-4">
+                    {teams.length === 2 && index === 1 && (
+                      <motion.div {...bounceIn(0.2)} className="hidden md:flex">
+                        <VsCard />
+                      </motion.div>
+                    )}
+                    <motion.div {...bounceIn(0.12 + index * 0.05)} className="w-[300px] md:w-[350px]">
+                      <TeamPanel 
+                        teamName={teamNames[teamId] || `Team ${teamId}`} 
+                        teamId={teamId} 
+                        players={teamPlayers} 
+                        myNickname={nickname} 
+                        avatarReactions={avatarReactions} 
+                      />
                     </motion.div>
-                  )}
-                  <motion.div {...bounceIn(0.12 + index * 0.05)} className="w-[300px] md:w-[350px]">
-                    <TeamPanel 
-                      teamName={teamNames[teamId] || `Team ${teamId}`} 
-                      teamId={teamId} 
-                      players={teamPlayers} 
-                      myNickname={nickname} 
-                      avatarReactions={avatarReactions} 
-                    />
-                  </motion.div>
-                </div>
-              );
-            })}
-          </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
       </div>
