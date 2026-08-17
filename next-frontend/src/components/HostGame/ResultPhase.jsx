@@ -15,7 +15,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="h-screen max-h-screen overflow-hidden flex flex-col bg-zk-bg relative"
+      className="h-screen max-h-screen overflow-hidden flex flex-col bg-[#0B0F19] relative"
     >
       <div className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
@@ -56,11 +56,11 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
       <div className="relative z-10 flex flex-col flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full h-full justify-center">
         {/* Top: Header */}
         <div className="flex-shrink-0 mt-2">
-          <h2 className="text-center text-4xl md:text-5xl font-black mb-2 text-zk-text uppercase permanent-marker-regular">
+          <h2 className="text-center text-4xl md:text-5xl font-black mb-2 text-white uppercase permanent-marker-regular">
             Results
           </h2>
           {question && (
-            <p className="text-center text-zk-text font-black text-xl mb-2">
+            <p className="text-center text-white font-black text-xl mb-2">
               {question.questionText}
             </p>
           )}
@@ -71,7 +71,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           
           {/* Left Panel: Answer breakdown */}
           <div className="flex-1 w-full h-full flex flex-col justify-center items-center">
-            <p className="text-center text-zk-text/40 mb-6 tracking-widest text-sm md:text-base font-bold flex-shrink-0">
+            <p className="text-center text-white/40 mb-6 tracking-widest text-sm md:text-base font-bold flex-shrink-0">
               Answer Breakdown
             </p>
             <div className="w-full max-w-2xl mx-auto flex flex-col justify-center">
@@ -85,7 +85,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
 
           {/* Right Panel: Top Players */}
           <div className="flex-1 w-full h-full flex flex-col justify-center items-center lg:border-l-[2px] border-white/10 lg:pl-12">
-            <p className="text-zk-text/50 tracking-widest text-sm md:text-base mb-6 font-black text-center flex-shrink-0">
+            <p className="text-white/50 tracking-widest text-sm md:text-base mb-6 font-black text-center flex-shrink-0">
               Top Players
             </p>
             <div className="flex justify-center items-end gap-x-6 lg:gap-x-10 mt-16 mb-8">
@@ -134,7 +134,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
                       </div>
                     </div>
                     {/* Score outside at the bottom */}
-                    <div className="mt-6 font-black text-zk-text text-lg uppercase tracking-wider">
+                    <div className="mt-6 font-black text-white text-lg uppercase tracking-wider">
                       {p.score?.toLocaleString() || 0} pts
                     </div>
                   </div>
