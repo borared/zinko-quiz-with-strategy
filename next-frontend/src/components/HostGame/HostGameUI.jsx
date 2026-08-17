@@ -11,10 +11,12 @@ import LineMatchingPhase from "./LineMatchingPhase";
 import { isDragLayersQuestion, isLineMatchingQuestion } from '@/lib/questionTypes';
 import ResultPhase from "./ResultPhase";
 import LeaderboardPhase from "./LeaderboardPhase";
+import IndividualLeaderboardPhase from "./IndividualLeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import DrawItHost from "./DrawItHost";
 import HangmanHost from "./HangmanHost";
+import PictureRaceHost from "./PictureRaceHost";
 import HangmanCategoryPicker from "./HangmanCategoryPicker";
 import RewardWheel from "./RewardWheel";
 import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
@@ -41,6 +43,7 @@ export default function HostGameUI() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [isFinalLeaderboard, setIsFinalLeaderboard] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [gameType, setGameType] = useState('STANDARD');
 
   // Minigame states
   const [minigameData, setMinigameData] = useState({
@@ -146,8 +149,11 @@ export default function HostGameUI() {
       setTotal(t);
     };
 
-    const onRevealResults = ({ correctAnswerId, stats: s, leaderboard: lb }) => {
+    const onRevealResults = ({ correctAnswerId, originalImage, stats: s, leaderboard: lb }) => {
       setCorrectId(correctAnswerId);
+      if (originalImage) {
+        setQuestion(prev => ({ ...prev, original_image: originalImage, answer: correctAnswerId }));
+      }
       setStats(s);
       setLeaderboard(lb);
       setPhase("RESULT");
@@ -316,8 +322,16 @@ export default function HostGameUI() {
     };
 
     const onHostSyncState = (data) => {
+      if (data.gameType) setGameType(data.gameType);
+
       // If backend is in LOBBY, we are in the initial SKILL_PICK screen, so don't override phase.
-      if (data.phase && data.phase !== 'LOBBY') setPhase(data.phase);
+      // However, for PICTURE_RACE, bypass SKILL_PICK completely.
+      if (data.phase === 'LOBBY' && data.gameType === 'PICTURE_RACE') {
+        getSocket().emit("game:start", { pin });
+      } else if (data.phase && data.phase !== 'LOBBY') {
+        setPhase(data.phase);
+      }
+
       if (data.question) {
         setQuestion(data.question);
         const limit = data.question.timeSeconds || DEFAULT_TIME_LIMIT;
@@ -477,7 +491,15 @@ export default function HostGameUI() {
         )}
 
         {phase === "QUESTION" && (
-          isDragLayersQuestion(question?.questionType) ? (
+          question?.gameType === 'PICTURE_RACE' ? (
+            <PictureRaceHost
+              question={question}
+              timeLeft={timeLeft}
+              totalTime={questionTimeLimit}
+              answered={answered}
+              total={total}
+            />
+          ) : isDragLayersQuestion(question?.questionType) ? (
             <DragLayersPhase
               question={question}
               timeLeft={timeLeft}
@@ -515,12 +537,21 @@ export default function HostGameUI() {
         )}
 
         {phase === "LEADERBOARD" && (
-          <LeaderboardPhase
-            leaderboard={leaderboard}
-            isFinalLeaderboard={isFinalLeaderboard}
-            handleNextQuestion={handleNextQuestion}
-            handleEndGame={handleEndGame}
-          />
+          gameType === 'PICTURE_RACE' ? (
+            <IndividualLeaderboardPhase
+              leaderboard={leaderboard}
+              isFinalLeaderboard={isFinalLeaderboard}
+              handleNextQuestion={handleNextQuestion}
+              handleEndGame={handleEndGame}
+            />
+          ) : (
+            <LeaderboardPhase
+              leaderboard={leaderboard}
+              isFinalLeaderboard={isFinalLeaderboard}
+              handleNextQuestion={handleNextQuestion}
+              handleEndGame={handleEndGame}
+            />
+          )
         )}
 
         {phase === "MINIGAME_HANGMAN_CATEGORY_PICK" && (
