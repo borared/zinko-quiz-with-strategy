@@ -36,6 +36,10 @@ function buildAnswerStats(game) {
   const question = game.questions[game.currentQuestionIndex];
   if (!question) return [];
 
+  if (game.gameType === 'PICTURE_RACE') {
+    return []; // No bar chart stats needed for text input
+  }
+
   const questionType = resolveQuestionType(question);
 
   if (questionType === QUESTION_TYPES.LINE_MATCHING) {
@@ -120,29 +124,45 @@ function revealResults(io, pin, games) {
   const questionType = resolveQuestionType(question);
   const isDragLayers = questionType === QUESTION_TYPES.DRAG_LAYERS;
   const isLineMatching = questionType === QUESTION_TYPES.LINE_MATCHING;
+  const isPictureRace = game.gameType === 'PICTURE_RACE';
+
   const correctLayerOrder = isDragLayers ? getCorrectLayerOrder(question.answers) : [];
   const correctMatches = isLineMatching ? getCorrectMatches(question.answers) : {};
-  const correctIds = isDragLayers
-    ? correctLayerOrder
+  const correctIds = (isDragLayers || isPictureRace)
+    ? []
     : question.answers
       .filter((answer) => answer.isCorrect === true || answer.checked === true || String(answer.isCorrect) === 'true' || String(answer.checked) === 'true')
       .map((answer) => answer.id);
-  const correctId = isDragLayers
-    ? JSON.stringify(correctLayerOrder)
-    : isLineMatching
-      ? JSON.stringify(correctMatches)
-      : (correctIds.length > 0 ? correctIds[0] : null);
+
+  let correctId = null;
+  if (isPictureRace) {
+    correctId = question.answer; // the correct string
+  } else if (isDragLayers) {
+    correctId = JSON.stringify(correctLayerOrder);
+  } else if (isLineMatching) {
+    correctId = JSON.stringify(correctMatches);
+  } else {
+    correctId = correctIds.length > 0 ? correctIds[0] : null;
+  }
   const stats = buildAnswerStats(game);
 
   // 1. Award base points based on correctness and speed, considering Rabbit
   game.players.forEach(player => {
     const selectedId = game.answers[player.id];
     const isMissed = selectedId === undefined;
-    const isCorrect = isDragLayers
-      ? !isMissed && isLayerOrderCorrect(parseDragLayerAnswer(selectedId), correctLayerOrder)
-      : isLineMatching
-        ? !isMissed && isLineMatchingCorrect(parseLineMatchingAnswer(selectedId), correctMatches)
-        : !isMissed && correctIds.includes(selectedId);
+    
+    let isCorrect = false;
+    if (!isMissed) {
+      if (isPictureRace) {
+        isCorrect = typeof selectedId === 'string' && selectedId.trim().toLowerCase() === question.answer.trim().toLowerCase();
+      } else if (isDragLayers) {
+        isCorrect = isLayerOrderCorrect(parseDragLayerAnswer(selectedId), correctLayerOrder);
+      } else if (isLineMatching) {
+        isCorrect = isLineMatchingCorrect(parseLineMatchingAnswer(selectedId), correctMatches);
+      } else {
+        isCorrect = correctIds.includes(selectedId);
+      }
+    }
     const timeLimitMs = (game.currentTimeLimit || QUESTION_TIME_SECONDS) * 1000;
     const timeTaken = game.answerTimes[player.id] || timeLimitMs;
     const speedBonus = isCorrect ? Math.max(0, Math.round((1 - timeTaken / timeLimitMs) * 500)) : 0;
@@ -223,6 +243,7 @@ function revealResults(io, pin, games) {
 
   io.to(pin).emit('game:reveal-results', {
     correctAnswerId: correctId,
+    originalImage: isPictureRace ? question.original_image : null,
     stats,
     leaderboard: getLeaderboard(game.players).slice(0, 5),
   });
