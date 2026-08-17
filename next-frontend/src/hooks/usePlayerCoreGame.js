@@ -62,6 +62,9 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     };
 
     const onSyncStateResponse = (data) => {
+      if (data.isLeader !== undefined) {
+        sessionStorage.setItem('player_is_leader', data.isLeader ? 'true' : 'false');
+      }
       const clientPhase = data.phase === 'QUESTION' ? 'PLAYING' : data.phase;
       setPhase(clientPhase);
       
