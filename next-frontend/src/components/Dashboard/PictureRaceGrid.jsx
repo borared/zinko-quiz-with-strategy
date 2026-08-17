@@ -48,9 +48,20 @@ const PictureRaceGrid = () => {
     }
   };
 
+  const [isHosting, setIsHosting] = useState(false);
+
   const handleHostClick = async (id) => {
-    // Currently Picture Race game screens aren't built, so we just show a placeholder toast.
-    showToast('Picture Race game engine coming soon!', 'orange');
+    try {
+      setIsHosting(true);
+      const { pin } = await api.post('/api/picture-races/host', { raceId: id });
+      sessionStorage.setItem(`game_${pin}_pictureRaceId`, id);
+      router.push(`/host/lobby/${pin}`);
+    } catch (err) {
+      console.error("Hosting failed:", err);
+      showToast(err.message || "Failed to host Picture Race!", 'error');
+    } finally {
+      setIsHosting(false);
+    }
   };
 
   if (loading) {
@@ -132,9 +143,14 @@ const PictureRaceGrid = () => {
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleHostClick(race.id); }}
-                    className="flex-1 bg-zk-purple text-white border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-purple-light flex items-center justify-center gap-1.5 leading-none pt-2"
+                    disabled={isHosting}
+                    className="flex-1 bg-zk-purple text-white border-[2px] border-zk-border !shadow-none py-2 font-['Amatic_SC'] font-bold text-2xl rounded-lg transition-colors hover:bg-zk-purple-light flex items-center justify-center gap-1.5 leading-none pt-2 disabled:opacity-60 disabled:cursor-wait"
                   >
-                    <Play size={16} fill="currentColor" /> Host
+                    {isHosting ? (
+                      <><Loader2 size={16} className="animate-spin" /> Creating...</>
+                    ) : (
+                      <><Play size={16} fill="currentColor" /> Host</>
+                    )}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); router.push('/create-picture-race/' + race.id); }}
