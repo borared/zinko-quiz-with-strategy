@@ -21,7 +21,9 @@ export default function QuestionPrompt({
   const isLineMatching = isLineMatchingQuestion(question?.questionType);
   const usesMatchingPanel = isDragLayers || isLineMatching;
 
-  const skillButton = playerSkill ? (() => {
+  const isPictureRace = question?.gameType === 'PICTURE_RACE' || (typeof window !== 'undefined' && sessionStorage.getItem('game_type') === 'PICTURE_RACE');
+
+  const skillButton = (playerSkill && !isPictureRace) ? (() => {
     const config = getSkillConfig(playerSkill);
     const Icon = config.icon;
     const isInactive = isSkillLockedOut || skillChargesLeft <= 0 || foxSmokescreen;
