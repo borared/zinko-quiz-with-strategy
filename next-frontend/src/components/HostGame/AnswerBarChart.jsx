@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { displayAnswerText } from '@/lib/questionTypes';
 
@@ -36,13 +36,13 @@ export default function AnswerBarChart({ stats, revealed, questionType }) {
   const isTrueFalse = questionType === 'true_false';
   const isDragLayers = questionType === 'drag_layers';
   const isLineMatching = questionType === 'line_matching';
-  const maxCount = Math.max(1, ...stats.map((s) => s.count));
+  const totalVotes = stats.reduce((sum, s) => sum + s.count, 0) || 1;
 
   return (
-    <div className={`flex items-end justify-center gap-6 min-h-[220px] ${isTrueFalse || isDragLayers || isLineMatching ? 'max-w-4xl mx-auto' : ''}`}>
+    <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
       {stats.map((s, i) => {
         const color = resolveBarColor(s, i, isTrueFalse);
-        const pct = (s.count / maxCount) * 100;
+        const votePct = Math.round((s.count / totalVotes) * 100);
         const answerLabel = isDragLayers
           ? (s.layerLabel || displayAnswerText(s.text))
           : isLineMatching
@@ -51,61 +51,79 @@ export default function AnswerBarChart({ stats, revealed, questionType }) {
               ? displayAnswerText(s.text)
               : color.label;
 
+        const isChoiceCorrect = s.isCorrect && revealed;
+
         return (
-          <div key={s.id || i} className="flex flex-col items-center gap-2 flex-1 max-w-[180px]">
-            <AnimatePresence>
-              {revealed && (
-                <motion.span
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-xl font-black"
-                  style={{ color: s.isCorrect ? "#27AE60" : "#E74C3C" }}
-                >
-                  {s.count}
-                </motion.span>
-              )}
-            </AnimatePresence>
-            <div className="w-full bg-black/10 rounded-t-xl overflow-hidden h-32 flex items-end relative">
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ height: `${pct}%` }}
-                transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.1 }}
-                className="w-full rounded-t-xl relative"
-                style={{
-                  backgroundColor: color.bg,
-                  boxShadow: s.isCorrect && revealed ? "0 0 20px rgba(39,174,96,0.6)" : "none",
-                  border: s.isCorrect && revealed ? "3px solid #27AE60" : "none",
-                }}
+          <div 
+            key={s.id || i}
+            className={`relative flex items-center justify-between p-3 border-[2px] rounded-lg overflow-hidden transition-all ${
+              isChoiceCorrect 
+                ? 'border-[#27AE60] bg-[#27AE60]' 
+                : 'border-zk-border bg-zk-panel-bg'
+            }`}
+          >
+            {/* Background progress slide-in */}
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${votePct}%` }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 }}
+              className="absolute top-0 left-0 bottom-0 pointer-events-none opacity-[0.15]"
+              style={{ backgroundColor: isChoiceCorrect ? '#000000' : color.bg }}
+            />
+
+            {/* Left Content: Letter Badge + Answer Text */}
+            <div className="flex items-center gap-4 z-10 pr-4 truncate">
+              {/* Option Letter/Label Badge */}
+              <div 
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm border-[2px] shrink-0 ${
+                  isChoiceCorrect 
+                    ? 'border-black bg-black text-white' 
+                    : 'border-black/10'
+                }`}
+                style={isChoiceCorrect ? {} : { color: color.text, backgroundColor: color.bg }}
               >
-                {s.isCorrect && revealed && (
-                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#27AE60] text-white w-8 h-8 rounded-lg flex items-center justify-center border-[2px] border-zk-border shadow-[2px_2px_0_#000]">
-                    <Check size={20} strokeWidth={4} />
-                  </div>
+                {isChoiceCorrect ? (
+                  <Check size={16} strokeWidth={4} />
+                ) : (
+                  answerLabel
                 )}
-              </motion.div>
-            </div>
-            {!isTrueFalse && !isDragLayers && !isLineMatching && (
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center border-[3px] border-black font-black text-lg"
-                style={{ backgroundColor: color.bg, color: color.text }}
-              >
-                {color.label}
               </div>
-            )}
-            <p className="text-black/60 text-xs text-center w-full px-1 font-bold uppercase leading-tight">
-              {isLineMatching ? (
-                <>
-                  {answerLabel}
-                  {s.matchText ? (
-                    <span className="block text-[10px] normal-case text-black/45 mt-0.5 truncate">
-                      {displayAnswerText(s.text)} → {displayAnswerText(s.matchText)}
-                    </span>
-                  ) : null}
-                </>
-              ) : (
-                s.layerLabel || answerLabel
-              )}
-            </p>
+
+              {/* Answer Text */}
+              <span className={`font-black text-sm truncate ${isChoiceCorrect ? 'text-black' : 'text-zk-text'}`}>
+                {isLineMatching && s.matchText ? (
+                  <span>
+                    {displayAnswerText(s.text)} → {displayAnswerText(s.matchText)}
+                  </span>
+                ) : (
+                  displayAnswerText(s.text) || answerLabel
+                )}
+              </span>
+            </div>
+
+            {/* Right Content: Stats (Pct / Count) */}
+            <div className="flex items-center gap-4 z-10 shrink-0">
+              {/* Progress bar inline */}
+              <div className={`hidden sm:block w-24 h-2 rounded-full overflow-hidden ${isChoiceCorrect ? 'bg-black/20' : 'bg-zk-text/10'}`}>
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${votePct}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: isChoiceCorrect ? '#000000' : color.bg }}
+                />
+              </div>
+
+              {/* Vote Count & % */}
+              <div className="text-right min-w-[70px]">
+                <span className={`font-black text-sm block leading-none ${isChoiceCorrect ? 'text-black' : 'text-zk-text'}`}>
+                  {s.count} {s.count === 1 ? 'vote' : 'votes'}
+                </span>
+                <span className={`text-xs font-bold ${isChoiceCorrect ? 'text-black/70' : 'text-zk-text/60'}`}>
+                  {votePct}%
+                </span>
+              </div>
+            </div>
           </div>
         );
       })}
