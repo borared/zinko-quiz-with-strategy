@@ -9,11 +9,13 @@ const { DEFAULT_LOBBY_SCENERY } = require('./lobbyScenery');
 /** @type {Map<string, GameState>} */
 const games = new Map(); // pin → gameState
 
-function createGame({ pin, quizId, hostUserId }) {
+function createGame({ pin, quizId, pictureRaceId, hostUserId, gameType = 'QUIZ' }) {
   const gamePin = pin || generatePin(games);
   games.set(gamePin, {
     pin: gamePin,
     quizId,
+    pictureRaceId,
+    gameType,
     hostUserId,
     hostSocketId: null,
     phase: 'LOBBY',
