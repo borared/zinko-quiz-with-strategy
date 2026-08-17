@@ -9,7 +9,7 @@ const COLOR_MAP = {
   YELLOW: "#EAB308",
 };
 
-export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }) {
+export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease, isLeader }) {
   const [pressedKeys, setPressedKeys] = React.useState(new Set());
 
   // Prevent context menu or selecting text while holding
@@ -63,10 +63,15 @@ export default function VaultBreakerPlayer({ assignedColors, onHold, onRelease }
 
   if (!assignedColors || assignedColors.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="font-zk-bold text-white text-2xl text-center px-4">
-          Waiting for assigned buttons...
-        </p>
+      <div className="flex-1 flex items-center justify-center bg-slate-900 text-center p-6">
+        <div className="max-w-md">
+          <h2 className="gasoek-one-regular text-4xl text-zk-yellow uppercase tracking-widest mb-4">
+            WAITING FOR LEADER
+          </h2>
+          <p className="font-bold text-white/80 text-3xl" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '1.5px' }}>
+            Only the Team Leader can crack the vault. Waiting for Leader to hold the colors...
+          </p>
+        </div>
       </div>
     );
   }
