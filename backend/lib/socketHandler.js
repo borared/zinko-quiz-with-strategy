@@ -41,11 +41,31 @@ function initSocketHandler(io) {
             
             // If still in lobby, remove player entirely and update lobby so their avatar leaves
             if (game.phase === 'LOBBY') {
+              const team = player.team;
               game.players = game.players.filter(p => p.id !== player.id);
+
+              // Reassign leader if they were the leader of their team
+              if (game.teamLeaders && game.teamLeaders[team] === player.id) {
+                const nextTeammate = game.players.find(p => p.team === team);
+                if (nextTeammate) {
+                  game.teamLeaders[team] = nextTeammate.id;
+                } else {
+                  delete game.teamLeaders[team];
+                }
+              }
+
               io.to(pin).emit('lobby:players-update', {
-                players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+                players: game.players.map(p => ({
+                  id: p.id,
+                  nickname: p.nickname,
+                  avatar: p.avatar,
+                  team: p.team,
+                  isLeader: game.teamLeaders?.[p.team] === p.id
+                })),
                 count: game.players.length,
                 background: game.background,
+                teams: game.teams,
+                teamNames: game.teamNames || {},
               });
               console.log(`👋 Player "${player.nickname}" removed from lobby ${pin}`);
             }
