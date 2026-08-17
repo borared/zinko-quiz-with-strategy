@@ -22,33 +22,35 @@ module.exports = function registerGameHandlers(io, socket, games) {
     game.answerTimes = {};
     game.absoluteAnswerTimes = {};
     
-    // Auto-assign missing skills
-    const ALL_SKILLS = ['rabbit', 'fox', 'butterfly', 'frog'];
-    const teams = ['A', 'B'];
-    teams.forEach(team => {
-      if (!game.teamSkills[team]) game.teamSkills[team] = {};
-      const teamPlayers = game.players.filter(p => p.team === team);
-      const playersWithSkill = new Set(Object.values(game.teamSkills[team]).map(s => s.playerId));
-      const playersNeedingSkill = teamPlayers.filter(p => !playersWithSkill.has(p.id));
-      
-      const availableSkills = ALL_SKILLS.filter(s => !game.teamSkills[team][s]);
-      // Fisher-Yates shuffle available skills
-      for (let i = availableSkills.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [availableSkills[i], availableSkills[j]] = [availableSkills[j], availableSkills[i]];
-      }
-      
-      playersNeedingSkill.forEach(p => {
-        if (availableSkills.length > 0) {
-          const skillToAssign = availableSkills.pop();
-          game.teamSkills[team][skillToAssign] = {
-            playerId: p.id,
-            nickname: p.nickname,
-            avatar: p.avatar
-          };
+    // Auto-assign missing skills (Skip for Picture Race since it's individual/no skills)
+    if (game.gameType !== 'PICTURE_RACE') {
+      const ALL_SKILLS = ['rabbit', 'fox', 'butterfly', 'frog'];
+      const teams = ['A', 'B'];
+      teams.forEach(team => {
+        if (!game.teamSkills[team]) game.teamSkills[team] = {};
+        const teamPlayers = game.players.filter(p => p.team === team);
+        const playersWithSkill = new Set(Object.values(game.teamSkills[team]).map(s => s.playerId));
+        const playersNeedingSkill = teamPlayers.filter(p => !playersWithSkill.has(p.id));
+        
+        const availableSkills = ALL_SKILLS.filter(s => !game.teamSkills[team][s]);
+        // Fisher-Yates shuffle available skills
+        for (let i = availableSkills.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availableSkills[i], availableSkills[j]] = [availableSkills[j], availableSkills[i]];
         }
+        
+        playersNeedingSkill.forEach(p => {
+          if (availableSkills.length > 0) {
+            const skillToAssign = availableSkills.pop();
+            game.teamSkills[team][skillToAssign] = {
+              playerId: p.id,
+              nickname: p.nickname,
+              avatar: p.avatar
+            };
+          }
+        });
       });
-    });
+    }
 
     // Reset skill states for the new round
     game.activeSkillThisRound = { A: null, B: null };
@@ -145,6 +147,37 @@ module.exports = function registerGameHandlers(io, socket, games) {
     }
   });
 
+  // ── player:submit-text-answer (for Picture Race) ────────────────────────
+  socket.on('player:submit-text-answer', ({ pin, playerId, textAnswer }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'QUESTION' || game.gameType !== 'PICTURE_RACE') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+    if (game.answers[playerId] !== undefined) return; // already answered
+
+    game.answers[playerId] = textAnswer;
+    const timeLimit = game.currentTimeLimit || QUESTION_TIME_SECONDS;
+    game.answerTimes[playerId] = (timeLimit - (game.timeLeft || 0)) * 1000;
+    game.absoluteAnswerTimes = game.absoluteAnswerTimes || {};
+    game.absoluteAnswerTimes[playerId] = Date.now();
+
+    const answeredCount = Object.keys(game.answers).length;
+    const totalPlayers = game.players.length;
+
+    socket.emit('player:answer-received', { answerId: textAnswer });
+
+    // Live progress broadcast to host
+    io.to(game.hostSocketId).emit('host:answer-progress', {
+      answered: answeredCount,
+      total: totalPlayers,
+    });
+
+    // Auto-reveal when everyone answered
+    if (answeredCount >= totalPlayers) {
+      clearInterval(game.timer);
+      revealResults(io, pin, games);
+    }
+  });
+
   // ── player:sync-state ─────────────────────────────────────────────────────
   socket.on('player:sync-state', ({ pin, playerId }) => {
     const game = games.get(pin);
@@ -170,14 +203,23 @@ module.exports = function registerGameHandlers(io, socket, games) {
       }
     } : null;
 
-    socket.emit('player:sync-state-response', {
+    const { getLeaderboard } = require('../socketUtils');
+    const syncData = {
       phase: game.phase,
       timeLeft: game.timeLeft,
       currentQuestion: currentQuestionPayload,
       hasAnswered: game.answers[playerId] !== undefined,
       minigameData,
       background: game.background,
-    });
+      gameType: game.gameType,
+    };
+
+    if (game.phase === 'LEADERBOARD' || game.phase === 'FINISHED') {
+      syncData.leaderboard = getLeaderboard(game.players);
+      syncData.isFinalLeaderboard = game.phase === 'FINISHED';
+    }
+
+    socket.emit('player:sync-state-response', syncData);
   });
 
   // ── host:show-leaderboard ─────────────────────────────────────────────────
