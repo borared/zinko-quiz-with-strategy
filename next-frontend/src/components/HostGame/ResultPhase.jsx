@@ -69,18 +69,34 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
         {/* Middle: 2 Columns */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-0 items-center justify-center py-4">
           
-          {/* Left Panel: Answer breakdown */}
+          {/* Left Panel: Answer breakdown or Picture Race Result */}
           <div className="flex-1 w-full h-full flex flex-col justify-center items-center">
-            <p className="text-center text-zk-text/40 mb-6 tracking-widest text-sm md:text-base font-bold flex-shrink-0">
-              Answer Breakdown
-            </p>
-            <div className="w-full max-w-2xl mx-auto flex flex-col justify-center">
-              <AnswerBarChart
-                stats={stats}
-                revealed={true}
-                questionType={question?.questionType}
-              />
-            </div>
+            {question?.gameType === 'PICTURE_RACE' ? (
+              <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                <div className="zk-panel !shadow-none bg-white p-2 rounded-xl mb-6 border-[3px] border-zk-border max-w-full overflow-hidden">
+                  <img src={question?.original_image || question?.image_url} alt="Original" className="max-h-[300px] object-contain rounded-lg" />
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-zk-text/50 font-black uppercase text-sm tracking-widest mb-1">Correct Answer</span>
+                  <div className="bg-zk-green px-8 py-3 rounded-xl border-[3px] border-zk-border shadow-[4px_4px_0px_#000000]">
+                    <p className="text-3xl md:text-5xl font-black text-zk-text amatic-sc-regular uppercase tracking-wider">{question?.answer || "Unknown"}</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-center text-zk-text/40 mb-6 tracking-widest text-sm md:text-base font-bold flex-shrink-0">
+                  Answer Breakdown
+                </p>
+                <div className="w-full max-w-2xl mx-auto flex flex-col justify-center">
+                  <AnswerBarChart
+                    stats={stats}
+                    revealed={true}
+                    questionType={question?.questionType}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Right Panel: Top Players */}
@@ -112,8 +128,8 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
                       ) : (
                         <div className="font-black text-4xl text-zk-text/30">?</div>
                       )}
-                      {/* Team badge at top left edge */}
-                      {p.team && (
+                      {/* Team badge at top left edge (hide for individual games like Picture Race) */}
+                      {p.team && question?.gameType !== 'PICTURE_RACE' && (
                         <div className={`absolute -top-3 -left-3 w-8 h-8 rounded-full border-[2px] border-zk-border flex items-center justify-center font-black text-sm z-10 text-white ${p.team === 'A' ? 'bg-[#27AE60]' : 'bg-[#E74C3C]'}`}>
                           {p.team}
                         </div>
