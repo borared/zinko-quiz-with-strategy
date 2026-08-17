@@ -62,7 +62,7 @@ export default function RootLayout({ children }) {
           <link rel="preconnect" href="https://content-panda-63.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://content-panda-63.clerk.accounts.dev" />
         </head>
-        <body className={`min-h-screen bg-zk-bg flex flex-col font-sans transition-colors duration-300 ${inter.variable} ${outfit.variable} ${permanentMarker.variable} ${gasoekOne.variable} ${kantumruyPro.variable} ${amaticSC.variable}`}>
+        <body className={`min-h-screen bg-zk-bg flex flex-col font-sans transition-colors duration-300 ${inter.variable} ${outfit.variable} ${permanentMarker.variable} ${gasoekOne.variable} ${kantumruyPro.variable} ${amaticSC.variable}`} suppressHydrationWarning>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ClientLayoutWrapper>
               {children}
