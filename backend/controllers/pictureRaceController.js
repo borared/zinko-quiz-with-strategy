@@ -1,6 +1,7 @@
 const { z } = require('zod');
 const pictureRaceService = require('../services/pictureRaceService');
 const handleError = require('../lib/errorHandler');
+const { createGame } = require('../lib/socketHandler');
 
 const questionSchema = z.object({
   question: z.string().optional().nullable(),
@@ -105,10 +106,33 @@ const deleteRace = async (req, res) => {
   }
 };
 
+const hostRace = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ error: 'Authentication required to host a game.' });
+
+    const { raceId } = req.body;
+    if (!raceId) return res.status(400).json({ error: 'raceId is required.' });
+
+    // Verify race belongs to user
+    const race = await pictureRaceService.getPictureRaceById(raceId, userId);
+    if (!race) return res.status(404).json({ error: 'Picture Race not found or unauthorized.' });
+
+    const pin = createGame({ pictureRaceId: raceId, hostUserId: userId, gameType: 'PICTURE_RACE' });
+
+    console.log(`🎮 Picture Race created — PIN: ${pin} | Race: "${race.title}" | Host: ${userId}`);
+    res.status(201).json({ pin, title: race.title });
+  } catch (err) {
+    console.error('❌ Error creating picture race game:', err.message);
+    res.status(500).json({ error: 'Failed to create game session.' });
+  }
+};
+
 module.exports = {
   createRace,
   getUserRaces,
   getRaceById,
   updateRace,
   deleteRace,
+  hostRace,
 };
