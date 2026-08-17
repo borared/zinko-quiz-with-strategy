@@ -15,7 +15,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col bg-zk-bg relative"
+      className="h-screen max-h-screen overflow-hidden flex flex-col bg-zk-bg relative"
     >
       <div className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
@@ -32,7 +32,7 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 10, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[4px] border-zk-border rounded-xl pointer-events-none"
+        className="absolute top-[10%] left-[10%] w-20 h-20 bg-zk-blue border-[2px] border-zk-border rounded-lg pointer-events-none"
       />
       <motion.div
         animate={{ y: [15, -15, 15], rotate: -360 }}
@@ -40,110 +40,124 @@ export default function ResultPhase({ question, stats, leaderboard, handleShowLe
           y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 12, repeat: Infinity, ease: "linear" }
         }}
-        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[4px] border-zk-border rounded-xl pointer-events-none"
+        className="absolute top-[5%] right-[15%] w-16 h-16 bg-[#6E5CF2] border-[2px] border-zk-border rounded-lg pointer-events-none"
       />
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[4px] border-zk-border rounded-full pointer-events-none"
+        className="absolute bottom-[20%] left-[10%] w-12 h-12 bg-[#FF6B6B] border-[2px] border-zk-border rounded-full pointer-events-none"
       />
       <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[4px] border-zk-border rounded-xl pointer-events-none"
+        className="absolute bottom-[5%] right-[15%] w-24 h-24 bg-[#FDE08B] border-[2px] border-zk-border rounded-lg pointer-events-none"
       />
 
-      <div className="relative z-10 flex flex-col flex-1 p-4 md:p-6 justify-center">
-        <h2 className="text-center text-4xl md:text-5xl font-black mb-1 text-zk-text uppercase permanent-marker-regular">
-          Results
-        </h2>
-        
-        {/* Team Scores Display */}
-        <div className="flex justify-center items-center gap-8 my-4">
-          <div className="bg-[#27AE60] text-white px-6 py-2 rounded-xl border-[3px] border-zk-border shadow-[4px_4px_0_#000] flex flex-col items-center">
-            <span className="text-sm font-black uppercase">Team A</span>
-            <span className="text-3xl font-black">{teamAScore.toLocaleString()}</span>
-          </div>
-          <div className="text-2xl font-black text-zk-text/50">VS</div>
-          <div className="bg-[#E74C3C] text-white px-6 py-2 rounded-xl border-[3px] border-zk-border shadow-[4px_4px_0_#000] flex flex-col items-center">
-            <span className="text-sm font-black uppercase">Team B</span>
-            <span className="text-3xl font-black">{teamBScore.toLocaleString()}</span>
-          </div>
-        </div>
-        {question && (
-          <p className="text-center text-zk-text font-black text-xl mb-1">
-            {question.questionText}
-          </p>
-        )}
-        <p className="text-center text-zk-text/40 mb-4 uppercase tracking-widest text-xs md:text-sm font-bold">
-          Answer breakdown
-        </p>
-
-        {/* Bar chart */}
-        <div className="mb-4 mt-2">
-          <AnswerBarChart
-            stats={stats}
-            revealed={true}
-            questionType={question?.questionType}
-          />
+      <div className="relative z-10 flex flex-col flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full h-full justify-center">
+        {/* Top: Header */}
+        <div className="flex-shrink-0 mt-2">
+          <h2 className="text-center text-4xl md:text-5xl font-black mb-2 text-zk-text uppercase permanent-marker-regular">
+            Results
+          </h2>
+          {question && (
+            <p className="text-center text-zk-text font-black text-xl mb-2">
+              {question.questionText}
+            </p>
+          )}
         </div>
 
-        {/* Mini leaderboard */}
-        <div className="mb-4 mt-8">
-          <p className="text-zk-text/50 uppercase tracking-widest text-xs md:text-sm mb-6 font-black text-center">
-            Top Players
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 mt-6">
-            {leaderboard.slice(0, 5).map((p, i) => (
-              <div key={p.id} className="flex flex-col items-center">
-                <div className="relative w-32 h-32 rounded-3xl border-[4px] border-zk-border bg-zk-panel-bg flex items-center justify-center flex-shrink-0">
-                  {p.avatar ? (
-                    <img src={p.avatar} alt={p.nickname} className="w-full h-full object-cover rounded-[20px]" />
-                  ) : (
-                    <div className="font-black text-4xl text-zk-text/30">?</div>
-                  )}
-                  {/* Team badge at top left edge */}
-                  {p.team && (
-                    <div className={`absolute -top-4 -left-4 w-10 h-10 rounded-full border-[3px] border-zk-border flex items-center justify-center font-black text-lg shadow-[2px_2px_0_#000] z-10 text-white ${p.team === 'A' ? 'bg-[#27AE60]' : 'bg-[#E74C3C]'}`}>
-                      {p.team}
+        {/* Middle: 2 Columns */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-0 items-center justify-center py-4">
+          
+          {/* Left Panel: Answer breakdown */}
+          <div className="flex-1 w-full h-full flex flex-col justify-center items-center">
+            <p className="text-center text-zk-text/40 mb-6 tracking-widest text-sm md:text-base font-bold flex-shrink-0">
+              Answer Breakdown
+            </p>
+            <div className="w-full max-w-2xl mx-auto flex flex-col justify-center">
+              <AnswerBarChart
+                stats={stats}
+                revealed={true}
+                questionType={question?.questionType}
+              />
+            </div>
+          </div>
+
+          {/* Right Panel: Top Players */}
+          <div className="flex-1 w-full h-full flex flex-col justify-center items-center lg:border-l-[2px] border-white/10 lg:pl-12">
+            <p className="text-zk-text/50 tracking-widest text-sm md:text-base mb-6 font-black text-center flex-shrink-0">
+              Top Players
+            </p>
+            <div className="flex justify-center items-end gap-x-6 lg:gap-x-10 mt-16 mb-8">
+              {(() => {
+                const top3 = leaderboard.slice(0, 3);
+                const podium = [];
+                // Layout: 2nd, 1st, 3rd
+                if (top3[1]) podium.push({ p: top3[1], rank: 2 });
+                if (top3[0]) podium.push({ p: top3[0], rank: 1 });
+                if (top3[2]) podium.push({ p: top3[2], rank: 3 });
+
+                return podium.map(({ p, rank }) => (
+                  <div 
+                    key={p.id} 
+                    className={`flex flex-col items-center transition-all ${
+                      rank === 1 ? 'z-20 -translate-y-12 scale-[1.15]' : 
+                      rank === 2 ? 'z-10 -translate-y-2' : 
+                      'z-10 translate-y-6 scale-[0.9]'
+                    }`}
+                  >
+                    <div className="relative w-24 h-24 lg:w-28 lg:h-28 rounded-lg border-[2px] border-zk-border bg-zk-panel-bg flex items-center justify-center flex-shrink-0">
+                      {p.avatar ? (
+                        <img src={p.avatar} alt={p.nickname} className="w-full h-full object-cover rounded-lg" />
+                      ) : (
+                        <div className="font-black text-4xl text-zk-text/30">?</div>
+                      )}
+                      {/* Team badge at top left edge */}
+                      {p.team && (
+                        <div className={`absolute -top-3 -left-3 w-8 h-8 rounded-full border-[2px] border-zk-border flex items-center justify-center font-black text-sm z-10 text-white ${p.team === 'A' ? 'bg-[#27AE60]' : 'bg-[#E74C3C]'}`}>
+                          {p.team}
+                        </div>
+                      )}
+                      {/* Rank badge at top right edge (Gold, Silver, Bronze) */}
+                      <div className={`absolute -top-3 -right-3 text-white w-8 h-8 rounded-full border-[2px] border-zk-border flex items-center justify-center font-black text-sm z-10 ${
+                        rank === 1 ? 'bg-[#F1C40F]' :
+                        rank === 2 ? 'bg-[#95A5A6]' :
+                        'bg-[#D35400]'
+                      }`}>
+                        #{rank}
+                      </div>
+                      {/* Name badge at bottom right edge */}
+                      <div className="absolute -bottom-3 -right-6 bg-zk-panel-bg border-[2px] border-zk-border rounded-lg px-3 py-1.5 z-10 min-w-[70px]">
+                        <span className="font-black text-zk-text text-sm truncate max-w-[100px] block text-center leading-none">
+                          {p.nickname}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  {/* Rank badge at top right edge */}
-                  <div className="absolute -top-4 -right-4 bg-[#5D3FD3] text-white w-10 h-10 rounded-full border-[3px] border-zk-border flex items-center justify-center font-black text-lg z-10">
-                    #{i + 1}
+                    {/* Score outside at the bottom */}
+                    <div className="mt-6 font-black text-zk-text text-lg uppercase tracking-wider">
+                      {p.score?.toLocaleString() || 0} pts
+                    </div>
                   </div>
-                  {/* Name badge at bottom right edge */}
-                  <div className="absolute -bottom-4 -right-8 bg-zk-panel-bg border-[3px] border-zk-border rounded-xl px-4 py-2 z-10 min-w-[80px]">
-                    <span className="font-black text-zk-text text-lg truncate max-w-[120px] block text-center leading-none">
-                      {p.nickname}
-                    </span>
-                  </div>
-                </div>
-                {/* Score outside at the bottom */}
-                <div className="mt-6 font-black text-zk-text text-lg uppercase tracking-wider">
-                  {p.score?.toLocaleString() || 0} pts
-                </div>
-              </div>
-            ))}
+                ));
+              })()}
+            </div>
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex justify-center gap-4 mt-2">
+        {/* Bottom: Actions */}
+        <div className="flex justify-center gap-4 flex-shrink-0 mt-16 mb-4">
           <button
             onClick={handleShowLeaderboard}
-            style={{ fontFamily: 'var(--font-amatic-sc)' }}
-            className="min-w-[240px] px-8 py-4 bg-zk-panel-bg border-[3px] border-zk-border rounded-xl text-zk-text font-black text-3xl tracking-widest hover:brightness-95 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="min-w-[200px] px-8 py-3 bg-zk-panel-bg border-[2px] border-zk-border rounded-lg text-zk-text font-black text-lg tracking-widest hover:brightness-95 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            <Trophy size={24} /> Leaderboard
+            <Trophy size={20} /> Leaderboard
           </button>
           <button
             id="next-question-btn"
             onClick={handleNextQuestion}
-            style={{ fontFamily: 'var(--font-amatic-sc)' }}
-            className="min-w-[240px] px-8 py-4 bg-[#5D3FD3] border-[3px] border-zk-border rounded-xl text-white font-black text-3xl tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="min-w-[200px] px-8 py-3 bg-[#5D3FD3] border-[2px] border-zk-border rounded-lg text-white font-black text-lg tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            Next Question <ChevronRight size={24} />
+            Next Question <ChevronRight size={20} />
           </button>
         </div>
       </div>
