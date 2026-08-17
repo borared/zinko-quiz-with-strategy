@@ -13,7 +13,9 @@ import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
 import DrawItPlayer from './DrawItPlayer';
 import HangmanPlayer from './HangmanPlayer';
+import PictureRacePlayer from './PictureRacePlayer';
 import RewardWheel from '../HostGame/RewardWheel';
+import IndividualLeaderboardPhase from '../HostGame/IndividualLeaderboardPhase';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 import { useGameBackground } from '@/hooks/useGameBackground';
 import { battleBackgroundStyle } from '@/lib/lobbyScenery';
@@ -58,12 +60,27 @@ export default function PlayerControllerUI() {
     handleHigherLowerGuess,
     handleHigherLowerSetSecret,
     handleHoldButton,
-    handleReleaseButton
+    handleReleaseButton,
+    handleTextAnswer
   } = gameState;
 
   // ── RESULT overlay ──
   if (phase === 'RESULT' && resultData) {
     return <ResultOverlay resultData={resultData} />;
+  }
+
+  // ── LEADERBOARD ──
+  if (phase === 'LEADERBOARD') {
+    const currentType = typeof window !== 'undefined' ? sessionStorage.getItem('game_type') : 'STANDARD';
+    if (currentType === 'PICTURE_RACE') {
+      return (
+        <IndividualLeaderboardPhase 
+          leaderboard={gameState.leaderboard || []} 
+          isFinalLeaderboard={gameState.isFinalLeaderboard}
+          isPlayerView={true} 
+        />
+      );
+    }
   }
 
   // ── MINIGAME ──
@@ -229,7 +246,14 @@ export default function PlayerControllerUI() {
           )}
         </QuestionPrompt>
 
-        {!isDragLayersQuestion(question?.questionType) && !isLineMatchingQuestion(question?.questionType) && (
+        {question?.gameType === 'PICTURE_RACE' ? (
+          <PictureRacePlayer
+            question={question}
+            phase={phase}
+            selectedId={selectedId}
+            onSubmitAnswer={handleTextAnswer}
+          />
+        ) : !isDragLayersQuestion(question?.questionType) && !isLineMatchingQuestion(question?.questionType) ? (
           <AnswerGrid
             question={question}
             phase={phase}
@@ -238,7 +262,7 @@ export default function PlayerControllerUI() {
             foxSmokescreen={foxSmokescreen}
             handleAnswer={(answerId) => handleAnswer(answerId, removedAnswers)}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );
