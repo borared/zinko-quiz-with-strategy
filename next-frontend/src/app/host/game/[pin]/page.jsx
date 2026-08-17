@@ -1,5 +1,7 @@
 "use client";
-import HostGame from '@/page/Host/HostGame';
+import dynamic from 'next/dynamic';
+
+const HostGame = dynamic(() => import('@/page/Host/HostGame'), { ssr: false });
 
 export default function Page() {
   return <HostGame />;

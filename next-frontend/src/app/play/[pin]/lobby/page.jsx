@@ -1,5 +1,7 @@
 "use client";
-import PlayerLobby from '@/page/Play/PlayerLobby';
+import dynamic from 'next/dynamic';
+
+const PlayerLobby = dynamic(() => import('@/page/Play/PlayerLobby'), { ssr: false });
 
 export default function Page() {
   return <PlayerLobby />;
