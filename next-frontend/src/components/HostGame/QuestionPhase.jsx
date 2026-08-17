@@ -42,7 +42,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
 
       <div className="relative z-10 flex flex-col flex-1 p-6 lg:p-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="bg-zk-black border-[3px] border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-xl px-6 py-3 text-left">
+          <div className="bg-zk-black border-[2px] border-black rounded-lg px-6 py-3 text-left">
             <span className="text-white/50 text-xs font-black uppercase tracking-widest leading-none mb-1 block">
               Round {question.round || 1}
             </span>
@@ -53,7 +53,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
 
           <CountdownRing timeLeft={timeLeft} total={totalTime} />
 
-          <div className="bg-zk-black border-[3px] border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] rounded-xl px-6 py-3 text-right">
+          <div className="bg-zk-black border-[2px] border-black rounded-lg px-6 py-3 text-right">
             <span className="text-white/50 text-xs font-black uppercase tracking-widest leading-none mb-1 block">
               Answered
             </span>
@@ -68,7 +68,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-zk-panel-bg border-[4px] border-zk-border shadow-[8px_8px_0_#000] rounded-2xl overflow-hidden mb-6 flex-1 flex flex-col items-center justify-center"
+          className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg overflow-hidden mb-6 flex-1 flex flex-col items-center justify-center"
         >
           {question.imageUrl && (
             <div className="w-full bg-[#2C3E50] flex items-center justify-center p-4 border-b-[3px] border-zk-border">
@@ -97,7 +97,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.07 }}
-                className={`flex items-center gap-4 rounded-2xl px-5 py-4 border-[3px] border-zk-border shadow-[4px_4px_0_#000] ${isTrueFalse ? 'justify-center' : ''}`}
+                className={`flex items-center gap-4 rounded-lg px-5 py-4 border-[2px] border-zk-border ${isTrueFalse ? 'justify-center' : ''}`}
                 style={{ backgroundColor: color.bg }}
               >
                 {!isTrueFalse && (

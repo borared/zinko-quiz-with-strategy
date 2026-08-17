@@ -45,7 +45,7 @@ export default function SkillPickPhase({ skillTimeLeft }) {
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="mt-8 bg-zk-panel-bg border-[4px] border-zk-border shadow-[6px_6px_0_#000] rounded-xl px-12 py-6 flex flex-col items-center z-10"
+        className="mt-8 bg-zk-panel-bg border-[2px] border-zk-border rounded-lg px-12 py-6 flex flex-col items-center z-10"
       >
         <span className="text-zk-text/60 font-black uppercase tracking-widest text-sm mb-1">
           Pick your skill

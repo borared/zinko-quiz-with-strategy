@@ -7,7 +7,7 @@ const TeamCard = ({ team, teamName, label, badge, icon, bgColor, onJoin }) => {
       
       {/* Card Box */}
       <div
-        className="relative w-full aspect-square border-[4px] border-zk-border flex items-center justify-center cursor-pointer select-none transition-transform duration-200 hover:scale-[1.02] rounded-xl"
+        className="relative w-full aspect-square border-[2px] border-zk-border flex items-center justify-center cursor-pointer select-none transition-transform duration-200 hover:scale-[1.02] rounded-lg"
         style={{ backgroundColor: bgColor }}
         onClick={onJoin}
       >
@@ -22,7 +22,7 @@ const TeamCard = ({ team, teamName, label, badge, icon, bgColor, onJoin }) => {
 
       <button
         onClick={onJoin}
-        className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[4px] border-zk-border py-3 font-black text-sm tracking-wider transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] mt-5 rounded-lg"
+        className="w-full flex items-center justify-center gap-2 bg-[#5D3FD3] hover:bg-zk-blue text-white border-[2px] border-zk-border py-3 font-black text-sm tracking-wider transition-transform hover:translate-y-[2px] hover:translate-x-[2px] active:translate-y-[4px] active:translate-x-[4px] mt-5 rounded-lg"
       >
         <Users size={16} />
         Join {teamName || `Team ${team}`}

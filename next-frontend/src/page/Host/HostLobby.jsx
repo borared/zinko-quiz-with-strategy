@@ -560,8 +560,8 @@ export default function HostLobby() {
             id="start-game-btn"
             onClick={handleStartGame}
             disabled={players.length === 0 || new Set(teams.map(t => players.filter(p => p.team === t).length)).size > 1 || startCountdown !== null}
-            className="px-16 py-1 border-[4px] border-[#000000] rounded-xl amatic-sc-regular text-4xl uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#FFCD29', color: '#000000', boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)' }}
+            className="px-16 py-3 bg-[#3B68FF] text-white border-[4px] border-[#000000] rounded-xl font-black text-xl tracking-[0.15em] hover:bg-zk-blue hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ boxShadow: '5px 5px 0px 0px rgba(0,0,0,1)' }}
           >
             {startCountdown !== null ? (
               <span className="text-4xl">{startCountdown}</span>
