@@ -53,6 +53,9 @@ const EnterNicknameSection = () => {
         const data = avatarRes?.data || avatarRes; // Handle unwrapped api responses
         const success = avatarRes?.success !== false;
 
+        // Store gameType for skip logic
+        sessionStorage.setItem('game_type', gameRes.gameType || 'STANDARD');
+
         if (success && Array.isArray(data)) {
           if (data.length > 0) {
             setAvatars(data);
@@ -112,7 +115,34 @@ const EnterNicknameSection = () => {
           if (response?.available) {
             sessionStorage.setItem('player_nickname', trimmedNickname);
             sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-            router.push(`/play/${pin}/choose-team`);
+            
+            const gameType = sessionStorage.getItem('game_type');
+            if (gameType === 'PICTURE_RACE') {
+              // Immediately join logic for individual games
+              const playerId = sessionStorage.getItem('player_id') || `guest_${Math.random().toString(36).slice(2, 10)}_${Date.now()}`;
+              sessionStorage.setItem('player_id', playerId);
+              sessionStorage.setItem('player_team', 'A'); // Default everyone to A
+              
+              socket.emit('player:join', { pin, playerId, nickname: trimmedNickname, avatar: selectedAvatar?.image_url || '', team: 'A' });
+              
+              const onJoined = () => {
+                socket.off('player:joined', onJoined);
+                socket.off('error', onError);
+                router.push(`/play/${pin}/lobby`);
+              };
+              
+              const onError = ({ message }) => {
+                showToast(message, 'error');
+                socket.off('player:joined', onJoined);
+                socket.off('error', onError);
+                setIsJoining(false);
+              };
+              
+              socket.once('player:joined', onJoined);
+              socket.once('error', onError);
+            } else {
+              router.push(`/play/${pin}/choose-team`);
+            }
           } else {
             setError(response?.message || 'Nickname already taken');
             showToast(response?.message || 'Nickname already taken', 'error');
@@ -122,7 +152,13 @@ const EnterNicknameSection = () => {
       } else {
         sessionStorage.setItem('player_nickname', trimmedNickname);
         sessionStorage.setItem('player_avatar', selectedAvatar?.image_url || '');
-        router.push(`/play/${pin}/choose-team`);
+        const gameType = sessionStorage.getItem('game_type');
+        if (gameType === 'PICTURE_RACE') {
+          sessionStorage.setItem('player_team', 'A');
+          router.push(`/play/${pin}/lobby`);
+        } else {
+          router.push(`/play/${pin}/choose-team`);
+        }
       }
     } else {
       router.push('/join');
