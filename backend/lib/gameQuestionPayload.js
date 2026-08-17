@@ -22,6 +22,7 @@ function buildGameQuestionPayload(question, game, questionIndex, extra = {}) {
   const lineMatchingPayload = isLineMatching ? buildLineMatchingPayload(fullAnswers) : {};
 
   return {
+    gameType: game.gameType || 'QUIZ',
     index: questionIndex,
     round: Math.floor(questionIndex / 5) + 1,
     match: (questionIndex % 5) + 1,
