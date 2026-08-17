@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lock } from "lucide-react";
 import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 
-export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, subPhase, currentTurn, team, background }) {
+export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, subPhase, currentTurn, team, background, isLeader }) {
   const [input, setInput] = useState("");
   const [showStatus, setShowStatus] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -63,6 +63,20 @@ export default function HigherLowerPlayer({ onGuess, onSetSecret, statusObj, sub
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-900 relative">
       <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
+      {/* Non-leader Overlay */}
+      {!isLeader && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md">
+          <div className="bg-zk-bg px-10 py-6 rounded-3xl border-[6px] border-black shadow-[0_8px_0_0_#000] rotate-[-2deg] flex flex-col items-center max-w-sm">
+            <h2 className="gasoek-one-regular text-4xl text-black uppercase tracking-widest text-center" style={{ textShadow: "2px 2px 0px rgba(255,255,255,0.5)" }}>
+              WAITING FOR LEADER
+            </h2>
+            <p className="font-bold text-2xl mt-2 opacity-80 text-center" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+              Only the Team Leader can play the minigame.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* INTRO Overlay */}
       {subPhase === 'INTRO' && (
