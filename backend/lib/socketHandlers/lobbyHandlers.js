@@ -17,9 +17,19 @@ function emitLobbyChatToAllPlayers(io, pin, event, payload) {
   io.to(getPlayerLobbyRoom(pin)).emit(event, payload);
 }
 
+function serializeLobbyPlayers(game) {
+  if (!game.teamLeaders) game.teamLeaders = {};
+  return game.players.map(p => ({
+    id: p.id,
+    nickname: p.nickname,
+    avatar: p.avatar,
+    team: p.team,
+    isLeader: game.teamLeaders[p.team] === p.id
+  }));
+}
+
 module.exports = function registerLobbyHandlers(io, socket, games) {
   // ── host:initialize ───────────────────────────────────────────────────────
-  // Host claims a pre-generated PIN (from REST endpoint) and loads quiz data
   socket.on('host:initialize', async ({ pin, quizId, token }) => {
     const game = games.get(pin);
     if (!game) {
@@ -48,13 +58,14 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       game.questions = data.slice(0, 15);
 
       console.log(`🎮 Host ${socket.id} initialized game PIN ${pin} with ${game.questions.length} questions`);
-      socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background });
+      socket.emit('host:initialized', { pin, questionCount: game.questions.length, background: game.background, sceneryProviderNickname: game.sceneryProviderNickname || null });
 
       // Immediately send current players list to the newly connected host
       socket.emit('lobby:players-update', {
-        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        players: serializeLobbyPlayers(game),
         count: game.players.length,
         background: game.background,
+        sceneryProviderNickname: game.sceneryProviderNickname || null,
         teams: game.teams,
         teamNames: game.teamNames || {},
       });
@@ -98,6 +109,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       answered: game.answers ? Object.keys(game.answers).length : 0,
       total: game.players.length,
       background: game.background,
+      sceneryProviderNickname: game.sceneryProviderNickname || null,
     };
 
     if (game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
@@ -134,6 +146,15 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
         playerButtons: game.playerButtons,
         heldColors: { A: Array.from(game.heldColors?.A || []), B: Array.from(game.heldColors?.B || []) }
       };
+    } else if (game.phase === 'MINIGAME_WORDLE') {
+      syncData.minigameData = {
+        wordLength: game.wordleSecret?.length || 5,
+        hint: game.wordleHint,
+        category: game.wordleCategory,
+        state: game.wordleState,
+        teams: game.teams,
+        teamNames: game.teamNames || {}
+      };
     }
 
     socket.emit('host:sync-state-response', syncData);
@@ -157,7 +178,8 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
-    if (!game.teams.includes(team)) {
+    const targetTeam = team || 'A';
+    if (!game.teams.includes(targetTeam)) {
       socket.emit('error', { message: 'Invalid team selection.' });
       return;
     }
@@ -174,46 +196,71 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     const existing = game.players.find(p => p.id === playerId);
 
     // Check team capacity (max 4 per team)
-    const teamCount = game.players.filter(p => p.team === team && p.id !== playerId).length;
+    const teamCount = game.players.filter(p => p.team === targetTeam && p.id !== playerId).length;
     if (teamCount >= 4) {
-      socket.emit('error', { message: `Team ${team} is full (max 4 players).` });
+      socket.emit('error', { message: `Team ${targetTeam} is full (max 4 players).` });
       return;
     }
+
+    if (!game.teamLeaders) game.teamLeaders = {};
 
     if (existing) {
       if (existing.socketId && existing.socketId !== socket.id) {
         socket.emit('error', { message: 'This player is already connected from another device.' });
         return;
       }
+      const oldTeam = existing.team;
       existing.socketId = socket.id;
       existing.nickname = trimmedNickname;
       existing.avatar = avatar || existing.avatar;
-      existing.team = team || existing.team;
+      existing.team = targetTeam;
+
+      if (oldTeam !== targetTeam) {
+        // Reassign leader for old team
+        if (game.teamLeaders[oldTeam] === playerId) {
+          const nextTeammate = game.players.find(p => p.team === oldTeam && p.id !== playerId);
+          if (nextTeammate) {
+            game.teamLeaders[oldTeam] = nextTeammate.id;
+          } else {
+            delete game.teamLeaders[oldTeam];
+          }
+        }
+        // Assign as leader for new team if no leader
+        if (!game.teamLeaders[targetTeam]) {
+          game.teamLeaders[targetTeam] = playerId;
+        }
+      }
     } else {
       game.players.push({
         id: playerId,
         socketId: socket.id,
         nickname: trimmedNickname,
         avatar: avatar || 'pizza',
-        team: team || 'A',
+        team: targetTeam,
         score: 0,
         lastPoints: 0,
         lastCorrect: null,
       });
+
+      // Assign as leader if new team has no leader
+      if (!game.teamLeaders[targetTeam]) {
+        game.teamLeaders[targetTeam] = playerId;
+      }
     }
 
     console.log(`👤 Player "${nickname}" joined game ${pin} (${game.players.length} total)`);
 
     // Broadcast updated player list to everyone in room (host + players)
     io.to(pin).emit('lobby:players-update', {
-      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      players: serializeLobbyPlayers(game),
       count: game.players.length,
       background: game.background,
+      sceneryProviderNickname: game.sceneryProviderNickname || null,
       teams: game.teams,
       teamNames: game.teamNames || {},
     });
 
-    socket.emit('player:joined', { success: true, nickname: trimmedNickname, avatar, team });
+    socket.emit('player:joined', { success: true, nickname: trimmedNickname, avatar, team: targetTeam });
   });
 
   // ── lobby:request-players ─────────────────────────────────────────────────
@@ -230,9 +277,10 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       socket.join(getPlayerLobbyRoom(pin));
     }
     socket.emit('lobby:players-update', {
-      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      players: serializeLobbyPlayers(game),
       count: game.players.length,
       background: game.background,
+      sceneryProviderNickname: game.sceneryProviderNickname || null,
       teams: game.teams,
       teamNames: game.teamNames || {},
     });
@@ -259,22 +307,47 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   });
 
   // ── lobby:set-background (host only) ──────────────────────────────────────
-  socket.on('lobby:set-background', async ({ pin, background }) => {
+  socket.on('lobby:set-background', async ({ pin, background, providerNickname }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'LOBBY') return;
     if (!isHostSocket(socket, game)) return;
-    if (!game.hostUserId) return;
 
-    try {
-      const ownsScenery = await sceneryService.userOwnsSceneryImage(game.hostUserId, background);
-      if (!ownsScenery) return;
-    } catch (err) {
-      console.error('Failed to validate scenery ownership:', err.message);
-      return;
+    if (!providerNickname) {
+      if (!game.hostUserId) return;
+
+      try {
+        const ownsScenery = await sceneryService.userOwnsSceneryImage(game.hostUserId, background);
+        if (!ownsScenery) return;
+      } catch (err) {
+        console.error('Failed to validate scenery ownership:', err.message);
+        return;
+      }
     }
 
     game.background = background;
-    io.to(pin).emit('lobby:background-update', { background });
+    game.sceneryProviderNickname = providerNickname || null;
+    io.to(pin).emit('lobby:background-update', { 
+      background, 
+      sceneryProviderNickname: game.sceneryProviderNickname 
+    });
+  });
+
+  // ── lobby:suggest-scenery ──────────────────────────────────────────────────
+  socket.on('lobby:suggest-scenery', ({ pin, playerId, background }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const player = game.players.find(p => p.id === playerId);
+    if (!player) return;
+
+    if (game.hostSocketId) {
+      io.to(game.hostSocketId).emit('host:scenery-requested', {
+        playerId,
+        nickname: player.nickname,
+        background
+      });
+    }
   });
 
   // ── lobby:add-team (host only) ────────────────────────────────────────────
@@ -300,11 +373,11 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       game.minigameTarget[nextTeam] = 100;
       
       io.to(pin).emit('lobby:players-update', {
-        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        players: serializeLobbyPlayers(game),
         count: game.players.length,
         background: game.background,
         teams: game.teams,
-      teamNames: game.teamNames || {},
+        teamNames: game.teamNames || {},
       });
     }
   });
@@ -318,9 +391,16 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     if (game.teams.length > 2) {
       const lastTeam = game.teams[game.teams.length - 1];
       
+      if (!game.teamLeaders) game.teamLeaders = {};
+
       // Reassign any players in this team to Team A just in case
       game.players.forEach(p => {
-        if (p.team === lastTeam) p.team = 'A';
+        if (p.team === lastTeam) {
+          p.team = 'A';
+          if (!game.teamLeaders['A']) {
+            game.teamLeaders['A'] = p.id;
+          }
+        }
       });
       
       game.teams.pop();
@@ -335,11 +415,11 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       delete game.minigameTarget[lastTeam];
 
       io.to(pin).emit('lobby:players-update', {
-        players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+        players: serializeLobbyPlayers(game),
         count: game.players.length,
         background: game.background,
         teams: game.teams,
-      teamNames: game.teamNames || {},
+        teamNames: game.teamNames || {},
       });
     }
   });
@@ -362,10 +442,28 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       return;
     }
 
+    const oldTeam = player.team;
     player.team = newTeam;
 
+    if (!game.teamLeaders) game.teamLeaders = {};
+
+    // Elect new leader for old team if necessary
+    if (game.teamLeaders[oldTeam] === playerId) {
+      const nextTeammate = game.players.find(p => p.team === oldTeam && p.id !== playerId);
+      if (nextTeammate) {
+        game.teamLeaders[oldTeam] = nextTeammate.id;
+      } else {
+        delete game.teamLeaders[oldTeam];
+      }
+    }
+
+    // Set as leader of new team if new team has no leader
+    if (!game.teamLeaders[newTeam]) {
+      game.teamLeaders[newTeam] = playerId;
+    }
+
     io.to(pin).emit('lobby:players-update', {
-      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      players: serializeLobbyPlayers(game),
       count: game.players.length,
       background: game.background,
       teams: game.teams,
@@ -447,7 +545,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
     game.teamNames[teamId] = trimmedName;
 
     io.to(pin).emit('lobby:players-update', {
-      players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+      players: serializeLobbyPlayers(game),
       count: game.players.length,
       background: game.background,
       teams: game.teams,
@@ -459,7 +557,10 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   socket.on('player:leave-team', ({ pin, playerId }) => {
     const game = games.get(pin);
     if (!game) return;
-    if (!requirePlayerSocket(game, socket, playerId)) return;
+
+    const player = game.players.find(p => p.id === playerId);
+    if (!player) return;
+    const team = player.team;
 
     if (game.phase === 'LOBBY') {
       const initialCount = game.players.length;
@@ -467,15 +568,60 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       socket.leave(getPlayerLobbyRoom(pin));
 
       if (game.players.length !== initialCount) {
+        // Reassign leader if necessary
+        if (game.teamLeaders && game.teamLeaders[team] === playerId) {
+          const nextTeammate = game.players.find(p => p.team === team);
+          if (nextTeammate) {
+            game.teamLeaders[team] = nextTeammate.id;
+          } else {
+            delete game.teamLeaders[team];
+          }
+        }
+
         console.log(`👋 Player ${playerId} explicitly left team in lobby ${pin}`);
         io.to(pin).emit('lobby:players-update', {
-          players: game.players.map(p => ({ id: p.id, nickname: p.nickname, avatar: p.avatar, team: p.team })),
+          players: serializeLobbyPlayers(game),
           count: game.players.length,
           background: game.background,
           teams: game.teams,
-      teamNames: game.teamNames || {},
+          teamNames: game.teamNames || {},
         });
       }
     }
+  });
+
+  // ── lobby:grant-leader ─────────────────────────────────────────────────────
+  socket.on('lobby:grant-leader', ({ pin, playerId, targetPlayerId }) => {
+    const game = games.get(pin);
+    if (!game || game.phase !== 'LOBBY') return;
+
+    const sender = requirePlayerSocket(game, socket, playerId);
+    if (!sender) return;
+
+    // Validate that the sender is the CURRENT leader of the team
+    const currentLeaderId = game.teamLeaders?.[sender.team];
+    if (currentLeaderId !== playerId) {
+      socket.emit('error', { message: 'Only the team leader can transfer leadership.' });
+      return;
+    }
+
+    const target = game.players.find(p => p.id === targetPlayerId);
+    if (!target || target.team !== sender.team) {
+      socket.emit('error', { message: 'You can only grant leader to a teammate.' });
+      return;
+    }
+
+    if (!game.teamLeaders) game.teamLeaders = {};
+    game.teamLeaders[sender.team] = targetPlayerId;
+
+    console.log(`👑 Leader "${sender.nickname}" transferred leadership of Team ${sender.team} to "${target.nickname}"`);
+
+    io.to(pin).emit('lobby:players-update', {
+      players: serializeLobbyPlayers(game),
+      count: game.players.length,
+      background: game.background,
+      teams: game.teams,
+      teamNames: game.teamNames || {},
+    });
   });
 };
