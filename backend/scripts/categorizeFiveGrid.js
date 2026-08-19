@@ -19,7 +19,7 @@ function shuffle(array) {
 
 async function main() {
   console.log("Fetching all words from the database...");
-  const allWords = await prisma.wordle_words.findMany({
+  const allWords = await prisma.fivegrid_words.findMany({
     select: { id: true }
   });
   
@@ -41,7 +41,7 @@ async function main() {
     
     if (ids.length > 0) {
       console.log(`Updating ${ids.length} words to category "${categoryName}"...`);
-      await prisma.wordle_words.updateMany({
+      await prisma.fivegrid_words.updateMany({
         where: { id: { in: ids } },
         data: { category: categoryName }
       });
