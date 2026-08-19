@@ -11,8 +11,9 @@ import RabbitRush from './Skills/RabbitRush';
 import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
-import DrawItPlayer from './DrawItPlayer';
+import ImposterPlayer from './ImposterPlayer';
 import WordlePlayer from './WordlePlayer';
+import DrawItPlayer from './DrawItPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 import { useGameBackground } from '@/hooks/useGameBackground';
@@ -40,7 +41,7 @@ export default function PlayerControllerUI() {
     minigameData,
     higherLowerData,
     wordleData,
-    drawItData,
+    imposterData,
     minigameSpinner,
     isWheelSpinning,
     
@@ -59,7 +60,10 @@ export default function PlayerControllerUI() {
     handleHigherLowerGuess,
     handleHigherLowerSetSecret,
     handleHoldButton,
-    handleReleaseButton
+    handleReleaseButton,
+    handleWordleGuess,
+    handleImposterSubmitClue,
+    handleImposterSabotageVote
   } = gameState;
 
   // ── RESULT overlay ──
@@ -126,20 +130,33 @@ export default function PlayerControllerUI() {
 
   if (phase === 'MINIGAME_DRAW_IT') {
     return (
+      <DrawItPlayer
+        pin={pin}
+        playerId={playerId}
+        winnerTeam={minigameData.winner}
+        winnerNickname={minigameData.winnerNickname}
+        word={minigameData.word}
+        teamNames={minigameData.teamNames}
+        isLeader={isLeader}
+        background={background}
+      />
+    );
+  }
+
+  if (phase === 'MINIGAME_IMPOSTER') {
+    return (
       <div 
-        className="min-h-screen flex flex-col relative transition-colors duration-300 p-4"
-        style={battleBackgroundStyle(background)}
+        className="min-h-screen flex flex-col relative transition-colors duration-300 p-0 bg-zk-black"
       >
-        <div className="absolute inset-0 bg-black/50 pointer-events-none z-0" />
         <div className="relative z-10 w-full h-full flex-1">
-          <DrawItPlayer 
+          <ImposterPlayer 
             pin={pin}
             playerId={playerId}
-            winnerTeam={drawItData.winnerTeam}
-            winnerNickname={drawItData.winnerNickname}
-            word={drawItData.word}
-            teamNames={drawItData.teamNames}
+            imposterData={imposterData}
+            team={team}
             isLeader={isLeader}
+            onSubmitClue={handleImposterSubmitClue}
+            onSabotageVote={handleImposterSabotageVote}
           />
         </div>
       </div>

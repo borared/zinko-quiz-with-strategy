@@ -93,17 +93,17 @@ export default function ResultOverlay({ resultData }) {
 
       {/* Zinko Style Total Score at Bottom Left */}
       <motion.div 
-        initial={{ x: -50, opacity: 0, rotate: -3 }}
-        animate={{ x: 0, opacity: 1, rotate: -3, y: [0, -8, 0] }}
+        initial={{ x: -50, opacity: 0 }}
+        animate={{ x: 0, opacity: 1, y: [0, -8, 0] }}
         transition={{ 
           x: { type: 'spring', stiffness: 200 },
           opacity: { duration: 0.5 },
           y: { repeat: Infinity, duration: 2.5, ease: "easeInOut" } 
         }}
-        className="absolute bottom-6 left-6 z-20 bg-zk-panel-bg text-zk-text border-[4px] border-zk-border rounded-xl px-6 py-2 font-['Outfit'] tracking-wide"
+        className="absolute bottom-6 left-6 z-20 text-white/90 font-['Outfit'] tracking-wide"
       >
         <p className="font-bold text-xl md:text-2xl">
-          Total Score: <span className="text-zk-blue ml-2 font-black text-2xl md:text-3xl">{resultData.totalScore?.toLocaleString()}</span>
+          Total Score: <span className="text-white ml-2 font-black text-2xl md:text-3xl">{resultData.totalScore?.toLocaleString()}</span>
         </p>
       </motion.div>
 

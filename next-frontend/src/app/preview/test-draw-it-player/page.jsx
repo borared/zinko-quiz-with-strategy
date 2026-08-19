@@ -16,7 +16,7 @@ export default function TestDrawItPlayer() {
   };
 
   return (
-    <div className="w-full h-screen bg-zk-blue p-4 relative">
+    <div className="w-full h-screen bg-zk-blue relative">
       <div className="absolute top-4 right-4 z-[100] flex flex-col gap-2">
         <button onClick={() => setWinner("A")} className="bg-zk-panel-bg p-2 rounded border-2 border-black font-bold">Team A Wins</button>
         <button onClick={() => setWinner(null)} className="bg-zk-panel-bg p-2 rounded border-2 border-black font-bold">Reset Winner</button>
@@ -31,6 +31,7 @@ export default function TestDrawItPlayer() {
         winnerNickname={winner ? "TestUser" : null}
         word={winner ? "apple" : null}
         teamNames={{A: "Alpha", B: "Beta"}}
+        background="/images/hero_bg2.png"
       />
     </div>
   );

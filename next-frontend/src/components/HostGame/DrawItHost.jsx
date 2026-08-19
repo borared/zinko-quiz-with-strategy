@@ -205,15 +205,15 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
         backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-0" />
 
       {/* Header Info */}
       <div className="relative z-10 w-full flex items-center justify-between mb-4">
-        <div className="bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl px-6 py-2">
+        <div className="bg-zk-panel-bg border-2 border-black rounded-xl px-6 py-2">
           <h2 className="font-black text-2xl">Draw It - Round {currentRound}/2</h2>
         </div>
         
-        <div className="bg-zk-bg border-[4px] border-[#000000] rounded-xl px-4 sm:px-6 py-2 flex flex-wrap items-center gap-3">
+        <div className="bg-zk-bg border-2 border-black rounded-xl px-4 sm:px-6 py-2 flex flex-wrap items-center gap-3">
           <Mail size={24} className="text-black" />
           <span className="font-black text-lg sm:text-xl">
             {emailStatus.status === 'error' ? 'Email failed — reveal word privately' : 'Word sent to your Email'}
@@ -224,7 +224,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
               getSocket()?.emit('host:send-secret-word', { pin });
             }}
             disabled={emailStatus.status === 'sending'}
-            className="flex items-center gap-2 font-black text-sm bg-zk-panel-bg px-4 py-2 rounded border-[3px] border-black cursor-pointer transition-all hover:bg-gray-100 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
+            className="flex items-center gap-2 font-black text-sm bg-zk-panel-bg px-4 py-2 rounded border-2 border-black cursor-pointer transition-all hover:bg-gray-100 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
             title="Resend Email"
           >
             <Send size={16} /> RESEND
@@ -232,7 +232,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
           <button
             onClick={() => setShowWordReveal((prev) => !prev)}
             disabled={!secretWord}
-            className="flex items-center gap-2 font-black text-sm bg-zk-blue text-white px-4 py-2 rounded border-[3px] border-black cursor-pointer transition-all hover:brightness-110 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
+            className="flex items-center gap-2 font-black text-sm bg-zk-blue text-white px-4 py-2 rounded border-2 border-black cursor-pointer transition-all hover:brightness-110 active:translate-y-1 disabled:opacity-50 disabled:active:translate-y-0"
             title="Privately reveal the secret word on this screen only"
           >
             {showWordReveal ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -241,7 +241,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
         </div>      </div>
 
       {/* Canvas Area */}
-      <div className="relative z-10 w-full flex-1 bg-zk-panel-bg border-[6px] border-[#000000] rounded-2xl overflow-hidden flex flex-col">
+      <div className="relative z-10 w-full flex-1 bg-white border-2 border-black rounded-2xl overflow-hidden flex flex-col">
         
         <div 
           className={`flex-1 w-full relative ${!contextMenu.visible ? 'cursor-none' : 'cursor-crosshair'}`}
@@ -299,7 +299,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
         </div>
 
         {/* Toolbar */}
-        <div className="h-16 border-t-[4px] border-[#000000] bg-gray-100 flex items-center justify-between px-6">
+        <div className="h-16 border-t-2 border-black bg-gray-100 flex items-center justify-between px-6">
           <span className="font-black text-gray-500 uppercase tracking-widest text-sm hidden sm:block">You are drawing...</span>
           
           <div className="flex gap-4">
@@ -314,7 +314,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
                   setTool('pen');
                   setActiveToolbarSlider(activeToolbarSlider === 'pen' ? null : 'pen');
                 }}
-                className={`p-2 rounded-lg border-[3px] border-[#000000] font-black uppercase transition-all flex items-center justify-center ${tool === 'pen' ? 'bg-zk-blue text-white' : 'bg-zk-panel-bg text-black hover:bg-gray-200'}`}
+                className={`p-2 rounded-lg border-2 border-black font-black uppercase transition-all flex items-center justify-center ${tool === 'pen' ? 'bg-zk-blue text-white' : 'bg-white text-black hover:bg-gray-100'}`}
                 title="Pen (Right click for size)"
               >
                 <Pen size={24} strokeWidth={3} />
@@ -322,7 +322,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
               
               {/* Vertical Slider Popup for Pen */}
               {activeToolbarSlider === 'pen' && (
-                <div className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-zk-panel-bg border-[3px] border-black rounded-xl p-3 z-50 flex flex-col items-center gap-3 w-16">
+                <div className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-white border-2 border-black rounded-xl p-3 z-50 flex flex-col items-center gap-3 w-16">
                   <span className="font-black text-sm bg-gray-200 w-10 text-center rounded">{penSize}</span>
                   <input
                     type="range"
@@ -356,7 +356,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
                   setTool('eraser');
                   setActiveToolbarSlider(activeToolbarSlider === 'eraser' ? null : 'eraser');
                 }}
-                className={`p-2 rounded-lg border-[3px] border-[#000000] font-black uppercase transition-all flex items-center justify-center ${tool === 'eraser' ? 'bg-zk-blue text-white' : 'bg-zk-panel-bg text-black hover:bg-gray-200'}`}
+                className={`p-2 rounded-lg border-2 border-black font-black uppercase transition-all flex items-center justify-center ${tool === 'eraser' ? 'bg-zk-blue text-white' : 'bg-white text-black hover:bg-gray-100'}`}
                 title="Eraser (Right click for size)"
               >
                 <Eraser size={24} strokeWidth={3} />
@@ -364,7 +364,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
               
               {/* Vertical Slider Popup for Eraser */}
               {activeToolbarSlider === 'eraser' && (
-                <div className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-zk-panel-bg border-[3px] border-black rounded-xl p-3 z-50 flex flex-col items-center gap-3 w-16">
+                <div className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 bg-white border-2 border-black rounded-xl p-3 z-50 flex flex-col items-center gap-3 w-16">
                   <span className="font-black text-sm bg-gray-200 w-10 text-center rounded">{eraserSize}</span>
                   <input
                     type="range"
@@ -386,10 +386,10 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
                 </div>
               )}
             </div>
-            <div className="w-[3px] bg-black mx-1 rounded-full"></div> {/* Separator */}
+            <div className="w-[2px] bg-black mx-1 rounded-full"></div> {/* Separator */}
             <button
               onClick={handleClear}
-              className="bg-red-600 hover:bg-red-700 text-white border-[3px] border-[#000000] p-2 rounded-lg font-black uppercase active:translate-y-1 transition-all flex items-center justify-center"
+              className="bg-red-600 hover:bg-red-700 text-white border-2 border-black p-2 rounded-lg font-black uppercase active:translate-y-1 transition-all flex items-center justify-center"
               title="Clear Canvas"
             >
               <Trash2 size={24} strokeWidth={3} />

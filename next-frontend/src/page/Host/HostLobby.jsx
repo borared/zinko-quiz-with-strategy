@@ -231,6 +231,22 @@ export default function HostLobby() {
   const [isQRExpanded, setIsQRExpanded] = useState(false);
   const [sceneryProviderNickname, setSceneryProviderNickname] = useState(null);
   const [requestedScenery, setRequestedScenery] = useState(null); // { playerId, nickname, background }
+  const [autoPlay, setAutoPlay] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('zinko_auto_play');
+      if (stored !== null) {
+        setAutoPlay(stored === 'true');
+      }
+    }
+  }, []);
+
+  const handleToggleAutoPlay = () => {
+    const newVal = !autoPlay;
+    setAutoPlay(newVal);
+    localStorage.setItem('zinko_auto_play', String(newVal));
+  };
 
   const scrollContainerRef = useRef(null);
   const prevTeamsLengthRef = useRef(teams.length);
@@ -475,6 +491,15 @@ export default function HostLobby() {
             Scan to Join
           </span>
         </div>
+
+        {/* Auto-Play Toggle */}
+        <button 
+          onClick={handleToggleAutoPlay}
+          className={`w-36 md:w-44 text-center font-bold text-[11px] md:text-xs py-2 px-2 rounded-lg shadow-lg border-2 tracking-wider disabled:opacity-50 ${autoPlay ? 'bg-green-600/80 border-green-400 text-white' : 'bg-neutral-800/80 border-neutral-500 text-neutral-300'}`}
+          disabled={startCountdown !== null}
+        >
+          Auto Next Question: {autoPlay ? 'On' : 'Off'}
+        </button>
       </motion.div>
 
       {/* ── Content Container ──────────────────────────────────────────── */}
@@ -577,7 +602,7 @@ export default function HostLobby() {
 
         <motion.div
           {...bounceIn(0.05)}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-30"
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-30 flex items-center gap-4"
         >
           <LobbySceneryPicker
             currentImage={bgImage}

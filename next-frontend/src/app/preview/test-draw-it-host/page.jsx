@@ -18,7 +18,7 @@ export default function TestDrawItHost() {
         winnerTeam={winner}
         winnerNickname={winner ? "TestUser" : null}
         teamNames={{A: "Alpha", B: "Beta"}}
-        background="/images/backgrounds/default.jpg" 
+        background="/images/hero_bg2.png" 
       />
     </div>
   );

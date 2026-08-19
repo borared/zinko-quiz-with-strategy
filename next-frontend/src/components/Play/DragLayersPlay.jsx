@@ -147,7 +147,7 @@ function PoolChip({
           onClick?.(event);
         }
       }}
-      className={`flex rounded-xl border-[3px] text-left touch-none select-none ${compact ? 'flex-col items-center gap-1.5 px-2.5 py-2.5 text-center' : 'items-center gap-2 px-3 py-3'
+      className={`flex rounded-xl border-2 text-left touch-none select-none ${compact ? 'flex-col items-center gap-1.5 px-2.5 py-2.5 text-center' : 'items-center gap-2 px-3 py-3'
         } ${isSelected ? 'border-zk-yellow ring-2 ring-zk-yellow' : 'border-zk-border'
         } ${getPlayLayerColor(answer.color, answer.layerIndex)} text-white min-w-0 ${fillWidth ? 'w-full' : compact ? 'w-full' : 'shrink-0'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
         } ${isDragging ? 'opacity-[0.35]' : isSelected ? 'scale-[1.02]' : ''}`}
@@ -230,7 +230,7 @@ function LayerSlot({
       transition={LAYER_SPRING}
       className="relative min-w-0 pt-2"
     >
-      <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-[2px] sm:border-[3px] border-zk-border min-w-[24px] sm:min-w-[28px] text-center pointer-events-none">
+      <span className="absolute top-0 -left-1 z-10 bg-[#5D3FD3] text-white text-xs sm:text-sm md:text-base font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border-2 border-zk-border min-w-[24px] sm:min-w-[28px] text-center pointer-events-none">
         {index + 1}
       </span>
 
@@ -253,7 +253,7 @@ function LayerSlot({
           borderColor: highlighted || isOver ? '#FFCD29' : hasAnswer ? '#000000' : emptyBorderColor,
         }}
         className={`${inPanel ? 'min-h-[96px] sm:min-h-[108px]' : 'min-h-[72px] sm:min-h-[80px]'
-          } rounded-lg sm:rounded-xl border-[2px] sm:border-[3px] border-dashed p-1.5 sm:p-2 pt-4 sm:pt-5 flex items-stretch justify-center ${isDisabled ? 'opacity-50' : selectedChipId ? 'cursor-pointer' : ''
+          } rounded-lg sm:rounded-xl border-2 border-dashed p-1.5 sm:p-2 pt-4 sm:pt-5 flex items-stretch justify-center ${isDisabled ? 'opacity-50' : selectedChipId ? 'cursor-pointer' : ''
           }`}
       >
         {children}
@@ -311,7 +311,7 @@ function AnswerBank({
         e.stopPropagation();
         onReturnSelected();
       }}
-      className={`rounded-xl border-[3px] border-zk-border flex flex-col w-full shrink-0 transition-shadow ${inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-zk-panel-bg/90 p-2 gap-1.5'
+      className={`rounded-xl border-2 border-zk-border flex flex-col w-full shrink-0 transition-shadow ${inPanel ? 'bg-zk-black/5 p-2 sm:p-3 gap-2' : 'bg-zk-panel-bg/90 p-2 gap-1.5'
         } ${!isDisabled && selectedChipId ? 'cursor-pointer ring-2 ring-[#5D3FD3]/30' : ''} ${bankActive ? 'ring-2 ring-[#5D3FD3]/40 shadow-[0_0_0_3px_#5D3FD3]' : ''
         }`}
     >
@@ -683,7 +683,7 @@ export default function DragLayersPlay({
           whileTap={isComplete && !isDisabled ? { scale: 0.97 } : {}}
           onClick={handleSubmit}
           disabled={!isComplete || isDisabled}
-          className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-[3px] border-zk-border font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${isComplete && !isDisabled
+          className={`w-full sm:w-auto mx-auto shrink-0 mt-1 sm:mt-2 ${inPanel ? 'mb-4 sm:mb-5' : ''} flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border-2 border-zk-border font-black text-sm sm:text-base uppercase tracking-widest transition-colors ${isComplete && !isDisabled
             ? 'bg-[#5D3FD3] text-white hover:bg-[#4d33b8]'
             : inPanel
               ? 'bg-zk-black/10 text-zk-text/35 cursor-not-allowed'
