@@ -58,22 +58,22 @@ const AnswerGrid = memo(() => {
           {/* Math/Formatting Toolbar (shown when focused) */}
           {!isTrueFalse && focusedAnswerId === ans.id && (
             <div 
-              className="absolute bottom-full left-0 mb-2 bg-[#E0E0E0] border-[2px] border-zk-border flex items-center gap-3 p-1.5 text-zk-text font-bold z-20 rounded-lg"
+              className="absolute bottom-full left-0 mb-2 bg-zk-panel-bg border-[2px] border-zk-border flex items-center gap-3 p-1.5 text-zk-text font-bold z-20 rounded-lg shadow-lg"
               onMouseDown={(e) => e.preventDefault()} // Prevent losing focus on input
             >
-              <button onClick={() => alert('Image upload for answer is not implemented yet!')} className="p-1 hover:bg-zk-panel-bg transition-colors rounded"><ImageIcon size={18} /></button>
+              <button onClick={() => alert('Image upload for answer is not implemented yet!')} className="p-1 hover:bg-zk-bg/20 transition-colors rounded"><ImageIcon size={18} /></button>
               <div className="border-l border-zk-border h-5 rounded-xl"></div>
               
-              <button onClick={() => document.execCommand('bold')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">B</button>
-              <button onClick={() => document.execCommand('italic')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm italic rounded">I</button>
-              <button onClick={() => document.execCommand('subscript')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">X₂</button>
-              <button onClick={() => document.execCommand('superscript')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">X²</button>
+              <button onClick={() => document.execCommand('bold')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm font-bold rounded">B</button>
+              <button onClick={() => document.execCommand('italic')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm italic rounded">I</button>
+              <button onClick={() => document.execCommand('subscript')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm rounded">X₂</button>
+              <button onClick={() => document.execCommand('superscript')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm rounded">X²</button>
               
               <div className="border-l border-zk-border h-5 rounded-xl"></div>
-              <button onClick={() => insertText('<')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">&lt;</button>
-              <button onClick={() => insertText('>')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm font-bold rounded">&gt;</button>
-              <button onClick={() => insertText('Ω')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">Ω</button>
-              <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-zk-panel-bg transition-colors px-1.5 text-sm rounded">f(x)</button>
+              <button onClick={() => insertText('<')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm font-bold rounded">&lt;</button>
+              <button onClick={() => insertText('>')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm font-bold rounded">&gt;</button>
+              <button onClick={() => insertText('Ω')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm rounded">Ω</button>
+              <button onClick={() => insertText('f(x)')} className="p-1 hover:bg-zk-bg/20 transition-colors px-1.5 text-sm rounded">f(x)</button>
             </div>
           )}
 
@@ -92,7 +92,13 @@ const AnswerGrid = memo(() => {
               onFocus={() => setFocusedAnswerId(ans.id)}
               onBlur={(e) => {
                 setFocusedAnswerId(null);
-                handleAnswerTextChange(ans.id, e.target.innerHTML);
+                const htmlVal = e.currentTarget.textContent === '' ? '' : e.currentTarget.innerHTML;
+                handleAnswerTextChange(ans.id, htmlVal);
+              }}
+              onInput={(e) => {
+                if (e.currentTarget.textContent === '') {
+                  e.currentTarget.innerHTML = '';
+                }
               }}
               dangerouslySetInnerHTML={{ __html: ans.text || '' }}
             />
