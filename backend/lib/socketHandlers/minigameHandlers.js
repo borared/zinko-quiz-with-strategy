@@ -1,5 +1,5 @@
 const { isHostSocket, requirePlayerSocket } = require('../socketAuth');
-const { getRandomWordleWord } = require('../wordleWords');
+const { getRandomFiveGridWord } = require('../fivegridWords');
 const Groq = require('groq-sdk');
 const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 const prisma = require('../prisma');
@@ -245,50 +245,50 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     }
   });
 
-  // ── host:start-minigame-wordle-intro ────────────────────────────────────────
-  socket.on('host:start-minigame-wordle-intro', ({ pin }) => {
+  // ── host:start-minigame-fivegrid-intro ────────────────────────────────────────
+  socket.on('host:start-minigame-fivegrid-intro', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
-    game.phase = 'MINIGAME_WORDLE_CATEGORY_PICK';
-    io.to(pin).emit('game:minigame-wordle-category-pick');
+    game.phase = 'MINIGAME_FIVEGRID_CATEGORY_PICK';
+    io.to(pin).emit('game:minigame-fivegrid-category-pick');
   });
 
-  // ── host:start-minigame-wordle ──────────────────────────────────────────────
-  socket.on('host:start-minigame-wordle', ({ pin, category }) => {
+  // ── host:start-minigame-fivegrid ──────────────────────────────────────────────
+  socket.on('host:start-minigame-fivegrid', ({ pin, category }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
     
-    game.phase = 'MINIGAME_WORDLE';
-    const secretObj = getRandomWordleWord(category);
-    game.wordleSecret = secretObj.word.toUpperCase();
-    game.wordleHint = secretObj.hint;
-    game.wordleCategory = category;
+    game.phase = 'MINIGAME_FIVEGRID';
+    const secretObj = getRandomFiveGridWord(category);
+    game.fivegridSecret = secretObj.word.toUpperCase();
+    game.fivegridHint = secretObj.hint;
+    game.fivegridCategory = category;
     
     const baseLives = 5;
     
-    game.wordleState = {};
+    game.fivegridState = {};
     game.teams.forEach(team => {
-      game.wordleState[team] = { lives: baseLives, guesses: [], isEliminated: false };
+      game.fivegridState[team] = { lives: baseLives, guesses: [], isEliminated: false };
     });
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
 
-    io.to(pin).emit('game:minigame-wordle-started', { 
-      wordLength: game.wordleSecret.length,
-      hint: game.wordleHint,
+    io.to(pin).emit('game:minigame-fivegrid-started', { 
+      wordLength: game.fivegridSecret.length,
+      hint: game.fivegridHint,
       category: category,
-      state: game.wordleState,
+      state: game.fivegridState,
       teams: game.teams,
       teamNames: game.teamNames || {}
     });
   });
 
-  // ── player:wordle-guess ───────────────────────────────────────────────────
-  socket.on('player:wordle-guess', async ({ pin, playerId, guess }) => {
+  // ── player:fivegrid-guess ───────────────────────────────────────────────────
+  socket.on('player:fivegrid-guess', async ({ pin, playerId, guess }) => {
     const game = games.get(pin);
-    if (!game || game.phase !== 'MINIGAME_WORDLE') return;
+    if (!game || game.phase !== 'MINIGAME_FIVEGRID') return;
     if (!requirePlayerSocket(game, socket, playerId)) return;
 
     const team = game.playerTeamMap ? game.playerTeamMap[playerId] : game.players.find(p => p.id === playerId)?.team;
@@ -297,20 +297,20 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const leaderId = game.teamLeaders?.[team];
     if (leaderId !== playerId) return; // Only leader can guess
 
-    const teamState = game.wordleState[team];
+    const teamState = game.fivegridState[team];
     if (teamState.isEliminated || teamState.lives <= 0) return;
 
     const upperGuess = guess.trim().toUpperCase();
-    const secretWord = game.wordleSecret;
+    const secretWord = game.fivegridSecret;
 
     if (upperGuess.length !== secretWord.length) return;
 
     if (upperGuess !== secretWord) {
-      const isValid = await prisma.wordle_words.findUnique({
+      const isValid = await prisma.fivegrid_words.findUnique({
         where: { word: upperGuess }
       });
       if (!isValid) {
-        socket.emit('game:wordle-invalid-guess', { message: 'Not in word list' });
+        socket.emit('game:fivegrid-invalid-guess', { message: 'Not in word list' });
         return;
       }
     }
@@ -347,9 +347,9 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         teamState.isEliminated = true;
       }
 
-      const allEliminated = game.teams.every(t => game.wordleState[t]?.isEliminated);
+      const allEliminated = game.teams.every(t => game.fivegridState[t]?.isEliminated);
       if (allEliminated) {
-        io.to(pin).emit('game:wordle-progress', {
+        io.to(pin).emit('game:fivegrid-progress', {
           team,
           lives: teamState.lives,
           guesses: teamState.guesses,
@@ -357,7 +357,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
         });
 
         setTimeout(() => {
-          if (games.has(pin) && game.phase === 'MINIGAME_WORDLE') {
+          if (games.has(pin) && game.phase === 'MINIGAME_FIVEGRID') {
             game.phase = 'MINIGAME_FINISHED_NO_WINNER';
             io.to(pin).emit('game:minigame-finished', { 
               winnerTeam: null, 
@@ -368,7 +368,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
           }
         }, 3000);
       } else {
-        io.to(pin).emit('game:wordle-progress', {
+        io.to(pin).emit('game:fivegrid-progress', {
           team,
           lives: teamState.lives,
           guesses: teamState.guesses,
@@ -477,7 +477,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const imposterTeam = teams[Math.floor(Math.random() * teams.length)];
     game.imposterTeam = imposterTeam;
 
-    const secretObj = getRandomWordleWord('all');
+    const secretObj = getRandomFiveGridWord('all');
     game.imposterSecret = secretObj.word.toUpperCase();
     
     game.imposterRound = 1;
