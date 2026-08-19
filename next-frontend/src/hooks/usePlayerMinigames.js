@@ -29,11 +29,15 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
   const [minigameSpinner, setMinigameSpinner] = useState({ id: null, name: "", preSelectedRewardId: null });
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
-  const [drawItData, setDrawItData] = useState({
-    winnerTeam: null,
-    winnerNickname: null,
-    word: null,
-    teamNames: {}
+  const [imposterData, setImposterData] = useState({
+    subPhase: null,
+    round: 1,
+    isImposter: false,
+    secret: null,
+    imposterTeam: null,
+    votes: {},
+    correctTeams: [],
+    currentTeamTurn: null
   });
 
   useEffect(() => {
@@ -100,8 +104,14 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
 
     const onMinigameWordleStarted = ({ wordLength, hint, category, state }) => {
       setWordleData({ wordLength, hint, category, state });
+      setMinigameSpinner(false);
       setPhase('MINIGAME_WORDLE');
-      setQuestion(null);
+    };
+
+    const onMinigameDrawItStarted = ({ word, teamNames }) => {
+      setMinigameData(prev => ({ ...prev, word, teamNames, winner: null }));
+      setMinigameSpinner(false);
+      setPhase('MINIGAME_DRAW_IT');
     };
 
     const onWordleProgress = ({ team, lives, guesses, isEliminated }) => {
@@ -120,32 +130,41 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       }
     };
 
-    const onMinigameDrawItStarted = ({ teamNames }) => {
-      setDrawItData({
-        winnerTeam: null,
-        winnerNickname: null,
-        word: null,
-        teamNames: teamNames || {}
-      });
-      setPhase('MINIGAME_DRAW_IT');
-      setQuestion(null);
-    };
-
-    const onDrawItRoundWinner = ({ team, nickname, word }) => {
-      setDrawItData(prev => ({
+    const onMinigameImposterStarted = ({ round, currentTeamTurn }) => {
+      setPhase('MINIGAME_IMPOSTER');
+      setImposterData(prev => ({
         ...prev,
-        winnerTeam: team,
-        winnerNickname: nickname,
-        word
+        subPhase: 'CLUE_PHASE',
+        round,
+        currentTeamTurn
       }));
+      getSocket().emit('player:imposter-request-role', { pin, playerId });
     };
 
-    const onDrawItRoundStartPlayer = () => {
-      setDrawItData(prev => ({
+    const onImposterRole = ({ isImposter, secret }) => {
+      setImposterData(prev => ({ ...prev, isImposter, secret }));
+    };
+
+    const onImposterNextRound = ({ round, currentTeamTurn }) => {
+      setImposterData(prev => ({ ...prev, round, currentTeamTurn }));
+    };
+
+    const onImposterTurnChanged = ({ round, currentTeamTurn }) => {
+      setImposterData(prev => ({ ...prev, round, currentTeamTurn }));
+    };
+
+    const onImposterVotingPhase = () => {
+      setImposterData(prev => ({ ...prev, subPhase: 'VOTING_PHASE' }));
+    };
+
+    const onImposterReveal = ({ imposterTeam, secret, votes, correctTeams }) => {
+      setImposterData(prev => ({
         ...prev,
-        winnerTeam: null,
-        winnerNickname: null,
-        word: null
+        subPhase: 'REVEAL_PHASE',
+        imposterTeam,
+        secret,
+        votes,
+        correctTeams
       }));
     };
 
@@ -159,13 +178,17 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on('game:minigame-finished', onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
     socket.on("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
-    socket.on('game:minigame-wordle-started', onMinigameWordleStarted);
+    socket.on("game:minigame-wordle-started", onMinigameWordleStarted);
+    socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
     socket.on('game:wordle-progress', onWordleProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
     
-    socket.on('game:minigame-draw-it-started', onMinigameDrawItStarted);
-    socket.on('game:draw-it-round-winner', onDrawItRoundWinner);
-    socket.on('game:draw-it-round-start-player', onDrawItRoundStartPlayer);
+    socket.on('game:minigame-imposter-started', onMinigameImposterStarted);
+    socket.on('game:imposter-role', onImposterRole);
+    socket.on('game:imposter-next-round', onImposterNextRound);
+    socket.on('game:imposter-turn-changed', onImposterTurnChanged);
+    socket.on('game:imposter-voting-phase', onImposterVotingPhase);
+    socket.on('game:imposter-reveal', onImposterReveal);
 
     return () => {
       socket.off('game:minigame-started', onMinigameStarted);
@@ -179,12 +202,16 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off("game:wheel-spinning", onWheelSpinning);
       socket.off("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
       socket.off("game:minigame-wordle-started", onMinigameWordleStarted);
+      socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
       socket.off('game:wordle-progress', onWordleProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
       
-      socket.off('game:minigame-draw-it-started', onMinigameDrawItStarted);
-      socket.off('game:draw-it-round-winner', onDrawItRoundWinner);
-      socket.off('game:draw-it-round-start-player', onDrawItRoundStartPlayer);
+      socket.off('game:minigame-imposter-started', onMinigameImposterStarted);
+      socket.off('game:imposter-role', onImposterRole);
+      socket.off('game:imposter-next-round', onImposterNextRound);
+      socket.off('game:imposter-turn-changed', onImposterTurnChanged);
+      socket.off('game:imposter-voting-phase', onImposterVotingPhase);
+      socket.off('game:imposter-reveal', onImposterReveal);
     };
   }, [getSocket, setPhase, setQuestion, playerId]);
 
@@ -219,17 +246,29 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     if (socket) socket.emit('player:wordle-guess', { pin, playerId, guess });
   }, [pin, playerId, getSocket]);
 
+  const handleImposterSubmitClue = useCallback((clue) => {
+    const socket = getSocket();
+    if (socket) socket.emit('player:imposter-submit-clue', { pin, playerId, clue });
+  }, [pin, playerId, getSocket]);
+
+  const handleImposterSabotageVote = useCallback((voteTeam) => {
+    const socket = getSocket();
+    if (socket) socket.emit('player:imposter-sabotage-vote', { pin, playerId, voteTeam });
+  }, [pin, playerId, getSocket]);
+
   return {
     minigameData,
     higherLowerData,
     wordleData,
-    drawItData,
+    imposterData,
     minigameSpinner,
     isWheelSpinning,
     handleHigherLowerGuess,
     handleHigherLowerSetSecret,
     handleHoldButton,
     handleReleaseButton,
-    handleWordleGuess
+    handleWordleGuess,
+    handleImposterSubmitClue,
+    handleImposterSabotageVote
   };
 }
