@@ -332,7 +332,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
       {/* Modals */}
       {showDetailsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-zk-panel-bg border-[4px] border-zk-border !shadow-none p-6 max-w-2xl w-full flex flex-col rounded-xl max-h-[80vh] overflow-hidden sm:mt-20">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-zk-panel-bg border-[1.5px] border-zk-border !shadow-none p-6 max-w-2xl w-full flex flex-col rounded-lg max-h-[80vh] overflow-hidden sm:mt-20">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-3xl font-black text-zk-text uppercase leading-none">{quiz.title}</h3>
@@ -340,21 +340,21 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                   By {formatDiscoveryCreatorName(quiz.creator)} • {questions.length} Questions
                 </p>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[2px] border-zk-border w-8 h-8 flex items-center justify-center font-black rounded-lg transition-colors hover:bg-[#e63e3e]">
+              <button onClick={() => setShowDetailsModal(false)} className="bg-[#FF4B4B] text-white border-[1.5px] border-zk-border w-8 h-8 flex items-center justify-center font-black rounded-md transition-colors hover:bg-[#e63e3e]">
                 X
               </button>
             </div>
             
             <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
               {questions.map((q, i) => (
-                <div key={q.id || i} className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg p-3 !shadow-none">
+                <div key={q.id || i} className="bg-zk-panel-bg border-[1.5px] border-zk-border rounded-md p-3 !shadow-none">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-black text-sm uppercase bg-zk-bg px-2 py-0.5 border-[1.5px] border-zk-border rounded">Q{i + 1} (R{q.round})</span>
+                    <span className="font-black text-sm uppercase bg-zk-bg px-2 py-0.5 border-[1.5px] border-zk-border rounded-md">Q{i + 1} (R{q.round})</span>
                   </div>
-                  <p className="font-bold text-zk-text mb-2">{q.question_text}</p>
+                  <p className="font-bold text-zk-text mb-2">{q.question_text || q.text}</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {q.answers?.map((a, j) => (
-                      <div key={j} className={`border-[1.5px] border-zk-border rounded p-1.5 font-bold ${a.is_correct ? 'bg-green-400 text-zk-text' : 'bg-gray-100 text-gray-500'}`}>
+                      <div key={j} className={`border-[1px] border-zk-border rounded-md p-1.5 font-bold ${a.isCorrect || a.is_correct ? 'bg-green-400 text-zk-text' : 'bg-gray-100 text-gray-500'}`}>
                         {a.text}
                       </div>
                     ))}
@@ -367,12 +367,12 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
             </div>
             
             {!isOwnQuiz && (
-              <div className="mt-4 pt-4 border-t-[3px] border-zk-border flex justify-end">
+              <div className="mt-4 pt-4 border-t-[1.5px] border-zk-border flex justify-end">
                 {alreadyCloned ? (
                   <button
                     type="button"
                     onClick={showAlreadyClonedToast}
-                    className="bg-zk-green/25 text-zk-text border-[2px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
+                    className="bg-zk-green/25 text-zk-text border-[1.5px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-md transition-colors hover:bg-zk-green/35 flex items-center justify-center gap-1.5 leading-none pt-2"
                   >
                     <CheckCheck size={16} /> Cloned
                   </button>
@@ -381,7 +381,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
                     type="button"
                     onClick={() => { setShowDetailsModal(false); handleCloneClick(); }}
                     disabled={isCloning}
-                    className="bg-[#5D3FD3] text-white border-[2px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-lg transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 leading-none pt-2 disabled:opacity-60"
+                    className="bg-[#5D3FD3] text-white border-[1.5px] border-zk-border px-8 py-2 font-['Amatic_SC'] font-bold text-2xl !shadow-none rounded-md transition-colors hover:bg-[#4e33b8] flex items-center justify-center gap-1.5 leading-none pt-2 disabled:opacity-60"
                   >
                     {isCloning ? <><Loader2 size={16} className="animate-spin" /> Cloning...</> : <><Copy size={16} /> Clone Quiz</>}
                   </button>
