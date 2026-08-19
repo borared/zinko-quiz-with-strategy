@@ -217,7 +217,7 @@ model picture_race_questions {
   @@index([game_id])
 }
 
-model wordle_words {
+model fivegrid_words {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   word       String   @unique
   category   String   @default("General")

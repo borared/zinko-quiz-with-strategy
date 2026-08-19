@@ -12,7 +12,7 @@ import ButterflyEffect from './Skills/ButterflyEffect';
 import VaultBreakerPlayer from './VaultBreakerPlayer';
 import HigherLowerPlayer from './HigherLowerPlayer';
 import ImposterPlayer from './ImposterPlayer';
-import WordlePlayer from './WordlePlayer';
+import FiveGridPlayer from './FiveGridPlayer';
 import DrawItPlayer from './DrawItPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
@@ -40,7 +40,7 @@ export default function PlayerControllerUI() {
     
     minigameData,
     higherLowerData,
-    wordleData,
+    fivegridData,
     imposterData,
     minigameSpinner,
     isWheelSpinning,
@@ -61,7 +61,7 @@ export default function PlayerControllerUI() {
     handleHigherLowerSetSecret,
     handleHoldButton,
     handleReleaseButton,
-    handleWordleGuess,
+    handleFiveGridGuess,
     handleImposterSubmitClue,
     handleImposterSabotageVote
   } = gameState;
@@ -84,19 +84,19 @@ export default function PlayerControllerUI() {
     );
   }
 
-  if (phase === 'MINIGAME_WORDLE') {
+  if (phase === 'MINIGAME_FIVEGRID') {
     return (
-      <WordlePlayer 
-        wordleData={gameState.wordleData}
+      <FiveGridPlayer 
+        fivegridData={gameState.fivegridData}
         team={team}
-        onGuess={gameState.handleWordleGuess}
+        onGuess={gameState.handleFiveGridGuess}
         background={background}
         isLeader={isLeader}
       />
     );
   }
 
-  if (phase === 'MINIGAME_WORDLE_CATEGORY_PICK') {
+  if (phase === 'MINIGAME_FIVEGRID_CATEGORY_PICK') {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center p-6 text-center z-20 text-white"
@@ -246,6 +246,7 @@ export default function PlayerControllerUI() {
               selectedId={selectedId}
               foxSmokescreen={foxSmokescreen}
               onSubmitMatches={handleSubmitMatches}
+              timeLeft={timeLeft}
               inPanel
             />
           )}

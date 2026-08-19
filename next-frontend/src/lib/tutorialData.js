@@ -40,8 +40,8 @@ export const tutorialData = [
     ]
   },
   {
-    id: 'wordle',
-    title: 'Wordle',
+    id: 'fivegrid',
+    title: 'Five Grid',
     category: 'Mini Games',
     description: 'Classic word-guessing fun. Solve the 5-letter word before your attempts run out!',
     image: '/images/yeti.png',
@@ -53,7 +53,7 @@ export const tutorialData = [
       },
       {
         heading: 'Multiplayer Twist',
-        text: 'Work together with your team leader to guess the word, and be the first team to correctly solve the Wordle to win!',
+        text: 'Work together with your team leader to guess the word, and be the first team to correctly solve the Five Grid to win!',
       }
     ]
   },

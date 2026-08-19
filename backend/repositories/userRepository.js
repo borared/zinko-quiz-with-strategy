@@ -231,7 +231,7 @@ const getPublicProfileByIdentifier = async (identifier) => {
             }
           },
           questions: {
-            select: { id: true, round: true }
+            orderBy: { order_index: 'asc' }
           }
         },
         orderBy: {

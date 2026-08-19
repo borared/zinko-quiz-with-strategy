@@ -257,7 +257,7 @@ const GameCreatorContent = () => {
                       onClick={() => setActiveRound(round.id)}
                       className={`relative border-[3px] border-zk-border p-3 lg:p-4 transition-colors rounded-xl ${
                         isActive
-                          ? `${round.color} text-zk-text`
+                          ? `${round.color} text-zk-black`
                           : 'bg-zk-panel-bg text-zk-text hover:bg-zk-bg/20'
                       }`}
                     >
@@ -265,7 +265,7 @@ const GameCreatorContent = () => {
                         <div className="text-left min-w-0">
                           <p
                             className={`text-[9px] lg:text-[10px] font-black uppercase tracking-widest ${
-                              isActive ? 'text-zk-text/60' : 'text-zk-text/50'
+                              isActive ? 'text-zk-black/60' : 'text-zk-text/50'
                             }`}
                           >
                             {round.difficulty}
@@ -280,7 +280,9 @@ const GameCreatorContent = () => {
                               ? 'bg-zk-blue text-white'
                               : count > 0
                                 ? 'bg-zk-panel-bg text-zk-text'
-                                : 'bg-zk-black/5 text-zk-text/40'
+                                : isActive
+                                  ? 'bg-zk-black/15 text-zk-black/60'
+                                  : 'bg-zk-black/5 text-zk-text/40'
                           }`}
                         >
                           {count}/5

@@ -48,7 +48,7 @@ const QuestionEditor = () => {
       {/* Question Title */}
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center gap-3">
-          <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Question {questionNumber}</label>
+          <label className="text-xs font-bold text-zk-text tracking-wider">Question {questionNumber}</label>
           <div className="flex items-center gap-2">
             <QuestionTypePicker
               value={activeQuestion.questionType || QUESTION_TYPES.MULTIPLE_CHOICE}
@@ -56,7 +56,7 @@ const QuestionEditor = () => {
             />
             <button
               onClick={() => deleteQuestion(activeQuestion.id)}
-              className="flex items-center gap-1.5 text-[#E74C3C] border-[2px] border-[#E74C3C] hover:bg-[#E74C3C] hover:text-white px-3 py-1.5 rounded-lg transition-all font-black text-sm uppercase tracking-widest"
+              className="flex items-center gap-1.5 text-[#E74C3C] border-[2px] border-[#E74C3C] hover:bg-[#E74C3C] hover:text-white px-3 py-1.5 rounded-lg transition-all font-black text-sm"
             >
               <Trash2 size={18} strokeWidth={3} />
               Delete
@@ -108,7 +108,7 @@ const QuestionEditor = () => {
         <div className="border-[3px] border-zk-border p-6 bg-zk-panel-bg/40 backdrop-blur-md flex flex-col gap-4 rounded-lg overflow-visible">
           <div className="flex gap-4 overflow-visible">
             <div className="flex-1 flex flex-col gap-1 relative z-20">
-              <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Time Limit</label>
+              <label className="text-xs font-bold text-zk-text tracking-wider">Time Limit</label>
               <CreatorSelectPicker
                 fullWidth
                 placement="top"
@@ -118,7 +118,7 @@ const QuestionEditor = () => {
               />
             </div>
             <div className="flex-1 flex flex-col gap-1 relative z-20">
-              <label className="text-xs font-bold text-zk-text uppercase tracking-wider">Points</label>
+              <label className="text-xs font-bold text-zk-text tracking-wider">Points</label>
               <CreatorSelectPicker
                 fullWidth
                 placement="top"

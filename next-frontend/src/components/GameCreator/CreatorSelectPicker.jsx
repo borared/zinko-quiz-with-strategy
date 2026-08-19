@@ -40,7 +40,7 @@ export default function CreatorSelectPicker({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center justify-between gap-3 bg-zk-panel-bg text-zk-text border-[2px] border-zk-border hover:bg-zk-bg/20 px-3 py-1.5 transition-colors font-black text-sm uppercase tracking-widest ${
+        className={`flex items-center justify-between gap-3 bg-zk-panel-bg text-zk-text border-[2px] border-zk-border hover:bg-zk-bg/20 px-3 py-1.5 transition-colors font-black text-sm ${
           fullWidth ? 'w-full' : 'min-w-[12.5rem]'
         } ${
           open

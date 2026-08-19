@@ -17,8 +17,8 @@ const CELL_BG = {
   empty: 'border-white/10 bg-black/20 text-transparent'
 };
 
-export default function WordleHost({ wordleData }) {
-  const { wordLength = 5, hint, category, state, teams = ['A', 'B'], teamNames = {} } = wordleData;
+export default function FiveGridHost({ fivegridData }) {
+  const { wordLength = 5, hint, category, state, teams = ['A', 'B'], teamNames = {} } = fivegridData;
 
   const renderTeam = (teamName, teamData) => {
     const style = TEAM_STYLES[teamName] || FALLBACK_STYLE;

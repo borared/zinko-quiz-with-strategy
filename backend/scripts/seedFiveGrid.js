@@ -28,7 +28,7 @@ async function main() {
             category: 'General'
           }));
           
-          await prisma.wordle_words.createMany({
+          await prisma.fivegrid_words.createMany({
             data: batch,
             skipDuplicates: true
           });

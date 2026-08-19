@@ -14,8 +14,8 @@ import LeaderboardPhase from "./LeaderboardPhase";
 import VaultBreakerHost from "./VaultBreakerHost";
 import HigherLowerHost from "./HigherLowerHost";
 import ImposterHost from "./ImposterHost";
-import WordleHost from "./WordleHost";
-import WordleCategoryPicker from "./WordleCategoryPicker";
+import FiveGridHost from "./FiveGridHost";
+import FiveGridCategoryPicker from "./FiveGridCategoryPicker";
 import RewardWheel from "./RewardWheel";
 import MinigamePicker from "./MinigamePicker";
 import DrawItHost from "./DrawItHost";
@@ -279,8 +279,8 @@ export default function HostGameUI() {
       setIsWheelSpinning(true);
     };
 
-    const onMinigameWordleCategoryPick = () => {
-      setPhase("MINIGAME_WORDLE_CATEGORY_PICK");
+    const onMinigameFiveGridCategoryPick = () => {
+      setPhase("MINIGAME_FIVEGRID_CATEGORY_PICK");
     };
 
     const onMinigameImposterStarted = ({ round, teams, teamNames, currentTeamTurn }) => {
@@ -346,10 +346,10 @@ export default function HostGameUI() {
       getSocket().emit("game:next-question", { pin });
     };
 
-    const onMinigameWordleStarted = ({ wordLength, hint, category, state }) => {
+    const onMinigameFiveGridStarted = ({ wordLength, hint, category, state }) => {
       setMinigameData(prev => ({ ...prev, wordLength, hint, category, state, winner: null }));
       setIsWheelSpinning(false);
-      setPhase("MINIGAME_WORDLE");
+      setPhase("MINIGAME_FIVEGRID");
     };
 
     const onMinigameDrawItStarted = ({ word, teamNames }) => {
@@ -358,7 +358,7 @@ export default function HostGameUI() {
       setPhase("MINIGAME_DRAW_IT");
     };
 
-    const onWordleProgress = ({ team, lives, guesses, isEliminated }) => {
+    const onFiveGridProgress = ({ team, lives, guesses, isEliminated }) => {
       setMinigameData(prev => ({
         ...prev,
         state: {
@@ -420,10 +420,10 @@ export default function HostGameUI() {
     socket.on("game:reward-queue-empty", onRewardQueueEmpty);
     socket.on("game:minigame-finished", onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
-    socket.on("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
-    socket.on("game:minigame-wordle-started", onMinigameWordleStarted);
+    socket.on("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
+    socket.on("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
     socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
-    socket.on("game:wordle-progress", onWordleProgress);
+    socket.on("game:fivegrid-progress", onFiveGridProgress);
     socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
@@ -453,10 +453,10 @@ export default function HostGameUI() {
       socket.off("game:reward-queue-empty", onRewardQueueEmpty);
       socket.off("game:minigame-finished", onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
-      socket.off("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
-      socket.off("game:minigame-wordle-started", onMinigameWordleStarted);
+      socket.off("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
+      socket.off("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
       socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
-      socket.off("game:wordle-progress", onWordleProgress);
+      socket.off("game:fivegrid-progress", onFiveGridProgress);
       socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
   }, [getSocket, pin]);
@@ -473,7 +473,7 @@ export default function HostGameUI() {
 
     // If it's the end of Round 1 (assuming 5 questions per round, next index is 5)
     if (question?.index === 4) {
-      getSocket().emit("host:start-minigame-wordle-intro", { pin });
+      getSocket().emit("host:start-minigame-fivegrid-intro", { pin });
     }
     // If it's the end of Round 2 (next index is 10)
     else if (question?.index === 9) {
@@ -614,10 +614,10 @@ export default function HostGameUI() {
             />
           )}
 
-          {phase === "MINIGAME_WORDLE_CATEGORY_PICK" && (
-            <WordleCategoryPicker
+          {phase === "MINIGAME_FIVEGRID_CATEGORY_PICK" && (
+            <FiveGridCategoryPicker
               onSelectCategory={(category) => {
-                getSocket().emit("host:start-minigame-wordle", { pin, category });
+                getSocket().emit("host:start-minigame-fivegrid", { pin, category });
               }}
             />
           )}
@@ -634,8 +634,8 @@ export default function HostGameUI() {
             />
           )}
 
-          {phase === "MINIGAME_WORDLE" && (
-            <WordleHost wordleData={minigameData} />
+          {phase === "MINIGAME_FIVEGRID" && (
+            <FiveGridHost fivegridData={minigameData} />
           )}
 
           {phase === "MINIGAME_RACING" && minigameData.teamVaults && (

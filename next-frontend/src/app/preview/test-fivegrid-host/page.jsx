@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import WordleHost from '@/components/HostGame/WordleHost';
+import FiveGridHost from '@/components/HostGame/FiveGridHost';
 
-export default function TestWordleHostPage() {
-  const [wordleData, setWordleData] = useState({
+export default function TestFiveGridHostPage() {
+  const [fivegridData, setFivegridData] = useState({
     wordLength: 5,
     hint: "A programming language",
     category: "Technology",
@@ -26,7 +26,7 @@ export default function TestWordleHostPage() {
   useEffect(() => {
     // Simulate someone making a guess
     const t1 = setTimeout(() => {
-      setWordleData(prev => ({
+      setFivegridData(prev => ({
         ...prev,
         state: { 
           ...prev.state, 
@@ -52,7 +52,7 @@ export default function TestWordleHostPage() {
 
     // Simulate team B guessing correctly
     const t2 = setTimeout(() => {
-      setWordleData(prev => ({
+      setFivegridData(prev => ({
         ...prev,
         state: { 
           ...prev.state, 
@@ -76,7 +76,7 @@ export default function TestWordleHostPage() {
       className="w-full h-screen font-sans bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: 'url("https://hyfqsjidyxufsatveaih.supabase.co/storage/v1/object/public/scenery/city.jpg")' }}
     >
-      <WordleHost wordleData={wordleData} />
+      <FiveGridHost fivegridData={fivegridData} />
     </div>
   );
 }
