@@ -146,12 +146,12 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
         playerButtons: game.playerButtons,
         heldColors: { A: Array.from(game.heldColors?.A || []), B: Array.from(game.heldColors?.B || []) }
       };
-    } else if (game.phase === 'MINIGAME_WORDLE') {
+    } else if (game.phase === 'MINIGAME_FIVEGRID') {
       syncData.minigameData = {
-        wordLength: game.wordleSecret?.length || 5,
-        hint: game.wordleHint,
-        category: game.wordleCategory,
-        state: game.wordleState,
+        wordLength: game.fivegridSecret?.length || 5,
+        hint: game.fivegridHint,
+        category: game.fivegridCategory,
+        state: game.fivegridState,
         teams: game.teams,
         teamNames: game.teamNames || {}
       };
