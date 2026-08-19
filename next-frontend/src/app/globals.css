@@ -16,7 +16,7 @@
   --zk-green: #00C853;
   --zk-coral: #FF6B4A;
   --zk-pink: #FF5FA8;
-  --zk-cream: #FFD54F;
+  --zk-cream: #B58900;
   --zk-red: #FF3B30;
   --zk-shadow-sm: 2px 2px 0 0 #000;
   --zk-shadow-md: 4px 4px 0 0 #000;
@@ -126,7 +126,7 @@
     background:
       radial-gradient(circle at 10% 20%, rgba(93, 63, 211, 0.12) 0%, transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(255, 107, 74, 0.1) 0%, transparent 35%),
-      linear-gradient(180deg, var(--zk-yellow) 0%, var(--zk-cream) 55%, #f7e49a 100%);
+      linear-gradient(180deg, var(--zk-yellow) 0%, #FFD54F 55%, #f7e49a 100%);
   }
 
   .dark .zk-workspace-bg {
@@ -148,6 +148,20 @@
   .creator-shell .zk-panel,
   .creator-shell .zk-panel-glass {
     box-shadow: none;
+  }
+
+  /* Sharper and thinner strokes for clickable containers in creator section */
+  .creator-shell .border-\[3px\]:not(.border-b-\[3px\]):not(.border-0),
+  .creator-shell .border-2:not(.rounded-none):not(.border-t-0),
+  .creator-shell input:not(.border-0),
+  .creator-shell textarea:not(.border-0),
+  .creator-shell select:not(.border-0) {
+    border-width: 1.5px !important;
+    border-radius: 8px !important;
+  }
+
+  .creator-shell .border-b-\[3px\] {
+    border-bottom-width: 1.5px !important;
   }
 
   .shop-shell .zk-panel,
