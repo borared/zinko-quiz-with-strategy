@@ -19,7 +19,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     currentTurn: null
   });
 
-  const [wordleData, setWordleData] = useState({
+  const [fivegridData, setFivegridData] = useState({
     wordLength: 0,
     hint: "",
     category: "",
@@ -97,15 +97,15 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       setIsWheelSpinning(true);
     };
 
-    const onMinigameWordleCategoryPick = () => {
-      setPhase('MINIGAME_WORDLE_CATEGORY_PICK');
+    const onMinigameFiveGridCategoryPick = () => {
+      setPhase('MINIGAME_FIVEGRID_CATEGORY_PICK');
       setQuestion(null);
     };
 
-    const onMinigameWordleStarted = ({ wordLength, hint, category, state }) => {
-      setWordleData({ wordLength, hint, category, state });
+    const onMinigameFiveGridStarted = ({ wordLength, hint, category, state }) => {
+      setFivegridData({ wordLength, hint, category, state });
       setMinigameSpinner(false);
-      setPhase('MINIGAME_WORDLE');
+      setPhase('MINIGAME_FIVEGRID');
     };
 
     const onMinigameDrawItStarted = ({ word, teamNames }) => {
@@ -114,8 +114,8 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       setPhase('MINIGAME_DRAW_IT');
     };
 
-    const onWordleProgress = ({ team, lives, guesses, isEliminated }) => {
-      setWordleData(prev => ({
+    const onFiveGridProgress = ({ team, lives, guesses, isEliminated }) => {
+      setFivegridData(prev => ({
         ...prev,
         state: {
           ...prev.state,
@@ -177,10 +177,10 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on('game:higher-lower-feedback', onHigherLowerFeedback);
     socket.on('game:minigame-finished', onMinigameFinished);
     socket.on("game:wheel-spinning", onWheelSpinning);
-    socket.on("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
-    socket.on("game:minigame-wordle-started", onMinigameWordleStarted);
+    socket.on("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
+    socket.on("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
     socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
-    socket.on('game:wordle-progress', onWordleProgress);
+    socket.on('game:fivegrid-progress', onFiveGridProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
     
     socket.on('game:minigame-imposter-started', onMinigameImposterStarted);
@@ -200,10 +200,10 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off('game:higher-lower-feedback', onHigherLowerFeedback);
       socket.off('game:minigame-finished', onMinigameFinished);
       socket.off("game:wheel-spinning", onWheelSpinning);
-      socket.off("game:minigame-wordle-category-pick", onMinigameWordleCategoryPick);
-      socket.off("game:minigame-wordle-started", onMinigameWordleStarted);
+      socket.off("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
+      socket.off("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
       socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
-      socket.off('game:wordle-progress', onWordleProgress);
+      socket.off('game:fivegrid-progress', onFiveGridProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
       
       socket.off('game:minigame-imposter-started', onMinigameImposterStarted);
@@ -241,9 +241,9 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     if (socket) socket.emit('player:release-button', { pin, playerId, color });
   }, [pin, playerId, getSocket]);
 
-  const handleWordleGuess = useCallback((guess) => {
+  const handleFiveGridGuess = useCallback((guess) => {
     const socket = getSocket();
-    if (socket) socket.emit('player:wordle-guess', { pin, playerId, guess });
+    if (socket) socket.emit('player:fivegrid-guess', { pin, playerId, guess });
   }, [pin, playerId, getSocket]);
 
   const handleImposterSubmitClue = useCallback((clue) => {
@@ -259,7 +259,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
   return {
     minigameData,
     higherLowerData,
-    wordleData,
+    fivegridData,
     imposterData,
     minigameSpinner,
     isWheelSpinning,
@@ -267,7 +267,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     handleHigherLowerSetSecret,
     handleHoldButton,
     handleReleaseButton,
-    handleWordleGuess,
+    handleFiveGridGuess,
     handleImposterSubmitClue,
     handleImposterSabotageVote
   };
