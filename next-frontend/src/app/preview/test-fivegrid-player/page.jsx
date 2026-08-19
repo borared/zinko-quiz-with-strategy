@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from 'react';
-import WordlePlayer from '@/components/Play/WordlePlayer';
+import React, { useState, useEffect } from 'react';
+import FiveGridPlayer from '@/components/Play/FiveGridPlayer';
 
-export default function TestWordlePlayerPage() {
-  const [wordleData, setWordleData] = useState({
+export default function TestFiveGridPlayerPage() {
+  const [fivegridData, setFivegridData] = useState({
     wordLength: 5,
     hint: "A popular frontend library",
     category: "Web Development",
@@ -12,8 +12,38 @@ export default function TestWordlePlayerPage() {
     }
   });
 
+  const [timeLeft, setTimeLeft] = useState(240); // 4 minutes
+
+  const guesses = fivegridData.state.A.guesses;
+  const isSolved = guesses.some(g => g.result.every(res => res === 'correct'));
+  const isEliminated = fivegridData.state.A.isEliminated;
+
+  useEffect(() => {
+    if (isSolved || isEliminated || timeLeft <= 0) {
+      if (timeLeft <= 0 && !isEliminated && !isSolved) {
+        setFivegridData(prev => ({
+          ...prev,
+          state: {
+            ...prev.state,
+            A: {
+              ...prev.state.A,
+              isEliminated: true
+            }
+          }
+        }));
+      }
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, isSolved, isEliminated]);
+
   const handleGuess = (guess) => {
-    setWordleData(prev => {
+    setFivegridData(prev => {
       const secret = "REACT";
       const upperGuess = guess.toUpperCase();
       const result = Array(secret.length).fill('absent');
@@ -59,12 +89,13 @@ export default function TestWordlePlayerPage() {
 
   return (
     <div className="w-full h-screen font-sans bg-zk-black">
-      <WordlePlayer 
-        wordleData={wordleData} 
+      <FiveGridPlayer 
+        fivegridData={fivegridData} 
         team="A" 
         onGuess={handleGuess} 
         background="bg-zk-black"
         isLeader={true}
+        timeLeft={timeLeft}
       />
     </div>
   );
