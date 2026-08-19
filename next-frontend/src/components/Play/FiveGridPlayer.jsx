@@ -25,8 +25,8 @@ const KEY_BG = {
   default: 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 hover:-translate-y-0.5 active:translate-y-0 shadow-md active:shadow-none'
 };
 
-export default function WordlePlayer({ wordleData, team, onGuess, background, isLeader }) {
-  const { wordLength = 5, category, state } = wordleData;
+export default function FiveGridPlayer({ fivegridData, team, onGuess, background, isLeader, timeLeft }) {
+  const { wordLength = 5, category, state, hint } = fivegridData;
   const myState = state?.[team] || { lives: 5, guesses: [], isEliminated: false };
   const { guesses = [], isEliminated } = myState;
   const isSolved = guesses.some(g => g.result.every(res => res === 'correct'));
@@ -36,6 +36,7 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
   const [currentGuess, setCurrentGuess] = useState('');
   const { getSocket, isConnected } = useSocketStore();
   const [error, setError] = useState(null);
+  const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
     const socket = getSocket();
@@ -46,9 +47,9 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
       setTimeout(() => setError(null), 2000);
     };
 
-    socket.on('game:wordle-invalid-guess', onInvalidGuess);
+    socket.on('game:fivegrid-invalid-guess', onInvalidGuess);
     return () => {
-      socket.off('game:wordle-invalid-guess', onInvalidGuess);
+      socket.off('game:fivegrid-invalid-guess', onInvalidGuess);
     };
   }, [getSocket, isConnected]);
 
@@ -136,7 +137,11 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleKeyPress]);
 
-  if (isEliminated) {
+  const isTimeOut = timeLeft !== undefined && timeLeft <= 0;
+
+  if (isEliminated || isTimeOut) {
+    const heading = isTimeOut ? "Time's Up!" : "Eliminated!";
+    const description = isTimeOut ? "Your team ran out of time." : "Your team ran out of attempts.";
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50 bg-neutral-950/90 backdrop-blur-sm">
         <motion.img 
@@ -146,8 +151,8 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
           animate={{ y: [0, -20, 0] }}
           transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         />
-        <h2 className="gasoek-one-regular text-7xl text-zk-red uppercase tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '3px black' }}>Eliminated!</h2>
-        <p className="text-4xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '3px' }}>Your team ran out of attempts.</p>
+        <h2 className="gasoek-one-regular text-7xl text-zk-red uppercase tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '3px black' }}>{heading}</h2>
+        <p className="text-4xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '3px' }}>{description}</p>
       </div>
     );
   }
@@ -170,6 +175,12 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
 
   return (
     <div className="w-full h-[100dvh] flex flex-col items-center p-4 z-20 relative text-black pt-4 bg-white overflow-y-auto">
+      {/* Absolute positioned timer text at top right edge */}
+      {timeLeft !== undefined && (
+        <div className={`absolute top-6 right-6 sm:right-8 z-50 font-black text-4xl font-sans tracking-widest select-none ${timeLeft < 30 ? 'text-zk-red animate-pulse' : 'text-[#2c3e50]'}`}>
+          {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        </div>
+      )}
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {mounted && bgElements.map((el) => (
@@ -321,6 +332,51 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
           </div>
         </div>
       </div>
+
+      {/* Floating Hint Button at bottom right */}
+      {hint && (
+        <button
+          onClick={() => setShowHint(true)}
+          className="absolute bottom-6 right-6 z-40 bg-neutral-100 border-2 border-neutral-200 text-[#2c3e50] font-black text-lg px-4 py-2.5 rounded-full shadow-md hover:bg-neutral-200 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+          title="Show Hint"
+        >
+          <span>💡</span>
+          <span className="hidden sm:inline font-sans font-bold">Clue</span>
+        </button>
+      )}
+
+      {/* Glassmorphic Hint Overlay Modal */}
+      <AnimatePresence>
+        {showHint && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowHint(false)}
+            className="fixed inset-0 flex items-center justify-center p-6 text-center z-[100] bg-black/60 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-neutral-900 border-4 border-zk-yellow rounded-2xl p-8 max-w-sm w-full shadow-2xl relative"
+            >
+              <div className="text-5xl mb-4">💡</div>
+              <h3 className="gasoek-one-regular text-4xl text-zk-yellow tracking-widest mb-4">Clue / Hint</h3>
+              <p className="text-xl text-white font-bold mb-6 font-sans">
+                {hint}
+              </p>
+              <button
+                onClick={() => setShowHint(false)}
+                className="w-full py-3 bg-zk-yellow text-black font-black text-xl rounded-lg shadow-md border-2 border-black hover:bg-yellow-400 active:translate-y-0.5 transition-all"
+              >
+                Got it!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
