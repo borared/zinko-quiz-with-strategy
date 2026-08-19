@@ -170,11 +170,11 @@ module.exports = function registerGameHandlers(io, socket, games) {
         A: Array.from(game.heldColors?.A || []),
         B: Array.from(game.heldColors?.B || [])
       }
-    } : game.phase === 'MINIGAME_WORDLE' ? {
-      wordLength: game.wordleSecret?.length || 5,
-      hint: game.wordleHint,
-      category: game.wordleCategory,
-      state: game.wordleState,
+    } : game.phase === 'MINIGAME_FIVEGRID' ? {
+      wordLength: game.fivegridSecret?.length || 5,
+      hint: game.fivegridHint,
+      category: game.fivegridCategory,
+      state: game.fivegridState,
       teams: game.teams,
       teamNames: game.teamNames || {}
     } : null;
