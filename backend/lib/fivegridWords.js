@@ -57,7 +57,7 @@ const CATEGORIES = {
   ]
 };
 
-function getRandomWordleWord(categoryName) {
+function getRandomFiveGridWord(categoryName) {
   const categoryWords = CATEGORIES[categoryName] || CATEGORIES["General & Fun"];
   const index = Math.floor(Math.random() * categoryWords.length);
   return categoryWords[index];
@@ -65,5 +65,5 @@ function getRandomWordleWord(categoryName) {
 
 module.exports = {
   CATEGORIES,
-  getRandomWordleWord
+  getRandomFiveGridWord
 };
