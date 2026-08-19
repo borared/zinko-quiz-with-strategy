@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketStore } from '@/store/useSocketStore';
 import { Send } from 'lucide-react';
 
-export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, teamNames, isLeader }) {
+export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, teamNames, isLeader, background }) {
   const canvasRef = useRef(null);
   const { getSocket, isConnected } = useSocketStore();
   const [guess, setGuess] = useState("");
@@ -92,18 +92,23 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
   };
 
   return (
-    <div className="relative w-full h-full min-h-[400px] flex flex-col p-4 sm:p-6">
-      
+    <div 
+      className="relative w-full h-full min-h-[400px] flex flex-col p-4 sm:p-6 overflow-hidden bg-zk-blue"
+      style={background ? { backgroundImage: `url('${background}')`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+    >
+      {/* Blurred Overlay */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-0" />
+
+      <div className="relative z-10 flex flex-col h-full w-full flex-1">
       {/* Title */}
       <h2 
-        className="text-3xl font-black text-white uppercase text-center mb-4 zinko-font"
-        style={{ WebkitTextStroke: '2px #1a1a1a' }}
+        className="text-3xl font-black text-white text-center mb-4 zinko-font drop-shadow-md"
       >
         Guess the Drawing!
       </h2>
 
       {/* Canvas Container */}
-      <div className="relative w-full flex-1 max-h-[500px] bg-zk-panel-bg border-[4px] border-[#000000] rounded-xl overflow-hidden">
+      <div className="relative w-full flex-1 min-h-[60vh] bg-white border-2 border-black rounded-2xl overflow-hidden shadow-lg">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
@@ -155,11 +160,11 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
             </button>
           </form>
         ) : (
-          <div className="bg-[#1A1A24]/60 border-[3px] border-black rounded-xl p-3 text-center">
-            <p className="text-zk-yellow font-black uppercase tracking-widest text-lg font-sans">
+          <div className="p-3 text-center">
+            <p className="text-zk-yellow font-black tracking-widest text-lg font-sans drop-shadow-md">
               Waiting for Leader to guess...
             </p>
-            <p className="text-white/80 font-bold text-xs mt-0.5">
+            <p className="text-white/80 font-bold text-base mt-1 drop-shadow-md">
               Only the Team Leader can submit guesses for your team.
             </p>
           </div>
@@ -192,6 +197,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -31,6 +31,7 @@ export function setNavAuthCache(isSignedIn, user) {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
+        username: user.username,
         imageUrl: user.imageUrl,
         email: user.primaryEmailAddress?.emailAddress ?? null,
       },

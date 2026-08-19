@@ -16,6 +16,7 @@ export default function UserProfilePage() {
   
   const cachedProfile = useProfileStore(state => state.profiles[username]);
   const setCachedProfile = useProfileStore(state => state.setProfile);
+  const fetchProfileIfNotCached = useProfileStore(state => state.fetchProfileIfNotCached);
 
   const [profile, setProfile] = useState(cachedProfile || null);
   const [loading, setLoading] = useState(!cachedProfile);
@@ -31,22 +32,27 @@ export default function UserProfilePage() {
       return;
     }
 
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const data = await api.get(`/api/user/profile/${username}`);
-        setProfile(data);
-        setCachedProfile(username, data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || 'Failed to load user profile.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    let isSubscribed = true;
+    setLoading(true);
 
-    fetchProfile();
-  }, [username, cachedProfile, setCachedProfile]);
+    fetchProfileIfNotCached(username)
+      .then((data) => {
+        if (isSubscribed) {
+          setProfile(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isSubscribed) {
+          setError(err.message || 'Failed to load user profile.');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [username, cachedProfile, fetchProfileIfNotCached]);
 
   if (loading) {
     return (
@@ -221,7 +227,11 @@ export default function UserProfilePage() {
                       key={friend.clerk_id}
                       className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                     >
-                      <Link href={`/u/${friend.username || friend.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
+                      <Link 
+                        href={`/u/${friend.username || friend.clerk_id}`} 
+                        onMouseEnter={() => fetchProfileIfNotCached(friend.username || friend.clerk_id)}
+                        className="flex items-center gap-3 cursor-pointer group"
+                      >
                         <img
                           src={friend.avatar_url || '/images/avatars/default.png'}
                           alt={friend.username}

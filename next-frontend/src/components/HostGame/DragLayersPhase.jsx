@@ -100,7 +100,7 @@ export default function DragLayersPhase({ question, timeLeft, totalTime, answere
               {steps.map((answer) => (
                 <div
                   key={answer.id}
-                  className={`rounded-xl border-4 border-zk-border px-8 py-4 font-black text-white text-2xl shadow-md ${answer.color}`}
+                  className={`rounded-xl border-2 border-zk-border px-8 py-4 font-black text-white text-2xl shadow-md ${answer.color}`}
                 >
                   {displayAnswerText(answer.text) || 'Step'}
                 </div>

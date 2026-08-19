@@ -17,7 +17,8 @@ import NotificationSidebar from './NotificationSidebar';
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const isDashboardView = ['/dashboard', '/discovery', '/library', '/create-game', '/create-picture-race', '/flashcard', '/classpin', '/reports'].some(p => pathname?.startsWith(p));
+  const [mounted, setMounted] = useState(false);
+  const isDashboardView = mounted && pathname && ['/dashboard', '/discovery', '/library', '/create-game', '/create-picture-race', '/flashcard', '/classpin', '/reports'].some(p => pathname.startsWith(p));
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +29,7 @@ const Navbar = () => {
   const [showModal, setShowModal] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const fetchProfileIfNotCached = useProfileStore((s) => s.fetchProfileIfNotCached);
 
   const { unreadCount, fetchNotifications } = useNotificationStore();
   const isJwtReady = useAuthStore((s) => s.isJwtReady);
@@ -39,9 +41,14 @@ const Navbar = () => {
   const [cachedAuth, setCachedAuth] = useState(null);
 
   useEffect(() => {
-    setCachedAuth(getNavAuthCache());
+    setMounted(true);
+    const cached = getNavAuthCache();
+    setCachedAuth(cached);
     hydrateCart();
-  }, [hydrateCart]);
+    if (cached?.isSignedIn && cached?.user?.username) {
+      fetchProfileIfNotCached(cached.user.username);
+    }
+  }, [hydrateCart, fetchProfileIfNotCached]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -61,7 +68,6 @@ const Navbar = () => {
     }
   }, [displayIsSignedIn, displayUser?.id, isJwtReady, fetchNotifications]);
 
-  const fetchProfileIfNotCached = useProfileStore((s) => s.fetchProfileIfNotCached);
 
   useEffect(() => {
     if (displayIsSignedIn && displayUser?.username) {
@@ -91,6 +97,9 @@ const Navbar = () => {
   }, [menuOpen]);
 
   const getLinkClass = (path) => {
+    if (!mounted || !pathname) {
+      return "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-pointer font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-block";
+    }
     // Basic active check based on pathname
     const isActive = pathname?.startsWith(path) && path !== '/';
 
@@ -140,6 +149,7 @@ const Navbar = () => {
           <div className="relative" ref={dropdownRef}>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
+              onMouseEnter={() => displayUser?.username && fetchProfileIfNotCached(displayUser.username)}
               className="relative w-12 h-12 border-2 border-zk-border overflow-hidden bg-zk-panel-bg cursor-pointer rounded-xl transition-opacity hover:opacity-90"
             >
               <img src={displayUser?.imageUrl} alt={displayUser?.firstName} className="w-full h-full object-cover" />
@@ -164,6 +174,7 @@ const Navbar = () => {
 
                     <button
                       onClick={() => { setMenuOpen(false); router.push(`/u/${displayUser?.username || displayUser?.id}`); }}
+                      onMouseEnter={() => (displayUser?.username || displayUser?.id) && fetchProfileIfNotCached(displayUser.username || displayUser.id)}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zk-bg/30 border-b-[1px] border-zk-border/10 font-bold text-zk-text text-sm transition-colors"
                     >
                       <User size={16} /> Profile
@@ -255,7 +266,7 @@ const Navbar = () => {
             >
               <div 
                 className={
-                  ['/blog', '/tutorial'].some(p => pathname?.startsWith(p))
+                  mounted && pathname && ['/blog', '/tutorial'].some(p => pathname.startsWith(p))
                     ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 uppercase"
                     : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 uppercase"
                 }
@@ -303,7 +314,7 @@ const Navbar = () => {
             >
               <div 
                 className={
-                  ['/dashboard', '/discovery', '/classpin', '/flashcard', '/create-picture-race'].some(p => pathname?.startsWith(p)) && !pathname?.startsWith('/dashboard/social')
+                  mounted && pathname && ['/dashboard', '/discovery', '/classpin', '/flashcard', '/create-picture-race'].some(p => pathname.startsWith(p)) && !pathname.startsWith('/dashboard/social')
                     ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1"
                     : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1"
                 }
@@ -372,7 +383,7 @@ const Navbar = () => {
             >
               <div 
                 className={
-                  pathname?.startsWith('/dashboard/social')
+                  mounted && pathname && pathname.startsWith('/dashboard/social')
                     ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
                     : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
                 }
@@ -419,7 +430,7 @@ const Navbar = () => {
             >
               <div 
                 className={
-                  pathname?.startsWith('/library')
+                  mounted && pathname && pathname.startsWith('/library')
                     ? "bg-[#5D3FD3] text-white border-[2px] border-zk-border px-4 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg font-['Amatic_SC'] text-2xl font-bold cursor-default transition-colors leading-none pt-2 animate-float-nav inline-flex items-center gap-1 capitalize"
                     : "text-zk-text underline decoration-transparent hover:decoration-current decoration-[2px] underline-offset-4 cursor-default font-bold font-['Amatic_SC'] text-2xl px-4 py-1 transition-colors leading-none pt-2 inline-flex items-center gap-1 capitalize"
                 }

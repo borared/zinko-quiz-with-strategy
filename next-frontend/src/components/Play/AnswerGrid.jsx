@@ -55,34 +55,39 @@ export default function AnswerGrid({
           <motion.button
             key={answer.id}
             id={`answer-btn-${answer.id}`}
-            whileTap={!isDisabled ? { scale: 0.94 } : {}}
+            whileTap={!isDisabled ? { scale: 0.98 } : {}}
             onClick={() => handleAnswer(answer.id)}
             disabled={isDisabled}
             className={`
-              relative rounded-3xl px-4 py-6 flex flex-col items-center justify-center gap-3
-              border-[4px] border-zk-border transition-all duration-150 min-h-[140px] w-full
+              relative rounded-lg px-5 py-4 flex items-center gap-4
+              border-2 border-zk-border transition-all duration-150 w-full text-left
               ${isSelected
                 ? `${style.activeBg} opacity-100`
                 : isDisabled
                   ? `${style.bg} opacity-20 cursor-not-allowed filter grayscale`
-                  : `${style.bg} hover:brightness-110`
+                  : `${style.bg} hover:brightness-105`
               }
             `}
           >
             {!isTrueFalse && (
-              <span className="text-white text-3xl font-black opacity-80">{style.shape}</span>
+              <div className="w-10 h-10 bg-zk-panel-bg/30 rounded-lg flex items-center justify-center border-2 border-black/10 flex-shrink-0">
+                <span className="text-white text-2xl font-black opacity-90">{style.shape}</span>
+              </div>
             )}
-            <span className={`font-black text-center leading-tight ${isTrueFalse ? 'text-white text-2xl md:text-3xl' : 'text-zk-text text-xl md:text-2xl'}`}>
+            <span className={`font-black flex-1 leading-snug text-white text-lg md:text-xl ${isTrueFalse ? 'text-center font-black text-2xl md:text-3xl' : ''}`}>
               {label}
             </span>
-            {isSelected && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-2 right-2 w-6 h-6 bg-zk-panel-bg/30 rounded-full flex items-center justify-center"
-              >
-                <span className="text-white text-xs">✓</span>
-              </motion.div>
+            {!isTrueFalse && (
+              isSelected ? (
+                <div className="w-8 h-8 rounded-full bg-zk-panel-bg/30 flex items-center justify-center border-2 border-white/50 flex-shrink-0">
+                  <span className="text-white text-sm font-black">✓</span>
+                </div>
+              ) : (
+                <div
+                  className="w-8 h-8 rounded-full border-2 flex-shrink-0"
+                  style={{ borderColor: "rgba(255,255,255,0.3)" }}
+                />
+              )
             )}
           </motion.button>
         );
@@ -91,7 +96,7 @@ export default function AnswerGrid({
       {!question?.answers && Array.from({ length: skeletonCount }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-3xl min-h-[140px] ${(MC_ANSWER_BUTTONS[i] || MC_ANSWER_BUTTONS[0]).bg} opacity-20 animate-pulse`}
+          className={`rounded-lg h-[72px] ${(MC_ANSWER_BUTTONS[i] || MC_ANSWER_BUTTONS[0]).bg} opacity-20 animate-pulse`}
         />
       ))}
     </div>

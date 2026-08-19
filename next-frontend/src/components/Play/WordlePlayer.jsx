@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { HelpCircle, Skull, Trophy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSocketStore } from '@/store/useSocketStore';
 
 const QWERTY = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -33,6 +34,23 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
   const [mounted, setMounted] = useState(false);
   const [bgElements, setBgElements] = useState([]);
   const [currentGuess, setCurrentGuess] = useState('');
+  const { getSocket, isConnected } = useSocketStore();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !isConnected) return;
+
+    const onInvalidGuess = ({ message }) => {
+      setError(message);
+      setTimeout(() => setError(null), 2000);
+    };
+
+    socket.on('game:wordle-invalid-guess', onInvalidGuess);
+    return () => {
+      socket.off('game:wordle-invalid-guess', onInvalidGuess);
+    };
+  }, [getSocket, isConnected]);
 
   // 5x5 Grid constraints
   const maxAttempts = 5;
@@ -151,7 +169,7 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 z-20 relative text-black pt-20 bg-white min-h-[100dvh] overflow-hidden w-full">
+    <div className="w-full h-[100dvh] flex flex-col items-center p-4 z-20 relative text-black pt-4 bg-white overflow-y-auto">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {mounted && bgElements.map((el) => (
@@ -185,7 +203,26 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
         ))}
       </div>
 
-      <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-3xl mx-auto pt-8">
+      <div className="relative z-10 flex-1 flex flex-col items-center w-full max-w-3xl mx-auto pt-2">
+        {/* Error message */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0, 
+                scale: 1,
+                x: [0, -10, 10, -10, 10, 0]
+              }}
+              exit={{ opacity: 0, y: -20, scale: 0.9 }}
+              transition={{ duration: 0.4 }}
+              className="absolute top-16 z-[100] bg-neutral-900 border-2 border-red-500 text-red-500 font-black px-6 py-2 rounded-lg shadow-xl text-lg tracking-wider"
+            >
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Category */}
         {category && (
           <div className="relative z-50 text-[#2c3e50] font-black text-2xl mb-4 font-sans bg-neutral-100 px-6 py-2 rounded-lg border-2 border-neutral-200 shadow-md">
@@ -194,7 +231,7 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
         )}
 
         {/* 5x5 Cyberpunk Board Grid */}
-        <div className="relative z-50 flex flex-col gap-3 p-6 sm:p-8 bg-black rounded-xl border-4 border-neutral-900 mb-6 w-full max-w-md">
+        <div className="relative z-50 flex flex-col gap-2 p-4 sm:p-6 bg-black rounded-xl border-4 border-neutral-900 mb-3 w-full max-w-md">
           {Array.from({ length: maxAttempts }).map((_, rIdx) => {
             const guessObj = guesses[rIdx];
             const isSubmitted = !!guessObj;
@@ -245,7 +282,7 @@ export default function WordlePlayer({ wordleData, team, onGuess, background, is
         </div>
 
         {/* Keyboard and Leader Warnings */}
-        <div className="w-full max-w-lg mt-auto pb-6">
+        <div className="w-full max-w-lg mt-auto pb-2">
           {!isLeader && (
             <div className="bg-[#1A1A24]/60 border-[3px] border-black rounded-xl p-3 text-center mb-4">
               <p className="text-zk-yellow font-black uppercase tracking-widest text-lg font-sans">
