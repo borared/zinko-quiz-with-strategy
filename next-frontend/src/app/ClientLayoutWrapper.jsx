@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import SoundToggle from '@/components/global/SoundToggle';
 import Navbar from '@/components/global/Navbar';
 import Footer from '@/components/global/Footer';
@@ -28,9 +28,11 @@ const GAME_FLOW_PATHS = [
 
 export default function ClientLayoutWrapper({ children }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   useButtonClickSound();
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window === 'undefined') return;
     
     // Preload heavy lobby background scenery images in background
@@ -57,10 +59,10 @@ export default function ClientLayoutWrapper({ children }) {
     });
   }, []);
   
-  const isFullScreen = pathname.startsWith("/host/") || pathname.startsWith("/play/");
-  const showNavbar = !NO_NAVBAR_PATHS.includes(pathname) && !isFullScreen;
-  const isGameFlow = GAME_FLOW_PATHS.some((p) => pathname.startsWith(p));
-  const showFooter = !isGameFlow && !isFullScreen;
+  const isFullScreen = mounted && pathname && (pathname.startsWith("/host/") || pathname.startsWith("/play/"));
+  const showNavbar = mounted && pathname && !NO_NAVBAR_PATHS.includes(pathname) && !isFullScreen;
+  const isGameFlow = mounted && pathname && GAME_FLOW_PATHS.some((p) => pathname.startsWith(p));
+  const showFooter = mounted && pathname && !isGameFlow && !isFullScreen;
 
   return (
     <>

@@ -244,7 +244,11 @@ export default function SocialPage() {
                       key={friend.clerk_id}
                       className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                     >
-                      <Link href={`/u/${friend.username || friend.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
+                      <Link 
+                        href={`/u/${friend.username || friend.clerk_id}`} 
+                        onMouseEnter={() => fetchProfileIfNotCached(friend.username || friend.clerk_id)}
+                        className="flex items-center gap-3 cursor-pointer group"
+                      >
                         <img
                           src={friend.avatar_url || '/images/avatars/default.png'}
                           alt={friend.username}
@@ -302,7 +306,11 @@ export default function SocialPage() {
                         key={req.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
-                        <Link href={`/u/${req.username || req.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
+                        <Link 
+                          href={`/u/${req.username || req.clerk_id}`} 
+                          onMouseEnter={() => fetchProfileIfNotCached(req.username || req.clerk_id)}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
@@ -357,7 +365,11 @@ export default function SocialPage() {
                         key={req.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between opacity-80"
                       >
-                        <Link href={`/u/${req.username || req.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
+                        <Link 
+                          href={`/u/${req.username || req.clerk_id}`} 
+                          onMouseEnter={() => fetchProfileIfNotCached(req.username || req.clerk_id)}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
                           <img
                             src={req.avatar_url || '/images/avatars/default.png'}
                             alt={req.username}
@@ -422,7 +434,11 @@ export default function SocialPage() {
                         key={result.clerk_id}
                         className="bg-zk-panel-bg border-[3px] border-zk-border rounded-2xl p-4 flex items-center justify-between !shadow-none"
                       >
-                        <Link href={`/u/${result.username || result.clerk_id}`} className="flex items-center gap-3 cursor-pointer group">
+                        <Link 
+                          href={`/u/${result.username || result.clerk_id}`} 
+                          onMouseEnter={() => fetchProfileIfNotCached(result.username || result.clerk_id)}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
                           <img
                             src={result.avatar_url || '/images/avatars/default.png'}
                             alt={result.username}
