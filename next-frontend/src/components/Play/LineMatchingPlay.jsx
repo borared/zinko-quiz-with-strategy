@@ -91,6 +91,7 @@ function LineMatchingBoard({
   selectedId,
   foxSmokescreen,
   onSubmitMatches,
+  timeLeft,
   inPanel = false,
 }) {
   const leftItems = useMemo(() => question?.leftItems || [], [question?.leftItems]);
@@ -104,6 +105,7 @@ function LineMatchingBoard({
   const [isDragging, setIsDragging] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [settledLines, setSettledLines] = useState([]);
+  const submittedRef = useRef(false);
 
   const boardRef = useRef(null);
   const itemRefs = useRef({});
@@ -127,7 +129,7 @@ function LineMatchingBoard({
   }, []);
 
   useEffect(() => {
-    if (!isLineMatchingQuestion(question?.questionType) || pairCount < 1) return;
+    submittedRef.current = false;
     cleanupDragListeners();
     setConnections({});
     setActiveLeftId(null);
@@ -336,10 +338,11 @@ function LineMatchingBoard({
   };
 
   useEffect(() => {
-    if (isComplete && !isDisabled) {
+    if (timeLeft !== undefined && timeLeft <= 1 && !submittedRef.current && !isDisabled) {
+      submittedRef.current = true;
       onSubmitMatches(buildConnectionsPayload(connections));
     }
-  }, [isComplete, isDisabled, connections, onSubmitMatches]);
+  }, [timeLeft, isDisabled, connections, onSubmitMatches]);
 
   if (!isLineMatchingQuestion(question?.questionType) || pairCount < 1) {
     return null;

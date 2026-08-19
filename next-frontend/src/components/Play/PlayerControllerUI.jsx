@@ -246,6 +246,7 @@ export default function PlayerControllerUI() {
               selectedId={selectedId}
               foxSmokescreen={foxSmokescreen}
               onSubmitMatches={handleSubmitMatches}
+              timeLeft={timeLeft}
               inPanel
             />
           )}
