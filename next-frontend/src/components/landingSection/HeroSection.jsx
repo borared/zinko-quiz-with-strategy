@@ -15,7 +15,7 @@ const HeroSection = () => {
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative z-10">
           <div className="w-full max-w-[400px] aspect-square transform hover:scale-105 transition-transform duration-500 ease-out">
             <DotLottieReact
-              src="https://lottie.host/24ab9b71-ff1d-40c1-8732-36339ad9dd0f/UypikKSNSE.lottie"
+              src="/lottie/hero.lottie"
               loop
               autoplay
             />
