@@ -28,6 +28,10 @@ function getLevenshteinDistance(a, b) {
 module.exports = function registerMinigameHandlers(io, socket, games) {
   // ── Helper functions ──────────────────────────────────────────────────────
   const triggerMinigameReward = (game, team, pin) => {
+    if (game.fivegridTimer) {
+      clearInterval(game.fivegridTimer);
+      game.fivegridTimer = null;
+    }
     game.phase = 'MINIGAME_REWARD';
     
     const winningPlayers = game.players.filter(p => p.team === team);
@@ -281,8 +285,33 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       category: category,
       state: game.fivegridState,
       teams: game.teams,
-      teamNames: game.teamNames || {}
+      teamNames: game.teamNames || {},
+      timeLeft: 90
     });
+
+    // Start 90s timer for Wordle game
+    clearInterval(game.fivegridTimer);
+    game.fivegridTimeLeft = 90;
+    game.fivegridTimer = setInterval(() => {
+      const g = games.get(pin);
+      if (!g || g.phase !== 'MINIGAME_FIVEGRID') {
+        clearInterval(game.fivegridTimer);
+        return;
+      }
+      g.fivegridTimeLeft--;
+      io.to(pin).emit('game:timer-tick', { timeLeft: g.fivegridTimeLeft });
+
+      if (g.fivegridTimeLeft <= 0) {
+        clearInterval(g.fivegridTimer);
+        g.phase = 'MINIGAME_FINISHED_NO_WINNER';
+        io.to(pin).emit('game:minigame-finished', { 
+          winnerTeam: null, 
+          spinnerId: null, 
+          spinnerName: "No one",
+          preSelectedRewardId: 'NOTHING'
+        });
+      }
+    }, 1000);
   });
 
   // ── player:fivegrid-guess ───────────────────────────────────────────────────
