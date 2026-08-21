@@ -20,6 +20,7 @@ import RewardWheel from "./RewardWheel";
 import MinigamePicker from "./MinigamePicker";
 import DrawItHost from "./DrawItHost";
 import ScenerySoundToggle from '@/components/Host/ScenerySoundToggle';
+import QuestionIntroOverlay from "../Play/QuestionIntroOverlay";
 import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
 import { useGameBackground } from '@/hooks/useGameBackground';
 import { battleBackgroundStyle, getSceneryAudioSlugFromImage } from '@/lib/lobbyScenery';
@@ -38,6 +39,20 @@ export default function HostGameUI() {
 
   const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME_LIMIT);
   const [questionTimeLimit, setQuestionTimeLimit] = useState(DEFAULT_TIME_LIMIT);
+
+  const [lastQuestionId, setLastQuestionId] = useState(null);
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    if (phase === "QUESTION" && question?.id) {
+      if (question.id !== lastQuestionId) {
+        setLastQuestionId(question.id);
+        setShowIntro(true);
+      }
+    } else {
+      setShowIntro(false);
+    }
+  }, [phase, question, lastQuestionId]);
   const [answered, setAnswered] = useState(0);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState([]);
@@ -561,6 +576,11 @@ export default function HostGameUI() {
       handleNextQuestion();
     }
   }, [phase, handleShowLeaderboard, handleNextQuestion]);
+
+  // Intro screen between skill pick and question
+  if (showIntro) {
+    return <QuestionIntroOverlay onComplete={() => setShowIntro(false)} />;
+  }
 
   // Loading state
   if (!question && phase !== "SKILL_PICK") {
