@@ -16,6 +16,11 @@ const SCENERY_AUDIO_CONFIG = {
     volume: 0.38,
     label: 'Inside',
   },
+  city: {
+    src: '/audio/lobby-funk.mp3',
+    volume: 0.3,
+    label: 'City Lobby',
+  },
 };
 
 const MUTE_STORAGE_KEY = 'zinko_scenery_audio_muted';
@@ -38,6 +43,16 @@ export function isSceneryAudioMuted() {
 export function setSceneryAudioMuted(muted) {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(MUTE_STORAGE_KEY, muted ? '1' : '0');
+  
+  const gameBgm = window.gameAudio;
+  if (gameBgm) {
+    if (muted) {
+      gameBgm.pause();
+    } else {
+      gameBgm.play().catch(() => {});
+    }
+    window.dispatchEvent(new CustomEvent('gameAudioChanged'));
+  }
 }
 
 export function getSceneryAudio() {
@@ -92,24 +107,32 @@ export function stopSceneryAudio() {
 
 export function toggleSceneryAudio() {
   const audio = getSceneryAudio();
-  const slug = getActiveSceneryAudioSlug();
+  const gameBgm = typeof window !== 'undefined' ? window.gameAudio : null;
 
-  if (!audio || !slug) {
-    setSceneryAudioMuted(false);
-    return false;
+  const isCurrentlyMuted = isSceneryAudioMuted();
+  const newMutedState = !isCurrentlyMuted;
+
+  setSceneryAudioMuted(newMutedState);
+
+  if (audio) {
+    if (newMutedState) {
+      audio.pause();
+    } else {
+      audio.play().catch(() => {});
+    }
   }
 
-  if (audio.paused) {
-    setSceneryAudioMuted(false);
-    audio.play().catch(() => {});
-    dispatchSceneryAudioChange();
-    return true;
+  if (gameBgm) {
+    if (newMutedState) {
+      gameBgm.pause();
+    } else {
+      gameBgm.play().catch(() => {});
+    }
+    window.dispatchEvent(new CustomEvent('gameAudioChanged'));
   }
 
-  audio.pause();
-  setSceneryAudioMuted(true);
   dispatchSceneryAudioChange();
-  return false;
+  return !newMutedState;
 }
 
 export function syncSceneryAudioForImage(image, pin) {

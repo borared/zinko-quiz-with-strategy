@@ -47,7 +47,7 @@ export const INSIDE_SCENERY_IMAGE = LOBBY_SCENERY.find((s) => s.id === 'inside')
 
 const LEGACY_HALLOWEEN_SCENERY_IMAGE = '/background_battle/halloween_scenery.jpg';
 
-export const SCENERY_AUDIO_SLUGS = ['halloween', 'inside'];
+export const SCENERY_AUDIO_SLUGS = ['halloween', 'inside', 'city'];
 
 export function isHalloweenScenery(image) {
   return image === HALLOWEEN_SCENERY_IMAGE || image === LEGACY_HALLOWEEN_SCENERY_IMAGE;
@@ -60,7 +60,7 @@ export function isInsideScenery(image) {
 export function getSceneryAudioSlugFromImage(image) {
   if (isHalloweenScenery(image)) return 'halloween';
   if (isInsideScenery(image)) return 'inside';
-  return null;
+  return 'city'; // Default fallback to city BGM for city and custom backgrounds
 }
 
 export function sceneryAudioSessionKey(pin, slug) {
