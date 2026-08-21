@@ -338,6 +338,12 @@ const Navbar = () => {
                       Dashboard
                     </button>
                     <button
+                      onClick={() => { setManageOpen(false); router.push('/create-game'); }}
+                      className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
+                    >
+                      Create Quiz
+                    </button>
+                    <button
                       onClick={() => { setManageOpen(false); router.push('/discovery'); }}
                       className="w-full text-left px-5 py-3 hover:bg-zk-bg/50 font-['Outfit'] font-bold text-zk-text text-base transition-colors"
                     >
