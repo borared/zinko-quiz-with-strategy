@@ -675,7 +675,7 @@ export default function HostGameUI() {
           )}
 
           {phase === "MINIGAME_FIVEGRID" && (
-            <FiveGridHost fivegridData={minigameData} />
+            <FiveGridHost fivegridData={minigameData} timeLeft={timeLeft} />
           )}
 
           {phase === "MINIGAME_RACING" && minigameData.teamVaults && (
