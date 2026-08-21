@@ -28,11 +28,12 @@ function initSocketHandler(io) {
       // Mark player offline (don't remove — allow reconnect)
       games.forEach((game, pin) => {
         if (game.hostSocketId === socket.id) {
-          console.log(`👑 Host disconnected from game ${pin}. Waiting 10s for reconnect...`);
+          console.log(`👑 Host disconnected from game ${pin}. Waiting 4s for reconnect...`);
+          io.to(pin).emit('game:host-reconnecting', { reconnectTimeoutMs: 4000 });
           game.hostDisconnectTimer = setTimeout(() => {
             console.log(`👑 Host permanently disconnected from game ${pin}.`);
             io.to(pin).emit('game:host-disconnected', { message: 'The host has disconnected.' });
-          }, 10000);
+          }, 4000);
         } else {
           const player = game.players.find(p => p.socketId === socket.id);
           if (player) {
