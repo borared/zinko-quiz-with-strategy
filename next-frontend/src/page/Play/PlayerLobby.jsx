@@ -271,6 +271,7 @@ export default function PlayerLobby() {
   const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
   const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
   const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
+  const avatar   = typeof window !== 'undefined' ? sessionStorage.getItem('player_avatar') || 'pizza' : 'pizza';
 
   const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
