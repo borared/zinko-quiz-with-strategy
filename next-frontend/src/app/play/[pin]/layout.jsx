@@ -9,6 +9,7 @@ export default function PlayLayout({ children }) {
   const { getSocket } = useSocketStore();
   const router = useRouter();
   const [hostDisconnected, setHostDisconnected] = useState(false);
+  const [hostReconnecting, setHostReconnecting] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.gameAudio) {
@@ -22,13 +23,26 @@ export default function PlayLayout({ children }) {
     const socket = getSocket();
     if (!socket) return;
 
+    const onHostReconnecting = () => {
+      setHostReconnecting(true);
+    };
+
+    const onHostReconnected = () => {
+      setHostReconnecting(false);
+    };
+
     const onHostDisconnected = () => {
+      setHostReconnecting(false);
       setHostDisconnected(true);
     };
 
+    socket.on('game:host-reconnecting', onHostReconnecting);
+    socket.on('game:host-reconnected', onHostReconnected);
     socket.on('game:host-disconnected', onHostDisconnected);
 
     return () => {
+      socket.off('game:host-reconnecting', onHostReconnecting);
+      socket.off('game:host-reconnected', onHostReconnected);
       socket.off('game:host-disconnected', onHostDisconnected);
     };
   }, [getSocket]);
@@ -41,6 +55,23 @@ export default function PlayLayout({ children }) {
   return (
     <>
       {children}
+
+      {hostReconnecting && !hostDisconnected && (
+        <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-zk-panel-bg border-[2px] border-zk-border rounded-lg flex flex-col items-center p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div className="bg-yellow-100 p-3 rounded-full border-2 border-zk-yellow shadow-sm animate-bounce">
+              <AlertTriangle className="text-zk-yellow w-10 h-10" />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold text-zk-text font-['Amatic_SC'] tracking-wider">Host Disconnected</h2>
+              <p className="text-gray-400 font-bold text-sm">
+                Waiting for host to reconnect...
+              </p>
+            </div>
+            <div className="w-10 h-10 border-4 border-zk-yellow border-t-transparent rounded-full animate-spin" />
+          </div>
+        </div>
+      )}
       
       {hostDisconnected && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
