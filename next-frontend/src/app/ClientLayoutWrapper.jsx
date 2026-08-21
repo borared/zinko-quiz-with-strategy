@@ -8,6 +8,7 @@ import ToastContainer from '@/components/global/ToastContainer';
 import { usePathname } from 'next/navigation';
 
 import CustomCursor from '@/components/global/CustomCursor';
+import SmoothScrollProvider from '@/components/global/SmoothScrollProvider';
 import { useButtonClickSound } from '@/hooks/useButtonClickSound';
 
 const NO_NAVBAR_PATHS = [
@@ -65,7 +66,7 @@ export default function ClientLayoutWrapper({ children }) {
   const showFooter = mounted && pathname && !isGameFlow && !isFullScreen;
 
   return (
-    <>
+    <SmoothScrollProvider>
       <CustomCursor />
       <AuthSync />
       <SoundToggle />
@@ -75,6 +76,6 @@ export default function ClientLayoutWrapper({ children }) {
         {children}
       </main>
       {showFooter && <Footer />}
-    </>
+    </SmoothScrollProvider>
   );
 }
