@@ -52,6 +52,8 @@ export default function PlayerControllerUI() {
     foxSmokescreen,
     rabbitRush,
     butterflyActive,
+    teamCounterBlindCharges,
+    handleCounterBlind,
     
     handleAnswer,
     handleSubmitLayerOrder,
@@ -235,6 +237,9 @@ export default function PlayerControllerUI() {
               phase={phase}
               selectedId={selectedId}
               foxSmokescreen={foxSmokescreen}
+              isLeader={isLeader}
+              teamCounterBlindCharges={teamCounterBlindCharges}
+              onCounterBlind={handleCounterBlind}
               onSubmitOrder={handleSubmitLayerOrder}
               inPanel
             />
@@ -245,6 +250,9 @@ export default function PlayerControllerUI() {
               phase={phase}
               selectedId={selectedId}
               foxSmokescreen={foxSmokescreen}
+              isLeader={isLeader}
+              teamCounterBlindCharges={teamCounterBlindCharges}
+              onCounterBlind={handleCounterBlind}
               onSubmitMatches={handleSubmitMatches}
               timeLeft={timeLeft}
               inPanel
@@ -259,6 +267,9 @@ export default function PlayerControllerUI() {
             selectedId={selectedId}
             removedAnswers={removedAnswers}
             foxSmokescreen={foxSmokescreen}
+            isLeader={isLeader}
+            teamCounterBlindCharges={teamCounterBlindCharges}
+            onCounterBlind={handleCounterBlind}
             handleAnswer={(answerId) => handleAnswer(answerId, removedAnswers)}
           />
         )}

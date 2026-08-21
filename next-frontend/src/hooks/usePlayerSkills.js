@@ -11,6 +11,7 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
   const [foxSmokescreen, setFoxSmokescreen] = useState(false);
   const [rabbitRush, setRabbitRush] = useState(false);
   const [butterflyActive, setButterflyActive] = useState(false);
+  const [teamCounterBlindCharges, setTeamCounterBlindCharges] = useState(0);
 
   useEffect(() => {
     const socket = getSocket();
@@ -19,6 +20,9 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
     const onQuestion = (data) => {
       if (data.skillCharges && data.skillCharges[team] && playerSkill) {
         setSkillChargesLeft(data.skillCharges[team][playerSkill]);
+      }
+      if (data.teamCounterBlindCharges && data.teamCounterBlindCharges[team] !== undefined) {
+        setTeamCounterBlindCharges(data.teamCounterBlindCharges[team]);
       }
       setIsSkillLockedOut(false);
       setSkillLockoutMsg("");
@@ -39,10 +43,10 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
       }
     };
 
-    const onFoxAttack = ({ targetTeam }) => {
+    const onFoxAttack = ({ targetTeam, duration }) => {
       if (targetTeam === team) {
         setFoxSmokescreen(true);
-        setTimeout(() => setFoxSmokescreen(false), 5000);
+        setTimeout(() => setFoxSmokescreen(false), duration || 5000);
       }
     };
 
@@ -61,9 +65,19 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
       }
     };
 
+    const onCounterBlindSuccess = ({ team: cbTeam }) => {
+      if (cbTeam === team) {
+        setFoxSmokescreen(false);
+        setTeamCounterBlindCharges(prev => Math.max(0, prev - 1));
+      }
+    };
+
     const onSyncStateResponse = (data) => {
       if (data.currentQuestion && data.currentQuestion.skillCharges && data.currentQuestion.skillCharges[team] && playerSkill) {
         setSkillChargesLeft(data.currentQuestion.skillCharges[team][playerSkill]);
+      }
+      if (data.currentQuestion && data.currentQuestion.teamCounterBlindCharges && data.currentQuestion.teamCounterBlindCharges[team] !== undefined) {
+        setTeamCounterBlindCharges(data.currentQuestion.teamCounterBlindCharges[team]);
       }
     };
 
@@ -72,6 +86,7 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
     socket.on('game:fox-attack', onFoxAttack);
     socket.on('game:butterfly-result', onButterflyResult);
     socket.on('game:rabbit-rush', onRabbitRush);
+    socket.on('game:counter-blind-success', onCounterBlindSuccess);
     socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
@@ -80,6 +95,7 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
       socket.off('game:fox-attack', onFoxAttack);
       socket.off('game:butterfly-result', onButterflyResult);
       socket.off('game:rabbit-rush', onRabbitRush);
+      socket.off('game:counter-blind-success', onCounterBlindSuccess);
       socket.off('player:sync-state-response', onSyncStateResponse);
     };
   }, [getSocket, team, playerSkill, playerId]);
@@ -95,6 +111,15 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
     });
   }, [phase, selectedId, isSkillLockedOut, skillChargesLeft, foxSmokescreen, pin, team, playerSkill, nickname, getSocket, playerId]);
 
+  const handleCounterBlind = useCallback(() => {
+    if (teamCounterBlindCharges <= 0) return;
+    getSocket().emit('player:use-counter-blind', {
+      pin,
+      playerId,
+      team
+    });
+  }, [teamCounterBlindCharges, pin, playerId, team, getSocket]);
+
   return {
     skillChargesLeft,
     isSkillLockedOut,
@@ -103,6 +128,8 @@ export function usePlayerSkills({ pin, playerId, team, playerSkill, nickname, ph
     foxSmokescreen,
     rabbitRush,
     butterflyActive,
-    handleUseSkill
+    teamCounterBlindCharges,
+    handleUseSkill,
+    handleCounterBlind
   };
 }

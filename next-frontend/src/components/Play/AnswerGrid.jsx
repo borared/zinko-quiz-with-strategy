@@ -32,8 +32,11 @@ export default function AnswerGrid({
   question,
   phase,
   selectedId,
-  removedAnswers,
+  removedAnswers = [],
   foxSmokescreen,
+  isLeader,
+  teamCounterBlindCharges,
+  onCounterBlind,
   handleAnswer,
 }) {
   const isTrueFalse = isTrueFalseQuestion(question?.questionType);
@@ -42,13 +45,18 @@ export default function AnswerGrid({
 
   return (
     <div className={`grid gap-3 p-4 pb-8 relative w-full ${isTrueFalse ? 'grid-cols-2' : 'grid-cols-2'}`}>
-      <FoxSmokescreen isActive={foxSmokescreen} />
+      <FoxSmokescreen 
+        isActive={foxSmokescreen} 
+        isLeader={isLeader}
+        teamCounterBlindCharges={teamCounterBlindCharges}
+        onCounterBlind={onCounterBlind}
+      />
 
       {answers.map((answer, i) => {
         const style = getAnswerStyle(answer, i, isTrueFalse);
         const isSelected = selectedId === answer.id;
         const isRemoved = removedAnswers.includes(answer.id);
-        const isDisabled = phase !== 'PLAYING' || isRemoved || foxSmokescreen;
+        const isDisabled = phase !== 'PLAYING' || isRemoved;
         const label = displayAnswerText(answer.text);
 
         return (
