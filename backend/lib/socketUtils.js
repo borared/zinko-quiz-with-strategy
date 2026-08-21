@@ -206,6 +206,26 @@ function revealResults(io, pin, games) {
     }
   });
 
+  // 2.5 Track Team Win Streaks and Award Counter Blind Charges
+  if (!game.teamWinStreaks) game.teamWinStreaks = {};
+  if (!game.teamCounterBlindCharges) game.teamCounterBlindCharges = {};
+  
+  teams.forEach(team => {
+    const teamPlayers = game.players.filter(p => p.team === team);
+    const hasCorrectPlayer = teamPlayers.some(p => p.lastCorrect);
+    
+    if (hasCorrectPlayer) {
+      game.teamWinStreaks[team] = (game.teamWinStreaks[team] || 0) + 1;
+      // Award a charge every 5 consecutive wins
+      if (game.teamWinStreaks[team] > 0 && game.teamWinStreaks[team] % 5 === 0) {
+        game.teamCounterBlindCharges[team] = (game.teamCounterBlindCharges[team] || 0) + 1;
+      }
+    } else {
+      // Reset streak if no one on the team got it right
+      game.teamWinStreaks[team] = 0;
+    }
+  });
+
   // 3. Emit results
   game.players.forEach(player => {
     io.to(player.socketId).emit('game:player-result', {
@@ -224,6 +244,8 @@ function revealResults(io, pin, games) {
     correctAnswerId: correctId,
     stats,
     leaderboard: getLeaderboard(game.players).slice(0, 5),
+    teamWinStreaks: game.teamWinStreaks,
+    teamCounterBlindCharges: game.teamCounterBlindCharges,
   });
 
   // 4. Decrement active multiplier

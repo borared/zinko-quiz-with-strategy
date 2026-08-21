@@ -90,6 +90,9 @@ function LineMatchingBoard({
   phase,
   selectedId,
   foxSmokescreen,
+  isLeader,
+  teamCounterBlindCharges,
+  onCounterBlind,
   onSubmitMatches,
   timeLeft,
   inPanel = false,
@@ -142,7 +145,7 @@ function LineMatchingBoard({
 
   useEffect(() => () => cleanupDragListeners(), [cleanupDragListeners]);
 
-  const isDisabled = phase !== 'PLAYING' || !!selectedId || foxSmokescreen;
+  const isDisabled = phase !== 'PLAYING' || !!selectedId;
   const connectedCount = Object.keys(connections).length;
   const isComplete = connectedCount === pairCount && pairCount > 0;
 

@@ -9,6 +9,25 @@ module.exports = function registerSkillHandlers(io, socket, games) {
     if (!isHostSocket(socket, game)) return;
     io.to(pin).emit('game:skill-timer-tick', { timeLeft });
   });
+  // ── player:use-counter-blind ─────────────────────────────────────────────
+  socket.on('player:use-counter-blind', ({ pin, playerId, team }) => {
+    const game = games.get(pin);
+    if (!game) return;
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) return;
+    
+    // Verify leader
+    if (game.teamLeaders?.[team] !== playerId) return;
+    // Verify charges
+    if (!game.teamCounterBlindCharges || !game.teamCounterBlindCharges[team] || game.teamCounterBlindCharges[team] <= 0) return;
+    
+    // Consume charge
+    game.teamCounterBlindCharges[team] -= 1;
+    // Remove the blind effect in backend state so late joiners aren't blinded
+    if (game.foxActive) game.foxActive[team] = false;
+    
+    io.to(pin).emit('game:counter-blind-success', { team });
+  });
 
   // ── player:select-skill ──────────────────────────────────────────────────
   socket.on('player:select-skill', ({ pin, playerId, skillId, team, nickname, avatar }) => {
@@ -100,9 +119,10 @@ module.exports = function registerSkillHandlers(io, socket, games) {
     } 
     else if (skillId === 'fox') {
       game.foxActive[team] = true;
+      const duration = Math.floor((game.currentTimeLimit || 20) * 0.3) * 1000;
       const enemyTeams = game.teams.filter(t => t !== team);
       enemyTeams.forEach(enemyTeam => {
-        io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam });
+        io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam, duration });
       });
     } 
     else if (skillId === 'butterfly') {

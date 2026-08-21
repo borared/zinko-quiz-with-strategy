@@ -24,6 +24,8 @@ import { useHalloweenSceneryAudio } from '@/hooks/useHalloweenSceneryAudio';
 import { useGameBackground } from '@/hooks/useGameBackground';
 import { battleBackgroundStyle, getSceneryAudioSlugFromImage } from '@/lib/lobbyScenery';
 import { DEFAULT_TIME_LIMIT } from '@/lib/timeLimit';
+import { stopSceneryAudio, resumeSceneryAudioForPin } from '@/lib/sceneryAudio';
+import { startGameAudio, stopGameAudio } from '@/lib/gameAudio';
 
 export default function HostGameUI() {
   const { pin } = useParams();
@@ -113,6 +115,27 @@ export default function HostGameUI() {
 
   const background = useGameBackground(pin);
   useHalloweenSceneryAudio(background, pin);
+
+  // Manage dynamic game phase BGM flow
+  useEffect(() => {
+    if (phase === "QUESTION") {
+      stopSceneryAudio();
+      startGameAudio("question");
+    } else if (phase === "RESULT" || phase === "LEADERBOARD") {
+      stopSceneryAudio();
+      startGameAudio("leaderboard");
+    } else if (phase === "SKILL_PICK") {
+      stopSceneryAudio();
+      startGameAudio("skillPick");
+    } else {
+      stopSceneryAudio();
+      startGameAudio("question");
+    }
+
+    return () => {
+      stopGameAudio();
+    };
+  }, [phase, pin]);
 
   // Re-register as host if socket reconnects
   useEffect(() => {

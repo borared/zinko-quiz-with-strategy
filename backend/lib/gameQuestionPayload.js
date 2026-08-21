@@ -36,6 +36,7 @@ function buildGameQuestionPayload(question, game, questionIndex, extra = {}) {
     answers: isLineMatching ? [] : mapPublicAnswers(sourceAnswers),
     timeSeconds: getQuestionTimeLimit(question),
     skillCharges: game.skillCharges,
+    teamCounterBlindCharges: game.teamCounterBlindCharges,
     background: game.background,
     ...extra,
   };

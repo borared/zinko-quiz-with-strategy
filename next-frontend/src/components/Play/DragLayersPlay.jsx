@@ -414,7 +414,7 @@ export default function DragLayersPlay({
     }
   }, [selectedChipId]);
 
-  const isDisabled = phase !== 'PLAYING' || !!selectedId || foxSmokescreen;
+  const isDisabled = phase !== 'PLAYING' || !!selectedId;
   const filledCount = Object.values(slots).filter(Boolean).length;
   const isComplete = filledCount === layerCount && layerCount > 0;
 
