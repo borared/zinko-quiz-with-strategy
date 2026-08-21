@@ -528,7 +528,7 @@ export default function PlayerLobby() {
 
       </div>
 
-      {pin && playerId && (
+      {isClient && pin && playerId && (
         <PlayerLobbyChat
           pin={pin}
           playerId={playerId}
