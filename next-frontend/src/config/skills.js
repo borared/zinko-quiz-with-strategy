@@ -3,7 +3,7 @@ import { Zap, Cloud, Eye, Target } from "lucide-react";
 export const SKILLS = [
   {
     id: "rabbit",
-    name: "The Rabbit",
+    name: "2x Points Under 5s",
     icon: Zap,
     skillDescription: "Adrenaline Rush: 2x Points (5s)",
     color: "#F39C12",
@@ -13,7 +13,7 @@ export const SKILLS = [
   },
   {
     id: "fox",
-    name: "The Fox",
+    name: "Blind Enemy",
     icon: Cloud,
     skillDescription: "Smokescreen: Blind Enemies (5s)",
     color: "#E74C3C",
@@ -23,7 +23,7 @@ export const SKILLS = [
   },
   {
     id: "butterfly",
-    name: "The Butterfly",
+    name: "50/50 Answer",
     icon: Eye,
     skillDescription: "Oracle: Remove 2 Wrong Answers",
     color: "#9B59B6",
@@ -33,7 +33,7 @@ export const SKILLS = [
   },
   {
     id: "frog",
-    name: "The Frog",
+    name: "Steal Point",
     icon: Target,
     skillDescription: "Sticky Tongue: Steal 50% Enemy Points",
     color: "#27AE60",
