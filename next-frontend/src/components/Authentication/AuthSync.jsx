@@ -73,11 +73,10 @@ export default function AuthSync() {
         } catch (error) {
           const isNetworkError =
             error?.message === 'Failed to fetch' || error?.name === 'TypeError';
-          console.error(
+          console.warn(
             isNetworkError
-              ? '[AuthSync] Network error while syncing token. Clerk or the Zinko API may be unreachable.'
-              : '[AuthSync] Error syncing token:',
-            error
+              ? `[AuthSync] Network error while syncing token: Zinko API at ${API_URL} is unreachable.`
+              : `[AuthSync] Error syncing token: ${error?.message || error}`
           );
           if (hasExistingToken) {
             setJwtReady(true);
