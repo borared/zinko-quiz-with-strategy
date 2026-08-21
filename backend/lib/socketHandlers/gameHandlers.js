@@ -55,9 +55,14 @@ module.exports = function registerGameHandlers(io, socket, games) {
     game.rabbitActive = {};
     game.foxActive = {};
     game.frogActive = {};
+    if (!game.teamWinStreaks) game.teamWinStreaks = {};
+    if (!game.teamCounterBlindCharges) game.teamCounterBlindCharges = {};
+    
     game.teams.forEach(t => {
       game.activeSkillThisRound[t] = null;
       game.rabbitActive[t] = null;
+      if (game.teamWinStreaks[t] === undefined) game.teamWinStreaks[t] = 0;
+      if (game.teamCounterBlindCharges[t] === undefined) game.teamCounterBlindCharges[t] = 0;
       game.foxActive[t] = null;
       game.frogActive[t] = null;
     });
