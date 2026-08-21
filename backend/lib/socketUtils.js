@@ -179,15 +179,14 @@ function revealResults(io, pin, games) {
   });
 
   // 2. Frog stealing logic
-  const teams = ['A', 'B'];
+  const teams = game.teams || ['A', 'B'];
   teams.forEach(team => {
     const frogActive = game.frogActive?.[team];
     if (frogActive) {
       const frogPlayer = game.players.find(p => p.id === frogActive.playerId);
       if (frogPlayer) {
-        // Find fastest correct enemy
-        const enemyTeam = team === 'A' ? 'B' : 'A';
-        const correctEnemies = game.players.filter(p => p.team === enemyTeam && p.lastCorrect);
+        // Find fastest correct enemy (anyone not on the same team)
+        const correctEnemies = game.players.filter(p => p.team !== team && p.lastCorrect);
         
         if (correctEnemies.length > 0) {
           correctEnemies.sort((a, b) => (game.answerTimes[a.id] || 99999) - (game.answerTimes[b.id] || 99999));

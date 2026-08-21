@@ -3,7 +3,7 @@ import { Fingerprint, Send, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitClue, onSabotageVote }) {
-  const { subPhase, round, isImposter, secret, imposterTeam, correctTeams, currentTeamTurn } = imposterData;
+  const { subPhase, round, isImposter, secret, imposterTeam, correctTeams, currentTeamTurn, teams = ['A', 'B'] } = imposterData;
   const [clue, setClue] = useState('');
   const [hasSubmittedClue, setHasSubmittedClue] = useState(false);
   const [votedTeam, setVotedTeam] = useState(null);
@@ -19,9 +19,7 @@ export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitC
     e.preventDefault();
     if (!clue.trim() || !isLeader || hasSubmittedClue) return;
     
-    // Only 1 word allowed
-    const singleWord = clue.trim().split(/\s+/)[0];
-    onSubmitClue(singleWord);
+    onSubmitClue(clue.trim());
     setHasSubmittedClue(true);
   };
 
@@ -96,15 +94,15 @@ export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitC
           </div>
         ) : isLeader ? (
           <form onSubmit={handleSubmit} className="w-full">
-            <p className="text-xl font-bold mb-4">Round {round}: Enter your 1-word clue</p>
+            <p className="text-xl font-bold mb-4">Round {round}: Enter your clue</p>
             <div className="flex w-full">
               <input
                 type="text"
                 maxLength={30}
                 value={clue}
-                onChange={(e) => setClue(e.target.value.replace(/\s/g, ''))} // Prevent spaces
+                onChange={(e) => setClue(e.target.value)} // Allow spaces
                 disabled={hasSubmittedClue}
-                placeholder="describe your word..."
+                placeholder="describe your secret..."
                 className="flex-1 bg-neutral-900 border-2 border-r-0 border-blue-500 p-4 text-2xl font-bold text-white outline-none disabled:opacity-50 min-w-0 rounded-l-md"
               />
               <button
@@ -134,7 +132,7 @@ export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitC
   );
 
   const renderVotingPhase = () => (
-    <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center w-full px-4">
+    <div className="flex flex-col items-center justify-center h-[100vh] max-w-lg mx-auto text-center w-full px-4">
       <h2 className="text-4xl font-black text-red-500 tracking-widest mb-4">Sabotage Round</h2>
       
       <p className="text-xl font-bold mb-8">
@@ -142,15 +140,18 @@ export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitC
       </p>
       {isLeader ? (
         <div className="grid grid-cols-2 gap-4 w-full">
-          {['A', 'B', 'C', 'D'].filter(t => t !== team).map(t => {
+          {teams.filter(t => t !== team).map((t, idx, arr) => {
             const isSelected = votedTeam === t;
             const isDisabled = votedTeam !== null;
+            const isLastOdd = idx === arr.length - 1 && arr.length % 2 !== 0;
             return (
               <button
                 key={t}
                 onClick={() => handleVote(t)}
                 disabled={isDisabled}
                 className={`border-2 p-6 text-2xl font-black uppercase transition-colors ${
+                  isLastOdd ? 'col-span-2' : ''
+                } ${
                   isSelected 
                     ? 'border-red-500 bg-red-500/20 text-red-500' 
                     : isDisabled 
@@ -174,7 +175,7 @@ export default function ImposterPlayer({ imposterData, team, isLeader, onSubmitC
     const wasImposter = isImposter;
     
     return (
-      <div className="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center w-full px-4">
+      <div className="flex flex-col items-center justify-center h-[100vh] max-w-md mx-auto text-center w-full px-4">
         {wasImposter ? (
           <div className="border-2 border-red-500 bg-red-500/20 p-8 w-full flex flex-col items-center">
             <Fingerprint className="w-20 h-20 text-red-500 mb-4" />

@@ -9,6 +9,7 @@ import { useDashboardQuizStore } from '@/store/useDashboardQuizStore';
 import { useDiscoveryQuizStore } from '@/store/useDiscoveryQuizStore';
 import { useToastStore } from '@/store/useToastStore';
 import { formatDiscoveryCreatorName } from '@/lib/creatorDisplay';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 import { z } from 'zod';
 
@@ -200,7 +201,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
         {/* Image Area */}
         <div className="h-32 border-b-[3px] border-zk-border bg-zk-bg/30 overflow-hidden relative">
           {quiz.cover_image ? (
-            <img src={quiz.cover_image} alt={quiz.title} className="w-full h-full object-cover" />
+            <img src={getOptimizedImageUrl(quiz.cover_image, 320)} alt={quiz.title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-zk-text/30">
               <div className="w-10 h-10 border-[2px] border-dashed border-zk-border/20 rounded-lg flex items-center justify-center">
@@ -345,7 +346,7 @@ const QuizCard = ({ quiz, isDiscoveryMode }) => {
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3" data-lenis-prevent="true">
               {questions.map((q, i) => (
                 <div key={q.id || i} className="bg-zk-panel-bg border-[1.5px] border-zk-border rounded-md p-3 !shadow-none">
                   <div className="flex justify-between items-start mb-2">

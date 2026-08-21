@@ -524,10 +524,10 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
 
     const round = game.imposterRound;
     if (round > 3) return; // Clue phase over
-    
-    if (game.imposterClues[round][team]) return; // Already submitted
 
-    game.imposterClues[round][team] = clue.trim().toUpperCase();
+    if (game.imposterClues[round][team]) return; // Already submitted
+    
+    game.imposterClues[round][team] = clue.trim().substring(0, 30);
     
     // Broadcast to host that a team submitted
     io.to(pin).emit('game:imposter-clue-received', { team, round, clue: game.imposterClues[round][team] });

@@ -3,7 +3,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSkillConfig } from '../../config/skills';
 import { Lock } from 'lucide-react';
-import { isDragLayersQuestion, isLineMatchingQuestion } from '@/lib/questionTypes';
+import { isDragLayersQuestion, isLineMatchingQuestion, resolveQuestionType, QUESTION_TYPES } from '@/lib/questionTypes';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 export default function QuestionPrompt({
   phase,
@@ -24,7 +25,20 @@ export default function QuestionPrompt({
   const skillButton = playerSkill ? (() => {
     const config = getSkillConfig(playerSkill);
     const Icon = config.icon;
-    const isInactive = isSkillLockedOut || skillChargesLeft <= 0 || foxSmokescreen;
+    
+    // Resolve question type to restrict butterfly
+    const qType = resolveQuestionType(question);
+    const isNotMultipleChoice = playerSkill === 'butterfly' && qType !== QUESTION_TYPES.MULTIPLE_CHOICE;
+    
+    const isInactive = isSkillLockedOut || skillChargesLeft <= 0 || foxSmokescreen || isNotMultipleChoice;
+    
+    let buttonText = `USE ${config.name.toUpperCase()} (${skillChargesLeft})`;
+    if (isSkillLockedOut) {
+      buttonText = skillLockoutMsg;
+    } else if (isNotMultipleChoice) {
+      buttonText = "MULTIPLE CHOICE ONLY";
+    }
+
     return (
       <button
         onClick={handleUseSkill}
@@ -37,7 +51,7 @@ export default function QuestionPrompt({
         style={{ fontFamily: 'var(--font-amatic-sc)', fontSize: '2.2rem', letterSpacing: '2px' }}
       >
         <Icon className="w-8 h-8" />
-        <span style={{ paddingTop: '4px' }}>{isSkillLockedOut ? skillLockoutMsg : `USE ${config.name.toUpperCase()} (${skillChargesLeft})`}</span>
+        <span style={{ paddingTop: '4px' }}>{buttonText}</span>
       </button>
     );
   })() : null;
@@ -65,7 +79,7 @@ export default function QuestionPrompt({
           <div className="flex flex-col h-auto w-full gap-3 sm:gap-4 p-3 sm:p-5 overflow-y-auto">
             {question.imageUrl && (
               <div className="w-full max-w-sm mx-auto rounded-lg overflow-hidden border-2 border-zk-border bg-gray-100 shrink-0 mb-1">
-                <img src={question.imageUrl} alt="Question" className="w-full max-h-[15vh] object-contain" />
+                <img src={getOptimizedImageUrl(question.imageUrl, 400)} alt="Question" className="w-full max-h-[15vh] object-contain" />
               </div>
             )}
             <p className={`font-black text-2xl sm:text-3xl lg:text-4xl leading-tight text-center shrink-0 ${
@@ -99,7 +113,7 @@ export default function QuestionPrompt({
         >
           {question.imageUrl && (
             <div className="w-full max-w-sm mx-auto rounded-xl overflow-hidden border-2 border-zk-border bg-gray-100 mb-3">
-              <img src={question.imageUrl} alt="Question" className="w-full max-h-[25vh] object-contain" />
+              <img src={getOptimizedImageUrl(question.imageUrl, 500)} alt="Question" className="w-full max-h-[25vh] object-contain" />
             </div>
           )}
           <p className="text-zk-text font-black text-xl lg:text-2xl leading-tight">

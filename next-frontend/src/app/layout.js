@@ -61,6 +61,7 @@ export default function RootLayout({ children }) {
         <head>
           <link rel="preconnect" href="https://content-panda-63.clerk.accounts.dev" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://content-panda-63.clerk.accounts.dev" />
+          <link rel="preload" href="/lottie/hero.lottie" as="fetch" type="application/json" crossOrigin="anonymous" />
         </head>
         <body className={`min-h-screen bg-zk-bg flex flex-col font-sans transition-colors duration-300 ${inter.variable} ${outfit.variable} ${permanentMarker.variable} ${gasoekOne.variable} ${kantumruyPro.variable} ${amaticSC.variable}`}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>

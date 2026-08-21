@@ -52,6 +52,7 @@ model quizzes {
 
   @@index([creator_id])
   @@index([creator_id, cloned_from_id])
+  @@index([is_public, created_at(sort: Desc)])
 }
 
 model users {
@@ -222,4 +223,5 @@ model fivegrid_words {
   word       String   @unique
   category   String   @default("General")
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  @@index([category])
 }
