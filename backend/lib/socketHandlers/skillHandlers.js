@@ -75,6 +75,16 @@ module.exports = function registerSkillHandlers(io, socket, games) {
       socket.emit('error', { message: 'Out of charges!' });
       return;
     }
+
+    // Check butterfly restriction
+    if (skillId === 'butterfly') {
+      const question = game.questions[game.currentQuestionIndex];
+      const { resolveQuestionType, QUESTION_TYPES } = require('../questionTypes');
+      if (resolveQuestionType(question) !== QUESTION_TYPES.MULTIPLE_CHOICE) {
+        socket.emit('error', { message: 'Butterfly skill can only be used on Multiple Choice questions!' });
+        return;
+      }
+    }
     
     // Activate skill
     game.skillCharges[team][skillId] -= 1;
@@ -90,13 +100,15 @@ module.exports = function registerSkillHandlers(io, socket, games) {
     } 
     else if (skillId === 'fox') {
       game.foxActive[team] = true;
-      const enemyTeam = team === 'A' ? 'B' : 'A';
-      io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam });
+      const enemyTeams = game.teams.filter(t => t !== team);
+      enemyTeams.forEach(enemyTeam => {
+        io.to(pin).emit('game:fox-attack', { targetTeam: enemyTeam });
+      });
     } 
     else if (skillId === 'butterfly') {
       const question = game.questions[game.currentQuestionIndex];
       const { resolveQuestionType, QUESTION_TYPES } = require('../questionTypes');
-      if (resolveQuestionType(question) === QUESTION_TYPES.DRAG_LAYERS) {
+      if (resolveQuestionType(question) !== QUESTION_TYPES.MULTIPLE_CHOICE) {
         return;
       }
 

@@ -37,7 +37,9 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     imposterTeam: null,
     votes: {},
     correctTeams: [],
-    currentTeamTurn: null
+    currentTeamTurn: null,
+    teams: [],
+    teamNames: {}
   });
 
   useEffect(() => {
@@ -128,15 +130,20 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       if (data.minigameData) {
         setMinigameData(prev => ({ ...prev, ...data.minigameData }));
       }
+      if (data.imposterData) {
+        setImposterData(prev => ({ ...prev, ...data.imposterData }));
+      }
     };
 
-    const onMinigameImposterStarted = ({ round, currentTeamTurn }) => {
+    const onMinigameImposterStarted = ({ round, currentTeamTurn, teams, teamNames }) => {
       setPhase('MINIGAME_IMPOSTER');
       setImposterData(prev => ({
         ...prev,
         subPhase: 'CLUE_PHASE',
         round,
-        currentTeamTurn
+        currentTeamTurn,
+        teams: teams || ['A', 'B'],
+        teamNames: teamNames || {}
       }));
       getSocket().emit('player:imposter-request-role', { pin, playerId });
     };

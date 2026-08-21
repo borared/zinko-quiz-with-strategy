@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 import { Fingerprint } from 'lucide-react';
 
-export default function ImposterHost({ imposterData, background }) {
+export default function ImposterHost({ imposterData, background, onNextRound }) {
   const { subPhase, round, teams, teamNames, clues, votes, correctTeams, imposterTeam, secret, currentTeamTurn } = imposterData;
 
   const [clueQueue, setClueQueue] = React.useState([]);
@@ -88,6 +88,14 @@ export default function ImposterHost({ imposterData, background }) {
                   );
                 })}
               </div>
+              {(!correctTeams || correctTeams.length === 0) && onNextRound && (
+                <button
+                  onClick={onNextRound}
+                  className="mt-12 bg-blue-600 hover:bg-blue-500 border-2 border-blue-400 text-white font-black text-2xl px-12 py-4 rounded-lg tracking-wide uppercase transition-colors shadow-lg active:scale-95 z-50 pointer-events-auto cursor-pointer"
+                >
+                  Proceed to Next Question
+                </button>
+              )}
             </div>
           ) : displayPhase === 'VOTING_PHASE' ? (
             <div className="grid grid-cols-2 gap-8 w-full max-w-4xl">
@@ -117,7 +125,7 @@ export default function ImposterHost({ imposterData, background }) {
                     <p className="text-4xl text-blue-400 font-bold tracking-widest mb-6">
                       {teamNames[currentClue.team] || `Team ${currentClue.team}`}
                     </p>
-                    <h2 className="text-[8rem] leading-none font-black text-white tracking-tighter break-all">
+                    <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight break-words max-w-4xl px-4">
                       {currentClue.text}
                     </h2>
                   </motion.div>

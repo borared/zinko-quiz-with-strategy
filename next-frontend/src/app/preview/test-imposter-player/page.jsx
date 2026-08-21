@@ -4,12 +4,12 @@ import ImposterPlayer from '@/components/Play/ImposterPlayer';
 
 export default function TestImposterPlayerPage() {
   const initialData = {
-    subPhase: 'CLUE_PHASE',
+    subPhase: 'VOTING_PHASE',
     round: 1,
-    isImposter: true,
-    secret: null,
-    imposterTeam: 'A',
-    correctTeams: ['B', 'C'],
+    isImposter: false,
+    secret: 'SNOWMAN',
+    imposterTeam: 'B',
+    correctTeams: ['A', 'C'],
     votes: {}
   };
 

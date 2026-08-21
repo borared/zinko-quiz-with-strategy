@@ -24,7 +24,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
     
     // Auto-assign missing skills
     const ALL_SKILLS = ['rabbit', 'fox', 'butterfly', 'frog'];
-    const teams = ['A', 'B'];
+    const teams = game.teams;
     teams.forEach(team => {
       if (!game.teamSkills[team]) game.teamSkills[team] = {};
       const teamPlayers = game.players.filter(p => p.team === team);
@@ -51,10 +51,16 @@ module.exports = function registerGameHandlers(io, socket, games) {
     });
 
     // Reset skill states for the new round
-    game.activeSkillThisRound = { A: null, B: null };
-    game.rabbitActive = { A: null, B: null };
-    game.foxActive = { A: null, B: null };
-    game.frogActive = { A: null, B: null };
+    game.activeSkillThisRound = {};
+    game.rabbitActive = {};
+    game.foxActive = {};
+    game.frogActive = {};
+    game.teams.forEach(t => {
+      game.activeSkillThisRound[t] = null;
+      game.rabbitActive[t] = null;
+      game.foxActive[t] = null;
+      game.frogActive[t] = null;
+    });
 
     if (!game.questions || game.questions.length === 0) {
       console.error(`Game ${pin}: No questions available to start.`);
@@ -98,10 +104,16 @@ module.exports = function registerGameHandlers(io, socket, games) {
     game.absoluteAnswerTimes = {};
     
     // Reset skill states for the new round
-    game.activeSkillThisRound = { A: null, B: null };
-    game.rabbitActive = { A: null, B: null };
-    game.foxActive = { A: null, B: null };
-    game.frogActive = { A: null, B: null };
+    game.activeSkillThisRound = {};
+    game.rabbitActive = {};
+    game.foxActive = {};
+    game.frogActive = {};
+    game.teams.forEach(t => {
+      game.activeSkillThisRound[t] = null;
+      game.rabbitActive[t] = null;
+      game.foxActive[t] = null;
+      game.frogActive[t] = null;
+    });
 
     const question = game.questions[nextIndex];
     if (!question) {
@@ -179,6 +191,21 @@ module.exports = function registerGameHandlers(io, socket, games) {
       teamNames: game.teamNames || {}
     } : null;
 
+    const isImposterPhase = ['MINIGAME_IMPOSTER', 'MINIGAME_IMPOSTER_VOTING', 'MINIGAME_IMPOSTER_REVEAL'].includes(game.phase);
+    const imposterData = isImposterPhase ? {
+      subPhase: game.phase === 'MINIGAME_IMPOSTER' ? 'CLUE_PHASE' :
+                game.phase === 'MINIGAME_IMPOSTER_VOTING' ? 'VOTING_PHASE' : 'REVEAL_PHASE',
+      round: game.imposterRound || 1,
+      isImposter: player ? (player.team === game.imposterTeam) : false,
+      secret: player ? (player.team === game.imposterTeam ? null : game.imposterSecret) : null,
+      imposterTeam: game.imposterTeam,
+      votes: game.imposterVotes || {},
+      correctTeams: game.imposterVotes ? game.teams.filter(t => t !== game.imposterTeam && game.imposterVotes[t] === game.imposterTeam) : [],
+      currentTeamTurn: game.teams[game.imposterTurnIndex || 0],
+      teams: game.teams,
+      teamNames: game.teamNames || {}
+    } : null;
+
     const isLeader = player && game.teamLeaders?.[player.team] === playerId;
 
     socket.emit('player:sync-state-response', {
@@ -187,6 +214,7 @@ module.exports = function registerGameHandlers(io, socket, games) {
       currentQuestion: currentQuestionPayload,
       hasAnswered: game.answers[playerId] !== undefined,
       minigameData,
+      imposterData,
       background: game.background,
       isLeader,
     });

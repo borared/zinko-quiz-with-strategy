@@ -82,7 +82,7 @@ export default function HostGameUI() {
     currentTurn: null
   });
 
-  const [imposterData, setImposterData] = useState({
+  const [imposterData, setImposterDataState] = useState({
     subPhase: 'INTRO',
     round: 1,
     teams: [],
@@ -94,6 +94,20 @@ export default function HostGameUI() {
     secret: null,
     currentTeamTurn: null
   });
+
+  const imposterDataRef = React.useRef(imposterData);
+  const setImposterData = (val) => {
+    if (typeof val === 'function') {
+      setImposterDataState(prev => {
+        const next = val(prev);
+        imposterDataRef.current = next;
+        return next;
+      });
+    } else {
+      imposterDataRef.current = val;
+      setImposterDataState(val);
+    }
+  };
 
   const [isWheelSpinning, setIsWheelSpinning] = useState(false);
 
@@ -343,7 +357,10 @@ export default function HostGameUI() {
     };
 
     const onRewardQueueEmpty = () => {
-      getSocket().emit("game:next-question", { pin });
+      const correctTeams = imposterDataRef.current?.correctTeams || [];
+      if (correctTeams.length > 0) {
+        getSocket().emit("game:next-question", { pin });
+      }
     };
 
     const onMinigameFiveGridStarted = ({ wordLength, hint, category, state }) => {
@@ -674,6 +691,7 @@ export default function HostGameUI() {
             <ImposterHost
               imposterData={imposterData}
               background={background}
+              onNextRound={handleNextQuestion}
             />
           )}
 
