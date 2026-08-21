@@ -283,6 +283,11 @@ export default function PlayerLobby() {
 
   const [isSceneryPickerOpen, setIsSceneryPickerOpen] = useState(false);
   const [sceneryProviderNickname, setSceneryProviderNickname] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const ownedScenery = useOwnedSceneryStore((s) => s.ownedScenery);
   const fetchOwnedScenery = useOwnedSceneryStore((s) => s.fetchOwnedScenery);
@@ -525,7 +530,7 @@ export default function PlayerLobby() {
       )}
 
       {/* Scenery Suggestion Credit Badge */}
-      {sceneryProviderNickname && (
+      {isClient && sceneryProviderNickname && (
         <div 
           className="fixed bottom-4 left-4 bg-[#1A1A24]/90 border-[2px] border-black text-white text-sm font-black tracking-widest px-5 py-2.5 rounded-md backdrop-blur-md z-30 flex items-center gap-2"
           style={{ fontFamily: 'var(--font-outfit)' }}
@@ -536,7 +541,7 @@ export default function PlayerLobby() {
       )}
 
       {/* Suggest Scenery Button */}
-      {ownedScenery && ownedScenery.length > 0 && (
+      {isClient && ownedScenery && ownedScenery.length > 0 && (
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -635,7 +640,7 @@ export default function PlayerLobby() {
       </AnimatePresence>
 
       {/* Leader Promotion Confirmation Modal */}
-      {promoteTarget && (
+      {isClient && promoteTarget && (
         <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4">
           <div className="bg-zk-panel-bg border-[2px] border-black rounded-md p-6 max-w-sm w-full flex flex-col items-center text-center">
             <h3 className="font-['Outfit'] font-black text-xl text-zk-text mb-2 uppercase">
