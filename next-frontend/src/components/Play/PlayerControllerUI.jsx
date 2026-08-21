@@ -94,6 +94,7 @@ export default function PlayerControllerUI() {
         onGuess={gameState.handleFiveGridGuess}
         background={background}
         isLeader={isLeader}
+        timeLeft={timeLeft}
       />
     );
   }
