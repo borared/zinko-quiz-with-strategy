@@ -40,35 +40,43 @@ function initSocketHandler(io) {
             player.socketId = null;
             console.log(`👤 Player "${player.nickname}" disconnected from game ${pin}`);
             
-            // If still in lobby, remove player entirely and update lobby so their avatar leaves
+            // If still in lobby, remove player after a 3-second grace period (to allow page refresh)
             if (game.phase === 'LOBBY') {
               const team = player.team;
-              game.players = game.players.filter(p => p.id !== player.id);
+              setTimeout(() => {
+                const g = games.get(pin);
+                if (!g) return;
 
-              // Reassign leader if they were the leader of their team
-              if (game.teamLeaders && game.teamLeaders[team] === player.id) {
-                const nextTeammate = game.players.find(p => p.team === team);
-                if (nextTeammate) {
-                  game.teamLeaders[team] = nextTeammate.id;
-                } else {
-                  delete game.teamLeaders[team];
+                const currentPlayer = g.players.find(p => p.id === player.id);
+                if (currentPlayer && currentPlayer.socketId === null) {
+                  g.players = g.players.filter(p => p.id !== player.id);
+
+                  // Reassign leader if they were the leader of their team
+                  if (g.teamLeaders && g.teamLeaders[team] === player.id) {
+                    const nextTeammate = g.players.find(p => p.team === team);
+                    if (nextTeammate) {
+                      g.teamLeaders[team] = nextTeammate.id;
+                    } else {
+                      delete g.teamLeaders[team];
+                    }
+                  }
+
+                  io.to(pin).emit('lobby:players-update', {
+                    players: g.players.map(p => ({
+                      id: p.id,
+                      nickname: p.nickname,
+                      avatar: p.avatar,
+                      team: p.team,
+                      isLeader: g.teamLeaders?.[p.team] === p.id
+                    })),
+                    count: g.players.length,
+                    background: g.background,
+                    teams: g.teams,
+                    teamNames: g.teamNames || {},
+                  });
+                  console.log(`👋 Player "${player.nickname}" removed from lobby ${pin} after grace period`);
                 }
-              }
-
-              io.to(pin).emit('lobby:players-update', {
-                players: game.players.map(p => ({
-                  id: p.id,
-                  nickname: p.nickname,
-                  avatar: p.avatar,
-                  team: p.team,
-                  isLeader: game.teamLeaders?.[p.team] === p.id
-                })),
-                count: game.players.length,
-                background: game.background,
-                teams: game.teams,
-                teamNames: game.teamNames || {},
-              });
-              console.log(`👋 Player "${player.nickname}" removed from lobby ${pin}`);
+              }, 3000);
             }
           }
         }
