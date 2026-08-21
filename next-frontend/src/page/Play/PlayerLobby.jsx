@@ -343,10 +343,18 @@ export default function PlayerLobby() {
     const socket = getSocket();
     if (!socket || !isConnected) return;
 
-      // Request current player list for this lobby
-      if (pin) {
-        socket.emit('lobby:request-players', { pin });
-      }
+    // Auto-rejoin on mount or reconnect if we have stored session details
+    if (pin && playerId && nickname) {
+      socket.emit('player:join', { 
+        pin, 
+        playerId, 
+        nickname, 
+        avatar, 
+        team 
+      });
+    } else if (pin) {
+      socket.emit('lobby:request-players', { pin });
+    }
 
     const onPlayersUpdate = (data) => {
       setPlayers(data.players || []);
