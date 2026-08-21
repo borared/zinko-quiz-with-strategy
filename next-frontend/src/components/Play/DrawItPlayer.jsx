@@ -93,7 +93,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
 
   return (
     <div 
-      className="relative w-full h-full min-h-[400px] flex flex-col p-4 sm:p-6 overflow-hidden bg-zk-blue"
+      className="relative w-full h-full min-h-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-zk-blue"
       style={background ? { backgroundImage: `url('${background}')`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
     >
       {/* Blurred Overlay */}
