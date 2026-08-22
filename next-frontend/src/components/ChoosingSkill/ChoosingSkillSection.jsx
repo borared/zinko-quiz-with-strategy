@@ -189,14 +189,14 @@ const ChoosingSkillSection = () => {
           {/* Icon/Color Representation */}
           <div className="w-full md:w-64 flex flex-col items-center justify-center flex-shrink-0 relative">
             <div
-              className="w-40 h-40 md:w-48 md:h-48 rounded-tl-[32px] rounded-br-[32px] rounded-tr-[4px] rounded-bl-[4px] border-[4px] border-black flex items-center justify-center shadow-lg relative transform rotate-3"
+              className="w-40 h-40 md:w-48 md:h-48 rounded-tl-[32px] rounded-br-[32px] rounded-tr-[4px] rounded-bl-[4px] border-[4px] border-black overflow-hidden shadow-lg relative transform rotate-3"
               style={{ backgroundColor: currentPreviewedSkill.color }}
             >
-              {currentPreviewedSkill.icon && React.createElement(currentPreviewedSkill.icon, {
-                size: 72,
-                className: "text-white",
-                strokeWidth: 3
-              })}
+              <img
+                src={`/images/skills/${currentPreviewedSkill.id}.png`}
+                alt={currentPreviewedSkill.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             
             {myTeamSkills[currentPreviewedSkill.id] && (
