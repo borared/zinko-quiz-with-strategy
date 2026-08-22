@@ -39,6 +39,11 @@ export function startGameAudio(type) {
   const config = GAME_AUDIO_CONFIG[type];
   if (!config) return;
 
+  // If the same BGM type is already active and playing, keep it playing smoothly without restart
+  if (window.gameAudioType === type && window.gameAudio) {
+    return;
+  }
+
   // Stop active game BGM
   stopGameAudio();
 
