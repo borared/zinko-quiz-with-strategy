@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-;
+import { usePlayerSession } from '@/hooks/usePlayerSession';
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap, ArrowLeft, Pencil } from 'lucide-react';
@@ -266,12 +266,7 @@ export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
-
-
-  const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
-  const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
-  const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
-  const avatar   = typeof window !== 'undefined' ? sessionStorage.getItem('player_avatar') || 'pizza' : 'pizza';
+  const { playerId, nickname, team, avatar, isLoaded } = usePlayerSession();
 
   const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
@@ -288,6 +283,9 @@ export default function PlayerLobby() {
 
   useEffect(() => {
     setIsClient(true);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('last_intro_shown_qid');
+    }
   }, []);
 
   const ownedScenery = useOwnedSceneryStore((s) => s.ownedScenery);
@@ -342,7 +340,7 @@ export default function PlayerLobby() {
   // Socket logic
   useEffect(() => {
     const socket = getSocket();
-    if (!socket || !isConnected) return;
+    if (!socket || !isLoaded || !isConnected) return;
 
     // Auto-rejoin on mount or reconnect if we have stored session details
     if (pin && playerId && nickname) {
@@ -353,6 +351,7 @@ export default function PlayerLobby() {
         avatar, 
         team 
       });
+      socket.emit('player:sync-state', { pin, playerId });
     } else if (pin) {
       socket.emit('lobby:request-players', { pin });
     }
@@ -397,18 +396,35 @@ export default function PlayerLobby() {
       }, 1000);
     };
 
+    const onSyncStateResponse = (data) => {
+      if (data.error) {
+        sessionStorage.clear();
+        router.push('/');
+        return;
+      }
+      if (data.phase === 'SKILL_PICK') {
+        router.push(`/play/${pin}/choose-skill`);
+      } else if (data.phase !== 'LOBBY' && data.phase !== 'FINISHED') {
+        router.push(`/play/${pin}/game`);
+      } else if (data.phase === 'FINISHED') {
+        router.push(`/play/${pin}/result`);
+      }
+    };
+
     socket.on('lobby:players-update', onPlayersUpdate);
     socket.on('lobby:background-update', onBackgroundUpdate);
     socket.on('game:question', onQuestion);
     socket.on('lobby:countdown-started', onCountdownStarted);
+    socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
       socket.off('lobby:players-update', onPlayersUpdate);
       socket.off('lobby:background-update', onBackgroundUpdate);
       socket.off('game:question', onQuestion);
       socket.off('lobby:countdown-started', onCountdownStarted);
+      socket.off('player:sync-state-response', onSyncStateResponse);
     };
-  }, [getSocket, isConnected, pin, router, nickname, team, playerId]);
+  }, [getSocket, isConnected, isLoaded, pin, router, nickname, team, playerId, avatar]);
 
 
   const handleGoBack = () => {
