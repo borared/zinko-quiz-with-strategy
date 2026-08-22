@@ -102,7 +102,7 @@ export default function TestChooseSkill() {
               <img
                 src={`/images/skills/${currentPreviewedSkill.id}.png`}
                 alt={currentPreviewedSkill.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain p-2"
               />
             </div>
             
