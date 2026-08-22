@@ -8,8 +8,8 @@ import { usePlayerMinigames } from './usePlayerMinigames';
 
 export function usePlayerGameState() {
   const { pin } = useParams();
-  const { getSocket } = useSocketStore();
-  const { playerId, nickname, playerSkill, team, isLeader } = usePlayerSession();
+  const { getSocket, isConnected } = useSocketStore();
+  const { playerId, nickname, playerSkill, team, isLeader, isLoaded } = usePlayerSession();
 
   // 1. Core Game State
   const coreGame = usePlayerCoreGame({ pin, playerId, team, playerSkill });
@@ -33,13 +33,13 @@ export function usePlayerGameState() {
     setQuestion: coreGame.setQuestion 
   });
 
-  // 4. Initial Sync
+  // 4. Initial Sync / Reconnect
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket || playerId === 'unknown') return;
-
-    socket.emit('player:sync-state', { pin, playerId });
-  }, [getSocket, pin, playerId]);
+    if (isLoaded && isConnected && pin && playerId && playerId !== 'unknown') {
+      const socket = getSocket();
+      socket.emit('player:sync-state', { pin, playerId });
+    }
+  }, [getSocket, isConnected, pin, playerId, isLoaded]);
 
   return {
     playerId,
