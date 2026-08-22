@@ -1,7 +1,19 @@
 "use client";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FoxSmokescreen({ isActive, isLeader, teamCounterBlindCharges, onCounterBlind }) {
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (isActive) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio('/audio/blind.mp3');
+      }
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  }, [isActive]);
   const blobs = [
     { x: '10vw', y: '5vh', size: '35vw', delay: 0 },
     { x: '60vw', y: '-8vh', size: '42vw', delay: 0.08 },
