@@ -23,6 +23,13 @@ function getLevenshteinDistance(a, b) {
   return matrix[a.length][b.length];
 }
 
+function getLevenshteinSimilarity(a, b) {
+  const distance = getLevenshteinDistance(a, b);
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 0;
+  return Math.round(((maxLen - distance) / maxLen) * 100);
+}
+
 
 
 module.exports = function registerMinigameHandlers(io, socket, games) {
@@ -647,6 +654,8 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     game.phase = 'MINIGAME_DRAW_IT';
     game.drawItRoundsRemaining = 2;
     game.drawItWinners = new Set();
+    game.drawItWinnerTeam = null;
+    game.drawItWinnerNickname = null;
     
     game.playerTeamMap = {};
     game.players.forEach(p => { game.playerTeamMap[p.id] = p.team; });
@@ -659,7 +668,11 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     // We'll skip semantic relations for now to avoid undefined function errors
     // fetchRelatedWordsForDrawIt(word, game);
 
-    io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+    io.to(pin).emit('game:minigame-draw-it-started', { 
+      word: null, 
+      wordLength: game.drawItWord ? game.drawItWord.length : 0, 
+      teamNames: game.teamNames || {} 
+    });
     // Host gets the word
     socket.emit('game:draw-it-round-start', { word, roundsRemaining: game.drawItRoundsRemaining });
   });
@@ -728,7 +741,7 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     }
   });
 
-  socket.on('player:draw-it-guess', ({ pin, playerId, guess }) => {
+  socket.on('player:draw-it-guess', async ({ pin, playerId, guess }) => {
     const game = games.get(pin);
     if (!game || game.phase !== 'MINIGAME_DRAW_IT') return;
     if (!requirePlayerSocket(game, socket, playerId)) return;
@@ -749,12 +762,16 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       game.drawItWinners.add(team);
       
       const playerNickname = game.players.find(p => p.id === playerId)?.nickname || 'Someone';
-
+      game.drawItWinnerTeam = team;
+      game.drawItWinnerNickname = playerNickname;
+      
       io.to(pin).emit('game:draw-it-round-winner', { team, nickname: playerNickname, word: game.drawItWord });
 
       setTimeout(() => {
         if (!games.has(pin) || game.phase !== 'MINIGAME_DRAW_IT') return;
         game.drawItRoundEnding = false;
+        game.drawItWinnerTeam = null;
+        game.drawItWinnerNickname = null;
         game.drawItRoundsRemaining -= 1;
 
         if (game.drawItRoundsRemaining > 0) {
@@ -765,7 +782,18 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
           
           io.to(pin).emit('game:draw-it-clear');
           io.to(pin).emit('game:draw-it-round-start-player'); 
-          io.to(pin).emit('game:minigame-draw-it-started', { word: null, teamNames: game.teamNames || {} });
+          io.to(pin).emit('game:minigame-draw-it-started', { 
+            word: null, 
+            wordLength: game.drawItWord ? game.drawItWord.length : 0, 
+            teamNames: game.teamNames || {} 
+          });
+
+          if (game.hostSocketId) {
+            io.to(game.hostSocketId).emit('game:draw-it-round-start', { 
+              word: newWord, 
+              roundsRemaining: game.drawItRoundsRemaining 
+            });
+          }
         } else {
           // Both rounds over. Process rewards
           game.rewardQueue = Array.from(game.drawItWinners);
@@ -779,10 +807,41 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       }, 4000); // 4 seconds delay to celebrate round win
     } else {
       let closenessScore = 0;
-      
-      // Simple heuristic for closeness
-      if (normalizedGuess.length > 0 && correctWord.startsWith(normalizedGuess.substring(0, Math.floor(correctWord.length/2)))) {
-         closenessScore = 70;
+      if (groq) {
+        try {
+          const chatCompletion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: 'user',
+                content: `Rate the semantic similarity between the user's guess and the correct secret word. 
+Secret word: "${correctWord}"
+User guess: "${normalizedGuess}"
+
+Respond with ONLY a single JSON object in the exact format: {"score": <number between 0 and 99>}.
+Example:
+Correct: "cat", Guess: "animal" -> {"score": 80}
+Correct: "car", Guess: "vehicle" -> {"score": 85}
+Correct: "dog", Guess: "cat" -> {"score": 50}
+Correct: "apple", Guess: "banana" -> {"score": 60}
+Do not include any other text, markdown formatting or explanation.`
+              }
+            ],
+            model: 'llama-3.3-70b-versatile',
+            temperature: 0.1,
+          });
+
+          const responseContent = chatCompletion.choices[0]?.message?.content;
+          const cleanJson = responseContent.replace(/```json|```/g, '').trim();
+          const result = JSON.parse(cleanJson);
+          if (typeof result.score === 'number') {
+            closenessScore = Math.min(Math.max(result.score, 0), 99);
+          }
+        } catch (err) {
+          console.error('⚠️ Semantic similarity API failed, using fallback:', err.message);
+          closenessScore = getLevenshteinSimilarity(normalizedGuess, correctWord);
+        }
+      } else {
+        closenessScore = getLevenshteinSimilarity(normalizedGuess, correctWord);
       }
 
       if (closenessScore > 0) {
