@@ -65,7 +65,7 @@ export default function TestChooseSkill() {
             </p>
 
             {/* Selection CTAs */}
-            <div className="mt-auto w-full">
+            <div className="mt-4 w-full">
               {selectedSkill === currentPreviewedSkill.id ? (
                 <button
                   onClick={() => handleCancelSkill(currentPreviewedSkill.id)}
