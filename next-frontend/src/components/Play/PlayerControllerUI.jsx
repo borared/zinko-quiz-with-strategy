@@ -24,19 +24,9 @@ export default function PlayerControllerUI() {
   const gameState = usePlayerGameState();
   const background = useGameBackground(gameState.pin);
 
-  const [lastQuestionId, setLastQuestionId] = React.useState(null);
-  const [showIntro, setShowIntro] = React.useState(false);
-
-  React.useEffect(() => {
-    if (gameState.phase === 'QUESTION' && gameState.question?.id) {
-      if (gameState.question.id !== lastQuestionId) {
-        setLastQuestionId(gameState.question.id);
-        setShowIntro(true);
-      }
-    } else {
-      setShowIntro(false);
-    }
-  }, [gameState.phase, gameState.question, lastQuestionId]);
+  const handleIntroComplete = () => {
+    // No-op since backend controls transition now
+  };
 
   const {
     playerId,
@@ -83,8 +73,8 @@ export default function PlayerControllerUI() {
     handleImposterSabotageVote
   } = gameState;
 
-  if (showIntro) {
-    return <QuestionIntroOverlay onComplete={() => setShowIntro(false)} />;
+  if (phase === 'QUESTION_INTRO') {
+    return <QuestionIntroOverlay onComplete={handleIntroComplete} />;
   }
 
   // ── RESULT overlay ──
@@ -158,6 +148,7 @@ export default function PlayerControllerUI() {
         winnerTeam={minigameData.winner}
         winnerNickname={minigameData.winnerNickname}
         word={minigameData.word}
+        wordLength={minigameData.wordLength}
         teamNames={minigameData.teamNames}
         isLeader={isLeader}
         background={background}
