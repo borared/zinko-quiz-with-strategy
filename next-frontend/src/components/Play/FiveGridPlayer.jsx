@@ -1,6 +1,9 @@
 "use client";
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { HelpCircle, Skull, Trophy } from 'lucide-react';
+import dynamic from 'next/dynamic';
+const Lottie = dynamic(() => import('lottie-react').then((mod) => mod.default), { ssr: false });
+import championLottieData from '@/lib/settings-profile-lottie.json';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketStore } from '@/store/useSocketStore';
 
@@ -25,7 +28,7 @@ const KEY_BG = {
   default: 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 hover:-translate-y-0.5 active:translate-y-0 shadow-md active:shadow-none'
 };
 
-export default function FiveGridPlayer({ fivegridData, team, onGuess, background, isLeader, timeLeft }) {
+export default function FiveGridPlayer({ fivegridData, team, onGuess, background, isLeader, timeLeft, overrideWinnerData }) {
   const { wordLength = 5, category, state, hint } = fivegridData;
   const myState = state?.[team] || { lives: 5, guesses: [], isEliminated: false };
   const { guesses = [], isEliminated } = myState;
@@ -37,6 +40,7 @@ export default function FiveGridPlayer({ fivegridData, team, onGuess, background
   const { getSocket, isConnected } = useSocketStore();
   const [error, setError] = useState(null);
   const [showHint, setShowHint] = useState(false);
+  const [winnerData, setWinnerData] = useState(null);
 
   useEffect(() => {
     const socket = getSocket();
@@ -47,9 +51,13 @@ export default function FiveGridPlayer({ fivegridData, team, onGuess, background
       setTimeout(() => setError(null), 2000);
     };
 
+    const onWinner = (data) => setWinnerData(data);
+
     socket.on('game:fivegrid-invalid-guess', onInvalidGuess);
+    socket.on('game:fivegrid-winner', onWinner);
     return () => {
       socket.off('game:fivegrid-invalid-guess', onInvalidGuess);
+      socket.off('game:fivegrid-winner', onWinner);
     };
   }, [getSocket, isConnected]);
 
@@ -153,6 +161,30 @@ export default function FiveGridPlayer({ fivegridData, team, onGuess, background
         />
         <h2 className="gasoek-one-regular text-7xl text-zk-red uppercase tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '3px black' }}>{heading}</h2>
         <p className="text-4xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '3px' }}>{description}</p>
+      </div>
+    );
+  }
+
+  const activeWinnerData = overrideWinnerData || winnerData;
+
+  if (activeWinnerData) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50 bg-neutral-950/90 backdrop-blur-sm">
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="flex flex-col items-center"
+        >
+          <div className="w-48 h-48 mb-8 drop-shadow-[0_10px_0_rgba(0,0,0,0.5)]">
+            <Lottie animationData={championLottieData} loop={true} style={{ width: '100%', height: '100%' }} />
+          </div>
+          <h2 className="gasoek-one-regular text-5xl sm:text-7xl text-zk-yellow tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '3px black' }}>
+            {activeWinnerData.teamName} win!
+          </h2>
+          <p className="text-4xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '3px' }}>
+            Answer: {activeWinnerData.word}
+          </p>
+        </motion.div>
       </div>
     );
   }
