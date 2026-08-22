@@ -207,6 +207,7 @@ export default function PlayerControllerUI() {
         onRewardClaimed={() => {}} // Host handles server transition
         playerId={playerId}
         isHost={false}
+        background={background}
       />
     );
   }

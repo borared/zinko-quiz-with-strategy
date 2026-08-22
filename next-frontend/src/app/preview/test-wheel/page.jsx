@@ -12,6 +12,7 @@ export default function TestWheelPage() {
         isSpinner={true} 
         onRewardClaimed={() => alert("Reward Claimed!")}
         playerId="test-1"
+        background="/background_battle/city.jpg"
       />
     </div>
   );

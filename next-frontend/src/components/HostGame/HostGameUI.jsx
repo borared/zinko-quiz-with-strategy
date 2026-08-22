@@ -769,6 +769,7 @@ export default function HostGameUI() {
                 getSocket().emit("host:process-reward-queue", { pin });
               }}
               isHost={true}
+              background={background}
             />
           )}
         </AnimatePresence>
