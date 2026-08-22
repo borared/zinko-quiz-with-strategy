@@ -47,7 +47,7 @@ export default function TestChooseSkill() {
       <div className="relative z-10 flex flex-col lg:flex-row w-full max-w-[1100px] h-[65vh] md:h-[70vh] gap-6 px-6 mt-16 md:mt-24">
         
         {/* LEFT PANEL - Detail View */}
-        <div className="flex-1 bg-zk-panel-bg/95 border border-black/30 rounded-xl p-6 md:p-8 flex flex-col-reverse md:flex-row items-center md:items-stretch gap-6 shadow-xl relative overflow-hidden">
+        <div className="flex-1 lg:self-center bg-zk-panel-bg/95 border border-black/30 rounded-xl p-6 md:p-8 flex flex-col-reverse md:flex-row items-center md:items-center gap-6 shadow-xl relative overflow-hidden">
           <div className="flex-1 flex flex-col justify-center text-center md:text-left">
             <span className="text-gray-500 font-bold text-xs uppercase tracking-wider mb-2">Selected Skill Details</span>
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-wide mb-4 zinko-font drop-shadow-sm">
