@@ -13,6 +13,7 @@ export default function TestFiveGridPlayerPage() {
   });
 
   const [timeLeft, setTimeLeft] = useState(240); // 4 minutes
+  const [winner, setWinner] = useState(null);
 
   const guesses = fivegridData.state.A.guesses;
   const isSolved = guesses.some(g => g.result.every(res => res === 'correct'));
@@ -72,6 +73,10 @@ export default function TestFiveGridPlayerPage() {
       const solved = upperGuess === secret;
       const eliminated = newLives <= 0 && !solved;
 
+      if (solved) {
+        setWinner({ teamName: "Team A", team: "A", word: secret });
+      }
+
       return {
         ...prev,
         state: {
@@ -96,6 +101,7 @@ export default function TestFiveGridPlayerPage() {
         background="bg-zk-black"
         isLeader={true}
         timeLeft={timeLeft}
+        overrideWinnerData={winner}
       />
     </div>
   );
