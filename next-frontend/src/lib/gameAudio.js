@@ -14,7 +14,7 @@ const GAME_AUDIO_CONFIG = {
     volume: 0.3,
   },
   fivegrid: {
-    src: '/audio/fivegrid-battle.mp3',
+    src: '/audio/bombinsound-kids-funk-intro-music-499479.mp3',
     volume: 0.3,
   },
   wheel: {
