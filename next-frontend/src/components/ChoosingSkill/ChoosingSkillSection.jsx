@@ -143,7 +143,7 @@ const ChoosingSkillSection = () => {
         <div className="flex-1 lg:self-center bg-zk-panel-bg/95 border border-black/30 rounded-xl p-6 md:p-8 flex flex-col-reverse md:flex-row items-center md:items-center gap-6 shadow-xl relative overflow-hidden">
           <div className="flex-1 flex flex-col justify-center text-center md:text-left">
             <span className="text-gray-500 font-bold text-xs uppercase tracking-wider mb-2">Selected Skill Details</span>
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-wide mb-4 zinko-font drop-shadow-sm">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-wide mb-4 zinko-font drop-shadow-sm whitespace-nowrap">
               {currentPreviewedSkill.name}
             </h2>
             <div className="bg-black/25 px-4 py-3 rounded-lg border border-black/25 mb-4 text-[#FFE600] font-semibold text-base leading-relaxed inline-block mx-auto md:mx-0">
