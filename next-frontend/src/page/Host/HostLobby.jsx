@@ -239,6 +239,7 @@ export default function HostLobby() {
       if (stored !== null) {
         setAutoPlay(stored === 'true');
       }
+      sessionStorage.removeItem('last_intro_shown_qid');
     }
   }, []);
 
