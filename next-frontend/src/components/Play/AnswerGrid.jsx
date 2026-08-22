@@ -5,10 +5,10 @@ import FoxSmokescreen from './Skills/FoxSmokescreen';
 import { displayAnswerText, isTrueFalseQuestion } from '@/lib/questionTypes';
 
 const MC_ANSWER_BUTTONS = [
-  { shape: '▲', bg: 'bg-[#E74C3C]', activeBg: 'bg-[#C0392B]' },
-  { shape: '◆', bg: 'bg-[#3B68FF]', activeBg: 'bg-[#2850CC]' },
-  { shape: '●', bg: 'bg-[#F39C12]', activeBg: 'bg-[#D68910]' },
-  { shape: '■', bg: 'bg-[#27AE60]', activeBg: 'bg-[#1E8449]' },
+  { shape: '♥', bg: 'bg-[#E74C3C]', activeBg: 'bg-[#C0392B]' },
+  { shape: '♠', bg: 'bg-[#3B68FF]', activeBg: 'bg-[#2850CC]' },
+  { shape: '♦', bg: 'bg-[#F39C12]', activeBg: 'bg-[#D68910]' },
+  { shape: '♣', bg: 'bg-[#27AE60]', activeBg: 'bg-[#1E8449]' },
 ];
 
 const TF_ANSWER_STYLES = {
@@ -67,7 +67,7 @@ export default function AnswerGrid({
             onClick={() => handleAnswer(answer.id)}
             disabled={isDisabled}
             className={`
-              relative rounded-lg px-5 py-4 flex items-center gap-4
+              relative rounded-tl-3xl rounded-br-3xl rounded-tr-sm rounded-bl-sm px-5 py-4 flex items-center gap-4
               border-2 border-zk-border transition-all duration-150 w-full text-left
               ${isSelected
                 ? `${style.activeBg} opacity-100`
@@ -78,7 +78,7 @@ export default function AnswerGrid({
             `}
           >
             {!isTrueFalse && (
-              <div className="w-10 h-10 bg-zk-panel-bg/30 rounded-lg flex items-center justify-center border-2 border-black/10 flex-shrink-0">
+              <div className="w-10 h-10 bg-zk-panel-bg/30 rounded-tl-xl rounded-br-xl rounded-tr-[2px] rounded-bl-[2px] flex items-center justify-center border-2 border-black/10 flex-shrink-0">
                 <span className="text-white text-2xl font-black opacity-90">{style.shape}</span>
               </div>
             )}
