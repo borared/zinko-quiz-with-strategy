@@ -154,7 +154,7 @@ const ChoosingSkillSection = () => {
               {currentPreviewedSkill.id === 'rabbit' && "Use the Rabbit skill to double your earned points if your team answers correctly in under 5 seconds. Perfect for high confidence questions!"}
               {currentPreviewedSkill.id === 'fox' && "Deploy the Fox smokescreen to blind the enemy team's leader with a cover of smoke for 5 seconds, causing disruption to their view."}
               {currentPreviewedSkill.id === 'butterfly' && "Activate the Oracle to reveal and remove two incorrect answer choices immediately, leaving you with a clean 50/50 choice."}
-              {currentPreviewedSkill.id === 'frog' && "Lash out with the Sticky Tongue to steal 50% of the enemy team's round points if they answer incorrectly. Use it defensively!"}
+              {currentPreviewedSkill.id === 'frog' && "Lash out with the Sticky Tongue to steal 50% of the fastest enemy's round points if they answer correctly."}
             </p>
 
             {/* Selection CTAs */}
