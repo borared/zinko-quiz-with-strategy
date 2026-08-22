@@ -50,7 +50,7 @@ export default function TestChooseSkill() {
         <div className="flex-1 bg-zk-panel-bg/95 border border-black/30 rounded-xl p-6 md:p-8 flex flex-col-reverse md:flex-row items-center md:items-stretch gap-6 shadow-xl relative overflow-hidden">
           <div className="flex-1 flex flex-col justify-center text-center md:text-left">
             <span className="text-gray-500 font-bold text-xs uppercase tracking-wider mb-2">Selected Skill Details</span>
-            <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-widest mb-4 zinko-font drop-shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-wide mb-4 zinko-font drop-shadow-sm">
               {currentPreviewedSkill.name}
             </h2>
             <div className="bg-black/25 px-4 py-3 rounded-lg border border-black/25 mb-4 text-[#FFE600] font-semibold text-base leading-relaxed inline-block mx-auto md:mx-0">
@@ -69,7 +69,7 @@ export default function TestChooseSkill() {
               {selectedSkill === currentPreviewedSkill.id ? (
                 <button
                   onClick={() => handleCancelSkill(currentPreviewedSkill.id)}
-                  className="w-full bg-[#FF4B4B] text-white font-black px-6 py-3 border border-black/30 rounded-md hover:brightness-105 active:translate-y-0.5 transition-all uppercase tracking-widest text-sm"
+                  className="w-full bg-[#FF4B4B] text-white font-black px-6 py-3 border border-black/30 rounded-md hover:brightness-105 active:translate-y-0.5 transition-all tracking-wide text-sm"
                 >
                   Cancel Selection
                 </button>
@@ -81,7 +81,7 @@ export default function TestChooseSkill() {
                     if (!isLockedByTeammate) handleSelectSkill(currentPreviewedSkill.id);
                   }}
                   disabled={selectedSkill !== null || (myTeamSkills[currentPreviewedSkill.id] && myTeamSkills[currentPreviewedSkill.id].playerId !== playerId)}
-                  className="w-full bg-zk-blue disabled:bg-gray-600 disabled:opacity-40 text-white font-black px-6 py-3 border border-black/30 rounded-md hover:brightness-105 active:translate-y-0.5 transition-all uppercase tracking-widest text-sm"
+                  className="w-full bg-zk-blue disabled:bg-gray-600 disabled:opacity-40 text-white font-black px-6 py-3 border border-black/30 rounded-md hover:brightness-105 active:translate-y-0.5 transition-all tracking-wide text-sm"
                 >
                   {myTeamSkills[currentPreviewedSkill.id] && myTeamSkills[currentPreviewedSkill.id].playerId !== playerId
                     ? "Locked by Teammate"
@@ -150,7 +150,7 @@ export default function TestChooseSkill() {
                 {/* Status indicator */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {isSkillSelected && (
-                    <span className="bg-[#FFE600] text-black border border-black/20 text-[10px] font-black uppercase px-2 py-0.5 rounded-md">
+                    <span className="bg-[#FFE600] text-black border border-black/20 text-[10px] font-black px-2 py-0.5 rounded-md">
                       Selected
                     </span>
                   )}
