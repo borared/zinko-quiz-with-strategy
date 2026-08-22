@@ -40,19 +40,9 @@ export default function HostGameUI() {
   const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME_LIMIT);
   const [questionTimeLimit, setQuestionTimeLimit] = useState(DEFAULT_TIME_LIMIT);
 
-  const [lastQuestionId, setLastQuestionId] = useState(null);
-  const [showIntro, setShowIntro] = useState(false);
-
-  useEffect(() => {
-    if (phase === "QUESTION" && question?.id) {
-      if (question.id !== lastQuestionId) {
-        setLastQuestionId(question.id);
-        setShowIntro(true);
-      }
-    } else {
-      setShowIntro(false);
-    }
-  }, [phase, question, lastQuestionId]);
+  const handleIntroComplete = () => {
+    // No-op since backend controls transition now
+  };
   const [answered, setAnswered] = useState(0);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState([]);
@@ -203,6 +193,11 @@ export default function HostGameUI() {
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
+
+    const onQuestionIntro = (data) => {
+      setQuestion(data.question);
+      setPhase("QUESTION_INTRO");
+    };
 
     const onQuestion = (data) => {
       setQuestion(data);
@@ -413,6 +408,14 @@ export default function HostGameUI() {
       setPhase("MINIGAME_DRAW_IT");
     };
 
+    const onDrawItRoundStart = ({ word, roundsRemaining }) => {
+      setMinigameData(prev => ({ ...prev, word, roundsRemaining }));
+    };
+
+    const onDrawItRoundWinner = ({ team, nickname, word }) => {
+      setMinigameData(prev => ({ ...prev, winner: team, winnerNickname: nickname, word }));
+    };
+
     const onFiveGridProgress = ({ team, lives, guesses, isEliminated }) => {
       setMinigameData(prev => ({
         ...prev,
@@ -449,6 +452,7 @@ export default function HostGameUI() {
     };
 
     socket.on("host:sync-state-response", onHostSyncState);
+    socket.on("game:question-intro", onQuestionIntro);
     socket.on("game:question", onQuestion);
     socket.on("game:timer-tick", onTimerTick);
     socket.on("host:answer-progress", onAnswerProgress);
@@ -478,11 +482,14 @@ export default function HostGameUI() {
     socket.on("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
     socket.on("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
     socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
+    socket.on("game:draw-it-round-start", onDrawItRoundStart);
+    socket.on("game:draw-it-round-winner", onDrawItRoundWinner);
     socket.on("game:fivegrid-progress", onFiveGridProgress);
     socket.on("game:minigame-reward-claimed", onMinigameRewardClaimed);
 
     return () => {
       socket.off("host:sync-state-response", onHostSyncState);
+      socket.off("game:question-intro", onQuestionIntro);
       socket.off("game:question", onQuestion);
       socket.off("game:timer-tick", onTimerTick);
       socket.off("host:answer-progress", onAnswerProgress);
@@ -511,6 +518,8 @@ export default function HostGameUI() {
       socket.off("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
       socket.off("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
       socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
+      socket.off("game:draw-it-round-start", onDrawItRoundStart);
+      socket.off("game:draw-it-round-winner", onDrawItRoundWinner);
       socket.off("game:fivegrid-progress", onFiveGridProgress);
       socket.off("game:minigame-reward-claimed", onMinigameRewardClaimed);
     };
@@ -578,8 +587,8 @@ export default function HostGameUI() {
   }, [phase, handleShowLeaderboard, handleNextQuestion]);
 
   // Intro screen between skill pick and question
-  if (showIntro) {
-    return <QuestionIntroOverlay onComplete={() => setShowIntro(false)} />;
+  if (phase === "QUESTION_INTRO") {
+    return <QuestionIntroOverlay onComplete={handleIntroComplete} />;
   }
 
   // Loading state
