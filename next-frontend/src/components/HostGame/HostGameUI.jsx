@@ -132,6 +132,9 @@ export default function HostGameUI() {
     } else if (phase === "SKILL_PICK") {
       stopSceneryAudio();
       startGameAudio("skillPick");
+    } else if (phase === "QUESTION_INTRO") {
+      stopSceneryAudio();
+      stopGameAudio();
     } else if (phase === "MINIGAME_FIVEGRID" || phase === "MINIGAME_FIVEGRID_CATEGORY_PICK") {
       stopSceneryAudio();
       startGameAudio("fivegrid");
