@@ -31,6 +31,18 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     const socket = getSocket();
     if (!socket) return;
 
+    const onQuestionIntro = (data) => {
+      setQuestion(data.question);
+      setSelectedId(null);
+      setPhase('QUESTION_INTRO');
+      setResultData(null);
+      const limit = data.question.timeSeconds || DEFAULT_TIME_LIMIT;
+      setQuestionTimeLimit(limit);
+      setTimeLeft(limit);
+      setQuestionIndex(data.question.index);
+      setQuestionTotal(data.question.total);
+    };
+
     const onQuestion = (data) => {
       setQuestion(data);
       setSelectedId(null);
@@ -62,9 +74,30 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     };
 
     const onSyncStateResponse = (data) => {
+      if (data.error) {
+        sessionStorage.clear();
+        router.push('/');
+        return;
+      }
+
       if (data.isLeader !== undefined) {
         sessionStorage.setItem('player_is_leader', data.isLeader ? 'true' : 'false');
       }
+
+      // Check for phase redirects
+      if (data.phase === 'LOBBY') {
+        router.push(`/play/${pin}/lobby`);
+        return;
+      }
+      if (data.phase === 'SKILL_PICK') {
+        router.push(`/play/${pin}/choose-skill`);
+        return;
+      }
+      if (data.phase === 'FINISHED') {
+        router.push(`/play/${pin}/result`);
+        return;
+      }
+
       const clientPhase = data.phase === 'QUESTION' ? 'PLAYING' : data.phase;
       setPhase(clientPhase);
       
@@ -83,6 +116,7 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
       }
     };
 
+    socket.on('game:question-intro', onQuestionIntro);
     socket.on('game:question', onQuestion);
     socket.on('game:timer-tick', onTimerTick);
     socket.on('player:answer-received', onAnswerReceived);
@@ -92,6 +126,7 @@ export function usePlayerCoreGame({ pin, playerId, team, playerSkill }) {
     socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
+      socket.off('game:question-intro', onQuestionIntro);
       socket.off('game:question', onQuestion);
       socket.off('game:timer-tick', onTimerTick);
       socket.off('player:answer-received', onAnswerReceived);
