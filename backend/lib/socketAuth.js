@@ -47,8 +47,7 @@ function requirePlayerSocket(game, socket, playerId) {
     console.log(`🔌 Player "${player.nickname}" reconnected on new socket: ${socket.id} (Old: ${player.socketId})`);
     player.socketId = socket.id;
     socket.join(game.pin);
-    const { getPlayerLobbyRoom } = require('./socketUtils');
-    socket.join(getPlayerLobbyRoom(game.pin));
+    socket.join(`${game.pin}-lobby-players`);
   }
 
   return player;
