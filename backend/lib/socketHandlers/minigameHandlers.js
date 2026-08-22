@@ -293,12 +293,12 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
       state: game.fivegridState,
       teams: game.teams,
       teamNames: game.teamNames || {},
-      timeLeft: 90
+      timeLeft: 180
     });
 
-    // Start 90s timer for Wordle game
+    // Start 180s timer for Wordle game
     clearInterval(game.fivegridTimer);
-    game.fivegridTimeLeft = 90;
+    game.fivegridTimeLeft = 180;
     game.fivegridTimer = setInterval(() => {
       const g = games.get(pin);
       if (!g || g.phase !== 'MINIGAME_FIVEGRID') {
@@ -377,7 +377,20 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const hasWon = upperGuess === secretWord;
 
     if (hasWon) {
-      triggerMinigameReward(game, team, pin);
+      if (game.fivegridTimer) {
+        clearInterval(game.fivegridTimer);
+        game.fivegridTimer = null;
+      }
+      io.to(pin).emit('game:fivegrid-winner', {
+        team,
+        teamName: game.teamNames?.[team] || `Team ${team}`,
+        word: secretWord
+      });
+      setTimeout(() => {
+        if (games.has(pin)) {
+          triggerMinigameReward(game, team, pin);
+        }
+      }, 4000);
     } else {
       if (teamState.lives <= 0) {
         teamState.isEliminated = true;

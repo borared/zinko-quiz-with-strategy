@@ -132,6 +132,15 @@ export default function HostGameUI() {
     } else if (phase === "SKILL_PICK") {
       stopSceneryAudio();
       startGameAudio("skillPick");
+    } else if (phase === "QUESTION_INTRO") {
+      stopSceneryAudio();
+      stopGameAudio();
+    } else if (phase === "MINIGAME_FIVEGRID" || phase === "MINIGAME_FIVEGRID_CATEGORY_PICK") {
+      stopSceneryAudio();
+      startGameAudio("fivegrid");
+    } else if (phase === "MINIGAME_PICKER" || phase === "MINIGAME_REWARD") {
+      stopSceneryAudio();
+      startGameAudio("wheel");
     } else {
       stopSceneryAudio();
       startGameAudio("question");
@@ -760,6 +769,7 @@ export default function HostGameUI() {
                 getSocket().emit("host:process-reward-queue", { pin });
               }}
               isHost={true}
+              background={background}
             />
           )}
         </AnimatePresence>

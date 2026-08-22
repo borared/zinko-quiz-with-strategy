@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Skull, Trophy } from 'lucide-react';
-
+import { useSocketStore } from '@/store/useSocketStore';
+import dynamic from 'next/dynamic';
+const Lottie = dynamic(() => import('lottie-react').then((mod) => mod.default), { ssr: false });
+import championLottieData from '@/lib/settings-profile-lottie.json';
 const TEAM_STYLES = {
   A: { text: 'text-zk-red', border: 'border-zk-red', bg: 'bg-black', fill: 'fill-zk-red' },
   B: { text: 'text-[#4B9FFF]', border: 'border-[#4B9FFF]', bg: 'bg-black', fill: 'fill-[#4B9FFF]' },
@@ -19,6 +22,16 @@ const CELL_BG = {
 
 export default function FiveGridHost({ fivegridData, timeLeft }) {
   const { wordLength = 5, hint, category, state, teams = ['A', 'B'], teamNames = {} } = fivegridData;
+  const [winnerData, setWinnerData] = useState(null);
+  const { getSocket, isConnected } = useSocketStore();
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !isConnected) return;
+    const onWinner = (data) => setWinnerData(data);
+    socket.on('game:fivegrid-winner', onWinner);
+    return () => socket.off('game:fivegrid-winner', onWinner);
+  }, [getSocket, isConnected]);
 
   const renderTeam = (teamName, teamData) => {
     const style = TEAM_STYLES[teamName] || FALLBACK_STYLE;
@@ -84,6 +97,28 @@ export default function FiveGridHost({ fivegridData, timeLeft }) {
       </div>
     );
   };
+
+  if (winnerData) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50 bg-neutral-950/90 backdrop-blur-sm">
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="flex flex-col items-center"
+        >
+          <div className="w-48 h-48 mb-8 drop-shadow-[0_10px_0_rgba(0,0,0,0.5)]">
+            <Lottie animationData={championLottieData} loop={true} style={{ width: '100%', height: '100%' }} />
+          </div>
+          <h2 className="gasoek-one-regular text-6xl sm:text-8xl text-zk-yellow tracking-widest mb-4 drop-shadow-[0_6px_0_#000]" style={{ WebkitTextStroke: '4px black' }}>
+            {winnerData.teamName} win!
+          </h2>
+          <p className="text-5xl text-white font-bold drop-shadow-[0_4px_0_#000]" style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '4px' }}>
+            Answer: {winnerData.word}
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 flex flex-col p-8 z-20 overflow-hidden">

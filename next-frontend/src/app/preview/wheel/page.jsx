@@ -16,6 +16,7 @@ export default function WheelPreviewPage() {
         preSelectedRewardId={null}
         externalSpinTrigger={false}
         onRewardClaimed={() => setKey(k => k + 1)} // reset wheel
+        background="/background_battle/city.jpg"
       />
     </div>
   );
