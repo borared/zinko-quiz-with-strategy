@@ -15,6 +15,7 @@ import ImposterPlayer from './ImposterPlayer';
 import FiveGridPlayer from './FiveGridPlayer';
 import DrawItPlayer from './DrawItPlayer';
 import RewardWheel from '../HostGame/RewardWheel';
+import QuestionIntroOverlay from './QuestionIntroOverlay';
 import { usePlayerGameState } from '@/hooks/usePlayerGameState';
 import { useGameBackground } from '@/hooks/useGameBackground';
 import { battleBackgroundStyle } from '@/lib/lobbyScenery';
@@ -22,6 +23,10 @@ import { battleBackgroundStyle } from '@/lib/lobbyScenery';
 export default function PlayerControllerUI() {
   const gameState = usePlayerGameState();
   const background = useGameBackground(gameState.pin);
+
+  const handleIntroComplete = () => {
+    // No-op since backend controls transition now
+  };
 
   const {
     playerId,
@@ -68,6 +73,10 @@ export default function PlayerControllerUI() {
     handleImposterSabotageVote
   } = gameState;
 
+  if (phase === 'QUESTION_INTRO') {
+    return <QuestionIntroOverlay onComplete={handleIntroComplete} />;
+  }
+
   // ── RESULT overlay ──
   if (phase === 'RESULT' && resultData) {
     return <ResultOverlay resultData={resultData} />;
@@ -94,6 +103,7 @@ export default function PlayerControllerUI() {
         onGuess={gameState.handleFiveGridGuess}
         background={background}
         isLeader={isLeader}
+        timeLeft={timeLeft}
       />
     );
   }
@@ -138,6 +148,7 @@ export default function PlayerControllerUI() {
         winnerTeam={minigameData.winner}
         winnerNickname={minigameData.winnerNickname}
         word={minigameData.word}
+        wordLength={minigameData.wordLength}
         teamNames={minigameData.teamNames}
         isLeader={isLeader}
         background={background}

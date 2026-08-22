@@ -13,6 +13,20 @@ export default function AuthSync() {
 
   useEffect(() => {
     const syncToken = async () => {
+      const getDynamicApiUrl = () => {
+        if (process.env.NEXT_PUBLIC_API_URL) {
+          return process.env.NEXT_PUBLIC_API_URL;
+        }
+        if (typeof window !== 'undefined') {
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:5000';
+          }
+          return `http://${window.location.hostname}:5000`;
+        }
+        return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      };
+      const API_URL = getDynamicApiUrl();
+
       if (isSignedIn) {
         const hasExistingToken = !!localStorage.getItem('zinko_jwt');
         if (!hasExistingToken) {
@@ -27,19 +41,6 @@ export default function AuthSync() {
             return;
           }
 
-          const getDynamicApiUrl = () => {
-            if (process.env.NEXT_PUBLIC_API_URL) {
-              return process.env.NEXT_PUBLIC_API_URL;
-            }
-            if (typeof window !== 'undefined') {
-              if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                return 'http://localhost:5001';
-              }
-              return `http://${window.location.hostname}:5001`;
-            }
-            return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-          };
-          const API_URL = getDynamicApiUrl();
           const response = await fetch(`${API_URL}/api/auth/token`, {
             method: 'POST',
             headers: {
@@ -73,11 +74,10 @@ export default function AuthSync() {
         } catch (error) {
           const isNetworkError =
             error?.message === 'Failed to fetch' || error?.name === 'TypeError';
-          console.error(
+          console.warn(
             isNetworkError
-              ? '[AuthSync] Network error while syncing token. Clerk or the Zinko API may be unreachable.'
-              : '[AuthSync] Error syncing token:',
-            error
+              ? `[AuthSync] Network error while syncing token: Zinko API at ${API_URL} is unreachable.`
+              : `[AuthSync] Error syncing token: ${error?.message || error}`
           );
           if (hasExistingToken) {
             setJwtReady(true);

@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-;
+import { usePlayerSession } from '@/hooks/usePlayerSession';
 import { useSocketStore } from '@/store/useSocketStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Zap, ArrowLeft, Pencil } from 'lucide-react';
@@ -266,11 +266,7 @@ export default function PlayerLobby() {
   const { pin } = useParams();
   const router = useRouter();
   const { getSocket, isConnected } = useSocketStore();
-
-
-  const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || 'Player' : 'Player';
-  const team     = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
-  const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') : null;
+  const { playerId, nickname, team, avatar, isLoaded } = usePlayerSession();
 
   const [bgImage, setBgImage] = useState(DEFAULT_LOBBY_SCENERY);
   const [players, setPlayers] = useState([]);
@@ -283,6 +279,14 @@ export default function PlayerLobby() {
 
   const [isSceneryPickerOpen, setIsSceneryPickerOpen] = useState(false);
   const [sceneryProviderNickname, setSceneryProviderNickname] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('last_intro_shown_qid');
+    }
+  }, []);
 
   const ownedScenery = useOwnedSceneryStore((s) => s.ownedScenery);
   const fetchOwnedScenery = useOwnedSceneryStore((s) => s.fetchOwnedScenery);
@@ -336,12 +340,21 @@ export default function PlayerLobby() {
   // Socket logic
   useEffect(() => {
     const socket = getSocket();
-    if (!socket || !isConnected) return;
+    if (!socket || !isLoaded || !isConnected) return;
 
-      // Request current player list for this lobby
-      if (pin) {
-        socket.emit('lobby:request-players', { pin });
-      }
+    // Auto-rejoin on mount or reconnect if we have stored session details
+    if (pin && playerId && nickname) {
+      socket.emit('player:join', { 
+        pin, 
+        playerId, 
+        nickname, 
+        avatar, 
+        team 
+      });
+      socket.emit('player:sync-state', { pin, playerId });
+    } else if (pin) {
+      socket.emit('lobby:request-players', { pin });
+    }
 
     const onPlayersUpdate = (data) => {
       setPlayers(data.players || []);
@@ -383,18 +396,35 @@ export default function PlayerLobby() {
       }, 1000);
     };
 
+    const onSyncStateResponse = (data) => {
+      if (data.error) {
+        sessionStorage.clear();
+        router.push('/');
+        return;
+      }
+      if (data.phase === 'SKILL_PICK') {
+        router.push(`/play/${pin}/choose-skill`);
+      } else if (data.phase !== 'LOBBY' && data.phase !== 'FINISHED') {
+        router.push(`/play/${pin}/game`);
+      } else if (data.phase === 'FINISHED') {
+        router.push(`/play/${pin}/result`);
+      }
+    };
+
     socket.on('lobby:players-update', onPlayersUpdate);
     socket.on('lobby:background-update', onBackgroundUpdate);
     socket.on('game:question', onQuestion);
     socket.on('lobby:countdown-started', onCountdownStarted);
+    socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
       socket.off('lobby:players-update', onPlayersUpdate);
       socket.off('lobby:background-update', onBackgroundUpdate);
       socket.off('game:question', onQuestion);
       socket.off('lobby:countdown-started', onCountdownStarted);
+      socket.off('player:sync-state-response', onSyncStateResponse);
     };
-  }, [getSocket, isConnected, pin, router, nickname, team, playerId]);
+  }, [getSocket, isConnected, isLoaded, pin, router, nickname, team, playerId, avatar]);
 
 
   const handleGoBack = () => {
@@ -514,7 +544,7 @@ export default function PlayerLobby() {
 
       </div>
 
-      {pin && playerId && (
+      {isClient && pin && playerId && (
         <PlayerLobbyChat
           pin={pin}
           playerId={playerId}
@@ -525,7 +555,7 @@ export default function PlayerLobby() {
       )}
 
       {/* Scenery Suggestion Credit Badge */}
-      {sceneryProviderNickname && (
+      {isClient && sceneryProviderNickname && (
         <div 
           className="fixed bottom-4 left-4 bg-[#1A1A24]/90 border-[2px] border-black text-white text-sm font-black tracking-widest px-5 py-2.5 rounded-md backdrop-blur-md z-30 flex items-center gap-2"
           style={{ fontFamily: 'var(--font-outfit)' }}
@@ -536,7 +566,7 @@ export default function PlayerLobby() {
       )}
 
       {/* Suggest Scenery Button */}
-      {ownedScenery && ownedScenery.length > 0 && (
+      {isClient && ownedScenery && ownedScenery.length > 0 && (
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -635,7 +665,7 @@ export default function PlayerLobby() {
       </AnimatePresence>
 
       {/* Leader Promotion Confirmation Modal */}
-      {promoteTarget && (
+      {isClient && promoteTarget && (
         <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4">
           <div className="bg-zk-panel-bg border-[2px] border-black rounded-md p-6 max-w-sm w-full flex flex-col items-center text-center">
             <h3 className="font-['Outfit'] font-black text-xl text-zk-text mb-2 uppercase">

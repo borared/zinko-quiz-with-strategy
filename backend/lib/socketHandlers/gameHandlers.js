@@ -74,15 +74,27 @@ module.exports = function registerGameHandlers(io, socket, games) {
     }
 
     const question = game.questions[0];
-    console.log(`▶️  Game ${pin} started — Q1`);
+    console.log(`▶️  Game ${pin} started — Q1 Intro`);
 
     io.to(pin).emit('lobby:skills-update', { teamSkills: game.teamSkills });
 
-    io.to(pin).emit('game:question', buildGameQuestionPayload(question, game, 0, {
-      teamSkills: game.teamSkills,
-    }));
+    game.phase = 'QUESTION_INTRO';
+    io.to(pin).emit('game:question-intro', {
+      question: buildGameQuestionPayload(question, game, 0, {
+        teamSkills: game.teamSkills,
+      })
+    });
 
-    startTimer(io, pin, games);
+    setTimeout(() => {
+      const currentGame = games.get(pin);
+      if (!currentGame || currentGame.phase !== 'QUESTION_INTRO') return;
+      
+      currentGame.phase = 'QUESTION';
+      io.to(pin).emit('game:question', buildGameQuestionPayload(question, currentGame, 0, {
+        teamSkills: currentGame.teamSkills,
+      }));
+      startTimer(io, pin, games);
+    }, 4000);
   });
 
   // ── game:next-question ────────────────────────────────────────────────────
@@ -165,19 +177,25 @@ module.exports = function registerGameHandlers(io, socket, games) {
   // ── player:sync-state ─────────────────────────────────────────────────────
   socket.on('player:sync-state', ({ pin, playerId }) => {
     const game = games.get(pin);
-    if (!game) return;
-    if (!requirePlayerSocket(game, socket, playerId)) return;
+    if (!game) {
+      socket.emit('player:sync-state-response', { error: 'Game not found' });
+      return;
+    }
+    const player = requirePlayerSocket(game, socket, playerId);
+    if (!player) {
+      socket.emit('player:sync-state-response', { error: 'Player not found' });
+      return;
+    }
 
     // Build current question payload if applicable
     let currentQuestionPayload = null;
-    if (game.phase === 'QUESTION' || game.phase === 'ANSWERED' || game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
+    if (game.phase === 'QUESTION_INTRO' || game.phase === 'QUESTION' || game.phase === 'ANSWERED' || game.phase === 'RESULT' || game.phase === 'LEADERBOARD') {
       const q = game.questions[game.currentQuestionIndex];
       if (q) {
         currentQuestionPayload = buildGameQuestionPayload(q, game, game.currentQuestionIndex);
       }
     }
 
-    const player = game.players.find(p => p.id === playerId);
 
     const minigameData = game.phase === 'MINIGAME_RACING' ? {
       vaultsToWin: game.vaultsToWin,
@@ -194,6 +212,12 @@ module.exports = function registerGameHandlers(io, socket, games) {
       state: game.fivegridState,
       teams: game.teams,
       teamNames: game.teamNames || {}
+    } : game.phase === 'MINIGAME_DRAW_IT' ? {
+      word: null,
+      wordLength: game.drawItWord ? game.drawItWord.length : 0,
+      teamNames: game.teamNames || {},
+      winner: game.drawItWinnerTeam || null,
+      winnerNickname: game.drawItWinnerNickname || null
     } : null;
 
     const isImposterPhase = ['MINIGAME_IMPOSTER', 'MINIGAME_IMPOSTER_VOTING', 'MINIGAME_IMPOSTER_REVEAL'].includes(game.phase);

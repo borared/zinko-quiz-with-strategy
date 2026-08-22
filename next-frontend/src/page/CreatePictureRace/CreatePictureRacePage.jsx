@@ -116,7 +116,7 @@ export default function CreatePictureRacePage() {
              <h2 className="font-black tracking-widest uppercase text-sm">QUESTIONS</h2>
           </div>
 
-          <div className="p-4 flex flex-col flex-1 overflow-y-auto gap-3">
+          <div className="p-4 flex flex-col flex-1 overflow-y-auto gap-3" data-lenis-prevent="true">
             {questions.length === 0 ? (
               <p className="text-center text-sm font-bold text-white/50 mt-4">No slides yet</p>
             ) : (
@@ -154,7 +154,7 @@ export default function CreatePictureRacePage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-10 overflow-y-auto bg-[url('/images/yeti.png')] bg-cover bg-center bg-no-repeat bg-fixed">
+        <main className="flex-1 p-6 lg:p-10 overflow-y-auto bg-[url('/images/yeti.png')] bg-cover bg-center bg-no-repeat bg-fixed" data-lenis-prevent="true">
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 lg:gap-10">
             {/* Top Section: Image Studio */}
             <div className="flex flex-col gap-6">

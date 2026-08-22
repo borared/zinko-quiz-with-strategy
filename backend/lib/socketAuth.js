@@ -41,7 +41,15 @@ function isPlayerSocket(game, socket, playerId) {
 function requirePlayerSocket(game, socket, playerId) {
   if (!game || !playerId) return null;
   const player = game.players.find((p) => p.id === playerId);
-  if (!player || player.socketId !== socket.id) return null;
+  if (!player) return null;
+
+  if (player.socketId !== socket.id) {
+    console.log(`🔌 Player "${player.nickname}" reconnected on new socket: ${socket.id} (Old: ${player.socketId})`);
+    player.socketId = socket.id;
+    socket.join(game.pin);
+    socket.join(`${game.pin}-lobby-players`);
+  }
+
   return player;
 }
 

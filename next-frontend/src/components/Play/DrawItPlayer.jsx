@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSocketStore } from '@/store/useSocketStore';
 import { Send } from 'lucide-react';
 
-export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, teamNames, isLeader, background }) {
+export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname, word, wordLength, teamNames, isLeader, background }) {
   const canvasRef = useRef(null);
   const { getSocket, isConnected } = useSocketStore();
   const [guess, setGuess] = useState("");
   const [hasGuessedCorrectly, setHasGuessedCorrectly] = useState(false);
   const [closenessScore, setClosenessScore] = useState(0);
   const [lastGuess, setLastGuess] = useState("");
+  const [showHint, setShowHint] = useState(false);
 
   // Handle resizing of canvas
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
       setGuess("");
       setClosenessScore(0);
       setLastGuess("");
+      setShowHint(false);
     };
 
     const onGuessFeedback = ({ score, guess: evaluatedGuess }) => {
@@ -99,10 +101,36 @@ export default function DrawItPlayer({ pin, playerId, winnerTeam, winnerNickname
       {/* Blurred Overlay */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-md z-0" />
 
+      {/* Contrast Hint Button */}
+      {wordLength > 0 && !winnerTeam && (
+        <div className="absolute top-4 right-4 z-50">
+          <button
+            onClick={() => setShowHint((prev) => !prev)}
+            className="bg-[#FFE600] hover:bg-yellow-400 text-black border border-black/40 rounded-md px-4 py-1.5 font-black text-lg zinko-font transition-all"
+          >
+            Hint
+          </button>
+          
+          <AnimatePresence>
+            {showHint && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                className="absolute right-0 mt-2 bg-zk-panel-bg border border-black/30 rounded-md p-3.5 shadow-lg w-56 text-center"
+              >
+                <p className="text-gray-500 text-xs mb-1">Secret word hint</p>
+                <p className="font-black text-2xl text-zk-blue zinko-font drop-shadow-sm">{wordLength} {wordLength === 1 ? 'letter' : 'letters'} word</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       <div className="relative z-10 flex flex-col h-full w-full flex-1">
       {/* Title */}
       <h2 
-        className="text-3xl font-black text-white text-center mb-4 zinko-font drop-shadow-md"
+        className="text-3xl font-black text-white text-center mb-6 zinko-font drop-shadow-md"
       >
         Guess the Drawing!
       </h2>

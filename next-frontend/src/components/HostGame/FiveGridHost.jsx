@@ -17,7 +17,7 @@ const CELL_BG = {
   empty: 'border-white/10 bg-black/20 text-transparent'
 };
 
-export default function FiveGridHost({ fivegridData }) {
+export default function FiveGridHost({ fivegridData, timeLeft }) {
   const { wordLength = 5, hint, category, state, teams = ['A', 'B'], teamNames = {} } = fivegridData;
 
   const renderTeam = (teamName, teamData) => {
@@ -98,7 +98,11 @@ export default function FiveGridHost({ fivegridData }) {
               {category}
             </div>
           )}
-
+          {timeLeft !== undefined && (
+            <div className={`text-4xl font-bold text-white uppercase tracking-widest bg-black px-8 h-[54px] inline-flex items-center justify-center rounded-full border-2 border-white shadow-xl ${timeLeft < 30 ? 'text-zk-red animate-pulse border-zk-red' : ''}`} style={{ fontFamily: 'var(--font-amatic-sc)', letterSpacing: '2px' }}>
+              ⏳ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          )}
         </div>
       </div>
 

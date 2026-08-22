@@ -80,7 +80,7 @@ export default function QuestionPhase({ question, timeLeft, totalTime, answered,
             </div>
           )}
           <div className="flex-1 flex items-center justify-center p-8">
-            <p className="text-2xl lg:text-4xl xl:text-5xl font-black text-zk-text text-center leading-tight uppercase">
+            <p className="text-2xl lg:text-4xl xl:text-5xl font-black text-zk-text text-center leading-tight">
               {question.questionText}
             </p>
           </div>

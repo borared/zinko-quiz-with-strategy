@@ -10,6 +10,8 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     heldColors: { A: [], B: [] },
     playerButtons: {},
     winner: null,
+    winnerNickname: null,
+    wordLength: 0,
     players: []
   });
 
@@ -110,10 +112,14 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       setPhase('MINIGAME_FIVEGRID');
     };
 
-    const onMinigameDrawItStarted = ({ word, teamNames }) => {
-      setMinigameData(prev => ({ ...prev, word, teamNames, winner: null }));
+    const onMinigameDrawItStarted = ({ word, wordLength, teamNames }) => {
+      setMinigameData(prev => ({ ...prev, word, wordLength, teamNames, winner: null, winnerNickname: null }));
       setMinigameSpinner(false);
       setPhase('MINIGAME_DRAW_IT');
+    };
+
+    const onDrawItRoundWinner = ({ team, nickname, word }) => {
+      setMinigameData(prev => ({ ...prev, winner: team, winnerNickname: nickname, word }));
     };
 
     const onFiveGridProgress = ({ team, lives, guesses, isEliminated }) => {
@@ -187,6 +193,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
     socket.on("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
     socket.on("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
     socket.on("game:minigame-draw-it-started", onMinigameDrawItStarted);
+    socket.on("game:draw-it-round-winner", onDrawItRoundWinner);
     socket.on('game:fivegrid-progress', onFiveGridProgress);
     socket.on('player:sync-state-response', onSyncStateResponse);
     
@@ -210,6 +217,7 @@ export function usePlayerMinigames({ pin, playerId, setPhase, setQuestion }) {
       socket.off("game:minigame-fivegrid-category-pick", onMinigameFiveGridCategoryPick);
       socket.off("game:minigame-fivegrid-started", onMinigameFiveGridStarted);
       socket.off("game:minigame-draw-it-started", onMinigameDrawItStarted);
+      socket.off("game:draw-it-round-winner", onDrawItRoundWinner);
       socket.off('game:fivegrid-progress', onFiveGridProgress);
       socket.off('player:sync-state-response', onSyncStateResponse);
       

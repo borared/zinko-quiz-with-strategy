@@ -2,8 +2,8 @@ import { isSceneryAudioMuted } from './sceneryAudio';
 
 const GAME_AUDIO_CONFIG = {
   question: {
-    src: '/audio/lobby-funk.mp3',
-    volume: 0.25,
+    src: '/audio/skill-pick-bgm.mp3',
+    volume: 0.3,
   },
   leaderboard: {
     src: '/audio/leaderboard-bgm.mp3',

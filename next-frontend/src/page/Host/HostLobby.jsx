@@ -239,6 +239,7 @@ export default function HostLobby() {
       if (stored !== null) {
         setAutoPlay(stored === 'true');
       }
+      sessionStorage.removeItem('last_intro_shown_qid');
     }
   }, []);
 
@@ -527,7 +528,7 @@ export default function HostLobby() {
 
         {/* Team Panels Container */}
         <DndContext onDragEnd={handleDragEnd}>
-          <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide content-start pt-4 pb-8">
+          <div ref={scrollContainerRef} className="flex-1 flex flex-row flex-wrap items-center justify-center gap-4 w-full max-w-6xl mx-auto min-h-0 overflow-y-auto scrollbar-hide content-start pt-4 pb-8" data-lenis-prevent="true">
             {teams.map((teamId, index) => {
               const teamPlayers = players.filter((p) => p.team === teamId);
               return (

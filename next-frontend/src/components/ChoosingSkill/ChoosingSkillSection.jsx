@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Zap, Cloud, Eye, Target } from "lucide-react";
-import { useRouter } from 'next/navigation';
-;
+import { useRouter, useParams } from 'next/navigation';
+import { usePlayerSession } from '@/hooks/usePlayerSession';
 import { useSocketStore } from '@/store/useSocketStore';
 import SkillHeader from "./SkillHeader";
 import SkillCard from "./SkillCard";
@@ -24,28 +24,31 @@ const ChoosingSkillSection = () => {
   const [teamSkills, setTeamSkills] = useState({});
   
   const router = useRouter();
-  const { getSocket } = useSocketStore();
-  const pin = typeof window !== 'undefined' ? sessionStorage.getItem('game_pin') || '' : '';
+  const { pin } = useParams();
+  const { getSocket, isConnected } = useSocketStore();
+  const { playerId, nickname, team, avatar, isLoaded } = usePlayerSession();
   const background = useGameBackground(pin);
-  const playerId = typeof window !== 'undefined' ? sessionStorage.getItem('player_id') || '' : '';
-  const team = typeof window !== 'undefined' ? sessionStorage.getItem('player_team') || 'A' : 'A';
-  const nickname = typeof window !== 'undefined' ? sessionStorage.getItem('player_nickname') || '' : '';
-  const avatar = typeof window !== 'undefined' ? sessionStorage.getItem('player_avatar') || 'pizza' : 'pizza';
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('last_intro_shown_qid');
+    }
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();
-    if (!socket) return;
+    if (!socket || !isLoaded || !isConnected) return;
 
+    socket.emit('player:sync-state', { pin, playerId });
     socket.emit('lobby:request-skills', { pin });
 
     const onSkillsUpdate = (data) => {
       setTeamSkills(data.teamSkills || {});
     };
 
-    const onQuestion = (data) => {
+    const onQuestionIntro = (data) => {
       let finalSkill = selectedSkill;
-      if (!finalSkill && data.teamSkills && data.teamSkills[team]) {
-        for (const [sId, info] of Object.entries(data.teamSkills[team])) {
+      if (!finalSkill && data.question?.teamSkills && data.question.teamSkills[team]) {
+        for (const [sId, info] of Object.entries(data.question.teamSkills[team])) {
           if (info.playerId === playerId) {
             finalSkill = sId;
             break;
@@ -59,18 +62,35 @@ const ChoosingSkillSection = () => {
         sessionStorage.removeItem('player_skill');
       }
       
-      sessionStorage.setItem('current_question', JSON.stringify(data));
+      sessionStorage.setItem('current_question', JSON.stringify(data.question));
       router.push(`/play/${pin}/game`);
     };
 
+    const onSyncStateResponse = (data) => {
+      if (data.error) {
+        sessionStorage.clear();
+        router.push('/');
+        return;
+      }
+      if (data.phase === 'LOBBY') {
+        router.push(`/play/${pin}/lobby`);
+      } else if (data.phase !== 'SKILL_PICK' && data.phase !== 'FINISHED') {
+        router.push(`/play/${pin}/game`);
+      } else if (data.phase === 'FINISHED') {
+        router.push(`/play/${pin}/result`);
+      }
+    };
+
     socket.on('lobby:skills-update', onSkillsUpdate);
-    socket.on('game:question', onQuestion);
+    socket.on('game:question-intro', onQuestionIntro);
+    socket.on('player:sync-state-response', onSyncStateResponse);
 
     return () => {
       socket.off('lobby:skills-update', onSkillsUpdate);
-      socket.off('game:question', onQuestion);
+      socket.off('game:question-intro', onQuestionIntro);
+      socket.off('player:sync-state-response', onSyncStateResponse);
     };
-  }, [getSocket, router, pin, selectedSkill]);
+  }, [getSocket, isConnected, isLoaded, router, pin, playerId, team, avatar, selectedSkill]);
 
   const handleSelectSkill = (skillId) => {
     // Check if teammate took it

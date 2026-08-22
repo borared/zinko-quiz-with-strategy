@@ -88,6 +88,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
       game.hostDisconnectTimer = null;
     }
     socket.join(pin);
+    io.to(pin).emit('game:host-reconnected');
     console.log(`🔌 Host reconnected to game ${pin}`);
 
     // Sync state back to host
@@ -475,6 +476,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   socket.on('lobby:start-countdown', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
+    game.phase = 'SKILL_PICK';
     io.to(pin).emit('lobby:countdown-started');
   });
 

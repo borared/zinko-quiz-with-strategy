@@ -236,7 +236,7 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
             title="Privately reveal the secret word on this screen only"
           >
             {showWordReveal ? <EyeOff size={16} /> : <Eye size={16} />}
-            {showWordReveal ? 'HIDE WORD' : 'REVEAL WORD'}
+            {showWordReveal ? 'Hide Word' : 'Reveal Word'}
           </button>
         </div>      </div>
 
@@ -436,17 +436,17 @@ export default function DrawItHost({ pin, word, roundsRemaining, winnerTeam, win
             onClick={() => setShowWordReveal(false)}
           >
             <div
-              className="bg-zk-panel-bg border-[6px] border-black rounded-2xl px-10 py-8 text-center shadow-[8px_8px_0px_#000] max-w-lg w-full"
+              className="bg-zk-panel-bg border border-black/30 rounded-md px-10 py-8 text-center shadow-xl max-w-lg w-full"
               onClick={(e) => e.stopPropagation()}
             >
-              <p className="font-black uppercase tracking-widest text-sm text-gray-500 mb-3">Secret word (host only)</p>
-              <p className="font-black text-5xl sm:text-6xl text-zk-blue break-words">{secretWord}</p>
-              <p className="mt-4 text-sm font-bold text-gray-500">Tap outside or press Hide Word so players cannot see it.</p>
+              <p className="font-bold tracking-widest text-sm text-gray-500 mb-3">Secret word (host only)</p>
+              <p className="font-black text-5xl sm:text-6xl text-zk-blue break-words lowercase">{secretWord}</p>
+              <p className="mt-4 text-sm text-gray-500">Tap outside or press Hide Word so players cannot see it.</p>
               <button
                 onClick={() => setShowWordReveal(false)}
-                className="mt-6 inline-flex items-center gap-2 font-black text-sm bg-zk-bg px-5 py-2 rounded border-[3px] border-black hover:brightness-105 active:translate-y-1"
+                className="mt-6 inline-flex items-center gap-2 font-semibold text-sm bg-zk-bg px-4 py-2 rounded-md border border-black/30 hover:brightness-105 active:translate-y-0.5 transition-all"
               >
-                <EyeOff size={16} /> HIDE WORD
+                <EyeOff size={16} /> Hide Word
               </button>
             </div>
           </motion.div>
