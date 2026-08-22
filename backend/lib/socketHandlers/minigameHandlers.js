@@ -377,7 +377,20 @@ module.exports = function registerMinigameHandlers(io, socket, games) {
     const hasWon = upperGuess === secretWord;
 
     if (hasWon) {
-      triggerMinigameReward(game, team, pin);
+      if (game.fivegridTimer) {
+        clearInterval(game.fivegridTimer);
+        game.fivegridTimer = null;
+      }
+      io.to(pin).emit('game:fivegrid-winner', {
+        team,
+        teamName: game.teamNames?.[team] || `Team ${team}`,
+        word: secretWord
+      });
+      setTimeout(() => {
+        if (games.has(pin)) {
+          triggerMinigameReward(game, team, pin);
+        }
+      }, 4000);
     } else {
       if (teamState.lives <= 0) {
         teamState.isEliminated = true;
