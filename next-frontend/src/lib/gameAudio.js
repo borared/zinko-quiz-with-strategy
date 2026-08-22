@@ -12,6 +12,14 @@ const GAME_AUDIO_CONFIG = {
   skillPick: {
     src: '/audio/skill-pick-bgm.mp3',
     volume: 0.3,
+  },
+  fivegrid: {
+    src: '/audio/fivegrid-battle.mp3',
+    volume: 0.3,
+  },
+  wheel: {
+    src: '/audio/wheel-spin.mp3',
+    volume: 0.3,
   }
 };
 
