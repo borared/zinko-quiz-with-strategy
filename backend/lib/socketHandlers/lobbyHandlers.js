@@ -476,6 +476,7 @@ module.exports = function registerLobbyHandlers(io, socket, games) {
   socket.on('lobby:start-countdown', ({ pin }) => {
     const game = games.get(pin);
     if (!isHostSocket(socket, game)) return;
+    game.phase = 'SKILL_PICK';
     io.to(pin).emit('lobby:countdown-started');
   });
 
